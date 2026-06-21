@@ -7,6 +7,10 @@
 - Ya existen rutas base placeholder para login, layout y patients.
 - Login funcional ya esta implementado.
 - Flujo completo de autenticacion validado.
+- Application Shell implementado.
+- Navbar implementado.
+- Sidebar implementado.
+- Logout movido al layout.
 - Integrar autenticacion JWT con el backend existente.
 - Configurar guardas e interceptor de autenticacion.
 

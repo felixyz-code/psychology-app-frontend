@@ -1,13 +1,4 @@
 <section class="patients-list-page">
-  <h1>Patients</h1>
-
-  @if (authStore.user(); as user) {
-    <div class="patients-list-page__session">
-      <p><strong>Nombre:</strong> {{ user.name }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <p><strong>Role:</strong> {{ user.role }}</p>
-    </div>
-  }
-
-  <button type="button" (click)="logout()">Cerrar sesión</button>
+  <h1>Pacientes</h1>
+  <p>Gestion de pacientes proximamente.</p>
 </section>

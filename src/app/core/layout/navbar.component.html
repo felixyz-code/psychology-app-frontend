@@ -1,0 +1,19 @@
+<mat-toolbar class="navbar">
+  <div class="navbar__brand">
+    <span class="navbar__title">Psychology App</span>
+  </div>
+
+  <div class="navbar__spacer"></div>
+
+  @if (authStore.user(); as user) {
+    <div class="navbar__user">
+      <span class="navbar__name">{{ user.name }}</span>
+      <span class="navbar__role">{{ user.role }}</span>
+    </div>
+  }
+
+  <button mat-stroked-button type="button" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    <span>Cerrar sesion</span>
+  </button>
+</mat-toolbar>

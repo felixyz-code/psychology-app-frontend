@@ -17,3 +17,5 @@
 - Las rutas iniciales usan lazy loading con `loadComponent` y componentes standalone.
 - Login usa Reactive Forms y Angular Material; `AuthService` se encarga de la sesion.
 - Logout validado antes de construir el layout definitivo.
+- El logout definitivo vive en `Navbar` dentro de `MainLayout`.
+- El Shell se compone de `Navbar` + `Sidebar` + `RouterOutlet`.
