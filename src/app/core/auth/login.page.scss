@@ -1,0 +1,56 @@
+.login-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at top, rgba(62, 110, 98, 0.18), transparent 32rem),
+    linear-gradient(180deg, #f3f7f5 0%, #e6eeea 100%);
+}
+
+.login-card {
+  width: min(100%, 26rem);
+  border-radius: 1.25rem;
+  box-shadow: 0 1.5rem 3rem rgba(27, 48, 42, 0.12);
+}
+
+.login-card__header {
+  padding-bottom: 1rem;
+}
+
+.login-form {
+  display: grid;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.login-form__error {
+  margin: 0;
+  color: #b3261e;
+  font-size: 0.95rem;
+}
+
+.login-form__submit {
+  min-height: 3rem;
+}
+
+.login-form__submit .mdc-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+:host ::ng-deep .login-form__submit .mat-mdc-progress-spinner circle {
+  stroke: currentColor;
+}
+
+@media (max-width: 600px) {
+  .login-page {
+    padding: 1rem;
+  }
+
+  .login-card {
+    border-radius: 1rem;
+  }
+}
