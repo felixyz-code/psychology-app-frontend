@@ -18,6 +18,13 @@
 
 - Crear la base funcional para listado, detalle y operaciones permitidas por la API de pacientes.
 - Estructurar modelos y servicios necesarios para este dominio.
+- Modelos de Patient creados.
+- PatientsService creado.
+- Prueba minima de integracion GET /patients desde frontend.
+- Listado visual de pacientes implementado.
+- Crear paciente implementado mediante modal MatDialog.
+- Edicion de pacientes implementada.
+- Detalle de paciente implementado mediante modal.
 
 ## Sprint 3: Case Files + Session Notes
 

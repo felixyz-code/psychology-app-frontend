@@ -81,6 +81,14 @@ Response:
 - Redirige a `/login` usando `UrlTree`.
 - Todavia no valida roles por ruta.
 
+## Patients API
+
+- `GET /patients`
+- `POST /patients`
+- `GET /patients/:id`
+- `PATCH /patients/:id`
+- `DELETE /patients/:id`
+
 ## URL base de la API
 
 La URL base del backend proviene de `environment.apiUrl`, permitiendo centralizar la configuracion por entorno sin dispersar rutas base dentro del codigo.

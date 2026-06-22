@@ -1,0 +1,62 @@
+.patient-detail-dialog {
+  display: grid;
+  gap: 1.5rem;
+  padding: 0.5rem;
+}
+
+.patient-detail-dialog__header h2,
+.patient-detail-dialog__header p,
+.patient-detail-dialog__grid p {
+  margin: 0;
+}
+
+.patient-detail-dialog__header h2 {
+  color: #16332d;
+  font-size: 1.5rem;
+}
+
+.patient-detail-dialog__header p {
+  margin-top: 0.35rem;
+  color: #5a736b;
+}
+
+.patient-detail-dialog__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.patient-detail-dialog__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #577069;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.patient-detail-dialog__full {
+  grid-column: 1 / -1;
+}
+
+.patient-detail-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .patient-detail-dialog {
+    padding: 0;
+  }
+
+  .patient-detail-dialog__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-detail-dialog__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

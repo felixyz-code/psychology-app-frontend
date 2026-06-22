@@ -1,0 +1,48 @@
+<div class="patient-detail-dialog">
+  <div class="patient-detail-dialog__header">
+    <h2>Detalle del paciente</h2>
+    <p>Informacion general registrada.</p>
+  </div>
+
+  <div class="patient-detail-dialog__grid">
+    <div>
+      <span class="patient-detail-dialog__label">Nombre completo</span>
+      <p>{{ getFullName() }}</p>
+    </div>
+
+    <div>
+      <span class="patient-detail-dialog__label">Telefono</span>
+      <p>{{ getDisplayValue(patient.phoneNumber) }}</p>
+    </div>
+
+    <div>
+      <span class="patient-detail-dialog__label">Email</span>
+      <p>{{ getDisplayValue(patient.email) }}</p>
+    </div>
+
+    <div>
+      <span class="patient-detail-dialog__label">Fecha de nacimiento</span>
+      <p>{{ formatBirthDate(patient.birthDate) }}</p>
+    </div>
+
+    <div>
+      <span class="patient-detail-dialog__label">Fecha de creacion</span>
+      <p>{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+    </div>
+
+    <div>
+      <span class="patient-detail-dialog__label">Fecha de actualizacion</span>
+      <p>{{ patient.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+    </div>
+
+    <div class="patient-detail-dialog__full">
+      <span class="patient-detail-dialog__label">ID del paciente</span>
+      <p>{{ patient.id }}</p>
+    </div>
+  </div>
+
+  <div class="patient-detail-dialog__actions">
+    <button mat-button type="button" (click)="close()">Cerrar</button>
+    <button mat-flat-button type="button" (click)="edit()">Editar</button>
+  </div>
+</div>

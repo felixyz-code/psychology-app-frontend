@@ -1,0 +1,68 @@
+.patient-dialog {
+  padding: 0.5rem;
+}
+
+.patient-dialog__header h2 {
+  margin: 0;
+  color: #16332d;
+  font-size: 1.5rem;
+}
+
+.patient-dialog__header p {
+  margin: 0.35rem 0 0;
+  color: #5a736b;
+}
+
+.patient-dialog__form {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.patient-dialog__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.patient-dialog__grid mat-form-field:last-child {
+  grid-column: 1 / -1;
+  max-width: 18rem;
+}
+
+.patient-dialog__error {
+  margin: 0;
+  color: #b3261e;
+}
+
+.patient-dialog__saving {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #466159;
+}
+
+.patient-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .patient-dialog {
+    padding: 0;
+  }
+
+  .patient-dialog__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-dialog__grid mat-form-field:last-child {
+    max-width: none;
+  }
+
+  .patient-dialog__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

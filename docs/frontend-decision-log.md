@@ -19,3 +19,9 @@
 - Logout validado antes de construir el layout definitivo.
 - El logout definitivo vive en `Navbar` dentro de `MainLayout`.
 - El Shell se compone de `Navbar` + `Sidebar` + `RouterOutlet`.
+- `PatientsService` encapsula el consumo HTTP de pacientes y deja ownership al backend.
+- `PatientsListPage` usa tabla Angular Material como primera representacion profesional del modulo Patients.
+- El formulario de creacion de paciente no solicita `psychologistId`; el ownership se delega al backend mediante JWT.
+- Los formularios simples de CRUD se abriran en modales para mantener contexto del listado.
+- `PatientFormDialog` se reutiliza para creacion y edicion mediante `MAT_DIALOG_DATA`.
+- El detalle inicial de paciente se implementa como modal para mantener contexto del listado.
