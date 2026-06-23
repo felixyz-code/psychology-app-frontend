@@ -37,6 +37,9 @@
 - Infraestructura frontend de Session Notes implementada con modelos y servicio HTTP.
 - Listado de notas de sesion integrado en detalle del paciente.
 - Crear nota de sesion implementado mediante modal.
+- Detalle de nota de sesion implementado mediante modal.
+- Edicion de notas de sesion implementada.
+- Eliminacion de notas de sesion implementada.
 - Session Notes quedaran gestionadas desde el detalle del paciente y el expediente en una siguiente iteracion de UI para crear, editar y eliminar.
 
 ## Sprint 4: Documents

@@ -1,0 +1,39 @@
+<div class="session-note-detail-dialog">
+  <div class="session-note-detail-dialog__content">
+    <div class="session-note-detail-dialog__header">
+      <h2>{{ sessionNote.title || 'Sesion sin titulo' }}</h2>
+      <p>{{ sessionNote.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+    </div>
+
+    <section class="session-note-detail-dialog__section">
+      <h3>Contenido</h3>
+      <p class="session-note-detail-dialog__content-text">{{ sessionNote.content }}</p>
+    </section>
+
+    <section class="session-note-detail-dialog__section">
+      <h3>Datos de la nota</h3>
+
+      <div class="session-note-detail-dialog__grid">
+        <div>
+          <span class="session-note-detail-dialog__label">Fecha de creacion</span>
+          <p>{{ sessionNote.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <div>
+          <span class="session-note-detail-dialog__label">Fecha de actualizacion</span>
+          <p>{{ sessionNote.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <div class="session-note-detail-dialog__full">
+          <span class="session-note-detail-dialog__label">ID de la nota</span>
+          <p>{{ sessionNote.id }}</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="session-note-detail-dialog__actions">
+    <button mat-button type="button" (click)="close()">Cerrar</button>
+    <button mat-flat-button type="button" (click)="edit()">Editar</button>
+  </div>
+</div>

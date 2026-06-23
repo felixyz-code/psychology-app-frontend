@@ -1,0 +1,59 @@
+.session-note-delete-dialog {
+  display: grid;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.session-note-delete-dialog h2,
+.session-note-delete-dialog p {
+  margin: 0;
+}
+
+.session-note-delete-dialog h2 {
+  color: #16332d;
+  font-size: 1.5rem;
+}
+
+.session-note-delete-dialog__summary {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem;
+  border: 1px solid #d5e1dc;
+  border-radius: 0.9rem;
+  background: #f8fbfa;
+  color: #48655c;
+}
+
+.session-note-delete-dialog__title {
+  color: #16332d;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.session-note-delete-dialog__error {
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.session-note-delete-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.session-note-delete-dialog__actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 720px) {
+  .session-note-delete-dialog {
+    padding: 0;
+  }
+
+  .session-note-delete-dialog__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

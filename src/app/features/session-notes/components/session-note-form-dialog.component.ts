@@ -8,12 +8,17 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthStore } from '../../../core/auth/auth.store';
-import { CreateSessionNoteRequest } from '../models/session-note.models';
+import {
+  CreateSessionNoteRequest,
+  SessionNote,
+  UpdateSessionNoteRequest,
+} from '../models/session-note.models';
 import { SessionNotesService } from '../services/session-notes.service';
 
 interface SessionNoteFormDialogData {
-  mode: 'create';
+  mode: 'create' | 'edit';
   caseFileId: string;
+  sessionNote?: SessionNote;
 }
 
 @Component({
@@ -39,12 +44,23 @@ export class SessionNoteFormDialogComponent {
 
   readonly isSaving = signal(false);
   readonly errorMessage = signal('');
+  readonly mode = this.data.mode;
 
   readonly sessionNoteForm = this.formBuilder.nonNullable.group({
     title: [''],
     content: ['', [Validators.required]],
     sessionDate: [this.getCurrentDateTimeLocal(), [Validators.required]],
   });
+
+  constructor() {
+    if (this.mode === 'edit' && this.data.sessionNote) {
+      this.sessionNoteForm.patchValue({
+        title: this.data.sessionNote.title ?? '',
+        content: this.data.sessionNote.content,
+        sessionDate: this.toDateTimeLocalValue(this.data.sessionNote.sessionDate),
+      });
+    }
+  }
 
   submit(): void {
     if (this.sessionNoteForm.invalid) {
@@ -56,13 +72,41 @@ export class SessionNoteFormDialogComponent {
     this.errorMessage.set('');
 
     const rawValue = this.sessionNoteForm.getRawValue();
+    const basePayload: UpdateSessionNoteRequest = {
+      title: this.normalizeOptional(rawValue.title),
+      content: rawValue.content.trim(),
+      sessionDate: new Date(rawValue.sessionDate).toISOString(),
+    };
+
+    if (this.mode === 'edit' && this.data.sessionNote) {
+      this.sessionNotesService
+        .updateSessionNote(this.data.sessionNote.id, basePayload)
+        .pipe(finalize(() => this.isSaving.set(false)))
+        .subscribe({
+          next: () => {
+            this.dialogRef.close(true);
+          },
+          error: (error) => {
+            console.error('PATCH /session-notes/:id failed', {
+              status: error?.status,
+              body: error?.error,
+              sessionNoteId: this.data.sessionNote?.id,
+              payload: basePayload,
+            });
+            this.errorMessage.set('No fue posible guardar los cambios.');
+          },
+        });
+
+      return;
+    }
+
     const currentUserId = this.authStore.user()?.id;
     const payload: CreateSessionNoteRequest = {
       caseFileId: this.data.caseFileId,
       ...(currentUserId ? { authorId: currentUserId } : {}),
-      title: this.normalizeOptional(rawValue.title),
-      content: rawValue.content.trim(),
-      sessionDate: new Date(rawValue.sessionDate).toISOString(),
+      ...basePayload,
+      content: basePayload.content ?? '',
+      sessionDate: basePayload.sessionDate ?? '',
     };
 
     this.sessionNotesService
@@ -92,6 +136,14 @@ export class SessionNoteFormDialogComponent {
     return control.touched && control.hasError('required');
   }
 
+  getTitle(): string {
+    return this.mode === 'edit' ? 'Editar nota de sesion' : 'Nueva nota de sesion';
+  }
+
+  getSubmitLabel(): string {
+    return this.mode === 'edit' ? 'Guardar cambios' : 'Guardar nota';
+  }
+
   private normalizeOptional(value: string): string | null {
     const normalized = value.trim();
     return normalized ? normalized : null;
@@ -101,6 +153,14 @@ export class SessionNoteFormDialogComponent {
     const now = new Date();
     const offset = now.getTimezoneOffset();
     const localDate = new Date(now.getTime() - offset * 60_000);
+
+    return localDate.toISOString().slice(0, 16);
+  }
+
+  private toDateTimeLocalValue(value: string): string {
+    const date = new Date(value);
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60_000);
 
     return localDate.toISOString().slice(0, 16);
   }

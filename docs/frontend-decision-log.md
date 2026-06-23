@@ -31,4 +31,7 @@
 - `Session Notes` dependen de `CaseFile` y se gestionaran desde el detalle del paciente y su expediente, no como modulo aislado.
 - `Session Notes` se muestran dentro del detalle del paciente porque dependen de `CaseFile`.
 - Las notas de sesion se crean desde el detalle del paciente usando el `CaseFile` actual.
+- El detalle completo de `Session Notes` se muestra en modal para mantener contexto del paciente.
+- `SessionNoteFormDialog` se reutiliza para crear y editar notas mediante `MAT_DIALOG_DATA`.
+- Las notas de sesion se eliminan mediante modal de confirmacion.
 - El frontend puede enviar `authorId` desde `AuthStore` en el MVP, pero el ownership final y la resolucion para `PSYCHOLOGIST` permanecen en backend.

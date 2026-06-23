@@ -8,6 +8,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CaseFileFormDialogComponent } from '../../case-files/components/case-file-form-dialog.component';
 import { CaseFile } from '../../case-files/models/case-file.models';
 import { CaseFilesService } from '../../case-files/services/case-files.service';
+import { SessionNoteDeleteDialogComponent } from '../../session-notes/components/session-note-delete-dialog.component';
+import { SessionNoteDetailDialogComponent } from '../../session-notes/components/session-note-detail-dialog.component';
 import { SessionNoteFormDialogComponent } from '../../session-notes/components/session-note-form-dialog.component';
 import { SessionNote } from '../../session-notes/models/session-note.models';
 import { SessionNotesService } from '../../session-notes/services/session-notes.service';
@@ -118,6 +120,71 @@ export class PatientDetailDialogComponent {
 
     dialogRef.afterClosed().subscribe((created) => {
       if (created) {
+        this.loadSessionNotes(currentCaseFile.id);
+      }
+    });
+  }
+
+  openEditSessionNoteDialog(sessionNote: SessionNote): void {
+    const currentCaseFile = this.caseFile();
+
+    if (!currentCaseFile) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(SessionNoteFormDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: {
+        mode: 'edit',
+        caseFileId: currentCaseFile.id,
+        sessionNote,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((updated) => {
+      if (updated) {
+        this.loadSessionNotes(currentCaseFile.id);
+      }
+    });
+  }
+
+  openSessionNoteDetailDialog(sessionNote: SessionNote): void {
+    const dialogRef = this.dialog.open(SessionNoteDetailDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: {
+        sessionNote,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.action === 'edit') {
+        this.openEditSessionNoteDialog(result.sessionNote);
+      }
+    });
+  }
+
+  openDeleteSessionNoteDialog(sessionNote: SessionNote): void {
+    const currentCaseFile = this.caseFile();
+
+    if (!currentCaseFile) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(SessionNoteDeleteDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: {
+        sessionNote,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((deleted) => {
+      if (deleted) {
         this.loadSessionNotes(currentCaseFile.id);
       }
     });

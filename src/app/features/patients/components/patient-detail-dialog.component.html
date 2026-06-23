@@ -134,9 +134,9 @@
                 </div>
 
                 <div class="patient-detail-dialog__note-actions">
-                  <button mat-button type="button" disabled>Ver</button>
-                  <button mat-button type="button" disabled>Editar</button>
-                  <button mat-button type="button" disabled>Eliminar</button>
+                  <button mat-button type="button" (click)="openSessionNoteDetailDialog(note)">Ver</button>
+                  <button mat-button type="button" (click)="openEditSessionNoteDialog(note)">Editar</button>
+                  <button mat-button type="button" (click)="openDeleteSessionNoteDialog(note)">Eliminar</button>
                 </div>
               </div>
 
