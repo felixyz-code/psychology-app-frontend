@@ -89,6 +89,36 @@ Response:
 - `PATCH /patients/:id`
 - `DELETE /patients/:id`
 
+## Case Files API
+
+- Relacion `1:1` entre `Patient` y `CaseFile`.
+- `CaseFile` es requisito para `Session Notes`.
+- `CaseFile` es requisito para `Documents`.
+- Ownership lo resuelve el backend.
+- No existe endpoint `DELETE` para `Case Files`.
+- `GET /case-files`
+- `GET /case-files/:id`
+- `GET /case-files/patient/:patientId`
+- `POST /case-files`
+- `PATCH /case-files/:id`
+
+## Session Notes API
+
+- `Session Notes` dependen de `CaseFile`.
+- Se gestionaran desde el detalle del paciente y su expediente clinico.
+- Ownership lo resuelve el backend.
+- En el MVP frontend se puede enviar `authorId` desde `AuthStore`, igual que se hizo con `psychologistId`.
+- Para `PSYCHOLOGIST`, el backend fuerza `authorId` a partir del JWT.
+- `content` es requerido.
+- `sessionDate` es requerido.
+- `title` es opcional.
+- `GET /session-notes`
+- `GET /session-notes/case-file/:caseFileId`
+- `GET /session-notes/:id`
+- `POST /session-notes`
+- `PATCH /session-notes/:id`
+- `DELETE /session-notes/:id`
+
 ## URL base de la API
 
 La URL base del backend proviene de `environment.apiUrl`, permitiendo centralizar la configuracion por entorno sin dispersar rutas base dentro del codigo.

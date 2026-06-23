@@ -24,4 +24,11 @@
 - El formulario de creacion de paciente no solicita `psychologistId`; el ownership se delega al backend mediante JWT.
 - Los formularios simples de CRUD se abriran en modales para mantener contexto del listado.
 - `PatientFormDialog` se reutiliza para creacion y edicion mediante `MAT_DIALOG_DATA`.
+- `CaseFile` mantiene una relacion `1:1` con `Patient`; no tiene `DELETE`, depende de backend para ownership y es prerequisito para `Session Notes` y `Documents`.
 - El detalle inicial de paciente se implementa como modal para mantener contexto del listado.
+- `CaseFile` se gestiona desde el detalle del paciente porque la relacion es `1:1`.
+- `Session Notes` se integran primero como infraestructura de frontend sin UI para desacoplar el consumo HTTP de la futura experiencia dentro del detalle del paciente.
+- `Session Notes` dependen de `CaseFile` y se gestionaran desde el detalle del paciente y su expediente, no como modulo aislado.
+- `Session Notes` se muestran dentro del detalle del paciente porque dependen de `CaseFile`.
+- Las notas de sesion se crean desde el detalle del paciente usando el `CaseFile` actual.
+- El frontend puede enviar `authorId` desde `AuthStore` en el MVP, pero el ownership final y la resolucion para `PSYCHOLOGIST` permanecen en backend.

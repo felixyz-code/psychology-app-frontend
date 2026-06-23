@@ -1,12 +1,27 @@
 .patient-detail-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  overflow: hidden;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+.patient-detail-dialog__content {
   display: grid;
   gap: 1.5rem;
   padding: 0.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(85vh - 5.5rem);
+  min-height: 0;
 }
 
 .patient-detail-dialog__header h2,
 .patient-detail-dialog__header p,
-.patient-detail-dialog__grid p {
+.patient-detail-dialog__grid p,
+.patient-detail-dialog__section h3,
+.patient-detail-dialog__section-header p {
   margin: 0;
 }
 
@@ -16,6 +31,32 @@
 }
 
 .patient-detail-dialog__header p {
+  margin-top: 0.35rem;
+  color: #5a736b;
+}
+
+.patient-detail-dialog__section {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #d5e1dc;
+  border-radius: 1rem;
+  background: #f8fbfa;
+}
+
+.patient-detail-dialog__section h3 {
+  color: #16332d;
+  font-size: 1.1rem;
+}
+
+.patient-detail-dialog__section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.patient-detail-dialog__section-header p {
   margin-top: 0.35rem;
   color: #5a736b;
 }
@@ -40,23 +81,120 @@
   grid-column: 1 / -1;
 }
 
+.patient-detail-dialog__loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #48655c;
+}
+
+.patient-detail-dialog__message {
+  margin: 0;
+  color: #48655c;
+}
+
+.patient-detail-dialog__message--error {
+  color: #9f2d2d;
+  font-weight: 600;
+}
+
 .patient-detail-dialog__actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+  flex-shrink: 0;
+  padding: 0.5rem;
+  border-top: 1px solid #d5e1dc;
+  background: #ffffff;
+}
+
+.patient-detail-dialog__notes-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.patient-detail-dialog__note-card {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid #d5e1dc;
+  border-radius: 0.9rem;
+  background: #ffffff;
+}
+
+.patient-detail-dialog__note-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.patient-detail-dialog__note-header h4,
+.patient-detail-dialog__note-header p,
+.patient-detail-dialog__note-content {
+  margin: 0;
+}
+
+.patient-detail-dialog__note-header h4 {
+  color: #16332d;
+  font-size: 1rem;
+}
+
+.patient-detail-dialog__note-header p {
+  margin-top: 0.25rem;
+  color: #5a736b;
+  font-size: 0.9rem;
+}
+
+.patient-detail-dialog__note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.patient-detail-dialog__note-content {
+  color: #355149;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
 }
 
 @media (max-width: 720px) {
   .patient-detail-dialog {
+    max-height: 85vh;
+  }
+
+  .patient-detail-dialog__content {
     padding: 0;
+    max-height: calc(85vh - 6.5rem);
+  }
+
+  .patient-detail-dialog__section {
+    padding: 1rem;
+  }
+
+  .patient-detail-dialog__section-header {
+    flex-direction: column;
   }
 
   .patient-detail-dialog__grid {
     grid-template-columns: 1fr;
   }
 
+  .patient-detail-dialog__note-header {
+    flex-direction: column;
+  }
+
+  .patient-detail-dialog__note-actions {
+    justify-content: flex-start;
+  }
+
   .patient-detail-dialog__actions {
     flex-direction: column-reverse;
     align-items: stretch;
+    padding: 0.75rem 0;
   }
 }

@@ -31,6 +31,13 @@
 - Integrar expedientes clinicos.
 - Integrar notas de sesion.
 - Alinear la navegacion entre pacientes, expediente y seguimiento clinico.
+- Infraestructura base de Case Files implementada.
+- Expediente clinico integrado en detalle de paciente.
+- Crear/editar expediente implementado mediante modal.
+- Infraestructura frontend de Session Notes implementada con modelos y servicio HTTP.
+- Listado de notas de sesion integrado en detalle del paciente.
+- Crear nota de sesion implementado mediante modal.
+- Session Notes quedaran gestionadas desde el detalle del paciente y el expediente en una siguiente iteracion de UI para crear, editar y eliminar.
 
 ## Sprint 4: Documents
 
