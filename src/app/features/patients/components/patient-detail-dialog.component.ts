@@ -4,6 +4,7 @@ import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs';
 
 import { AppointmentDeleteDialogComponent } from '../../appointments/components/appointment-delete-dialog.component';
 import { AppointmentFormDialogComponent } from '../../appointments/components/appointment-form-dialog.component';
@@ -49,6 +50,8 @@ export class PatientDetailDialogComponent {
   readonly appointments = signal<Appointment[]>([]);
   readonly isAppointmentsLoading = signal(true);
   readonly appointmentsErrorMessage = signal('');
+  readonly appointmentsSuccessMessage = signal('');
+  readonly cancellingAppointmentId = signal<string | null>(null);
   readonly caseFile = signal<CaseFile | null>(null);
   readonly isCaseFileLoading = signal(true);
   readonly caseFileErrorMessage = signal('');
@@ -119,6 +122,8 @@ export class PatientDetailDialogComponent {
   }
 
   openCreateAppointmentDialog(): void {
+    this.appointmentsSuccessMessage.set('');
+
     const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
       width: '720px',
       maxWidth: '95vw',
@@ -137,6 +142,8 @@ export class PatientDetailDialogComponent {
   }
 
   openEditAppointmentDialog(appointment: Appointment): void {
+    this.appointmentsSuccessMessage.set('');
+
     const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
       width: '720px',
       maxWidth: '95vw',
@@ -156,14 +163,22 @@ export class PatientDetailDialogComponent {
   }
 
   cancelAppointment(appointment: Appointment): void {
+    if (this.cancellingAppointmentId()) {
+      return;
+    }
+
     this.appointmentsErrorMessage.set('');
+    this.appointmentsSuccessMessage.set('');
+    this.cancellingAppointmentId.set(appointment.id);
 
     this.appointmentsService
       .updateAppointment(appointment.id, {
         status: 'CANCELLED',
       })
+      .pipe(finalize(() => this.cancellingAppointmentId.set(null)))
       .subscribe({
         next: () => {
+          this.appointmentsSuccessMessage.set('La cita fue cancelada correctamente.');
           this.loadAppointments();
         },
         error: (error: HttpErrorResponse) => {
@@ -173,6 +188,8 @@ export class PatientDetailDialogComponent {
   }
 
   openDeleteAppointmentDialog(appointment: Appointment): void {
+    this.appointmentsSuccessMessage.set('');
+
     const dialogRef = this.dialog.open(AppointmentDeleteDialogComponent, {
       width: '520px',
       maxWidth: '95vw',
@@ -246,7 +263,7 @@ export class PatientDetailDialogComponent {
 
         if (!openedWindow) {
           URL.revokeObjectURL(blobUrl);
-          this.documentsErrorMessage.set('No fue posible abrir el documento en una nueva pestana.');
+          this.documentsErrorMessage.set('No fue posible abrir el documento en una nueva pestaña.');
           return;
         }
 
@@ -395,7 +412,7 @@ export class PatientDetailDialogComponent {
       SCHEDULED: 'Programada',
       COMPLETED: 'Completada',
       CANCELLED: 'Cancelada',
-      NO_SHOW: 'No asistio',
+      NO_SHOW: 'No asistió',
     };
 
     return labels[status];
@@ -439,7 +456,7 @@ export class PatientDetailDialogComponent {
           return;
         }
 
-        this.caseFileErrorMessage.set('No fue posible cargar el expediente clinico.');
+        this.caseFileErrorMessage.set('No fue posible cargar el expediente clínico.');
       },
     });
   }
@@ -493,7 +510,7 @@ export class PatientDetailDialogComponent {
       error: () => {
         this.sessionNotes.set([]);
         this.isSessionNotesLoading.set(false);
-        this.sessionNotesErrorMessage.set('No fue posible cargar las notas de sesion.');
+        this.sessionNotesErrorMessage.set('No fue posible cargar las notas de sesión.');
       },
     });
   }
@@ -516,7 +533,7 @@ export class PatientDetailDialogComponent {
     }
 
     if (error.status === 404) {
-      return 'El documento ya no esta disponible.';
+      return 'El documento ya no está disponible.';
     }
 
     return `No fue posible ${action} el documento.`;
@@ -528,7 +545,7 @@ export class PatientDetailDialogComponent {
     }
 
     if (error.status === 404) {
-      return 'La cita ya no esta disponible.';
+      return 'La cita ya no está disponible.';
     }
 
     return `No fue posible ${action} la cita.`;

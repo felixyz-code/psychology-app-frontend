@@ -36,4 +36,21 @@ body {
   margin: 0;
   height: 100%;
 }
+
+.patient-detail-dialog__empty {
+  padding: 1rem;
+  border: 1px dashed #c3d2cc;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.patient-detail-dialog__message--success {
+  padding: 0.75rem 1rem;
+  border: 1px solid #b9d8c6;
+  border-radius: 8px;
+  background: #f1faf4;
+  color: #1f6b3e;
+  font-weight: 600;
+}
+
 /* You can add global styles to this file, and also import other style files */

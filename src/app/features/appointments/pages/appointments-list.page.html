@@ -1,0 +1,97 @@
+<section class="appointments-list-page">
+  <mat-card class="appointments-card">
+    <div class="appointments-card__header">
+      <div>
+        <h1>Citas</h1>
+        <p>Agenda global registrada en el sistema.</p>
+      </div>
+
+      <button mat-stroked-button type="button" [disabled]="isLoading()" (click)="loadAppointments()">
+        <mat-icon>refresh</mat-icon>
+        <span>Actualizar</span>
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="appointments-state">
+        <mat-spinner diameter="40" />
+        <p>Cargando citas...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="appointments-state appointments-state--error">
+        <p>{{ errorMessage() }}</p>
+      </div>
+    } @else if (appointments().length) {
+      @if (successMessage()) {
+        <p class="appointments-message appointments-message--success" role="status">
+          {{ successMessage() }}
+        </p>
+      }
+
+      <div class="appointments-table-wrapper">
+        <table mat-table [dataSource]="appointments()" class="appointments-table">
+          <ng-container matColumnDef="patient">
+            <th mat-header-cell *matHeaderCellDef>Paciente</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ getPatientName(appointment.patientId) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="scheduledAt">
+            <th mat-header-cell *matHeaderCellDef>Fecha y hora</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="durationMinutes">
+            <th mat-header-cell *matHeaderCellDef>Duración</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ appointment.durationMinutes }} min
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ getAppointmentStatusLabel(appointment.status) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let appointment">
+              <div class="appointments-actions" aria-label="Acciones disponibles">
+                <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openEditAppointmentDialog(appointment)" aria-label="Editar cita">
+                  <mat-icon>edit</mat-icon>
+                </button>
+
+                @if (appointment.status !== 'CANCELLED') {
+                  <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="cancelAppointment(appointment)" aria-label="Cancelar cita">
+                    @if (cancellingAppointmentId() === appointment.id) {
+                      <mat-spinner diameter="20" />
+                    } @else {
+                      <mat-icon>event_busy</mat-icon>
+                    }
+                  </button>
+                }
+
+                <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openDeleteAppointmentDialog(appointment)" aria-label="Eliminar cita">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    } @else {
+      <div class="appointments-state appointments-state--empty">
+        <h2>No hay citas registradas</h2>
+        <p>Cuando existan citas, aparecerán en este listado global.</p>
+      </div>
+    }
+  </mat-card>
+</section>

@@ -1,6 +1,6 @@
 <aside class="sidebar">
   <div class="sidebar__section">
-    <p class="sidebar__label">Navegacion</p>
+    <p class="sidebar__label">Navegación</p>
 
     <mat-nav-list>
       <a
@@ -17,20 +17,25 @@
       <div mat-list-item class="sidebar__link sidebar__link--disabled">
         <mat-icon matListItemIcon>folder_shared</mat-icon>
         <span matListItemTitle>Expedientes</span>
-        <span matListItemLine>Proximamente</span>
+        <span matListItemLine>Próximamente</span>
       </div>
 
       <div mat-list-item class="sidebar__link sidebar__link--disabled">
         <mat-icon matListItemIcon>description</mat-icon>
         <span matListItemTitle>Documentos</span>
-        <span matListItemLine>Proximamente</span>
+        <span matListItemLine>Próximamente</span>
       </div>
 
-      <div mat-list-item class="sidebar__link sidebar__link--disabled">
+      <a
+        mat-list-item
+        routerLink="/appointments"
+        routerLinkActive="sidebar__link--active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="sidebar__link"
+      >
         <mat-icon matListItemIcon>event</mat-icon>
         <span matListItemTitle>Citas</span>
-        <span matListItemLine>Proximamente</span>
-      </div>
+      </a>
     </mat-nav-list>
   </div>
 </aside>

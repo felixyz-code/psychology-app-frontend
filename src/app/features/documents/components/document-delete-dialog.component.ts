@@ -29,6 +29,10 @@ export class DocumentDeleteDialogComponent {
   readonly document = this.data.document;
 
   confirmDelete(): void {
+    if (this.isDeleting()) {
+      return;
+    }
+
     this.isDeleting.set(true);
     this.errorMessage.set('');
 
@@ -46,7 +50,7 @@ export class DocumentDeleteDialogComponent {
           }
 
           if (error?.status === 404) {
-            this.errorMessage.set('El documento ya no esta disponible.');
+            this.errorMessage.set('El documento ya no está disponible.');
             return;
           }
 

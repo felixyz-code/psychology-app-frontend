@@ -25,7 +25,7 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Telefono</mat-label>
+        <mat-label>Teléfono</mat-label>
         <input matInput formControlName="phoneNumber" />
       </mat-form-field>
 
@@ -34,7 +34,7 @@
         <input matInput type="email" formControlName="email" />
 
         @if (hasEmailError()) {
-          <mat-error>Ingresa un correo valido.</mat-error>
+          <mat-error>Ingresa un correo válido.</mat-error>
         }
       </mat-form-field>
 
@@ -56,7 +56,7 @@
     }
 
     <div class="patient-dialog__actions">
-      <button mat-button type="button" (click)="cancel()">Cancelar</button>
+      <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>
       <button mat-flat-button type="submit" [disabled]="isSaving()">{{ getSubmitLabel() }}</button>
     </div>
   </form>

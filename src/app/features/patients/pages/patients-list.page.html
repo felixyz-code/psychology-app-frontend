@@ -3,7 +3,7 @@
     <div class="patients-card__header">
       <div>
         <h1>Pacientes</h1>
-        <p>Gestion de pacientes registrados.</p>
+        <p>Gestión de pacientes registrados.</p>
       </div>
 
       <button mat-flat-button type="button" (click)="openCreatePatientDialog()">
@@ -32,7 +32,7 @@
           </ng-container>
 
           <ng-container matColumnDef="phoneNumber">
-            <th mat-header-cell *matHeaderCellDef>Telefono</th>
+            <th mat-header-cell *matHeaderCellDef>Teléfono</th>
             <td mat-cell *matCellDef="let patient">
               {{ getDisplayValue(patient.phoneNumber) }}
             </td>
@@ -74,8 +74,9 @@
         </table>
       </div>
     } @else {
-      <div class="patients-state">
-        <p>No hay pacientes registrados.</p>
+      <div class="patients-state patients-state--empty">
+        <h2>No hay pacientes registrados</h2>
+        <p>Cuando agregues pacientes, aparecerán en este listado.</p>
       </div>
     }
   </mat-card>

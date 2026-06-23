@@ -64,6 +64,10 @@ export class PatientFormDialogComponent {
   }
 
   submit(): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     if (this.patientForm.invalid) {
       this.patientForm.markAllAsTouched();
       return;
@@ -149,8 +153,8 @@ export class PatientFormDialogComponent {
 
   getSubtitle(): string {
     return this.mode === 'edit'
-      ? 'Actualiza la informacion del paciente.'
-      : 'Registra la informacion basica del paciente.';
+      ? 'Actualiza la información del paciente.'
+      : 'Registra la información básica del paciente.';
   }
 
   getSubmitLabel(): string {

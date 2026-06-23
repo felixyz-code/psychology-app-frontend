@@ -1,8 +1,8 @@
 <div class="patient-detail-dialog">
   <div class="patient-detail-dialog__content">
     <div class="patient-detail-dialog__header">
-      <h2>Detalle del paciente</h2>
-      <p>Informacion general registrada.</p>
+      <h2>{{ getFullName() }}</h2>
+      <p>Detalle clínico y seguimiento del paciente.</p>
     </div>
 
     <section class="patient-detail-dialog__section">
@@ -15,7 +15,7 @@
         </div>
 
         <div>
-          <span class="patient-detail-dialog__label">Telefono</span>
+          <span class="patient-detail-dialog__label">Teléfono</span>
           <p>{{ getDisplayValue(patient.phoneNumber) }}</p>
         </div>
 
@@ -30,12 +30,12 @@
         </div>
 
         <div>
-          <span class="patient-detail-dialog__label">Fecha de creacion</span>
+          <span class="patient-detail-dialog__label">Fecha de creación</span>
           <p>{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
         </div>
 
         <div>
-          <span class="patient-detail-dialog__label">Fecha de actualizacion</span>
+          <span class="patient-detail-dialog__label">Fecha de actualización</span>
           <p>{{ patient.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
         </div>
 
@@ -66,6 +66,12 @@
           {{ appointmentsErrorMessage() }}
         </p>
       } @else if (appointments().length) {
+        @if (appointmentsSuccessMessage()) {
+          <p class="patient-detail-dialog__message patient-detail-dialog__message--success" role="status">
+            {{ appointmentsSuccessMessage() }}
+          </p>
+        }
+
         <div class="patient-detail-dialog__appointments-list">
           @for (appointment of appointments(); track appointment.id) {
             <article class="patient-detail-dialog__appointment-card">
@@ -79,11 +85,18 @@
                 </div>
 
                 <div class="patient-detail-dialog__appointment-actions">
-                  <button mat-button type="button" (click)="openEditAppointmentDialog(appointment)">Editar</button>
+                  <button mat-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openEditAppointmentDialog(appointment)">Editar</button>
                   @if (appointment.status !== 'CANCELLED') {
-                    <button mat-button type="button" (click)="cancelAppointment(appointment)">Cancelar</button>
+                    <button mat-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="cancelAppointment(appointment)">
+                      @if (cancellingAppointmentId() === appointment.id) {
+                        <mat-spinner diameter="18" />
+                        <span>Cancelando...</span>
+                      } @else {
+                        <span>Cancelar</span>
+                      }
+                    </button>
                   }
-                  <button mat-button type="button" (click)="openDeleteAppointmentDialog(appointment)">Eliminar</button>
+                  <button mat-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openDeleteAppointmentDialog(appointment)">Eliminar</button>
                 </div>
               </div>
 
@@ -94,8 +107,8 @@
           }
         </div>
       } @else {
-        <p class="patient-detail-dialog__message">
-          No hay citas registradas.
+        <p class="patient-detail-dialog__message patient-detail-dialog__empty">
+          No hay citas registradas para este paciente.
         </p>
       }
     </section>
@@ -104,7 +117,7 @@
       <div class="patient-detail-dialog__section-header">
         <div>
           <h3>Documentos</h3>
-          <p>Archivos asociados al expediente clinico.</p>
+          <p>Archivos asociados al expediente clínico.</p>
         </div>
 
         @if (caseFile()) {
@@ -114,7 +127,7 @@
 
       @if (!caseFile()) {
         <p class="patient-detail-dialog__message">
-          Crea un expediente clinico para comenzar a subir documentos.
+          Crea un expediente clínico para comenzar a subir documentos.
         </p>
       } @else if (isDocumentsLoading()) {
         <div class="patient-detail-dialog__loading" aria-live="polite">
@@ -145,8 +158,8 @@
           }
         </div>
       } @else {
-        <p class="patient-detail-dialog__message">
-          No hay documentos registrados.
+        <p class="patient-detail-dialog__message patient-detail-dialog__empty">
+          No hay documentos cargados en este expediente.
         </p>
       }
     </section>
@@ -154,8 +167,8 @@
     <section class="patient-detail-dialog__section">
       <div class="patient-detail-dialog__section-header">
         <div>
-          <h3>Expediente clinico</h3>
-          <p>Diagnostico y plan de tratamiento del paciente.</p>
+          <h3>Expediente clínico</h3>
+          <p>Diagnóstico y plan de tratamiento del paciente.</p>
         </div>
 
         @if (caseFile()) {
@@ -168,7 +181,7 @@
       @if (isCaseFileLoading()) {
         <div class="patient-detail-dialog__loading" aria-live="polite">
           <mat-spinner diameter="22" />
-          <span>Cargando expediente clinico...</span>
+          <span>Cargando expediente clínico...</span>
         </div>
       } @else if (caseFileErrorMessage()) {
         <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
@@ -177,7 +190,7 @@
       } @else if (caseFile(); as currentCaseFile) {
         <div class="patient-detail-dialog__grid">
           <div class="patient-detail-dialog__full">
-            <span class="patient-detail-dialog__label">Diagnostico</span>
+            <span class="patient-detail-dialog__label">Diagnóstico</span>
             <p>{{ getDisplayValue(currentCaseFile.diagnosis) }}</p>
           </div>
 
@@ -187,18 +200,18 @@
           </div>
 
           <div>
-            <span class="patient-detail-dialog__label">Fecha de creacion</span>
+            <span class="patient-detail-dialog__label">Fecha de creación</span>
             <p>{{ currentCaseFile.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
           </div>
 
           <div>
-            <span class="patient-detail-dialog__label">Fecha de actualizacion</span>
+            <span class="patient-detail-dialog__label">Fecha de actualización</span>
             <p>{{ currentCaseFile.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
           </div>
         </div>
       } @else {
-        <p class="patient-detail-dialog__message">
-          Este paciente aun no tiene expediente clinico.
+        <p class="patient-detail-dialog__message patient-detail-dialog__empty">
+          Este paciente aún no tiene expediente clínico.
         </p>
       }
     </section>
@@ -206,8 +219,8 @@
     <section class="patient-detail-dialog__section">
       <div class="patient-detail-dialog__section-header">
         <div>
-        <h3>Notas de sesion</h3>
-        <p>Seguimiento clinico registrado para este expediente.</p>
+        <h3>Notas de sesión</h3>
+        <p>Seguimiento clínico registrado para este expediente.</p>
       </div>
 
       @if (caseFile()) {
@@ -217,12 +230,12 @@
 
       @if (!caseFile()) {
         <p class="patient-detail-dialog__message">
-          Crea un expediente clinico para comenzar a registrar notas de sesion.
+          Crea un expediente clínico para comenzar a registrar notas de sesión.
         </p>
       } @else if (isSessionNotesLoading()) {
         <div class="patient-detail-dialog__loading" aria-live="polite">
           <mat-spinner diameter="22" />
-          <span>Cargando notas de sesion...</span>
+          <span>Cargando notas de sesión...</span>
         </div>
       } @else if (sessionNotesErrorMessage()) {
         <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
@@ -234,7 +247,7 @@
             <article class="patient-detail-dialog__note-card">
               <div class="patient-detail-dialog__note-header">
                 <div>
-                  <h4>{{ note.title || 'Sesion sin titulo' }}</h4>
+                  <h4>{{ note.title || 'Sesión sin título' }}</h4>
                   <p>{{ note.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</p>
                 </div>
 
@@ -250,8 +263,8 @@
           }
         </div>
       } @else {
-        <p class="patient-detail-dialog__message">
-          No hay notas de sesion registradas.
+        <p class="patient-detail-dialog__message patient-detail-dialog__empty">
+          No hay notas de sesión registradas para este expediente.
         </p>
       }
     </section>

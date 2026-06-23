@@ -1,13 +1,13 @@
-.patients-list-page {
+.appointments-list-page {
   padding: 0;
 }
 
-.patients-card {
+.appointments-card {
   border-radius: 8px;
   box-shadow: 0 1rem 2.5rem rgba(24, 42, 37, 0.08);
 }
 
-.patients-card__header {
+.appointments-card__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -15,18 +15,18 @@
   padding: 1.5rem 1.5rem 0;
 }
 
-.patients-card__header h1 {
+.appointments-card__header h1 {
   margin: 0;
   color: #16332d;
   font-size: 1.75rem;
 }
 
-.patients-card__header p {
+.appointments-card__header p {
   margin: 0.35rem 0 0;
   color: #5a736b;
 }
 
-.patients-state {
+.appointments-state {
   display: grid;
   justify-items: center;
   gap: 1rem;
@@ -35,68 +35,81 @@
   color: #466159;
 }
 
-.patients-state--error {
-  color: #b3261e;
-}
-
-.patients-state p {
+.appointments-state h2,
+.appointments-state p {
   margin: 0;
 }
 
-.patients-state h2 {
-  margin: 0;
+.appointments-state h2 {
   color: #16332d;
   font-size: 1.1rem;
 }
 
-.patients-state--empty {
+.appointments-state--error {
+  color: #b3261e;
+}
+
+.appointments-state--empty {
   margin: 1rem 1.5rem 1.5rem;
   border: 1px dashed #c3d2cc;
   border-radius: 8px;
   background: #f8fbfa;
 }
 
-.patients-table-wrapper {
+.appointments-message {
+  margin: 1rem 1.5rem 0;
+}
+
+.appointments-message--success {
+  padding: 0.75rem 1rem;
+  border: 1px solid #b9d8c6;
+  border-radius: 8px;
+  background: #f1faf4;
+  color: #1f6b3e;
+  font-weight: 600;
+}
+
+.appointments-table-wrapper {
   overflow-x: auto;
   padding: 1rem 1.5rem 1.5rem;
 }
 
-.patients-table {
+.appointments-table {
   width: 100%;
-  min-width: 720px;
+  min-width: 760px;
   background: transparent;
 }
 
-.patients-table .mat-mdc-header-cell {
+.appointments-table .mat-mdc-header-cell {
   color: #335149;
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.03em;
 }
 
-.patients-table .mat-mdc-cell,
-.patients-table .mat-mdc-header-cell {
+.appointments-table .mat-mdc-cell,
+.appointments-table .mat-mdc-header-cell {
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
 
-.patients-actions {
+.appointments-actions {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
 
 @media (max-width: 720px) {
-  .patients-card__header {
+  .appointments-card__header {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .patients-card__header button {
+  .appointments-card__header button {
     align-self: flex-start;
   }
 
-  .patients-table-wrapper {
+  .appointments-table-wrapper {
     padding: 1rem;
   }
 }

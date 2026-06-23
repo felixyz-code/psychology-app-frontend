@@ -29,6 +29,10 @@ export class SessionNoteDeleteDialogComponent {
   readonly sessionNote = this.data.sessionNote;
 
   confirmDelete(): void {
+    if (this.isDeleting()) {
+      return;
+    }
+
     this.isDeleting.set(true);
     this.errorMessage.set('');
 

@@ -69,6 +69,10 @@ export class AppointmentFormDialogComponent {
   }
 
   submit(): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     if (this.appointmentForm.invalid) {
       this.appointmentForm.markAllAsTouched();
       return;
@@ -170,7 +174,7 @@ export class AppointmentFormDialogComponent {
       SCHEDULED: 'Programada',
       COMPLETED: 'Completada',
       CANCELLED: 'Cancelada',
-      NO_SHOW: 'No asistio',
+      NO_SHOW: 'No asistió',
     };
 
     return labels[status];

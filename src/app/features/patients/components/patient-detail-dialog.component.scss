@@ -9,7 +9,7 @@
 
 .patient-detail-dialog__content {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
   padding: 0.5rem;
   overflow-y: auto;
   overflow-x: hidden;
@@ -27,7 +27,8 @@
 
 .patient-detail-dialog__header h2 {
   color: #16332d;
-  font-size: 1.5rem;
+  font-size: 1.55rem;
+  line-height: 1.2;
 }
 
 .patient-detail-dialog__header p {
@@ -40,7 +41,7 @@
   gap: 1rem;
   padding: 1.25rem;
   border: 1px solid #d5e1dc;
-  border-radius: 1rem;
+  border-radius: 8px;
   background: #f8fbfa;
 }
 
@@ -123,30 +124,14 @@
   gap: 0.9rem;
 }
 
-.patient-detail-dialog__note-card {
-  display: grid;
-  gap: 0.85rem;
-  padding: 1rem;
-  border: 1px solid #d5e1dc;
-  border-radius: 0.9rem;
-  background: #ffffff;
-}
-
-.patient-detail-dialog__appointment-card {
-  display: grid;
-  gap: 0.85rem;
-  padding: 1rem;
-  border: 1px solid #d5e1dc;
-  border-radius: 0.9rem;
-  background: #ffffff;
-}
-
+.patient-detail-dialog__note-card,
+.patient-detail-dialog__appointment-card,
 .patient-detail-dialog__document-card {
   display: grid;
   gap: 0.85rem;
   padding: 1rem;
   border: 1px solid #d5e1dc;
-  border-radius: 0.9rem;
+  border-radius: 8px;
   background: #ffffff;
 }
 
@@ -197,20 +182,8 @@
   font-size: 0.9rem;
 }
 
-.patient-detail-dialog__note-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.35rem;
-}
-
-.patient-detail-dialog__appointment-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.35rem;
-}
-
+.patient-detail-dialog__note-actions,
+.patient-detail-dialog__appointment-actions,
 .patient-detail-dialog__document-actions {
   display: flex;
   flex-wrap: wrap;
@@ -233,10 +206,6 @@
 }
 
 @media (max-width: 720px) {
-  .patient-detail-dialog {
-    max-height: 85vh;
-  }
-
   .patient-detail-dialog__content {
     padding: 0;
     max-height: calc(85vh - 6.5rem);
@@ -254,26 +223,14 @@
     grid-template-columns: 1fr;
   }
 
-  .patient-detail-dialog__note-header {
-    flex-direction: column;
-  }
-
-  .patient-detail-dialog__appointment-header {
-    flex-direction: column;
-  }
-
+  .patient-detail-dialog__note-header,
+  .patient-detail-dialog__appointment-header,
   .patient-detail-dialog__document-header {
     flex-direction: column;
   }
 
-  .patient-detail-dialog__note-actions {
-    justify-content: flex-start;
-  }
-
-  .patient-detail-dialog__appointment-actions {
-    justify-content: flex-start;
-  }
-
+  .patient-detail-dialog__note-actions,
+  .patient-detail-dialog__appointment-actions,
   .patient-detail-dialog__document-actions {
     justify-content: flex-start;
   }

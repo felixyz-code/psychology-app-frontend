@@ -63,6 +63,10 @@ export class SessionNoteFormDialogComponent {
   }
 
   submit(): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     if (this.sessionNoteForm.invalid) {
       this.sessionNoteForm.markAllAsTouched();
       return;
@@ -122,7 +126,7 @@ export class SessionNoteFormDialogComponent {
             body: error?.error,
             payload,
           });
-          this.errorMessage.set('No fue posible crear la nota de sesion.');
+          this.errorMessage.set('No fue posible crear la nota de sesión.');
         },
       });
   }
@@ -137,7 +141,7 @@ export class SessionNoteFormDialogComponent {
   }
 
   getTitle(): string {
-    return this.mode === 'edit' ? 'Editar nota de sesion' : 'Nueva nota de sesion';
+    return this.mode === 'edit' ? 'Editar nota de sesión' : 'Nueva nota de sesión';
   }
 
   getSubmitLabel(): string {

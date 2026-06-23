@@ -55,6 +55,10 @@ export class CaseFileFormDialogComponent {
   }
 
   submit(): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     this.isSaving.set(true);
     this.errorMessage.set('');
 
@@ -106,8 +110,8 @@ export class CaseFileFormDialogComponent {
 
   getSubtitle(): string {
     return this.mode === 'edit'
-      ? 'Actualiza la informacion clinica del paciente.'
-      : 'Registra la informacion basica del expediente clinico.';
+      ? 'Actualiza la información clínica del paciente.'
+      : 'Registra la información básica del expediente clínico.';
   }
 
   getSubmitLabel(): string {

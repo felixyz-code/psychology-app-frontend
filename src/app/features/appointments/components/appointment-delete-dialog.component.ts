@@ -29,6 +29,10 @@ export class AppointmentDeleteDialogComponent {
   readonly errorMessage = signal('');
 
   confirmDelete(): void {
+    if (this.isDeleting()) {
+      return;
+    }
+
     this.isDeleting.set(true);
     this.errorMessage.set('');
 
@@ -46,7 +50,7 @@ export class AppointmentDeleteDialogComponent {
           }
 
           if (error?.status === 404) {
-            this.errorMessage.set('La cita ya no esta disponible.');
+            this.errorMessage.set('La cita ya no está disponible.');
             return;
           }
 

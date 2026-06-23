@@ -1,13 +1,13 @@
 <div class="session-note-dialog">
   <div class="session-note-dialog__header">
     <h2>{{ getTitle() }}</h2>
-    <p>Registra el seguimiento clinico asociado al expediente actual.</p>
+    <p>Registra el seguimiento clínico asociado al expediente actual.</p>
   </div>
 
   <form class="session-note-dialog__form" [formGroup]="sessionNoteForm" (ngSubmit)="submit()">
     <div class="session-note-dialog__grid">
       <mat-form-field appearance="outline" class="session-note-dialog__full">
-        <mat-label>Titulo</mat-label>
+        <mat-label>Título</mat-label>
         <input matInput formControlName="title" />
       </mat-form-field>
 
@@ -20,10 +20,10 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="session-note-dialog__full">
-        <mat-label>Fecha y hora de sesion</mat-label>
+        <mat-label>Fecha y hora de sesión</mat-label>
         <input matInput type="datetime-local" formControlName="sessionDate" />
         @if (hasRequiredError('sessionDate')) {
-          <mat-error>La fecha de sesion es obligatoria.</mat-error>
+          <mat-error>La fecha de sesión es obligatoria.</mat-error>
         }
       </mat-form-field>
     </div>
