@@ -1,0 +1,56 @@
+.navbar {
+  display: flex;
+  gap: 1rem;
+  min-height: 4.5rem;
+  padding: 0 1rem;
+  background: #27443d;
+  color: #f7fbf9;
+  box-shadow: 0 0.75rem 1.5rem rgba(20, 37, 33, 0.12);
+}
+
+.navbar__brand {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.navbar__spacer {
+  flex: 1;
+}
+
+.navbar__user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.navbar__name {
+  font-weight: 600;
+}
+
+.navbar__role {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 720px) {
+  .navbar {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+  }
+
+  .navbar__user {
+    align-items: flex-start;
+    width: 100%;
+    order: 3;
+  }
+}

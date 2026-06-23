@@ -1,0 +1,264 @@
+<div class="patient-detail-dialog">
+  <div class="patient-detail-dialog__content">
+    <div class="patient-detail-dialog__header">
+      <h2>Detalle del paciente</h2>
+      <p>Informacion general registrada.</p>
+    </div>
+
+    <section class="patient-detail-dialog__section">
+      <h3>Datos del paciente</h3>
+
+      <div class="patient-detail-dialog__grid">
+        <div>
+          <span class="patient-detail-dialog__label">Nombre completo</span>
+          <p>{{ getFullName() }}</p>
+        </div>
+
+        <div>
+          <span class="patient-detail-dialog__label">Telefono</span>
+          <p>{{ getDisplayValue(patient.phoneNumber) }}</p>
+        </div>
+
+        <div>
+          <span class="patient-detail-dialog__label">Email</span>
+          <p>{{ getDisplayValue(patient.email) }}</p>
+        </div>
+
+        <div>
+          <span class="patient-detail-dialog__label">Fecha de nacimiento</span>
+          <p>{{ formatBirthDate(patient.birthDate) }}</p>
+        </div>
+
+        <div>
+          <span class="patient-detail-dialog__label">Fecha de creacion</span>
+          <p>{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <div>
+          <span class="patient-detail-dialog__label">Fecha de actualizacion</span>
+          <p>{{ patient.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <div class="patient-detail-dialog__full">
+          <span class="patient-detail-dialog__label">ID del paciente</span>
+          <p>{{ patient.id }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="patient-detail-dialog__section">
+      <div class="patient-detail-dialog__section-header">
+        <div>
+          <h3>Citas</h3>
+          <p>Agenda registrada para este paciente.</p>
+        </div>
+
+        <button mat-button type="button" (click)="openCreateAppointmentDialog()">Nueva cita</button>
+      </div>
+
+      @if (isAppointmentsLoading()) {
+        <div class="patient-detail-dialog__loading" aria-live="polite">
+          <mat-spinner diameter="22" />
+          <span>Cargando citas...</span>
+        </div>
+      } @else if (appointmentsErrorMessage()) {
+        <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
+          {{ appointmentsErrorMessage() }}
+        </p>
+      } @else if (appointments().length) {
+        <div class="patient-detail-dialog__appointments-list">
+          @for (appointment of appointments(); track appointment.id) {
+            <article class="patient-detail-dialog__appointment-card">
+              <div class="patient-detail-dialog__appointment-header">
+                <div>
+                  <h4>{{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</h4>
+                  <p>
+                    {{ appointment.durationMinutes }} minutos -
+                    {{ getAppointmentStatusLabel(appointment.status) }}
+                  </p>
+                </div>
+
+                <div class="patient-detail-dialog__appointment-actions">
+                  <button mat-button type="button" (click)="openEditAppointmentDialog(appointment)">Editar</button>
+                  @if (appointment.status !== 'CANCELLED') {
+                    <button mat-button type="button" (click)="cancelAppointment(appointment)">Cancelar</button>
+                  }
+                  <button mat-button type="button" (click)="openDeleteAppointmentDialog(appointment)">Eliminar</button>
+                </div>
+              </div>
+
+              @if (appointment.notes) {
+                <p class="patient-detail-dialog__appointment-notes">{{ appointment.notes }}</p>
+              }
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="patient-detail-dialog__message">
+          No hay citas registradas.
+        </p>
+      }
+    </section>
+
+    <section class="patient-detail-dialog__section">
+      <div class="patient-detail-dialog__section-header">
+        <div>
+          <h3>Documentos</h3>
+          <p>Archivos asociados al expediente clinico.</p>
+        </div>
+
+        @if (caseFile()) {
+          <button mat-button type="button" (click)="openUploadDocumentDialog()">Subir documento</button>
+        }
+      </div>
+
+      @if (!caseFile()) {
+        <p class="patient-detail-dialog__message">
+          Crea un expediente clinico para comenzar a subir documentos.
+        </p>
+      } @else if (isDocumentsLoading()) {
+        <div class="patient-detail-dialog__loading" aria-live="polite">
+          <mat-spinner diameter="22" />
+          <span>Cargando documentos...</span>
+        </div>
+      } @else if (documentsErrorMessage()) {
+        <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
+          {{ documentsErrorMessage() }}
+        </p>
+      } @else if (documents().length) {
+        <div class="patient-detail-dialog__documents-list">
+          @for (document of documents(); track document.id) {
+            <article class="patient-detail-dialog__document-card">
+              <div class="patient-detail-dialog__document-header">
+                <div>
+                  <h4>{{ document.fileName }}</h4>
+                  <p>{{ getDocumentType(document) }} - {{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+                </div>
+
+                <div class="patient-detail-dialog__document-actions">
+                  <button mat-button type="button" (click)="viewDocument(document)">Ver</button>
+                  <button mat-button type="button" (click)="downloadDocument(document)">Descargar</button>
+                  <button mat-button type="button" (click)="openDeleteDocumentDialog(document)">Eliminar</button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="patient-detail-dialog__message">
+          No hay documentos registrados.
+        </p>
+      }
+    </section>
+
+    <section class="patient-detail-dialog__section">
+      <div class="patient-detail-dialog__section-header">
+        <div>
+          <h3>Expediente clinico</h3>
+          <p>Diagnostico y plan de tratamiento del paciente.</p>
+        </div>
+
+        @if (caseFile()) {
+          <button mat-button type="button" (click)="openEditCaseFileDialog()">Editar expediente</button>
+        } @else {
+          <button mat-button type="button" (click)="openCreateCaseFileDialog()">Crear expediente</button>
+        }
+      </div>
+
+      @if (isCaseFileLoading()) {
+        <div class="patient-detail-dialog__loading" aria-live="polite">
+          <mat-spinner diameter="22" />
+          <span>Cargando expediente clinico...</span>
+        </div>
+      } @else if (caseFileErrorMessage()) {
+        <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
+          {{ caseFileErrorMessage() }}
+        </p>
+      } @else if (caseFile(); as currentCaseFile) {
+        <div class="patient-detail-dialog__grid">
+          <div class="patient-detail-dialog__full">
+            <span class="patient-detail-dialog__label">Diagnostico</span>
+            <p>{{ getDisplayValue(currentCaseFile.diagnosis) }}</p>
+          </div>
+
+          <div class="patient-detail-dialog__full">
+            <span class="patient-detail-dialog__label">Plan de tratamiento</span>
+            <p>{{ getDisplayValue(currentCaseFile.treatmentPlan) }}</p>
+          </div>
+
+          <div>
+            <span class="patient-detail-dialog__label">Fecha de creacion</span>
+            <p>{{ currentCaseFile.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+
+          <div>
+            <span class="patient-detail-dialog__label">Fecha de actualizacion</span>
+            <p>{{ currentCaseFile.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        </div>
+      } @else {
+        <p class="patient-detail-dialog__message">
+          Este paciente aun no tiene expediente clinico.
+        </p>
+      }
+    </section>
+
+    <section class="patient-detail-dialog__section">
+      <div class="patient-detail-dialog__section-header">
+        <div>
+        <h3>Notas de sesion</h3>
+        <p>Seguimiento clinico registrado para este expediente.</p>
+      </div>
+
+      @if (caseFile()) {
+        <button mat-button type="button" (click)="openCreateSessionNoteDialog()">Nueva nota</button>
+      }
+    </div>
+
+      @if (!caseFile()) {
+        <p class="patient-detail-dialog__message">
+          Crea un expediente clinico para comenzar a registrar notas de sesion.
+        </p>
+      } @else if (isSessionNotesLoading()) {
+        <div class="patient-detail-dialog__loading" aria-live="polite">
+          <mat-spinner diameter="22" />
+          <span>Cargando notas de sesion...</span>
+        </div>
+      } @else if (sessionNotesErrorMessage()) {
+        <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
+          {{ sessionNotesErrorMessage() }}
+        </p>
+      } @else if (sessionNotes().length) {
+        <div class="patient-detail-dialog__notes-list">
+          @for (note of sessionNotes(); track note.id) {
+            <article class="patient-detail-dialog__note-card">
+              <div class="patient-detail-dialog__note-header">
+                <div>
+                  <h4>{{ note.title || 'Sesion sin titulo' }}</h4>
+                  <p>{{ note.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+                </div>
+
+                <div class="patient-detail-dialog__note-actions">
+                  <button mat-button type="button" (click)="openSessionNoteDetailDialog(note)">Ver</button>
+                  <button mat-button type="button" (click)="openEditSessionNoteDialog(note)">Editar</button>
+                  <button mat-button type="button" (click)="openDeleteSessionNoteDialog(note)">Eliminar</button>
+                </div>
+              </div>
+
+              <p class="patient-detail-dialog__note-content">{{ note.content }}</p>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="patient-detail-dialog__message">
+          No hay notas de sesion registradas.
+        </p>
+      }
+    </section>
+  </div>
+
+  <div class="patient-detail-dialog__actions">
+    <button mat-button type="button" (click)="close()">Cerrar</button>
+    <button mat-flat-button type="button" (click)="edit()">Editar</button>
+  </div>
+</div>

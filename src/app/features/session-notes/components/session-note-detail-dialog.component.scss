@@ -1,0 +1,111 @@
+.session-note-detail-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  overflow: hidden;
+  overflow-x: hidden;
+}
+
+.session-note-detail-dialog__content {
+  display: grid;
+  gap: 1.25rem;
+  padding: 0.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(85vh - 5.5rem);
+  min-height: 0;
+}
+
+.session-note-detail-dialog__header h2,
+.session-note-detail-dialog__header p,
+.session-note-detail-dialog__section h3,
+.session-note-detail-dialog__grid p,
+.session-note-detail-dialog__content-text {
+  margin: 0;
+}
+
+.session-note-detail-dialog__header h2 {
+  color: #16332d;
+  font-size: 1.5rem;
+}
+
+.session-note-detail-dialog__header p {
+  margin-top: 0.35rem;
+  color: #5a736b;
+}
+
+.session-note-detail-dialog__section {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #d5e1dc;
+  border-radius: 1rem;
+  background: #f8fbfa;
+}
+
+.session-note-detail-dialog__section h3 {
+  color: #16332d;
+  font-size: 1.1rem;
+}
+
+.session-note-detail-dialog__content-text {
+  color: #355149;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.session-note-detail-dialog__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.session-note-detail-dialog__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #577069;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.session-note-detail-dialog__full {
+  grid-column: 1 / -1;
+}
+
+.session-note-detail-dialog__full p {
+  overflow-wrap: anywhere;
+}
+
+.session-note-detail-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  padding: 0.5rem;
+  border-top: 1px solid #d5e1dc;
+  background: #ffffff;
+}
+
+@media (max-width: 720px) {
+  .session-note-detail-dialog__content {
+    padding: 0;
+    max-height: calc(85vh - 6.5rem);
+  }
+
+  .session-note-detail-dialog__section {
+    padding: 1rem;
+  }
+
+  .session-note-detail-dialog__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .session-note-detail-dialog__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    padding: 0.75rem 0;
+  }
+}

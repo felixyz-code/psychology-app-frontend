@@ -1,0 +1,27 @@
+<div class="document-delete-dialog">
+  <h2>Eliminar documento</h2>
+
+  <p>&iquest;Esta seguro que desea eliminar este documento?</p>
+
+  <div class="document-delete-dialog__summary">
+    <p class="document-delete-dialog__title">"{{ document.fileName }}"</p>
+    <p>{{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="document-delete-dialog__error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <div class="document-delete-dialog__actions">
+    <button mat-button type="button" [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+
+    <button mat-flat-button type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+      @if (isDeleting()) {
+        <mat-spinner diameter="20" />
+        <span>Eliminando...</span>
+      } @else {
+        <span>Eliminar</span>
+      }
+    </button>
+  </div>
+</div>

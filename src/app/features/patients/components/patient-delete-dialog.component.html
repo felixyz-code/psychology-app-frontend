@@ -1,0 +1,28 @@
+<div class="patient-delete-dialog">
+  <h2>Eliminar paciente</h2>
+
+  <p>
+    ¿Está seguro que desea eliminar al paciente:
+  </p>
+
+  <p class="patient-delete-dialog__name">"{{ getFullName() }}"?</p>
+
+  <p class="patient-delete-dialog__warning">Esta acción no puede deshacerse.</p>
+
+  @if (errorMessage()) {
+    <p class="patient-delete-dialog__error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <div class="patient-delete-dialog__actions">
+    <button mat-button type="button" [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+
+    <button mat-flat-button type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+      @if (isDeleting()) {
+        <mat-spinner diameter="20" />
+        <span>Eliminando...</span>
+      } @else {
+        <span>Eliminar</span>
+      }
+    </button>
+  </div>
+</div>
