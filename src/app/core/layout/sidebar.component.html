@@ -5,6 +5,17 @@
     <mat-nav-list>
       <a
         mat-list-item
+        routerLink="/dashboard"
+        routerLinkActive="sidebar__link--active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="sidebar__link"
+      >
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Dashboard</span>
+      </a>
+
+      <a
+        mat-list-item
         routerLink="/patients"
         routerLinkActive="sidebar__link--active"
         [routerLinkActiveOptions]="{ exact: true }"

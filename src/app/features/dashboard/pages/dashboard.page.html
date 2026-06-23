@@ -1,0 +1,153 @@
+<section class="dashboard-page">
+  <div class="dashboard-header">
+    <div>
+      <h1>Dashboard clínico</h1>
+      <p>Vista operativa del consultorio y seguimiento reciente.</p>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <mat-card class="dashboard-state">
+      <mat-spinner diameter="42" />
+      <p>Cargando información clínica...</p>
+    </mat-card>
+  } @else if (errorMessage()) {
+    <mat-card class="dashboard-state dashboard-state--error">
+      <p>{{ errorMessage() }}</p>
+    </mat-card>
+  } @else {
+    @if (failedSourcesMessage()) {
+      <p class="dashboard-warning" role="status">{{ failedSourcesMessage() }}</p>
+    }
+
+    <div class="dashboard-kpis">
+      <mat-card class="dashboard-kpi">
+        <mat-icon>groups</mat-icon>
+        <span>Total de pacientes</span>
+        <strong>{{ data().patients.length }}</strong>
+      </mat-card>
+
+      <mat-card class="dashboard-kpi">
+        <mat-icon>today</mat-icon>
+        <span>Citas de hoy</span>
+        <strong>{{ todayAppointments().length }}</strong>
+      </mat-card>
+
+      <mat-card class="dashboard-kpi">
+        <mat-icon>event</mat-icon>
+        <span>Próximas citas</span>
+        <strong>{{ upcomingAppointments().length }}</strong>
+      </mat-card>
+
+      <mat-card class="dashboard-kpi">
+        <mat-icon>notes</mat-icon>
+        <span>Notas recientes</span>
+        <strong>{{ recentNotes().length }}</strong>
+      </mat-card>
+
+      <mat-card class="dashboard-kpi">
+        <mat-icon>description</mat-icon>
+        <span>Documentos registrados</span>
+        <strong>{{ data().documents.length }}</strong>
+      </mat-card>
+    </div>
+
+    <div class="dashboard-grid">
+      <mat-card class="dashboard-panel">
+        <div class="dashboard-panel__header">
+          <div>
+            <h2>Agenda de hoy</h2>
+            <p>Citas programadas para la jornada actual.</p>
+          </div>
+        </div>
+
+        @if (todayAppointments().length) {
+          <div class="dashboard-list">
+            @for (appointment of todayAppointments(); track appointment.id) {
+              <article class="dashboard-list-item">
+                <div>
+                  <h3>{{ getPatientName(appointment.patientId) }}</h3>
+                  <p>
+                    {{ appointment.scheduledAt | date: 'HH:mm' }} ·
+                    {{ getStatusLabel(appointment.status) }}
+                  </p>
+                  @if (appointment.notes) {
+                    <p class="dashboard-list-item__note">{{ appointment.notes }}</p>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="dashboard-empty">
+            <h3>No hay citas para hoy</h3>
+            <p>La agenda del día está libre.</p>
+          </div>
+        }
+      </mat-card>
+
+      <mat-card class="dashboard-panel">
+        <div class="dashboard-panel__header">
+          <div>
+            <h2>Próximas citas</h2>
+            <p>Siguientes atenciones programadas.</p>
+          </div>
+        </div>
+
+        @if (upcomingAppointments().length) {
+          <div class="dashboard-list">
+            @for (appointment of upcomingAppointments(); track appointment.id) {
+              <article class="dashboard-list-item">
+                <div>
+                  <h3>{{ getPatientName(appointment.patientId) }}</h3>
+                  <p>
+                    {{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }} ·
+                    {{ appointment.durationMinutes }} min
+                  </p>
+                </div>
+                <span>{{ getStatusLabel(appointment.status) }}</span>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="dashboard-empty">
+            <h3>No hay próximas citas</h3>
+            <p>Las citas futuras aparecerán aquí.</p>
+          </div>
+        }
+      </mat-card>
+    </div>
+
+    <mat-card class="dashboard-panel">
+      <div class="dashboard-panel__header">
+        <div>
+          <h2>Actividad reciente</h2>
+          <p>Notas de sesión y documentos agregados recientemente.</p>
+        </div>
+      </div>
+
+      @if (recentActivity().length) {
+        <div class="dashboard-activity">
+          @for (activity of recentActivity(); track activity.type + activity.id) {
+            <article class="dashboard-activity-item">
+              <mat-icon>{{ getActivityIcon(activity.type) }}</mat-icon>
+              <div>
+                <h3>{{ activity.title }}</h3>
+                <p>
+                  {{ getActivityTypeLabel(activity.type) }} ·
+                  {{ activity.patientName }} ·
+                  {{ activity.date | date: 'dd/MM/yyyy HH:mm' }}
+                </p>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="dashboard-empty">
+          <h3>No hay actividad reciente</h3>
+          <p>Las notas y documentos recientes aparecerán aquí.</p>
+        </div>
+      }
+    </mat-card>
+  }
+</section>
