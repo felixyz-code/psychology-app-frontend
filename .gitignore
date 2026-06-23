@@ -44,3 +44,8 @@ __screenshots__/
 Thumbs.db
 
 /src/generated/prisma
+
+# Environment variables file
+.env
+.env.*
+!.env.example
