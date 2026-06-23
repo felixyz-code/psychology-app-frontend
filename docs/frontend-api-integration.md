@@ -119,6 +119,68 @@ Response:
 - `PATCH /session-notes/:id`
 - `DELETE /session-notes/:id`
 
+## Documents API
+
+- `Documents` dependen de `CaseFile`.
+- `Documents` no dependen de `Session Notes` por ahora.
+- Se gestionan desde el detalle del paciente usando el `CaseFile` actual.
+- Ownership lo resuelve el backend.
+- Para subir documentos se usa exclusivamente `POST /documents/upload`.
+- No se usa `POST /documents` metadata-only desde el frontend en esta etapa.
+- El upload usa `multipart/form-data` con los campos `file`, `caseFileId` y `uploadedById`.
+- Angular no debe setear manualmente `Content-Type` al enviar `FormData`.
+- `uploadedById` se envia temporalmente desde `AuthStore` porque el DTO del backend lo requiere.
+- El backend puede reemplazar `uploadedById` para `PSYCHOLOGIST` usando el JWT.
+- El frontend valida localmente PDF, JPG, JPEG y PNG con maximo 10 MB.
+- `filePath` no se muestra en UI y no se usa para ver o descargar documentos.
+- Ver y descargar usan endpoints dedicados con `responseType: 'blob'`.
+- `GET /documents`
+- `GET /documents/case-file/:caseFileId`
+- `GET /documents/:id`
+- `POST /documents/upload`
+- `GET /documents/:id/view`
+- `GET /documents/:id/download`
+- `DELETE /documents/:id`
+
+## Appointments API
+
+- `Appointments` dependen directamente de `Patient`.
+- `Appointments` no dependen de `CaseFile`, `Session Notes` ni `Documents`.
+- Se gestionan primero desde el detalle del paciente.
+- Ownership lo resuelve el backend.
+- ADMIN puede listar todas las citas.
+- PSYCHOLOGIST solo ve citas propias.
+- Para crear/editar, el frontend envia temporalmente `psychologistId` desde `AuthStore.user()?.id`.
+- No existe selector de psicologos en frontend por ahora.
+- No existe endpoint dedicado para cancelar citas.
+- Cancelar cita se implementa con `PATCH /appointments/:id` enviando `status: 'CANCELLED'`.
+- Eliminar cita se mantiene como accion separada con `DELETE /appointments/:id`.
+- No se implementan validaciones de choque de horario en frontend.
+- `GET /appointments`
+- `GET /appointments/patient/:patientId`
+- `GET /appointments/:id`
+- `POST /appointments`
+- `PATCH /appointments/:id`
+- `DELETE /appointments/:id`
+
+### Appointment model
+
+```ts
+type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
+
+interface Appointment {
+  id: string;
+  patientId: string;
+  psychologistId: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  status: AppointmentStatus;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
 ## URL base de la API
 
 La URL base del backend proviene de `environment.apiUrl`, permitiendo centralizar la configuracion por entorno sin dispersar rutas base dentro del codigo.

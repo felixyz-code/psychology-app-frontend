@@ -1,0 +1,37 @@
+<div class="document-upload-dialog">
+  <div class="document-upload-dialog__header">
+    <h2>Subir documento</h2>
+    <p>Adjunta un archivo al expediente clinico actual.</p>
+  </div>
+
+  <div class="document-upload-dialog__field">
+    <label for="document-file">Archivo</label>
+    <input
+      id="document-file"
+      type="file"
+      accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+      [disabled]="isSaving()"
+      (change)="selectFile($event)"
+    />
+
+    @if (selectedFile(); as file) {
+      <p class="document-upload-dialog__selected">{{ file.name }}</p>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <p class="document-upload-dialog__error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (isSaving()) {
+    <div class="document-upload-dialog__saving" aria-live="polite">
+      <mat-spinner diameter="20" />
+      <span>Subiendo...</span>
+    </div>
+  }
+
+  <div class="document-upload-dialog__actions">
+    <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">Cancelar</button>
+    <button mat-flat-button type="button" [disabled]="isSaving()" (click)="submit()">Subir</button>
+  </div>
+</div>

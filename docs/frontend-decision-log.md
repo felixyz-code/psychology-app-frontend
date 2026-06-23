@@ -35,3 +35,18 @@
 - `SessionNoteFormDialog` se reutiliza para crear y editar notas mediante `MAT_DIALOG_DATA`.
 - Las notas de sesion se eliminan mediante modal de confirmacion.
 - El frontend puede enviar `authorId` desde `AuthStore` en el MVP, pero el ownership final y la resolucion para `PSYCHOLOGIST` permanecen en backend.
+- `Documents` dependen de `CaseFile` y se gestionan desde el detalle del paciente, igual que `Session Notes`, pero no dependen de `Session Notes`.
+- La creacion de documentos usa exclusivamente `POST /documents/upload`; `POST /documents` metadata-only queda fuera del frontend por ahora.
+- El upload de documentos se implementa mediante modal Angular Material reutilizando el patron de formularios modales existente.
+- El frontend envia `uploadedById` desde `AuthStore` de forma temporal porque el DTO actual del backend lo requiere.
+- `filePath` no se muestra al usuario y no se usa para acciones de UI.
+- Ver y descargar documentos se resuelven con `/documents/:id/view` y `/documents/:id/download` usando Blob.
+- La eliminacion de documentos usa modal de confirmacion y refresca la lista del `CaseFile` actual.
+- `Appointments` dependen directamente de `Patient` y se integran primero dentro del detalle del paciente.
+- `Appointments` no dependen de `CaseFile`, `Session Notes` ni `Documents`.
+- La ruta global `/appointments` y el menu "Citas" del sidebar no se activan en este sprint.
+- Crear y editar citas se implementan mediante Angular Material Dialogs.
+- El frontend envia `psychologistId` desde `AuthStore.user()?.id` de forma temporal porque no existe selector/listado de psicologos.
+- Cancelar cita se implementa con `PATCH /appointments/:id` enviando `status: 'CANCELLED'`.
+- Eliminar cita se mantiene como accion separada usando `DELETE /appointments/:id`.
+- El frontend no inventa validaciones de choque de horario; esa regla queda para backend o una decision futura.

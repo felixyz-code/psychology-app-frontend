@@ -113,7 +113,35 @@
   gap: 0.9rem;
 }
 
+.patient-detail-dialog__appointments-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.patient-detail-dialog__documents-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
 .patient-detail-dialog__note-card {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid #d5e1dc;
+  border-radius: 0.9rem;
+  background: #ffffff;
+}
+
+.patient-detail-dialog__appointment-card {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid #d5e1dc;
+  border-radius: 0.9rem;
+  background: #ffffff;
+}
+
+.patient-detail-dialog__document-card {
   display: grid;
   gap: 0.85rem;
   padding: 1rem;
@@ -129,24 +157,61 @@
   gap: 1rem;
 }
 
+.patient-detail-dialog__appointment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.patient-detail-dialog__document-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .patient-detail-dialog__note-header h4,
 .patient-detail-dialog__note-header p,
+.patient-detail-dialog__appointment-header h4,
+.patient-detail-dialog__appointment-header p,
+.patient-detail-dialog__document-header h4,
+.patient-detail-dialog__document-header p,
+.patient-detail-dialog__appointment-notes,
 .patient-detail-dialog__note-content {
   margin: 0;
 }
 
-.patient-detail-dialog__note-header h4 {
+.patient-detail-dialog__note-header h4,
+.patient-detail-dialog__appointment-header h4,
+.patient-detail-dialog__document-header h4 {
   color: #16332d;
   font-size: 1rem;
 }
 
-.patient-detail-dialog__note-header p {
+.patient-detail-dialog__note-header p,
+.patient-detail-dialog__appointment-header p,
+.patient-detail-dialog__document-header p {
   margin-top: 0.25rem;
   color: #5a736b;
   font-size: 0.9rem;
 }
 
 .patient-detail-dialog__note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.patient-detail-dialog__appointment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.patient-detail-dialog__document-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -160,6 +225,11 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
   overflow: hidden;
+}
+
+.patient-detail-dialog__appointment-notes {
+  color: #355149;
+  line-height: 1.5;
 }
 
 @media (max-width: 720px) {
@@ -188,7 +258,23 @@
     flex-direction: column;
   }
 
+  .patient-detail-dialog__appointment-header {
+    flex-direction: column;
+  }
+
+  .patient-detail-dialog__document-header {
+    flex-direction: column;
+  }
+
   .patient-detail-dialog__note-actions {
+    justify-content: flex-start;
+  }
+
+  .patient-detail-dialog__appointment-actions {
+    justify-content: flex-start;
+  }
+
+  .patient-detail-dialog__document-actions {
     justify-content: flex-start;
   }
 

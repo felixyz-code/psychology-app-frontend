@@ -46,8 +46,25 @@
 
 - Implementar la gestion de documentos usando exclusivamente endpoints existentes.
 - Preparar flujo de visualizacion y carga si la API ya lo soporta.
+- Modelos de Documents creados.
+- DocumentsService creado con listados, metadata, upload, view, download y delete.
+- Listado de documentos integrado en el detalle del paciente usando el `CaseFile` actual.
+- Upload de documentos implementado mediante modal MatDialog.
+- Visualizacion y descarga implementadas mediante Blob y endpoints `/view` y `/download`.
+- Eliminacion de documentos implementada mediante modal de confirmacion.
+- `POST /documents` metadata-only no se usa desde frontend.
+- `filePath` no se muestra ni se usa en UI.
 
 ## Sprint 5: Appointments
 
 - Integrar agenda y citas.
 - Conectar vistas de calendario o listado segun el alcance permitido por la API disponible.
+- Modelos de Appointments creados.
+- AppointmentsService creado con listado global, listado por paciente, detalle, create, update y delete.
+- Listado de citas integrado en el detalle del paciente usando `GET /appointments/patient/:patientId`.
+- Crear cita implementado mediante modal MatDialog.
+- Editar cita implementado mediante modal MatDialog.
+- Cancelar cita implementado con `PATCH /appointments/:id` enviando `status: 'CANCELLED'`.
+- Eliminacion de citas implementada mediante modal de confirmacion.
+- Ruta global `/appointments` y menu de sidebar quedan pendientes.
+- No se implementa selector de psicologos ni validacion de choques de horario en este sprint.

@@ -1,0 +1,29 @@
+<div class="appointment-delete-dialog">
+  <h2>Eliminar cita</h2>
+
+  <p>&iquest;Esta seguro que desea eliminar esta cita?</p>
+
+  <div class="appointment-delete-dialog__summary">
+    <p class="appointment-delete-dialog__title">
+      {{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
+    </p>
+    <p>{{ appointment.durationMinutes }} minutos</p>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="appointment-delete-dialog__error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <div class="appointment-delete-dialog__actions">
+    <button mat-button type="button" [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+
+    <button mat-flat-button type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+      @if (isDeleting()) {
+        <mat-spinner diameter="20" />
+        <span>Eliminando...</span>
+      } @else {
+        <span>Eliminar</span>
+      }
+    </button>
+  </div>
+</div>

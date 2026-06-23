@@ -49,6 +49,111 @@
     <section class="patient-detail-dialog__section">
       <div class="patient-detail-dialog__section-header">
         <div>
+          <h3>Citas</h3>
+          <p>Agenda registrada para este paciente.</p>
+        </div>
+
+        <button mat-button type="button" (click)="openCreateAppointmentDialog()">Nueva cita</button>
+      </div>
+
+      @if (isAppointmentsLoading()) {
+        <div class="patient-detail-dialog__loading" aria-live="polite">
+          <mat-spinner diameter="22" />
+          <span>Cargando citas...</span>
+        </div>
+      } @else if (appointmentsErrorMessage()) {
+        <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
+          {{ appointmentsErrorMessage() }}
+        </p>
+      } @else if (appointments().length) {
+        <div class="patient-detail-dialog__appointments-list">
+          @for (appointment of appointments(); track appointment.id) {
+            <article class="patient-detail-dialog__appointment-card">
+              <div class="patient-detail-dialog__appointment-header">
+                <div>
+                  <h4>{{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</h4>
+                  <p>
+                    {{ appointment.durationMinutes }} minutos -
+                    {{ getAppointmentStatusLabel(appointment.status) }}
+                  </p>
+                </div>
+
+                <div class="patient-detail-dialog__appointment-actions">
+                  <button mat-button type="button" (click)="openEditAppointmentDialog(appointment)">Editar</button>
+                  @if (appointment.status !== 'CANCELLED') {
+                    <button mat-button type="button" (click)="cancelAppointment(appointment)">Cancelar</button>
+                  }
+                  <button mat-button type="button" (click)="openDeleteAppointmentDialog(appointment)">Eliminar</button>
+                </div>
+              </div>
+
+              @if (appointment.notes) {
+                <p class="patient-detail-dialog__appointment-notes">{{ appointment.notes }}</p>
+              }
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="patient-detail-dialog__message">
+          No hay citas registradas.
+        </p>
+      }
+    </section>
+
+    <section class="patient-detail-dialog__section">
+      <div class="patient-detail-dialog__section-header">
+        <div>
+          <h3>Documentos</h3>
+          <p>Archivos asociados al expediente clinico.</p>
+        </div>
+
+        @if (caseFile()) {
+          <button mat-button type="button" (click)="openUploadDocumentDialog()">Subir documento</button>
+        }
+      </div>
+
+      @if (!caseFile()) {
+        <p class="patient-detail-dialog__message">
+          Crea un expediente clinico para comenzar a subir documentos.
+        </p>
+      } @else if (isDocumentsLoading()) {
+        <div class="patient-detail-dialog__loading" aria-live="polite">
+          <mat-spinner diameter="22" />
+          <span>Cargando documentos...</span>
+        </div>
+      } @else if (documentsErrorMessage()) {
+        <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
+          {{ documentsErrorMessage() }}
+        </p>
+      } @else if (documents().length) {
+        <div class="patient-detail-dialog__documents-list">
+          @for (document of documents(); track document.id) {
+            <article class="patient-detail-dialog__document-card">
+              <div class="patient-detail-dialog__document-header">
+                <div>
+                  <h4>{{ document.fileName }}</h4>
+                  <p>{{ getDocumentType(document) }} - {{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+                </div>
+
+                <div class="patient-detail-dialog__document-actions">
+                  <button mat-button type="button" (click)="viewDocument(document)">Ver</button>
+                  <button mat-button type="button" (click)="downloadDocument(document)">Descargar</button>
+                  <button mat-button type="button" (click)="openDeleteDocumentDialog(document)">Eliminar</button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="patient-detail-dialog__message">
+          No hay documentos registrados.
+        </p>
+      }
+    </section>
+
+    <section class="patient-detail-dialog__section">
+      <div class="patient-detail-dialog__section-header">
+        <div>
           <h3>Expediente clinico</h3>
           <p>Diagnostico y plan de tratamiento del paciente.</p>
         </div>
