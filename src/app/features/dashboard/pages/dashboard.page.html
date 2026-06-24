@@ -1,10 +1,9 @@
 <section class="dashboard-page">
-  <div class="dashboard-header">
-    <div>
-      <h1>Dashboard clínico</h1>
-      <p>Vista operativa del consultorio y seguimiento reciente.</p>
-    </div>
-  </div>
+  <app-page-header
+    heading="Dashboard clínico"
+    subtitle="Vista operativa del consultorio y seguimiento reciente."
+    [breadcrumbs]="breadcrumbs"
+  />
 
   @if (isLoading()) {
     <mat-card class="dashboard-state">
@@ -68,13 +67,15 @@
                 <div>
                   <h3>{{ getPatientName(appointment.patientId) }}</h3>
                   <p>
-                    {{ appointment.scheduledAt | date: 'HH:mm' }} ·
-                    {{ getStatusLabel(appointment.status) }}
+                    {{ appointment.scheduledAt | date: 'HH:mm' }}
                   </p>
                   @if (appointment.notes) {
                     <p class="dashboard-list-item__note">{{ appointment.notes }}</p>
                   }
                 </div>
+                <span class="app-status-badge {{ getStatusClass(appointment.status) }}">
+                  {{ getStatusLabel(appointment.status) }}
+                </span>
               </article>
             }
           </div>
@@ -105,7 +106,9 @@
                     {{ appointment.durationMinutes }} min
                   </p>
                 </div>
-                <span>{{ getStatusLabel(appointment.status) }}</span>
+                <span class="app-status-badge {{ getStatusClass(appointment.status) }}">
+                  {{ getStatusLabel(appointment.status) }}
+                </span>
               </article>
             }
           </div>

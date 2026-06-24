@@ -2,22 +2,48 @@
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr;
-  background: linear-gradient(180deg, #eef5f1 0%, #f8fbfa 100%);
+  background: var(--app-color-app-bg);
+  overflow-x: hidden;
 }
 
 .main-layout__body {
+  position: relative;
   display: grid;
-  grid-template-columns: 18rem 1fr;
+  grid-template-columns: 17rem 1fr;
   min-height: 0;
+  background: var(--app-color-app-bg);
+  transition: grid-template-columns 180ms ease;
+}
+
+.main-layout--sidebar-collapsed .main-layout__body {
+  grid-template-columns: 4.75rem 1fr;
 }
 
 .main-layout__sidebar {
   min-width: 0;
+  z-index: 20;
 }
 
 .main-layout__content {
   min-width: 0;
-  padding: 1.5rem;
+  overflow-x: hidden;
+  padding: 1.35rem 1.5rem 1.5rem;
+  background: var(--app-color-app-bg);
+  color: var(--app-color-heading);
+}
+
+.main-layout__overlay {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .main-layout__body {
+    grid-template-columns: 15.5rem 1fr;
+  }
+
+  .main-layout--sidebar-collapsed .main-layout__body {
+    grid-template-columns: 4.75rem 1fr;
+  }
 }
 
 @media (max-width: 960px) {
@@ -25,7 +51,51 @@
     grid-template-columns: 1fr;
   }
 
+  .main-layout--sidebar-collapsed .main-layout__body {
+    grid-template-columns: 1fr;
+  }
+
+  .main-layout__sidebar {
+    position: fixed;
+    top: 4.25rem;
+    bottom: 0;
+    left: 0;
+    width: min(18rem, 82vw);
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  .main-layout__sidebar--open {
+    transform: translateX(0);
+  }
+
+  .main-layout__overlay {
+    position: fixed;
+    inset: 4.25rem 0 0;
+    z-index: 10;
+    display: block;
+    pointer-events: none;
+    border: 0;
+    background: rgba(15, 23, 42, 0);
+    opacity: 0;
+    transition:
+      background-color 180ms ease,
+      opacity 180ms ease;
+  }
+
+  .main-layout__overlay--visible {
+    pointer-events: auto;
+    background: var(--app-color-overlay);
+    opacity: 1;
+  }
+
   .main-layout__content {
     padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-layout__content {
+    padding: 0.8rem;
   }
 }

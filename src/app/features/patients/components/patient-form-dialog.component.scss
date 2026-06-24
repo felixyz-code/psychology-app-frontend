@@ -1,16 +1,16 @@
-.patient-dialog {
+﻿.patient-dialog {
   padding: 0.5rem;
 }
 
 .patient-dialog__header h2 {
   margin: 0;
-  color: #16332d;
+  color: #1f2937;
   font-size: 1.5rem;
 }
 
 .patient-dialog__header p {
   margin: 0.35rem 0 0;
-  color: #5a736b;
+  color: #6c757d;
 }
 
 .patient-dialog__form {
@@ -39,7 +39,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  color: #466159;
+  color: #495057;
 }
 
 .patient-dialog__actions {
@@ -66,3 +66,4 @@
     align-items: stretch;
   }
 }
+

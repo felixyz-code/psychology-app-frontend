@@ -3,8 +3,9 @@
 }
 
 .appointments-card {
+  border: 1px solid var(--app-color-card-border);
   border-radius: 8px;
-  box-shadow: 0 1rem 2.5rem rgba(24, 42, 37, 0.08);
+  box-shadow: var(--app-shadow-surface);
 }
 
 .appointments-card__header {
@@ -17,13 +18,13 @@
 
 .appointments-card__header h1 {
   margin: 0;
-  color: #16332d;
+  color: var(--app-color-heading);
   font-size: 1.75rem;
 }
 
 .appointments-card__header p {
   margin: 0.35rem 0 0;
-  color: #5a736b;
+  color: var(--app-color-text-secondary);
 }
 
 .appointments-state {
@@ -32,7 +33,7 @@
   gap: 1rem;
   padding: 3rem 1.5rem;
   text-align: center;
-  color: #466159;
+  color: var(--app-color-text-secondary);
 }
 
 .appointments-state h2,
@@ -41,19 +42,19 @@
 }
 
 .appointments-state h2 {
-  color: #16332d;
+  color: var(--app-color-heading);
   font-size: 1.1rem;
 }
 
 .appointments-state--error {
-  color: #b3261e;
+  color: var(--app-color-danger-text);
 }
 
 .appointments-state--empty {
   margin: 1rem 1.5rem 1.5rem;
-  border: 1px dashed #c3d2cc;
+  border: 1px dashed var(--app-color-border);
   border-radius: 8px;
-  background: #f8fbfa;
+  background: var(--app-color-empty-bg);
 }
 
 .appointments-message {
@@ -62,10 +63,10 @@
 
 .appointments-message--success {
   padding: 0.75rem 1rem;
-  border: 1px solid #b9d8c6;
+  border: 1px solid var(--app-color-success-border);
   border-radius: 8px;
-  background: #f1faf4;
-  color: #1f6b3e;
+  background: var(--app-color-success-soft);
+  color: var(--app-color-success-text);
   font-weight: 600;
 }
 
@@ -81,7 +82,7 @@
 }
 
 .appointments-table .mat-mdc-header-cell {
-  color: #335149;
+  color: var(--app-color-muted);
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -93,10 +94,18 @@
   padding-bottom: 1rem;
 }
 
+.appointments-table .mat-mdc-row:hover {
+  background: var(--app-color-table-hover);
+}
+
 .appointments-actions {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+}
+
+.appointments-actions button:last-child {
+  color: var(--app-color-danger-text);
 }
 
 @media (max-width: 720px) {

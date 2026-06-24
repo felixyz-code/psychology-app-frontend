@@ -1,4 +1,4 @@
-.appointment-delete-dialog {
+﻿.appointment-delete-dialog {
   display: grid;
   gap: 1rem;
   padding: 0.5rem;
@@ -10,7 +10,7 @@
 }
 
 .appointment-delete-dialog h2 {
-  color: #16332d;
+  color: #1f2937;
   font-size: 1.5rem;
 }
 
@@ -18,13 +18,13 @@
   display: grid;
   gap: 0.35rem;
   padding: 1rem;
-  border: 1px solid #d5e1dc;
+  border: 1px solid #dee2e6;
   border-radius: 0.9rem;
-  background: #f8fbfa;
+  background: #f8f9fa;
 }
 
 .appointment-delete-dialog__title {
-  color: #16332d;
+  color: #1f2937;
   font-weight: 700;
 }
 
@@ -51,3 +51,4 @@
     align-items: stretch;
   }
 }
+

@@ -1,4 +1,4 @@
-.case-file-dialog {
+﻿.case-file-dialog {
   display: grid;
   gap: 1.5rem;
   padding: 0.5rem;
@@ -10,13 +10,13 @@
 }
 
 .case-file-dialog__header h2 {
-  color: #16332d;
+  color: #1f2937;
   font-size: 1.5rem;
 }
 
 .case-file-dialog__header p {
   margin-top: 0.35rem;
-  color: #5a736b;
+  color: #6c757d;
 }
 
 .case-file-dialog__form {
@@ -43,7 +43,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  color: #48655c;
+  color: #495057;
 }
 
 .case-file-dialog__actions {
@@ -62,3 +62,4 @@
     align-items: stretch;
   }
 }
+

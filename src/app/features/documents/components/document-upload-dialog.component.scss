@@ -1,4 +1,4 @@
-.document-upload-dialog {
+﻿.document-upload-dialog {
   display: grid;
   gap: 1.25rem;
   padding: 0.5rem;
@@ -11,13 +11,13 @@
 }
 
 .document-upload-dialog__header h2 {
-  color: #16332d;
+  color: #1f2937;
   font-size: 1.5rem;
 }
 
 .document-upload-dialog__header p {
   margin-top: 0.35rem;
-  color: #5a736b;
+  color: #6c757d;
 }
 
 .document-upload-dialog__field {
@@ -26,7 +26,7 @@
 }
 
 .document-upload-dialog__field label {
-  color: #577069;
+  color: #6c757d;
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -35,11 +35,11 @@
 
 .document-upload-dialog__field input {
   width: 100%;
-  color: #355149;
+  color: #374151;
 }
 
 .document-upload-dialog__selected {
-  color: #355149;
+  color: #374151;
 }
 
 .document-upload-dialog__error {
@@ -52,7 +52,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  color: #48655c;
+  color: #495057;
 }
 
 .document-upload-dialog__actions {
@@ -67,3 +67,4 @@
     align-items: stretch;
   }
 }
+

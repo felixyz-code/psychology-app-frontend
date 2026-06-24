@@ -7,6 +7,7 @@
 
 html {
   height: 100%;
+  background: #f8fafc;
   @include mat.theme(
     (
       color: (
@@ -20,37 +21,396 @@ html {
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
+  background-color: var(--app-color-app-bg);
+  color: var(--app-color-heading);
   font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
   height: 100%;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+:root {
+  --app-color-sidebar-bg: #172a46;
+  --app-color-header-bg: #1d4ed8;
+  --app-color-primary: #3b82f6;
+  --app-color-primary-soft: rgba(59, 130, 246, 0.16);
+  --app-color-primary-border: rgba(147, 197, 253, 0.32);
+  --app-color-link: #3b82f6;
+  --app-color-app-bg: #f8fafc;
+  --app-color-muted: #64748b;
+  --app-color-text-secondary: #64748b;
+  --app-color-border: #dbe3ef;
+  --app-color-heading: #0f172a;
+  --app-color-text-inverse: #f8fafc;
+  --app-color-sidebar-text: #d7e3f7;
+  --app-color-sidebar-text-muted: #8fa7c7;
+  --app-color-header-text: #eff6ff;
+  --app-color-surface: #ffffff;
+  --app-color-surface-soft: #f8f9fa;
+  --app-color-surface-muted: #f1f5f9;
+  --app-color-card-bg: #ffffff;
+  --app-color-card-soft-bg: #f8fafc;
+  --app-color-card-border: #dbe3ef;
+  --app-color-table-hover: #f8fafc;
+  --app-color-empty-bg: #f8fafc;
+  --app-color-dialog-bg: #ffffff;
+  --app-color-menu-bg: #ffffff;
+  --app-color-input-bg: #ffffff;
+  --app-color-overlay: rgba(15, 23, 42, 0.32);
+  --app-color-danger-soft: #fff8f8;
+  --app-color-danger-text: #9f2d2d;
+  --app-color-success-soft: #d1e7dd;
+  --app-color-success-border: #badbcc;
+  --app-color-success-text: #0f5132;
+  --app-color-success: #198754;
+  --app-color-warning: #f59f00;
+  --app-color-danger: #dc3545;
+  --app-color-info: #0dcaf0;
+  --app-shadow-card: 0 0.5rem 1.25rem rgba(15, 23, 42, 0.08);
+  --app-shadow-header: 0 2px 8px rgba(15, 23, 42, 0.08);
+  --app-shadow-sidebar: 0.25rem 0 1.25rem rgba(15, 23, 42, 0.14);
+  --app-shadow-surface: 0 1rem 2.5rem rgba(24, 42, 37, 0.08);
+}
+
+body.light-theme {
+  color-scheme: light;
+}
+
+body.dark-theme {
+  color-scheme: dark;
+  background: var(--app-color-app-bg);
+  --app-color-sidebar-bg: #020617;
+  --app-color-header-bg: #0f172a;
+  --app-color-primary: #60a5fa;
+  --app-color-primary-soft: rgba(96, 165, 250, 0.16);
+  --app-color-primary-border: rgba(96, 165, 250, 0.34);
+  --app-color-link: #93c5fd;
+  --app-color-app-bg: #0f172a;
+  --app-color-muted: #94a3b8;
+  --app-color-text-secondary: #cbd5e1;
+  --app-color-border: #334155;
+  --app-color-heading: #f8fafc;
+  --app-color-text-inverse: #0f172a;
+  --app-color-sidebar-text: #dbeafe;
+  --app-color-sidebar-text-muted: #94a3b8;
+  --app-color-header-text: #e2e8f0;
+  --app-color-surface: #1e293b;
+  --app-color-surface-soft: #111827;
+  --app-color-surface-muted: #111827;
+  --app-color-card-bg: #1e293b;
+  --app-color-card-soft-bg: #111827;
+  --app-color-card-border: #334155;
+  --app-color-table-hover: #162033;
+  --app-color-empty-bg: #111827;
+  --app-color-dialog-bg: #1e293b;
+  --app-color-menu-bg: #1e293b;
+  --app-color-input-bg: #0f172a;
+  --app-color-overlay: rgba(2, 6, 23, 0.62);
+  --app-color-danger-soft: rgba(127, 29, 29, 0.22);
+  --app-color-danger-text: #fecaca;
+  --app-color-success-soft: rgba(20, 83, 45, 0.35);
+  --app-color-success-border: rgba(74, 222, 128, 0.28);
+  --app-color-success-text: #bbf7d0;
+  --app-shadow-card: 0 0.75rem 2rem rgba(2, 6, 23, 0.35);
+  --app-shadow-header: 0 2px 8px rgba(2, 6, 23, 0.35);
+  --app-shadow-sidebar: 0.25rem 0 1.25rem rgba(2, 6, 23, 0.4);
+  --app-shadow-surface: 0 1rem 2.5rem rgba(2, 6, 23, 0.4);
+}
+
+button[mat-flat-button],
+button[mat-stroked-button],
+button[mat-button] {
+  border-radius: 8px;
+}
+
+.app-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.15rem 0.65rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 999px;
+  background: var(--app-color-surface-soft);
+  color: var(--app-color-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.app-status-badge--scheduled {
+  border-color: #b6d4fe;
+  background: #e7f1ff;
+  color: #084298;
+}
+
+.app-status-badge--completed {
+  border-color: #badbcc;
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.app-status-badge--cancelled {
+  border-color: #f5c2c7;
+  background: #f8d7da;
+  color: #842029;
+}
+
+.app-status-badge--no-show {
+  border-color: #ffecb5;
+  background: #fff3cd;
+  color: #664d03;
+}
+
+body.dark-theme .app-status-badge--scheduled {
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.18);
+  color: #dbeafe;
+}
+
+body.dark-theme .app-status-badge--completed {
+  border-color: rgba(74, 222, 128, 0.28);
+  background: rgba(22, 101, 52, 0.34);
+  color: #dcfce7;
+}
+
+body.dark-theme .app-status-badge--cancelled {
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(127, 29, 29, 0.3);
+  color: #fecaca;
+}
+
+body.dark-theme .app-status-badge--no-show {
+  border-color: rgba(250, 204, 21, 0.28);
+  background: rgba(113, 63, 18, 0.34);
+  color: #fde68a;
+}
+
+.mat-mdc-card {
+  background: var(--app-color-card-bg);
+  color: var(--app-color-heading);
+}
+
+.mat-mdc-dialog-surface {
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 8px;
+  background: var(--app-color-dialog-bg);
+  color: var(--app-color-heading);
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+  --mdc-filled-text-field-container-color: var(--app-color-input-bg);
+  --mdc-filled-text-field-input-text-color: var(--app-color-heading);
+  --mdc-filled-text-field-label-text-color: var(--app-color-muted);
+  --mdc-filled-text-field-hover-label-text-color: var(--app-color-heading);
+  --mdc-filled-text-field-focus-label-text-color: var(--app-color-primary);
+  --mdc-filled-text-field-active-indicator-color: var(--app-color-border);
+  --mdc-filled-text-field-focus-active-indicator-color: var(--app-color-primary);
+  --mdc-outlined-text-field-input-text-color: var(--app-color-heading);
+  --mdc-outlined-text-field-label-text-color: var(--app-color-muted);
+  --mdc-outlined-text-field-hover-label-text-color: var(--app-color-heading);
+  --mdc-outlined-text-field-focus-label-text-color: var(--app-color-primary);
+  --mdc-outlined-text-field-outline-color: var(--app-color-border);
+  --mdc-outlined-text-field-hover-outline-color: var(--app-color-primary-border);
+  --mdc-outlined-text-field-focus-outline-color: var(--app-color-primary);
+  --mat-select-enabled-trigger-text-color: var(--app-color-heading);
+}
+
+.mat-mdc-form-field-subscript-wrapper,
+.mat-mdc-form-field-hint-wrapper,
+.mat-mdc-form-field-error-wrapper {
+  color: var(--app-color-muted);
+}
+
+.mat-mdc-menu-panel {
+  border: 1px solid var(--app-color-card-border);
+  background: var(--app-color-menu-bg);
+  color: var(--app-color-heading);
+}
+
+.mat-mdc-menu-item,
+.mat-mdc-menu-item .mat-icon {
+  color: var(--app-color-heading);
+}
+
+.mat-mdc-menu-item:hover:not([disabled]) {
+  background: var(--app-color-primary-soft);
+}
+
+.mat-mdc-outlined-button:not(:disabled),
+.mat-mdc-button:not(:disabled) {
+  color: var(--app-color-heading);
+}
+
+.mat-mdc-header-cell {
+  color: var(--app-color-muted);
+}
+
+.mat-mdc-cell {
+  color: var(--app-color-heading);
+}
+
+.mat-mdc-row:hover {
+  background: var(--app-color-table-hover);
+}
+
+.mat-mdc-menu-panel.navbar-user-menu-panel {
+  width: 360px !important;
+  max-width: calc(100vw - 24px) !important;
+  overflow: hidden !important;
+  border-radius: 12px;
+}
+
+.mat-mdc-menu-panel.navbar-user-menu-panel .mat-mdc-menu-content {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.navbar-user-menu {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.navbar-user-menu * {
+  box-sizing: border-box;
+}
+
+.navbar-user-menu .mat-mdc-menu-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden !important;
+  box-sizing: border-box;
+}
+
+body.dark-theme .navbar-user-menu .mat-mdc-menu-content {
+  background: #1e293b;
+}
+
+.navbar-user-menu__summary {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem 0.8rem;
+  border-bottom: 1px solid var(--app-color-border);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.navbar-user-menu__avatar {
+  display: inline-grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--app-color-primary-soft);
+  color: var(--app-color-primary);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.navbar-user-menu__identity {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.navbar-user-menu__name {
+  overflow: hidden;
+  color: var(--app-color-heading);
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar-user-menu__role {
+  color: var(--app-color-text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.navbar-user-menu__theme-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  align-items: center;
+  column-gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 0 20px;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--app-color-border);
+}
+
+.navbar-user-menu__theme-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.navbar-user-menu__theme-copy .mat-icon {
+  color: var(--app-color-primary);
+}
+
+.navbar-user-menu__theme-copy span {
+  overflow: hidden;
+  color: var(--app-color-heading);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar-user-menu__theme-toggle {
+  justify-self: end;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  flex: 0 0 auto;
+  margin: 0;
+  overflow: visible;
+}
+
+.navbar-user-menu__theme-toggle.mat-mdc-slide-toggle {
+  margin: 0;
+}
+
+.navbar-user-menu__action {
+  margin-top: 0;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .patient-detail-dialog__empty {
   padding: 1rem;
-  border: 1px dashed #c3d2cc;
+  border: 1px dashed var(--app-color-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--app-color-empty-bg);
+}
+
+body.dark-theme .patient-detail-dialog__empty {
+  background: #111827;
 }
 
 .patient-detail-dialog__message--success {
   padding: 0.75rem 1rem;
-  border: 1px solid #b9d8c6;
+  border: 1px solid var(--app-color-success-border);
   border-radius: 8px;
-  background: #f1faf4;
-  color: #1f6b3e;
+  background: var(--app-color-success-soft);
+  color: var(--app-color-success-text);
   font-weight: 600;
 }
-
-/* You can add global styles to this file, and also import other style files */

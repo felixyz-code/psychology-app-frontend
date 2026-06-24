@@ -1,4 +1,15 @@
 <mat-toolbar class="navbar">
+  <button
+    class="navbar__menu-button"
+    mat-icon-button
+    type="button"
+    aria-label="Alternar menu lateral"
+    [attr.aria-expanded]="isSidebarOpen() || !isSidebarCollapsed()"
+    (click)="menuToggle.emit()"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+
   <div class="navbar__brand">
     <span class="navbar__title">Psychology App</span>
   </div>
@@ -6,14 +17,47 @@
   <div class="navbar__spacer"></div>
 
   @if (authStore.user(); as user) {
-    <div class="navbar__user">
-      <span class="navbar__name">{{ user.name }}</span>
-      <span class="navbar__role">{{ user.role }}</span>
-    </div>
-  }
+    <button
+      class="user-menu-trigger"
+      type="button"
+      [matMenuTriggerFor]="userMenu"
+      aria-label="Abrir menu de usuario"
+    >
+      <div class="user-avatar" aria-hidden="true">{{ user.name.charAt(0) }}</div>
+      <div class="user-info">
+        <span class="user-name">{{ user.name }}</span>
+        <span class="user-role">{{ getRoleLabel(user.role) }}</span>
+      </div>
+      <mat-icon class="chevron">expand_more</mat-icon>
+    </button>
 
-  <button mat-stroked-button type="button" (click)="logout()">
-    <mat-icon>logout</mat-icon>
-    <span>Cerrar sesión</span>
-  </button>
+    <mat-menu #userMenu="matMenu" xPosition="before" class="navbar-user-menu" panelClass="navbar-user-menu-panel">
+      <div class="navbar-user-menu__summary">
+        <span class="navbar-user-menu__avatar" aria-hidden="true">{{ user.name.charAt(0) }}</span>
+        <span class="navbar-user-menu__identity">
+          <span class="navbar-user-menu__name">{{ user.name }}</span>
+          <span class="navbar-user-menu__role">{{ getRoleLabel(user.role) }}</span>
+        </span>
+      </div>
+
+      <div class="navbar-user-menu__theme-row">
+        <div class="navbar-user-menu__theme-copy">
+          <mat-icon>{{ isDarkTheme() ? 'dark_mode' : 'light_mode' }}</mat-icon>
+          <span>Modo oscuro</span>
+        </div>
+
+        <mat-slide-toggle
+          class="navbar-user-menu__theme-toggle"
+          [checked]="isDarkTheme()"
+          (change)="toggleTheme($event.checked)"
+          aria-label="Cambiar tema"
+        />
+      </div>
+
+      <button class="navbar-user-menu__action" mat-menu-item type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar sesion</span>
+      </button>
+    </mat-menu>
+  }
 </mat-toolbar>

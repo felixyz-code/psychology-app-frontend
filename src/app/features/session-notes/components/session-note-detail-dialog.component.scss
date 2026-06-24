@@ -1,4 +1,4 @@
-.session-note-detail-dialog {
+﻿.session-note-detail-dialog {
   display: flex;
   flex-direction: column;
   max-height: 85vh;
@@ -25,31 +25,31 @@
 }
 
 .session-note-detail-dialog__header h2 {
-  color: #16332d;
+  color: #1f2937;
   font-size: 1.5rem;
 }
 
 .session-note-detail-dialog__header p {
   margin-top: 0.35rem;
-  color: #5a736b;
+  color: #6c757d;
 }
 
 .session-note-detail-dialog__section {
   display: grid;
   gap: 1rem;
   padding: 1.25rem;
-  border: 1px solid #d5e1dc;
+  border: 1px solid #dee2e6;
   border-radius: 1rem;
-  background: #f8fbfa;
+  background: #f8f9fa;
 }
 
 .session-note-detail-dialog__section h3 {
-  color: #16332d;
+  color: #1f2937;
   font-size: 1.1rem;
 }
 
 .session-note-detail-dialog__content-text {
-  color: #355149;
+  color: #374151;
   line-height: 1.6;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
@@ -64,7 +64,7 @@
 .session-note-detail-dialog__label {
   display: block;
   margin-bottom: 0.35rem;
-  color: #577069;
+  color: #6c757d;
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -85,7 +85,7 @@
   gap: 0.75rem;
   flex-shrink: 0;
   padding: 0.5rem;
-  border-top: 1px solid #d5e1dc;
+  border-top: 1px solid #dee2e6;
   background: #ffffff;
 }
 
@@ -109,3 +109,4 @@
     padding: 0.75rem 0;
   }
 }
+

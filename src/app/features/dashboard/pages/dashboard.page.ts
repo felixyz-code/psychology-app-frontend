@@ -15,6 +15,7 @@ import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { SessionNote } from '../../session-notes/models/session-note.models';
 import { SessionNotesService } from '../../session-notes/services/session-notes.service';
+import { PageHeaderComponent, PageHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.component';
 
 interface DashboardData {
   patients: Patient[];
@@ -36,7 +37,7 @@ interface ActivityItem {
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [DatePipe, MatCardModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [DatePipe, MatCardModule, MatIconModule, MatProgressSpinnerModule, PageHeaderComponent],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.scss',
 })
@@ -57,6 +58,15 @@ export class DashboardPage {
     caseFiles: [],
     failedSources: [],
   });
+  readonly breadcrumbs: PageHeaderBreadcrumb[] = [
+    {
+      label: 'Inicio',
+      url: '/dashboard',
+    },
+    {
+      label: 'Dashboard',
+    },
+  ];
 
   readonly patientNames = computed(() => {
     return this.data().patients.reduce<Record<string, string>>((names, patient) => {
@@ -172,6 +182,17 @@ export class DashboardPage {
     };
 
     return labels[status];
+  }
+
+  getStatusClass(status: AppointmentStatus): string {
+    const classes: Record<AppointmentStatus, string> = {
+      SCHEDULED: 'app-status-badge--scheduled',
+      COMPLETED: 'app-status-badge--completed',
+      CANCELLED: 'app-status-badge--cancelled',
+      NO_SHOW: 'app-status-badge--no-show',
+    };
+
+    return classes[status];
   }
 
   getActivityIcon(type: ActivityItem['type']): string {

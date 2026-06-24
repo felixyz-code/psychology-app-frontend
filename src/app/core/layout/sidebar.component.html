@@ -1,52 +1,62 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
   <div class="sidebar__section">
     <p class="sidebar__label">Navegación</p>
 
-    <mat-nav-list>
+    <nav class="sidebar__nav" aria-label="Navegación principal">
       <a
-        mat-list-item
         routerLink="/dashboard"
         routerLinkActive="sidebar__link--active"
         [routerLinkActiveOptions]="{ exact: true }"
         class="sidebar__link"
+        (click)="navSelected.emit()"
       >
-        <mat-icon matListItemIcon>dashboard</mat-icon>
-        <span matListItemTitle>Dashboard</span>
+        <mat-icon>dashboard</mat-icon>
+        <span class="sidebar__content">
+          <span class="sidebar__title">Dashboard</span>
+        </span>
       </a>
 
       <a
-        mat-list-item
         routerLink="/patients"
         routerLinkActive="sidebar__link--active"
         [routerLinkActiveOptions]="{ exact: true }"
         class="sidebar__link"
+        (click)="navSelected.emit()"
       >
-        <mat-icon matListItemIcon>groups</mat-icon>
-        <span matListItemTitle>Pacientes</span>
+        <mat-icon>groups</mat-icon>
+        <span class="sidebar__content">
+          <span class="sidebar__title">Pacientes</span>
+        </span>
       </a>
 
-      <div mat-list-item class="sidebar__link sidebar__link--disabled">
-        <mat-icon matListItemIcon>folder_shared</mat-icon>
-        <span matListItemTitle>Expedientes</span>
-        <span matListItemLine>Próximamente</span>
-      </div>
-
-      <div mat-list-item class="sidebar__link sidebar__link--disabled">
-        <mat-icon matListItemIcon>description</mat-icon>
-        <span matListItemTitle>Documentos</span>
-        <span matListItemLine>Próximamente</span>
-      </div>
-
       <a
-        mat-list-item
         routerLink="/appointments"
         routerLinkActive="sidebar__link--active"
         [routerLinkActiveOptions]="{ exact: true }"
         class="sidebar__link"
+        (click)="navSelected.emit()"
       >
-        <mat-icon matListItemIcon>event</mat-icon>
-        <span matListItemTitle>Citas</span>
+        <mat-icon>event</mat-icon>
+        <span class="sidebar__content">
+          <span class="sidebar__title">Citas</span>
+        </span>
       </a>
-    </mat-nav-list>
+
+      <div class="sidebar__link sidebar__link--disabled" aria-disabled="true">
+        <mat-icon>folder_shared</mat-icon>
+        <span class="sidebar__content">
+          <span class="sidebar__title">Expedientes</span>
+          <span class="sidebar__meta">Próximamente</span>
+        </span>
+      </div>
+
+      <div class="sidebar__link sidebar__link--disabled" aria-disabled="true">
+        <mat-icon>description</mat-icon>
+        <span class="sidebar__content">
+          <span class="sidebar__title">Documentos</span>
+          <span class="sidebar__meta">Próximamente</span>
+        </span>
+      </div>
+    </nav>
   </div>
 </aside>

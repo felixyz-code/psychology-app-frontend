@@ -1,0 +1,49 @@
+:host {
+  display: block;
+}
+
+.page-header h1,
+.page-header p {
+  margin: 0;
+}
+
+.page-header h1 {
+  color: var(--app-color-heading);
+  font-size: 1.85rem;
+  line-height: 1.2;
+}
+
+.page-header p {
+  margin-top: 0.35rem;
+  color: var(--app-color-text-secondary);
+}
+
+.page-header__breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.45rem;
+  color: var(--app-color-text-secondary);
+  font-size: 0.82rem;
+}
+
+.page-header__breadcrumbs a {
+  color: var(--app-color-link);
+  text-decoration: none;
+}
+
+.page-header__breadcrumbs a::after {
+  margin-left: 0.35rem;
+  color: var(--app-color-text-secondary);
+  content: '/';
+}
+
+.page-header__breadcrumbs span {
+  color: var(--app-color-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .page-header h1 {
+    font-size: 1.45rem;
+  }
+}

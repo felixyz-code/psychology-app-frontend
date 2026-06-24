@@ -418,6 +418,17 @@ export class PatientDetailDialogComponent {
     return labels[status];
   }
 
+  getAppointmentStatusClass(status: AppointmentStatus): string {
+    const classes: Record<AppointmentStatus, string> = {
+      SCHEDULED: 'app-status-badge--scheduled',
+      COMPLETED: 'app-status-badge--completed',
+      CANCELLED: 'app-status-badge--cancelled',
+      NO_SHOW: 'app-status-badge--no-show',
+    };
+
+    return classes[status];
+  }
+
   formatBirthDate(value?: string | null): string {
     if (!value) {
       return '-';

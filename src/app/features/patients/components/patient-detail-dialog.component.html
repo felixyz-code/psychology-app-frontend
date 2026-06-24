@@ -79,9 +79,11 @@
                 <div>
                   <h4>{{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</h4>
                   <p>
-                    {{ appointment.durationMinutes }} minutos -
-                    {{ getAppointmentStatusLabel(appointment.status) }}
+                    {{ appointment.durationMinutes }} minutos
                   </p>
+                  <span class="app-status-badge {{ getAppointmentStatusClass(appointment.status) }}">
+                    {{ getAppointmentStatusLabel(appointment.status) }}
+                  </span>
                 </div>
 
                 <div class="patient-detail-dialog__appointment-actions">
