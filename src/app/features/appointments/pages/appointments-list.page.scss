@@ -16,15 +16,8 @@
   padding: 1.5rem 1.5rem 0;
 }
 
-.appointments-card__header h1 {
-  margin: 0;
-  color: var(--app-color-heading);
-  font-size: 1.75rem;
-}
-
-.appointments-card__header p {
-  margin: 0.35rem 0 0;
-  color: var(--app-color-text-secondary);
+.appointments-card__header app-page-header {
+  min-width: 0;
 }
 
 .appointments-state {

@@ -1,29 +1,8 @@
-﻿.session-note-dialog {
-  display: grid;
+.session-note-dialog {
   gap: 1.5rem;
-  padding: 0.5rem;
 }
 
-.session-note-dialog__header h2,
-.session-note-dialog__header p {
-  margin: 0;
-}
-
-.session-note-dialog__header h2 {
-  color: #1f2937;
-  font-size: 1.5rem;
-}
-
-.session-note-dialog__header p {
-  margin-top: 0.35rem;
-  color: #6c757d;
-}
-
-.session-note-dialog__form {
-  display: grid;
-  gap: 1rem;
-}
-
+.session-note-dialog__form,
 .session-note-dialog__grid {
   display: grid;
   gap: 1rem;
@@ -32,34 +11,3 @@
 .session-note-dialog__full {
   grid-column: 1 / -1;
 }
-
-.session-note-dialog__error {
-  margin: 0;
-  color: #9f2d2d;
-  font-weight: 600;
-}
-
-.session-note-dialog__saving {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #495057;
-}
-
-.session-note-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-@media (max-width: 720px) {
-  .session-note-dialog {
-    padding: 0;
-  }
-
-  .session-note-dialog__actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-}
-

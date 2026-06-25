@@ -1,8 +1,31 @@
 .dashboard-page {
+  padding: 0;
+}
+
+.dashboard-card {
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 8px;
+  box-shadow: var(--app-shadow-surface);
+}
+
+.dashboard-card__header {
+  padding: 1.5rem 1.5rem 0;
+}
+
+.dashboard-card__header app-page-header {
+  min-width: 0;
+}
+
+.dashboard-card__content {
   display: grid;
   gap: 1.35rem;
-  background: var(--app-color-app-bg);
+  padding: 1rem 1.5rem 1.5rem;
   color: var(--app-color-heading);
+}
+
+.dashboard-skeleton {
+  display: grid;
+  gap: 1.35rem;
 }
 
 .dashboard-panel__header h2,
@@ -39,6 +62,10 @@
   box-shadow: var(--app-shadow-card);
 }
 
+.dashboard-kpi--skeleton {
+  align-content: start;
+}
+
 .dashboard-kpi mat-icon {
   color: var(--app-color-primary);
 }
@@ -55,9 +82,19 @@
 }
 
 .dashboard-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  display: flex;
   gap: 1rem;
+  align-items: flex-start;
+}
+
+.dashboard-grid > .dashboard-panel {
+  flex: 1 1 0;
+  min-width: 0;
+  height: fit-content;
+}
+
+.dashboard-grid > .dashboard-panel:first-child {
+  flex: 1.1 1 0;
 }
 
 .dashboard-panel,
@@ -70,13 +107,52 @@
 
 .dashboard-panel {
   display: grid;
+  align-content: start;
   gap: 1rem;
+  height: auto;
+  align-self: start;
   padding: 1.25rem;
+}
+
+.dashboard-panel--skeleton {
+  align-content: start;
 }
 
 .dashboard-panel__header h2 {
   color: var(--app-color-heading);
   font-size: 1.15rem;
+}
+
+.dashboard-panel__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dashboard-agenda-cta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.dashboard-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--app-color-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-link:hover {
+  color: var(--app-color-primary-strong);
+  text-decoration: underline;
+}
+
+.dashboard-link:focus-visible {
+  outline: 2px solid var(--app-color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .dashboard-list,
@@ -87,20 +163,68 @@
 
 .dashboard-list-item,
 .dashboard-activity-item {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem;
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.75rem 0.85rem;
   border: 1px solid var(--app-color-card-border);
   border-radius: 8px;
   background: var(--app-color-card-soft-bg);
 }
 
-.dashboard-list-item:hover,
+.dashboard-list-item--skeleton {
+  min-height: 5.4rem;
+}
+
+.dashboard-activity-item--skeleton {
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+}
+
+.dashboard-activity-item__content {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
 .dashboard-activity-item:hover {
   border-color: var(--app-color-primary-border);
   background: var(--app-color-card-soft-bg);
+}
+
+.dashboard-list-item--interactive {
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.dashboard-list-item--interactive:hover {
+  border-color: var(--app-color-primary-border);
+  background: color-mix(in srgb, var(--app-color-card-soft-bg) 84%, var(--app-color-primary) 16%);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
+}
+
+.dashboard-list-item--interactive:active {
+  transform: scale(0.992);
+}
+
+.dashboard-list-item--interactive:focus-visible {
+  outline: 2px solid var(--app-color-primary);
+  outline-offset: 2px;
+}
+
+.dashboard-list-item__content {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.dashboard-list-item__topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .dashboard-list-item h3,
@@ -115,13 +239,24 @@
   font-size: 0.9rem;
 }
 
+.dashboard-list-item__meta {
+  font-weight: 600;
+  font-size: 0.84rem;
+}
+
 .dashboard-list-item__note {
-  margin-top: 0.35rem;
   color: var(--app-color-heading);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .dashboard-activity-item {
   justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .dashboard-activity-item mat-icon {
@@ -131,7 +266,7 @@
 .dashboard-empty {
   display: grid;
   gap: 0.35rem;
-  padding: 1.25rem;
+  padding: 1rem;
   border: 1px dashed var(--app-color-border);
   border-radius: 8px;
   background: var(--app-color-empty-bg);
@@ -150,7 +285,7 @@
   display: grid;
   justify-items: center;
   gap: 1rem;
-  padding: 3rem 1.5rem;
+  padding: 2rem 1rem;
   color: var(--app-color-muted);
   text-align: center;
 }
@@ -169,6 +304,54 @@
   background: var(--app-color-danger-soft);
 }
 
+.app-skeleton--icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+}
+
+.app-skeleton-line--title {
+  width: min(12rem, 72%);
+  height: 1.1rem;
+}
+
+.app-skeleton-line--subtitle {
+  width: min(18rem, 88%);
+  height: 0.9rem;
+  margin-top: 0.35rem;
+}
+
+.app-skeleton-line--label {
+  width: 58%;
+  height: 0.95rem;
+}
+
+.app-skeleton-line--value {
+  width: 42%;
+  height: 2rem;
+}
+
+.app-skeleton-line--item-title {
+  width: min(11rem, 68%);
+  height: 0.95rem;
+}
+
+.app-skeleton-line--badge {
+  width: 4.75rem;
+  height: 1.6rem;
+  border-radius: 999px;
+}
+
+.app-skeleton-line--meta {
+  width: min(10rem, 56%);
+  height: 0.8rem;
+}
+
+.app-skeleton-line--body {
+  width: min(18rem, 100%);
+  height: 0.85rem;
+}
+
 @media (max-width: 1199px) {
   .dashboard-kpis {
     grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
@@ -177,13 +360,24 @@
 
 @media (max-width: 1100px) {
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .dashboard-grid > .dashboard-panel,
+  .dashboard-grid > .dashboard-panel:first-child {
+    width: 100%;
+    flex: 1 1 auto;
   }
 }
 
 @media (max-width: 640px) {
-  .dashboard-page {
+  .dashboard-card__header {
+    padding: 1rem 1rem 0;
+  }
+
+  .dashboard-card__content {
     gap: 1rem;
+    padding: 1rem;
   }
 
   .dashboard-kpis {
@@ -196,7 +390,6 @@
 
   .dashboard-list-item,
   .dashboard-activity-item {
-    flex-direction: column;
     gap: 0.65rem;
   }
 }

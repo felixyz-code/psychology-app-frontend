@@ -53,7 +53,10 @@
           <p>Agenda registrada para este paciente.</p>
         </div>
 
-        <button mat-button type="button" (click)="openCreateAppointmentDialog()">Nueva cita</button>
+        <button mat-button class="app-action-button" type="button" (click)="openCreateAppointmentDialog()">
+          <mat-icon>event_available</mat-icon>
+          <span>Nueva cita</span>
+        </button>
       </div>
 
       @if (isAppointmentsLoading()) {
@@ -123,7 +126,10 @@
         </div>
 
         @if (caseFile()) {
-          <button mat-button type="button" (click)="openUploadDocumentDialog()">Subir documento</button>
+          <button mat-button class="app-action-button" type="button" (click)="openUploadDocumentDialog()">
+            <mat-icon>upload_file</mat-icon>
+            <span>Subir documento</span>
+          </button>
         }
       </div>
 
@@ -174,9 +180,15 @@
         </div>
 
         @if (caseFile()) {
-          <button mat-button type="button" (click)="openEditCaseFileDialog()">Editar expediente</button>
+          <button mat-button class="app-action-button" type="button" (click)="openEditCaseFileDialog()">
+            <mat-icon>folder_open</mat-icon>
+            <span>Editar expediente</span>
+          </button>
         } @else {
-          <button mat-button type="button" (click)="openCreateCaseFileDialog()">Crear expediente</button>
+          <button mat-button class="app-action-button" type="button" (click)="openCreateCaseFileDialog()">
+            <mat-icon>create_new_folder</mat-icon>
+            <span>Crear expediente</span>
+          </button>
         }
       </div>
 
@@ -226,7 +238,10 @@
       </div>
 
       @if (caseFile()) {
-        <button mat-button type="button" (click)="openCreateSessionNoteDialog()">Nueva nota</button>
+        <button mat-button class="app-action-button" type="button" (click)="openCreateSessionNoteDialog()">
+          <mat-icon>note_add</mat-icon>
+          <span>Nueva nota</span>
+        </button>
       }
     </div>
 

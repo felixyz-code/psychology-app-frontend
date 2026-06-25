@@ -9,12 +9,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { AppointmentDeleteDialogComponent } from '../components/appointment-delete-dialog.component';
 import { AppointmentFormDialogComponent } from '../components/appointment-form-dialog.component';
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 import { AppointmentsService } from '../services/appointments.service';
+import { sortAppointmentsByScheduledAt } from '../utils/appointment-datetime';
 
 @Component({
   selector: 'app-appointments-list-page',
@@ -26,6 +28,7 @@ import { AppointmentsService } from '../services/appointments.service';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTableModule,
+    PageHeaderComponent,
   ],
   templateUrl: './appointments-list.page.html',
   styleUrl: './appointments-list.page.scss',
@@ -57,7 +60,7 @@ export class AppointmentsListPage {
       patients: this.patientsService.getPatients().pipe(catchError(() => of([] as Patient[]))),
     }).subscribe({
       next: ({ appointments, patients }) => {
-        this.appointments.set(appointments);
+        this.appointments.set(sortAppointmentsByScheduledAt(appointments));
         this.patientNames.set(this.buildPatientNames(patients));
         this.isLoading.set(false);
       },

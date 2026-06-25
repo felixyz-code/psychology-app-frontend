@@ -1,29 +1,8 @@
-﻿.case-file-dialog {
-  display: grid;
+.case-file-dialog {
   gap: 1.5rem;
-  padding: 0.5rem;
 }
 
-.case-file-dialog__header h2,
-.case-file-dialog__header p {
-  margin: 0;
-}
-
-.case-file-dialog__header h2 {
-  color: #1f2937;
-  font-size: 1.5rem;
-}
-
-.case-file-dialog__header p {
-  margin-top: 0.35rem;
-  color: #6c757d;
-}
-
-.case-file-dialog__form {
-  display: grid;
-  gap: 1rem;
-}
-
+.case-file-dialog__form,
 .case-file-dialog__grid {
   display: grid;
   gap: 1rem;
@@ -32,34 +11,3 @@
 .case-file-dialog__full {
   grid-column: 1 / -1;
 }
-
-.case-file-dialog__error {
-  margin: 0;
-  color: #9f2d2d;
-  font-weight: 600;
-}
-
-.case-file-dialog__saving {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #495057;
-}
-
-.case-file-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-@media (max-width: 720px) {
-  .case-file-dialog {
-    padding: 0;
-  }
-
-  .case-file-dialog__actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-}
-

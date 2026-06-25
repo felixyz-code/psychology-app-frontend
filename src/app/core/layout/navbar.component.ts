@@ -2,7 +2,7 @@ import { Component, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
@@ -42,7 +42,8 @@ export class NavbarComponent {
     this.router.navigate(['/login']);
   }
 
-  toggleTheme(enabled?: boolean): void {
+  toggleTheme(enabled?: boolean, menuTrigger?: MatMenuTrigger): void {
     this.themeService.toggleDarkTheme(enabled ?? !this.isDarkTheme());
+    menuTrigger?.closeMenu();
   }
 }

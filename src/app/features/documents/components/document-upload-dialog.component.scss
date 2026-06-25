@@ -1,23 +1,5 @@
-﻿.document-upload-dialog {
-  display: grid;
+.document-upload-dialog {
   gap: 1.25rem;
-  padding: 0.5rem;
-}
-
-.document-upload-dialog__header h2,
-.document-upload-dialog__header p,
-.document-upload-dialog__field p {
-  margin: 0;
-}
-
-.document-upload-dialog__header h2 {
-  color: #1f2937;
-  font-size: 1.5rem;
-}
-
-.document-upload-dialog__header p {
-  margin-top: 0.35rem;
-  color: #6c757d;
 }
 
 .document-upload-dialog__field {
@@ -25,8 +7,12 @@
   gap: 0.5rem;
 }
 
+.document-upload-dialog__field p {
+  margin: 0;
+}
+
 .document-upload-dialog__field label {
-  color: #6c757d;
+  color: var(--app-color-muted);
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -35,36 +21,9 @@
 
 .document-upload-dialog__field input {
   width: 100%;
-  color: #374151;
+  color: var(--app-color-heading);
 }
 
 .document-upload-dialog__selected {
-  color: #374151;
+  color: var(--app-color-heading);
 }
-
-.document-upload-dialog__error {
-  margin: 0;
-  color: #9f2d2d;
-  font-weight: 600;
-}
-
-.document-upload-dialog__saving {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #495057;
-}
-
-.document-upload-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-@media (max-width: 720px) {
-  .document-upload-dialog__actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-}
-

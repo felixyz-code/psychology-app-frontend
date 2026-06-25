@@ -1,10 +1,10 @@
 <section class="patients-list-page">
   <mat-card class="patients-card">
     <div class="patients-card__header">
-      <div>
-        <h1>Pacientes</h1>
-        <p>Gestión de pacientes registrados.</p>
-      </div>
+      <app-page-header
+        heading="Pacientes"
+        subtitle="Gestión de pacientes registrados."
+      />
 
       <button mat-flat-button type="button" (click)="openCreatePatientDialog()">
         <mat-icon>person_add</mat-icon>

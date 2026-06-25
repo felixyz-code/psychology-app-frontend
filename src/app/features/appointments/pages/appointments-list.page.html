@@ -1,12 +1,12 @@
 <section class="appointments-list-page">
   <mat-card class="appointments-card">
     <div class="appointments-card__header">
-      <div>
-        <h1>Citas</h1>
-        <p>Agenda global registrada en el sistema.</p>
-      </div>
+      <app-page-header
+        heading="Citas"
+        subtitle="Agenda global registrada en el sistema."
+      />
 
-      <button mat-stroked-button type="button" [disabled]="isLoading()" (click)="loadAppointments()">
+      <button mat-stroked-button class="app-action-button" type="button" [disabled]="isLoading()" (click)="loadAppointments()">
         <mat-icon>refresh</mat-icon>
         <span>Actualizar</span>
       </button>

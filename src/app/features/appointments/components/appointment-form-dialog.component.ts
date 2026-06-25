@@ -10,6 +10,10 @@ import { finalize } from 'rxjs';
 
 import { AuthStore } from '../../../core/auth/auth.store';
 import {
+  localDateTimeValueToIso,
+  toDateTimeLocalValue,
+} from '../utils/appointment-datetime';
+import {
   Appointment,
   AppointmentStatus,
   CreateAppointmentRequest,
@@ -60,7 +64,7 @@ export class AppointmentFormDialogComponent {
   constructor() {
     if (this.mode === 'edit' && this.data.appointment) {
       this.appointmentForm.patchValue({
-        scheduledAt: this.toDateTimeLocalValue(this.data.appointment.scheduledAt),
+        scheduledAt: toDateTimeLocalValue(this.data.appointment.scheduledAt),
         durationMinutes: this.data.appointment.durationMinutes,
         status: this.data.appointment.status,
         notes: this.data.appointment.notes ?? '',
@@ -92,7 +96,7 @@ export class AppointmentFormDialogComponent {
     const basePayload: UpdateAppointmentRequest = {
       patientId: this.data.patientId,
       psychologistId,
-      scheduledAt: new Date(rawValue.scheduledAt).toISOString(),
+      scheduledAt: localDateTimeValueToIso(rawValue.scheduledAt),
       durationMinutes: rawValue.durationMinutes,
       status: rawValue.status,
       notes: this.normalizeOptional(rawValue.notes),
@@ -186,18 +190,6 @@ export class AppointmentFormDialogComponent {
   }
 
   private getCurrentDateTimeLocal(): string {
-    const now = new Date();
-    const offset = now.getTimezoneOffset();
-    const localDate = new Date(now.getTime() - offset * 60_000);
-
-    return localDate.toISOString().slice(0, 16);
-  }
-
-  private toDateTimeLocalValue(value: string): string {
-    const date = new Date(value);
-    const offset = date.getTimezoneOffset();
-    const localDate = new Date(date.getTime() - offset * 60_000);
-
-    return localDate.toISOString().slice(0, 16);
+    return toDateTimeLocalValue(new Date());
   }
 }

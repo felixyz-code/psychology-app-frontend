@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { PatientDeleteDialogComponent } from '../components/patient-delete-dialog.component';
 import { PatientDetailDialogComponent } from '../components/patient-detail-dialog.component';
 import { PatientFormDialogComponent } from '../components/patient-form-dialog.component';
@@ -21,6 +22,7 @@ import { PatientsService } from '../services/patients.service';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTableModule,
+    PageHeaderComponent,
   ],
   templateUrl: './patients-list.page.html',
   styleUrl: './patients-list.page.scss',

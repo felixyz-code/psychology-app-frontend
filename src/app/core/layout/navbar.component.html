@@ -18,6 +18,7 @@
 
   @if (authStore.user(); as user) {
     <button
+      #userMenuTrigger="matMenuTrigger"
       class="user-menu-trigger"
       type="button"
       [matMenuTriggerFor]="userMenu"
@@ -49,7 +50,7 @@
         <mat-slide-toggle
           class="navbar-user-menu__theme-toggle"
           [checked]="isDarkTheme()"
-          (change)="toggleTheme($event.checked)"
+          (change)="toggleTheme($event.checked, userMenuTrigger)"
           aria-label="Cambiar tema"
         />
       </div>

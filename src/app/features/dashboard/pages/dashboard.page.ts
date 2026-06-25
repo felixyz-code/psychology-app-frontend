@@ -1,11 +1,21 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { catchError, forkJoin, of } from 'rxjs';
 
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { AppointmentFormDialogComponent } from '../../appointments/components/appointment-form-dialog.component';
 import { Appointment, AppointmentStatus } from '../../appointments/models/appointment.models';
+import {
+  getLocalDayDifference,
+  isAfterTodayLocal,
+  isSameLocalDay,
+  parseAppointmentDate,
+  sortAppointmentsByScheduledAt,
+} from '../../appointments/utils/appointment-datetime';
 import { AppointmentsService } from '../../appointments/services/appointments.service';
 import { CaseFile } from '../../case-files/models/case-file.models';
 import { CaseFilesService } from '../../case-files/services/case-files.service';
@@ -15,7 +25,6 @@ import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { SessionNote } from '../../session-notes/models/session-note.models';
 import { SessionNotesService } from '../../session-notes/services/session-notes.service';
-import { PageHeaderComponent, PageHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.component';
 
 interface DashboardData {
   patients: Patient[];
@@ -37,15 +46,23 @@ interface ActivityItem {
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [DatePipe, MatCardModule, MatIconModule, MatProgressSpinnerModule, PageHeaderComponent],
+  imports: [DatePipe, MatCardModule, MatIconModule, PageHeaderComponent],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.scss',
 })
 export class DashboardPage {
+  readonly DASHBOARD_TODAY_LIMIT = 3;
+  readonly DASHBOARD_UPCOMING_LIMIT = 3;
+  readonly DASHBOARD_ACTIVITY_LIMIT = 5;
+  readonly dashboardSkeletonKpis = Array.from({ length: 5 });
+  readonly dashboardSkeletonList = Array.from({ length: 3 });
+
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly caseFilesService = inject(CaseFilesService);
   private readonly documentsService = inject(DocumentsService);
+  private readonly dialog = inject(MatDialog);
   private readonly patientsService = inject(PatientsService);
+  private readonly router = inject(Router);
   private readonly sessionNotesService = inject(SessionNotesService);
 
   readonly isLoading = signal(true);
@@ -58,15 +75,6 @@ export class DashboardPage {
     caseFiles: [],
     failedSources: [],
   });
-  readonly breadcrumbs: PageHeaderBreadcrumb[] = [
-    {
-      label: 'Inicio',
-      url: '/dashboard',
-    },
-    {
-      label: 'Dashboard',
-    },
-  ];
 
   readonly patientNames = computed(() => {
     return this.data().patients.reduce<Record<string, string>>((names, patient) => {
@@ -83,25 +91,29 @@ export class DashboardPage {
   });
 
   readonly todayAppointments = computed(() => {
-    return this.sortAppointments(
-      this.data().appointments.filter((appointment) => this.isToday(appointment.scheduledAt))
+    return sortAppointmentsByScheduledAt(
+      this.data().appointments.filter((appointment) => isSameLocalDay(appointment.scheduledAt, new Date()))
     );
   });
 
-  readonly upcomingAppointments = computed(() => {
-    const now = new Date().getTime();
+  readonly todayAppointmentsPreview = computed(() => this.todayAppointments().slice(0, this.DASHBOARD_TODAY_LIMIT));
+  readonly hasMoreTodayAppointments = computed(() => this.todayAppointments().length > this.DASHBOARD_TODAY_LIMIT);
 
-    return this.sortAppointments(
+  readonly upcomingAppointments = computed(() => {
+    return sortAppointmentsByScheduledAt(
       this.data().appointments.filter((appointment) => {
-        return appointment.status !== 'CANCELLED' && new Date(appointment.scheduledAt).getTime() >= now;
+        return appointment.status !== 'CANCELLED' && isAfterTodayLocal(appointment.scheduledAt, new Date());
       })
-    ).slice(0, 6);
+    );
   });
+
+  readonly upcomingAppointmentsPreview = computed(() => this.upcomingAppointments().slice(0, this.DASHBOARD_UPCOMING_LIMIT));
+  readonly hasMoreUpcomingAppointments = computed(() => this.upcomingAppointments().length > this.DASHBOARD_UPCOMING_LIMIT);
 
   readonly recentNotes = computed(() => {
     return [...this.data().sessionNotes]
       .sort((a, b) => new Date(b.sessionDate).getTime() - new Date(a.sessionDate).getTime())
-      .slice(0, 5);
+      .slice(0, this.DASHBOARD_ACTIVITY_LIMIT);
   });
 
   readonly recentActivity = computed<ActivityItem[]>(() => {
@@ -123,7 +135,7 @@ export class DashboardPage {
 
     return [...noteActivity, ...documentActivity]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 6);
+      .slice(0, this.DASHBOARD_ACTIVITY_LIMIT);
   });
 
   readonly failedSourcesMessage = computed(() => {
@@ -138,9 +150,20 @@ export class DashboardPage {
   }
 
   loadDashboard(): void {
+    this.fetchDashboardData(true);
+  }
+
+  refreshDashboardData(): void {
+    this.fetchDashboardData(false);
+  }
+
+  private fetchDashboardData(showLoadingState: boolean): void {
     const failedSources: string[] = [];
 
-    this.isLoading.set(true);
+    if (showLoadingState) {
+      this.isLoading.set(true);
+    }
+
     this.errorMessage.set('');
 
     forkJoin({
@@ -155,11 +178,15 @@ export class DashboardPage {
           ...result,
           failedSources,
         });
-        this.isLoading.set(false);
+        if (showLoadingState) {
+          this.isLoading.set(false);
+        }
       },
       error: () => {
         this.errorMessage.set('No fue posible cargar el dashboard.');
-        this.isLoading.set(false);
+        if (showLoadingState) {
+          this.isLoading.set(false);
+        }
       },
     });
   }
@@ -199,8 +226,51 @@ export class DashboardPage {
     return type === 'note' ? 'notes' : 'description';
   }
 
+  getAppointmentScheduleLabel(appointment: Appointment): string {
+    const date = parseAppointmentDate(appointment.scheduledAt);
+    const duration = `${appointment.durationMinutes} min`;
+
+    return `${this.formatAppointmentDate(date)} · ${duration}`;
+  }
+
+  getAppointmentDescription(appointment: Appointment): string {
+    return appointment.notes?.trim() || 'Sin motivo clínico registrado.';
+  }
+
   getActivityTypeLabel(type: ActivityItem['type']): string {
     return type === 'note' ? 'Nota de sesión' : 'Documento';
+  }
+
+  navigateToAppointments(): void {
+    void this.router.navigate(['/appointments']);
+  }
+
+  openAppointmentDetails(appointment: Appointment): void {
+    const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: {
+        mode: 'edit',
+        patientId: appointment.patientId,
+        appointment,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((updated) => {
+      if (updated) {
+        this.refreshDashboardData();
+      }
+    });
+  }
+
+  handleAppointmentCardKeydown(event: KeyboardEvent, appointment: Appointment): void {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    this.openAppointmentDetails(appointment);
   }
 
   private fallback<T>(value: T, failedSources: string[], source: string) {
@@ -208,20 +278,53 @@ export class DashboardPage {
     return of(value);
   }
 
-  private sortAppointments(appointments: Appointment[]): Appointment[] {
-    return [...appointments].sort(
-      (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
-    );
+  private formatAppointmentDate(date: Date): string {
+    const dayDifference = getLocalDayDifference(date, new Date());
+    const time = this.formatTime(date);
+
+    if (dayDifference === 0) {
+      return `Hoy ${time}`;
+    }
+
+    if (dayDifference === 1) {
+      return `Mañana ${time}`;
+    }
+
+    if (dayDifference === 2) {
+      return `Pasado mañana ${time}`;
+    }
+
+    if (dayDifference > 2 && dayDifference <= 7) {
+      return `${this.formatWeekday(date)} ${time}`;
+    }
+
+    return this.formatDateTime(date);
   }
 
-  private isToday(value: string): boolean {
-    const date = new Date(value);
-    const today = new Date();
+  private formatTime(date: Date): string {
+    return new Intl.DateTimeFormat('es-MX', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(date);
+  }
 
-    return (
-      date.getFullYear() === today.getFullYear() &&
-      date.getMonth() === today.getMonth() &&
-      date.getDate() === today.getDate()
-    );
+  private formatDateTime(date: Date): string {
+    return new Intl.DateTimeFormat('es-MX', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(date);
+  }
+
+  private formatWeekday(date: Date): string {
+    const weekday = new Intl.DateTimeFormat('es-MX', {
+      weekday: 'long',
+    }).format(date);
+
+    return weekday.charAt(0).toUpperCase() + weekday.slice(1);
   }
 }

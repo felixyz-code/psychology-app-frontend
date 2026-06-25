@@ -1,22 +1,5 @@
-﻿.appointment-dialog {
-  display: grid;
+.appointment-dialog {
   gap: 1.25rem;
-  padding: 0.5rem;
-}
-
-.appointment-dialog__header h2,
-.appointment-dialog__header p {
-  margin: 0;
-}
-
-.appointment-dialog__header h2 {
-  color: #1f2937;
-  font-size: 1.5rem;
-}
-
-.appointment-dialog__header p {
-  margin-top: 0.35rem;
-  color: #6c757d;
 }
 
 .appointment-dialog__form,
@@ -33,25 +16,6 @@
   grid-column: 1 / -1;
 }
 
-.appointment-dialog__error {
-  margin: 0;
-  color: #9f2d2d;
-  font-weight: 600;
-}
-
-.appointment-dialog__saving {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #495057;
-}
-
-.appointment-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
 @media (max-width: 720px) {
   .appointment-dialog__grid {
     grid-template-columns: 1fr;
@@ -62,4 +26,3 @@
     align-items: stretch;
   }
 }
-
