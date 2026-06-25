@@ -1,0 +1,31 @@
+<div class="data-table-toolbar">
+  <mat-form-field class="data-table-toolbar__search" appearance="outline">
+    <mat-label>Buscar</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input
+      matInput
+      type="search"
+      [value]="searchTerm()"
+      [placeholder]="searchPlaceholder()"
+      (input)="searchTermChange.emit($any($event.target).value)"
+    />
+  </mat-form-field>
+
+  <div class="data-table-toolbar__meta">
+    @if (resultsLabel()) {
+      <span class="data-table-toolbar__counter" aria-live="polite">
+        {{ resultsLabel() }}
+      </span>
+    }
+
+    @if (hasActiveFilters()) {
+      <button mat-stroked-button type="button" (click)="clearFilters.emit()">
+        <mat-icon>filter_alt_off</mat-icon>
+        <span>Limpiar</span>
+      </button>
+    }
+
+    <ng-content />
+  </div>
+</div>
+

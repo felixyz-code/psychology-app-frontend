@@ -43,16 +43,9 @@
   font-size: 1.1rem;
 }
 
-.patients-state--empty {
-  margin: 1rem 1.5rem 1.5rem;
-  border: 1px dashed var(--app-color-border);
-  border-radius: 8px;
-  background: var(--app-color-empty-bg);
-}
-
 .patients-table-wrapper {
   overflow-x: auto;
-  padding: 1rem 1.5rem 1.5rem;
+  padding: 1rem 1.5rem 0;
 }
 
 .patients-table {
@@ -88,6 +81,13 @@
   color: var(--app-color-danger-text);
 }
 
+.patients-paginator {
+  border-top: 1px solid var(--app-color-border);
+  border-radius: 0 0 8px 8px;
+  background: transparent;
+  color: var(--app-color-heading);
+}
+
 @media (max-width: 720px) {
   .patients-card__header {
     flex-direction: column;
@@ -99,6 +99,6 @@
   }
 
   .patients-table-wrapper {
-    padding: 1rem;
+    padding: 1rem 1rem 0;
   }
 }
