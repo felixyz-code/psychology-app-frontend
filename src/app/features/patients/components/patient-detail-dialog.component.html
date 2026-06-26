@@ -233,17 +233,17 @@
     <section class="patient-detail-dialog__section">
       <div class="patient-detail-dialog__section-header">
         <div>
-        <h3>Notas de sesión</h3>
-        <p>Seguimiento clínico registrado para este expediente.</p>
-      </div>
+          <h3>Notas de sesión</h3>
+          <p>Seguimiento clínico registrado para este expediente.</p>
+        </div>
 
-      @if (caseFile()) {
-        <button mat-button class="app-action-button" type="button" (click)="openCreateSessionNoteDialog()">
-          <mat-icon>note_add</mat-icon>
-          <span>Nueva nota</span>
-        </button>
-      }
-    </div>
+        @if (caseFile()) {
+          <button mat-button class="app-action-button" type="button" (click)="openCreateSessionNoteDialog()">
+            <mat-icon>note_add</mat-icon>
+            <span>Nueva nota</span>
+          </button>
+        }
+      </div>
 
       @if (!caseFile()) {
         <p class="patient-detail-dialog__message">
@@ -259,30 +259,59 @@
           {{ sessionNotesErrorMessage() }}
         </p>
       } @else if (sessionNotes().length) {
-        <div class="patient-detail-dialog__notes-list">
-          @for (note of sessionNotes(); track note.id) {
-            <article class="patient-detail-dialog__note-card">
-              <div class="patient-detail-dialog__note-header">
-                <div>
-                  <h4>{{ note.title || 'Sesión sin título' }}</h4>
-                  <p>{{ note.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+        <app-data-table-toolbar
+          [searchTerm]="sessionNotesTableState().searchTerm"
+          searchPlaceholder="Buscar por titulo, contenido o fecha"
+          [resultsLabel]="sessionNotesCounterLabel()"
+          [hasActiveFilters]="sessionNotesTableResult().hasActiveFilters"
+          (searchTermChange)="updateSessionNotesSearchTerm($event)"
+          (clearFilters)="clearSessionNotesFilters()"
+        />
+
+        @if (sessionNotesTableResult().totalFilteredItems) {
+          <div class="patient-detail-dialog__notes-list">
+            @for (note of sessionNotesTableResult().pagedItems; track note.id) {
+              <article class="patient-detail-dialog__note-card">
+                <div class="patient-detail-dialog__note-header">
+                  <div>
+                    <h4>{{ getSessionNoteTitle(note) }}</h4>
+                    <p>{{ note.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+                  </div>
+
+                  <div class="patient-detail-dialog__note-actions">
+                    <button mat-button type="button" (click)="openSessionNoteDetailDialog(note)">Ver</button>
+                    <button mat-button type="button" (click)="openEditSessionNoteDialog(note)">Editar</button>
+                    <button mat-button type="button" (click)="openDeleteSessionNoteDialog(note)">Eliminar</button>
+                  </div>
                 </div>
 
-                <div class="patient-detail-dialog__note-actions">
-                  <button mat-button type="button" (click)="openSessionNoteDetailDialog(note)">Ver</button>
-                  <button mat-button type="button" (click)="openEditSessionNoteDialog(note)">Editar</button>
-                  <button mat-button type="button" (click)="openDeleteSessionNoteDialog(note)">Eliminar</button>
-                </div>
-              </div>
+                <p class="patient-detail-dialog__note-content">{{ note.content }}</p>
+              </article>
+            }
+          </div>
 
-              <p class="patient-detail-dialog__note-content">{{ note.content }}</p>
-            </article>
-          }
-        </div>
+          <mat-paginator
+            class="patient-detail-dialog__paginator"
+            [length]="sessionNotesTableResult().totalFilteredItems"
+            [pageIndex]="safeSessionNotesPageIndex()"
+            [pageSize]="sessionNotesTableState().pageSize"
+            [pageSizeOptions]="sessionNotesPageSizeOptions"
+            showFirstLastButtons
+            (page)="handleSessionNotesPageChange($event)"
+          />
+        } @else {
+          <app-data-table-empty-state
+            icon="search_off"
+            title="No se encontraron notas"
+            message="Intenta ajustar tu busqueda"
+          />
+        }
       } @else {
-        <p class="patient-detail-dialog__message patient-detail-dialog__empty">
-          No hay notas de sesión registradas para este expediente.
-        </p>
+        <app-data-table-empty-state
+          icon="note_alt"
+          title="No hay notas de sesion registradas"
+          message="Cuando agregues notas de sesion, apareceran en este listado."
+        />
       }
     </section>
   </div>

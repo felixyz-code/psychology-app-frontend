@@ -184,6 +184,10 @@
   overflow: hidden;
 }
 
+.patient-detail-dialog__paginator {
+  background: transparent;
+}
+
 @media (max-width: 720px) {
   .patient-detail-dialog__content {
     padding: 0;

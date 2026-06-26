@@ -28,6 +28,12 @@ Current priorities:
 * Reusable components
 * Documentation standardization
 
+Latest completed sprint:
+
+```text
+Sprint 7.4 - Session Notes Data Table Pattern
+```
+
 ---
 
 # Completed Milestones
@@ -74,6 +80,7 @@ Current priorities:
 * Edit
 * Detail
 * Delete
+* Sprint 7.4 completed - Data table pattern applied to the Session Notes block inside patient detail dialog
 
 ### Documents
 
@@ -86,10 +93,12 @@ Current priorities:
 ### Appointments
 
 * List by patient
+* Global appointments list
 * Create
 * Edit
 * Cancel
 * Delete
+* Sprint 7.3 completed - Data table pattern applied to global appointments list
 
 ---
 
@@ -139,7 +148,6 @@ Current development efforts include:
 
 Potential additions after MVP completion:
 
-* Global appointments page
 * Dashboard improvements
 * Search and filtering
 * Reports
