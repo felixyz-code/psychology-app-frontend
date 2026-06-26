@@ -7,7 +7,7 @@
       type="search"
       [value]="searchTerm()"
       [placeholder]="searchPlaceholder()"
-      (input)="searchTermChange.emit($any($event.target).value)"
+      (input)="handleSearchInput($event)"
     />
   </mat-form-field>
 
@@ -28,4 +28,3 @@
     <ng-content />
   </div>
 </div>
-

@@ -19,5 +19,14 @@ export class DataTableToolbarComponent {
 
   readonly searchTermChange = output<string>();
   readonly clearFilters = output<void>();
-}
 
+  handleSearchInput(event: Event): void {
+    const target = event.target;
+
+    if (!(target instanceof HTMLInputElement)) {
+      return;
+    }
+
+    this.searchTermChange.emit(target.value);
+  }
+}
