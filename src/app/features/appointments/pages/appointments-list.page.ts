@@ -3,9 +3,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
@@ -14,7 +17,6 @@ import { MatTableModule } from '@angular/material/table';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
-import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
 import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems, sortItems } from '../../../shared/utils/data-table';
@@ -24,9 +26,12 @@ import { AppointmentDeleteDialogComponent } from '../components/appointment-dele
 import { AppointmentFormDialogComponent } from '../components/appointment-form-dialog.component';
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 import { AppointmentsService } from '../services/appointments.service';
+import { endOfLocalMonth, isWithinLocalDateRange, startOfLocalMonth, startOfLocalDay } from '../utils/appointment-datetime';
 
 interface AppointmentsTableState extends DataTableState {
   statusFilter: 'ALL' | AppointmentStatus;
+  startDate: Date | null;
+  endDate: Date | null;
 }
 
 @Component({
@@ -36,15 +41,17 @@ interface AppointmentsTableState extends DataTableState {
     DatePipe,
     MatButtonModule,
     MatCardModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
+    MatInputModule,
+    MatNativeDateModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatSelectModule,
     MatSortModule,
     MatTableModule,
     DataTableEmptyStateComponent,
-    DataTableToolbarComponent,
     PageHeaderComponent,
   ],
   templateUrl: './appointments-list.page.html',
@@ -54,6 +61,7 @@ export class AppointmentsListPage {
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly patientsService = inject(PatientsService);
   private readonly dialog = inject(MatDialog);
+  private readonly defaultDateRange = this.createCurrentMonthDateRange();
 
   readonly displayedColumns = ['patient', 'scheduledAt', 'durationMinutes', 'status', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
@@ -70,18 +78,27 @@ export class AppointmentsListPage {
     pageIndex: 0,
     pageSize: 10,
     statusFilter: 'ALL',
+    startDate: this.defaultDateRange.startDate,
+    endDate: this.defaultDateRange.endDate,
     sortBy: undefined,
     sortDirection: '',
+  });
+  readonly filteredAppointments = computed(() => {
+    const state = this.tableState();
+
+    return this.appointments()
+      .filter((appointment) =>
+        matchesSearchTerm(appointment, state.searchTerm, (item) => this.getAppointmentSearchValues(item))
+      )
+      .filter((appointment) =>
+        state.statusFilter === 'ALL' ? true : appointment.status === state.statusFilter
+      )
+      .filter((appointment) => isWithinLocalDateRange(appointment.scheduledAt, state.startDate, state.endDate));
   });
   readonly appointmentsTableResult = computed<DataTableResult<Appointment>>(() => {
     const state = this.tableState();
     const items = this.appointments();
-    const searchedItems = items.filter((appointment) =>
-      matchesSearchTerm(appointment, state.searchTerm, (item) => this.getAppointmentSearchValues(item))
-    );
-    const filteredItems = searchedItems.filter((appointment) =>
-      state.statusFilter === 'ALL' ? true : appointment.status === state.statusFilter
-    );
+    const filteredItems = this.filteredAppointments();
     const sortedItems = sortItems(filteredItems, {
       sortBy: state.sortBy,
       sortDirection: state.sortDirection,
@@ -97,20 +114,17 @@ export class AppointmentsListPage {
       }),
       totalItems: items.length,
       totalFilteredItems: filteredItems.length,
-      hasActiveFilters: Boolean(state.searchTerm.trim()) || state.statusFilter !== 'ALL',
+      hasActiveFilters: Boolean(state.searchTerm.trim()) || state.statusFilter !== 'ALL' || this.hasDateRangeFilter(state),
     };
+  });
+  readonly showDateRangeReset = computed(() => !this.isCurrentMonthDateRange(this.tableState()));
+  readonly showToolbarReset = computed(() => {
+    const state = this.tableState();
+    return Boolean(state.searchTerm.trim()) || state.statusFilter !== 'ALL' || this.showDateRangeReset();
   });
   readonly safePageIndex = computed(() => {
     const state = this.tableState();
-    const totalFilteredItems = this.appointments()
-      .filter((appointment) =>
-        matchesSearchTerm(appointment, state.searchTerm, (item) => this.getAppointmentSearchValues(item))
-      )
-      .filter((appointment) =>
-        state.statusFilter === 'ALL' ? true : appointment.status === state.statusFilter
-      ).length;
-
-    return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
+    return getSafePageIndex(this.filteredAppointments().length, state.pageIndex, state.pageSize);
   });
   readonly appointmentsCounterLabel = computed(() => {
     const result = this.appointmentsTableResult();
@@ -285,8 +299,48 @@ export class AppointmentsListPage {
       ...state,
       searchTerm: '',
       statusFilter: 'ALL',
+      startDate: this.defaultDateRange.startDate,
+      endDate: this.defaultDateRange.endDate,
       pageIndex: 0,
     }));
+  }
+
+  resetDateRangeToCurrentMonth(): void {
+    this.tableState.update((state) => ({
+      ...state,
+      ...this.createCurrentMonthDateRange(),
+      pageIndex: 0,
+    }));
+  }
+
+  updateStartDate(event: MatDatepickerInputEvent<Date>): void {
+    this.tableState.update((state) => {
+      const startDate = event.value ? startOfLocalDay(event.value) : null;
+      const endDate =
+        startDate && state.endDate && startDate.getTime() > state.endDate.getTime() ? startDate : state.endDate;
+
+      return {
+        ...state,
+        startDate,
+        endDate,
+        pageIndex: 0,
+      };
+    });
+  }
+
+  updateEndDate(event: MatDatepickerInputEvent<Date>): void {
+    this.tableState.update((state) => {
+      const endDate = event.value ? startOfLocalDay(event.value) : null;
+      const startDate =
+        endDate && state.startDate && endDate.getTime() < state.startDate.getTime() ? endDate : state.startDate;
+
+      return {
+        ...state,
+        startDate,
+        endDate,
+        pageIndex: 0,
+      };
+    });
   }
 
   handleAppointmentsPageChange(event: PageEvent): void {
@@ -366,5 +420,39 @@ export class AppointmentsListPage {
 
   private getAppointmentTimestamp(value: string): number {
     return new Date(value).getTime();
+  }
+
+  private createCurrentMonthDateRange(): Pick<AppointmentsTableState, 'startDate' | 'endDate'> {
+    const today = new Date();
+
+    return {
+      startDate: startOfLocalMonth(today),
+      endDate: endOfLocalMonth(today),
+    };
+  }
+
+  private hasDateRangeFilter(state: AppointmentsTableState): boolean {
+    return state.startDate !== null || state.endDate !== null;
+  }
+
+  private isCurrentMonthDateRange(state: AppointmentsTableState): boolean {
+    const currentMonth = this.createCurrentMonthDateRange();
+
+    return (
+      this.areDatesEqual(state.startDate, currentMonth.startDate) &&
+      this.areDatesEqual(state.endDate, currentMonth.endDate)
+    );
+  }
+
+  private areDatesEqual(first: Date | null, second: Date | null): boolean {
+    if (first === second) {
+      return true;
+    }
+
+    if (!first || !second) {
+      return false;
+    }
+
+    return first.getTime() === second.getTime();
   }
 }

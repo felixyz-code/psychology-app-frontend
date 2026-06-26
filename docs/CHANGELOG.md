@@ -8,6 +8,22 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 8
 
+## Sprint 8.1.1 - Appointments Date Range Filter
+
+### Added
+
+* Filtro client-side por rango de fechas en Appointments.
+* Rango predeterminado = mes actual.
+
+### Changed
+
+* Integracion del rango de fechas con busqueda, estado, ordenamiento y paginacion.
+* Comparacion cronologica usando `Date` y timestamps.
+* Inclusion correcta del dia final del rango seleccionado.
+* Reorganizacion responsive de la toolbar para convertirla en el patron visual oficial de filtros.
+* Desktop: Buscar, Estado y Rango de fechas en una sola fila.
+* Mobile: un control por fila ocupando todo el ancho disponible.
+
 ## Sprint 8.1 - Table Productivity Enhancements
 
 ### Added

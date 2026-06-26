@@ -235,6 +235,28 @@ The UI follows the same clinical workflow implemented by the backend.
 
 ---
 
+# ADR-012 â€” Responsive Table Toolbar Layout
+
+## Decision
+
+Table toolbars use a shared responsive layout pattern.
+
+Desktop:
+
+- Filters align horizontally in a single row whenever space allows.
+
+Mobile:
+
+- Each control occupies its own row using the full available width.
+
+## Rationale
+
+This rule improves consistency across table experiences and prevents staggered filter layouts.
+
+It also establishes a reusable UX baseline for future views such as Calendar View, Finance and Reports.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

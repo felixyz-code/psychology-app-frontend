@@ -28,14 +28,20 @@
         <p>{{ errorMessage() }}</p>
       </div>
     } @else if (appointments().length) {
-      <app-data-table-toolbar
-        [searchTerm]="tableState().searchTerm"
-        searchPlaceholder="Buscar por paciente, estado o nota"
-        [hasActiveFilters]="appointmentsTableResult().hasActiveFilters"
-        (searchTermChange)="updateSearchTerm($event)"
-        (clearFilters)="clearAppointmentFilters()"
-      >
-        <div class="appointments-toolbar-panel">
+      <div class="appointments-toolbar">
+        <div class="appointments-toolbar__filters">
+          <mat-form-field appearance="outline" class="appointments-search-filter">
+            <mat-label>Buscar</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input
+              matInput
+              type="search"
+              [value]="tableState().searchTerm"
+              placeholder="Buscar por paciente, estado o nota"
+              (input)="updateSearchTerm($any($event.target).value)"
+            />
+          </mat-form-field>
+
           <mat-form-field appearance="outline" class="appointments-status-filter">
             <mat-label>Estado</mat-label>
             <mat-select [value]="tableState().statusFilter" (valueChange)="updateStatusFilter($event)">
@@ -46,11 +52,54 @@
             </mat-select>
           </mat-form-field>
 
+          <mat-form-field appearance="outline" class="appointments-date-range-filter">
+            <mat-label>Rango de fechas</mat-label>
+            <mat-date-range-input [rangePicker]="appointmentsDateRangePicker">
+              <input
+                matStartDate
+                [value]="tableState().startDate"
+                placeholder="Inicio"
+                (dateChange)="updateStartDate($event)"
+              />
+              <input
+                matEndDate
+                [value]="tableState().endDate"
+                placeholder="Fin"
+                (dateChange)="updateEndDate($event)"
+              />
+            </mat-date-range-input>
+            <mat-datepicker-toggle matIconSuffix [for]="appointmentsDateRangePicker" />
+            <mat-date-range-picker #appointmentsDateRangePicker />
+          </mat-form-field>
+        </div>
+
+        <div class="appointments-toolbar__meta">
           <span class="appointments-toolbar-panel__counter" aria-live="polite">
             {{ appointmentsCounterLabel() }}
           </span>
+
+          @if (showDateRangeReset()) {
+            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="resetDateRangeToCurrentMonth()">
+              <mat-icon>today</mat-icon>
+              <span>Mes actual</span>
+            </button>
+          }
+
+          @if (showToolbarReset() && !showDateRangeReset()) {
+            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="clearAppointmentFilters()">
+              <mat-icon>filter_alt_off</mat-icon>
+              <span>Limpiar</span>
+            </button>
+          }
+
+          @if (showToolbarReset() && showDateRangeReset()) {
+            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="clearAppointmentFilters()">
+              <mat-icon>restart_alt</mat-icon>
+              <span>Restablecer</span>
+            </button>
+          }
         </div>
-      </app-data-table-toolbar>
+      </div>
 
       @if (successMessage()) {
         <p class="appointments-message appointments-message--success" role="status">

@@ -18,7 +18,7 @@
       </span>
     }
 
-    @if (hasActiveFilters()) {
+    @if (showClearButton() && hasActiveFilters()) {
       <button mat-stroked-button type="button" (click)="clearFilters.emit()">
         <mat-icon>filter_alt_off</mat-icon>
         <span>Limpiar</span>

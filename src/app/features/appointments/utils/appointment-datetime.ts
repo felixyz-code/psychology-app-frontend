@@ -12,6 +12,28 @@ export function endOfLocalDay(value: string | Date): Date {
   return new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999);
 }
 
+export function startOfLocalMonth(value: string | Date): Date {
+  const date = parseAppointmentDate(value);
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+export function endOfLocalMonth(value: string | Date): Date {
+  const date = parseAppointmentDate(value);
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+}
+
+export function isWithinLocalDateRange(
+  value: string | Date,
+  startDate: Date | null,
+  endDate: Date | null
+): boolean {
+  const appointmentTime = parseAppointmentDate(value).getTime();
+  const rangeStartTime = startDate ? startOfLocalDay(startDate).getTime() : Number.NEGATIVE_INFINITY;
+  const rangeEndTime = endDate ? endOfLocalDay(endDate).getTime() : Number.POSITIVE_INFINITY;
+
+  return appointmentTime >= rangeStartTime && appointmentTime <= rangeEndTime;
+}
+
 export function isSameLocalDay(dateA: string | Date, dateB: string | Date): boolean {
   const first = parseAppointmentDate(dateA);
   const second = parseAppointmentDate(dateB);

@@ -16,6 +16,7 @@ export class DataTableToolbarComponent {
   readonly searchPlaceholder = input('Buscar');
   readonly resultsLabel = input('');
   readonly hasActiveFilters = input(false);
+  readonly showClearButton = input(true);
 
   readonly searchTermChange = output<string>();
   readonly clearFilters = output<void>();
