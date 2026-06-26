@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 8.2 - Calendar View
+Sprint 8.3 - Daily Agenda
 ```
 
 ---
@@ -96,13 +96,21 @@ Sprint 8.2 - Calendar View
 * List by patient
 * Global appointments list
 * Calendar view
+* Daily agenda view
 * Create
 * Edit
 * Cancel
 * Delete
+* Three fully functional views: Table, Calendar and Daily Agenda
+* Search
+* Sorting
+* Filters
+* Date range
 * Sprint 7.3 completed - Data table pattern applied to global appointments list
 * Sprint 8.1.1 completed - Global appointments list now includes client-side date range filtering with current-month default range
 * Sprint 8.2 completed - Global appointments list now includes a monthly calendar view sharing the same client-side state and CRUD flows
+* Sprint 8.3 completed - Global appointments list now includes a daily agenda view sharing the same search, filters, state and CRUD flows
+* The module now provides a stable foundation for future additions such as working hours, availability, drag & drop, reminders and notification integration without requiring major refactors
 
 ### Sprint 7
 
@@ -116,6 +124,7 @@ Sprint 8.2 - Calendar View
 * Sprint 8.1 completed - Table productivity enhancements delivered across Patients and Appointments
 * Sprint 8.1.1 completed - Appointments date range filter and responsive toolbar polish delivered on the global appointments list
 * Sprint 8.2 completed - Calendar View delivered for Appointments with shared state, month navigation and monthly visualization
+* Sprint 8.3 completed - Daily Agenda delivered for Appointments with shared state, daily navigation and polished responsive agenda cards
 
 Next planned sprint:
 

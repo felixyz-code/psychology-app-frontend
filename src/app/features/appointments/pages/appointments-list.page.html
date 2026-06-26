@@ -38,10 +38,14 @@
           >
             <mat-button-toggle value="table">Tabla</mat-button-toggle>
             <mat-button-toggle value="calendar">Calendario</mat-button-toggle>
+            <mat-button-toggle value="agenda">Agenda</mat-button-toggle>
           </mat-button-toggle-group>
         </div>
 
-        <div class="appointments-toolbar__filters">
+        <div
+          class="appointments-toolbar__filters"
+          [class.appointments-toolbar__filters--with-date-range]="viewMode() !== 'agenda'"
+        >
           <mat-form-field appearance="outline" class="appointments-search-filter">
             <mat-label>Buscar</mat-label>
             <mat-icon matPrefix>search</mat-icon>
@@ -64,25 +68,27 @@
             </mat-select>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="appointments-date-range-filter">
-            <mat-label>Rango de fechas</mat-label>
-            <mat-date-range-input [rangePicker]="appointmentsDateRangePicker">
-              <input
-                matStartDate
-                [value]="tableState().startDate"
-                placeholder="Inicio"
-                (dateChange)="updateStartDate($event)"
-              />
-              <input
-                matEndDate
-                [value]="tableState().endDate"
-                placeholder="Fin"
-                (dateChange)="updateEndDate($event)"
-              />
-            </mat-date-range-input>
-            <mat-datepicker-toggle matIconSuffix [for]="appointmentsDateRangePicker" />
-            <mat-date-range-picker #appointmentsDateRangePicker />
-          </mat-form-field>
+          @if (viewMode() !== 'agenda') {
+            <mat-form-field appearance="outline" class="appointments-date-range-filter">
+              <mat-label>Rango de fechas</mat-label>
+              <mat-date-range-input [rangePicker]="appointmentsDateRangePicker">
+                <input
+                  matStartDate
+                  [value]="tableState().startDate"
+                  placeholder="Inicio"
+                  (dateChange)="updateStartDate($event)"
+                />
+                <input
+                  matEndDate
+                  [value]="tableState().endDate"
+                  placeholder="Fin"
+                  (dateChange)="updateEndDate($event)"
+                />
+              </mat-date-range-input>
+              <mat-datepicker-toggle matIconSuffix [for]="appointmentsDateRangePicker" />
+              <mat-date-range-picker #appointmentsDateRangePicker />
+            </mat-form-field>
+          }
         </div>
 
         <div class="appointments-toolbar__meta">
@@ -124,6 +130,22 @@
           (today)="showCurrentCalendarMonth()"
           (daySelected)="openCreateAppointmentDialog($event)"
           (appointmentSelected)="openEditAppointmentDialog($event)"
+        />
+      } @else if (viewMode() === 'agenda') {
+        <app-appointments-daily-agenda
+          [appointments]="appointmentsForSelectedDay()"
+          [selectedDate]="selectedAgendaDate()"
+          [cancellingAppointmentId]="cancellingAppointmentId()"
+          [getPatientName]="patientNameResolver"
+          [getStatusLabel]="appointmentStatusLabelResolver"
+          [getStatusClass]="appointmentStatusClassResolver"
+          (previousDay)="showPreviousAgendaDay()"
+          (nextDay)="showNextAgendaDay()"
+          (today)="showTodayAgenda()"
+          (createAppointment)="openCreateAppointmentDialog(selectedAgendaDate())"
+          (appointmentSelected)="openEditAppointmentDialog($event)"
+          (cancelAppointment)="cancelAppointment($event)"
+          (deleteAppointment)="openDeleteAppointmentDialog($event)"
         />
       } @else if (appointmentsTableResult().totalFilteredItems) {
         @if (viewMode() === 'table') {

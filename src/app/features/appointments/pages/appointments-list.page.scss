@@ -73,7 +73,7 @@
 
 .appointments-toolbar__filters {
   display: grid;
-  grid-template-columns: minmax(240px, 1.45fr) minmax(180px, 0.75fr) minmax(280px, 1fr);
+  grid-template-columns: minmax(240px, 1.45fr) minmax(180px, 0.75fr);
   gap: 0.75rem;
   align-items: start;
 }
@@ -96,6 +96,14 @@
 .appointments-date-range-filter {
   width: 100%;
   min-width: 0;
+}
+
+.appointments-date-range-filter {
+  grid-column: span 1;
+}
+
+.appointments-toolbar__filters--with-date-range {
+  grid-template-columns: minmax(240px, 1.45fr) minmax(180px, 0.75fr) minmax(280px, 1fr);
 }
 
 .appointments-toolbar-panel__reset {

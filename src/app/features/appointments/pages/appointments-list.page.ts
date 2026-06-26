@@ -25,11 +25,13 @@ import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { AppointmentDeleteDialogComponent } from '../components/appointment-delete-dialog.component';
 import { AppointmentsCalendarComponent } from '../components/appointments-calendar.component';
+import { AppointmentsDailyAgendaComponent } from '../components/appointments-daily-agenda.component';
 import { AppointmentFormDialogComponent } from '../components/appointment-form-dialog.component';
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 import { AppointmentsService } from '../services/appointments.service';
 import {
   endOfLocalMonth,
+  isSameLocalDay,
   isWithinLocalDateRange,
   parseAppointmentDate,
   sortAppointmentsByScheduledAt,
@@ -64,6 +66,7 @@ interface AppointmentsTableState extends DataTableState {
     DataTableEmptyStateComponent,
     PageHeaderComponent,
     AppointmentsCalendarComponent,
+    AppointmentsDailyAgendaComponent,
   ],
   templateUrl: './appointments-list.page.html',
   styleUrl: './appointments-list.page.scss',
@@ -77,7 +80,8 @@ export class AppointmentsListPage {
   readonly displayedColumns = ['patient', 'scheduledAt', 'durationMinutes', 'status', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
   readonly appointmentStatuses: AppointmentStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
-  readonly viewMode = signal<'table' | 'calendar'>('table');
+  readonly viewMode = signal<'table' | 'calendar' | 'agenda'>('table');
+  readonly selectedAgendaDate = signal(startOfLocalDay(new Date()));
   readonly patientNameResolver = (patientId: string) => this.getPatientName(patientId);
   readonly appointmentStatusLabelResolver = (status: AppointmentStatus) => this.getAppointmentStatusLabel(status);
   readonly appointmentStatusClassResolver = (status: AppointmentStatus) => this.getAppointmentStatusClass(status);
@@ -98,15 +102,21 @@ export class AppointmentsListPage {
     sortBy: undefined,
     sortDirection: '',
   });
-  readonly filteredAppointments = computed(() => {
+  readonly baseFilteredAppointments = computed(() => {
     const state = this.tableState();
 
     return this.appointments()
       .filter((appointment) =>
         matchesSearchTerm(appointment, state.searchTerm, (item) => this.getAppointmentSearchValues(item))
       )
-      .filter((appointment) => (state.statusFilter === 'ALL' ? true : appointment.status === state.statusFilter))
-      .filter((appointment) => isWithinLocalDateRange(appointment.scheduledAt, state.startDate, state.endDate));
+      .filter((appointment) => (state.statusFilter === 'ALL' ? true : appointment.status === state.statusFilter));
+  });
+  readonly filteredAppointments = computed(() => {
+    const state = this.tableState();
+
+    return this.baseFilteredAppointments().filter((appointment) =>
+      isWithinLocalDateRange(appointment.scheduledAt, state.startDate, state.endDate)
+    );
   });
   readonly tableSortedAppointments = computed(() =>
     sortItems(this.filteredAppointments(), {
@@ -117,6 +127,13 @@ export class AppointmentsListPage {
   );
   readonly calendarAppointments = computed(() =>
     sortAppointmentsByScheduledAt(this.filteredAppointments())
+  );
+  readonly appointmentsForSelectedDay = computed(() =>
+    sortAppointmentsByScheduledAt(
+      this.baseFilteredAppointments().filter((appointment) =>
+        isSameLocalDay(appointment.scheduledAt, this.selectedAgendaDate())
+      )
+    )
   );
   readonly appointmentsTableResult = computed<DataTableResult<Appointment>>(() => {
     const state = this.tableState();
@@ -323,7 +340,7 @@ export class AppointmentsListPage {
     }));
   }
 
-  updateViewMode(viewMode: 'table' | 'calendar'): void {
+  updateViewMode(viewMode: 'table' | 'calendar' | 'agenda'): void {
     this.viewMode.set(viewMode);
   }
 
@@ -388,6 +405,18 @@ export class AppointmentsListPage {
 
   showCurrentCalendarMonth(): void {
     this.setCalendarMonth(new Date());
+  }
+
+  showPreviousAgendaDay(): void {
+    this.shiftAgendaDay(-1);
+  }
+
+  showNextAgendaDay(): void {
+    this.shiftAgendaDay(1);
+  }
+
+  showTodayAgenda(): void {
+    this.selectedAgendaDate.set(startOfLocalDay(new Date()));
   }
 
   handleAppointmentsPageChange(event: PageEvent): void {
@@ -510,5 +539,13 @@ export class AppointmentsListPage {
       endDate: endOfLocalMonth(value),
       pageIndex: 0,
     }));
+  }
+
+  private shiftAgendaDay(days: number): void {
+    this.selectedAgendaDate.update((currentDate) =>
+      startOfLocalDay(
+        new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + days)
+      )
+    );
   }
 }

@@ -8,6 +8,29 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 8
 
+## Sprint 8.3 - Daily Agenda
+
+### Added
+
+* Tercera vista Agenda para el modulo de Citas, complementando Tabla y Calendario.
+* Navegacion diaria mediante controles de dia anterior, siguiente y boton Hoy.
+* Creacion de citas directamente desde la Agenda diaria.
+
+### Changed
+
+* Reutilizado el mismo pipeline de busqueda, filtros y estado utilizado por las demas vistas.
+* Mantenida la sincronizacion automatica entre Agenda, Tabla y Calendario.
+* Redisenado completamente el layout de las tarjetas de Agenda para un mejor aprovechamiento del espacio.
+* Mejorada la jerarquia visual de la informacion.
+* Optimizado el comportamiento responsive para Desktop y Mobile.
+* Mejorada la consistencia visual con el resto del modulo de Appointments.
+
+### Fixed
+
+* Truncadas correctamente las notas largas.
+* Alineados visualmente estado, acciones y datos de la cita.
+* Reducido el espacio desperdiciado dentro de las tarjetas.
+
 ## Sprint 8.2 - Calendar View
 
 ### Added

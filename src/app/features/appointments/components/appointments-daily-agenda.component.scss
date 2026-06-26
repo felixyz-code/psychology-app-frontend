@@ -1,0 +1,236 @@
+.appointments-agenda {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.appointments-agenda__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.appointments-agenda__title-group h2,
+.appointments-agenda__title-group p,
+.appointments-agenda__item h3,
+.appointments-agenda__item span,
+.appointments-agenda__empty h3,
+.appointments-agenda__empty p {
+  margin: 0;
+}
+
+.appointments-agenda__eyebrow {
+  color: var(--app-color-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.appointments-agenda__title-group h2 {
+  color: var(--app-color-heading);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  line-height: 1.15;
+}
+
+.appointments-agenda__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.appointments-agenda__nav {
+  display: inline-flex;
+  border: 1px solid var(--app-color-border);
+  border-radius: 999px;
+}
+
+.appointments-agenda__list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.appointments-agenda__item {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 12px;
+  background: var(--app-color-card-bg);
+  box-shadow: var(--app-shadow-surface);
+}
+
+.appointments-agenda__item--interactive {
+  cursor: pointer;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.appointments-agenda__item--interactive:focus-visible {
+  outline: 2px solid var(--app-color-primary);
+  outline-offset: 2px;
+}
+
+.appointments-agenda__top-row,
+.appointments-agenda__bottom-row {
+  display: grid;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.appointments-agenda__top-row {
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+}
+
+.appointments-agenda__bottom-row {
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+}
+
+.appointments-agenda__time {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--app-color-heading);
+  font-size: 1.02rem;
+  font-weight: 700;
+  width: 4.5rem;
+}
+
+.appointments-agenda__patient,
+.appointments-agenda__status,
+.appointments-agenda__meta {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.appointments-agenda__patient h3 {
+  color: var(--app-color-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointments-agenda__status .app-status-badge {
+  display: inline-flex;
+  align-items: center;
+}
+
+.appointments-agenda__meta {
+  color: var(--app-color-text-secondary);
+  font-size: 0.9rem;
+  gap: 0.45rem;
+  grid-column: 2;
+  min-width: 0;
+}
+
+.appointments-agenda__duration {
+  white-space: nowrap;
+}
+
+.appointments-agenda__separator {
+  flex: 0 0 auto;
+}
+
+.appointments-agenda__note {
+  min-width: 0;
+  color: var(--app-color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointments-agenda__item-actions {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  grid-column: 3;
+  white-space: nowrap;
+}
+
+.appointments-agenda__item-actions button:last-child {
+  color: var(--app-color-danger-text);
+}
+
+.appointments-agenda__empty {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.25rem;
+  border: 1px dashed var(--app-color-border);
+  border-radius: 12px;
+}
+
+@media (max-width: 900px) {
+  .appointments-agenda__header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .appointments-agenda__actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .appointments-agenda {
+    padding: 1rem 1rem 1.25rem;
+  }
+
+  .appointments-agenda__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.6rem;
+  }
+
+  .appointments-agenda__create,
+  .appointments-agenda__today {
+    width: 100%;
+  }
+
+  .appointments-agenda__top-row,
+  .appointments-agenda__bottom-row,
+  .appointments-agenda__meta {
+    gap: 0.5rem;
+  }
+
+  .appointments-agenda__item {
+    gap: 0.6rem;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .appointments-agenda__top-row {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+  }
+
+  .appointments-agenda__status {
+    grid-column: 1 / -1;
+  }
+
+  .appointments-agenda__bottom-row {
+    grid-template-columns: 1fr;
+  }
+
+  .appointments-agenda__item-actions {
+    justify-content: flex-start;
+    grid-column: 1;
+  }
+
+  .appointments-agenda__patient h3 {
+    white-space: nowrap;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .appointments-agenda__item--interactive:hover {
+    transform: translateY(-2px);
+    border-color: var(--app-color-primary-border);
+    box-shadow: 0 12px 22px rgba(15, 23, 42, 0.08);
+  }
+}
