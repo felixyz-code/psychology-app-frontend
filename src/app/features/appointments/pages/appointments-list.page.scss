@@ -10,7 +10,7 @@
 
 .appointments-card__header {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
   padding: 1.5rem 1.5rem 0;
@@ -18,6 +18,11 @@
 
 .appointments-card__header app-page-header {
   min-width: 0;
+}
+
+.appointments-card__create-button {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .appointments-state {
@@ -54,6 +59,25 @@
   background: var(--app-color-success-soft);
   color: var(--app-color-success-text);
   font-weight: 600;
+}
+
+.appointments-status-filter {
+  min-width: 180px;
+}
+
+.appointments-toolbar-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.appointments-toolbar-panel__counter {
+  color: var(--app-color-text-secondary);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .appointments-table-wrapper {
@@ -107,11 +131,21 @@
     align-items: stretch;
   }
 
-  .appointments-card__header button {
+  .appointments-card__create-button {
     align-self: flex-start;
+    margin-left: -0.5rem;
   }
 
   .appointments-table-wrapper {
     padding: 1rem 1rem 0;
+  }
+
+  .appointments-status-filter {
+    width: 100%;
+  }
+
+  .appointments-toolbar-panel {
+    width: 100%;
+    align-items: flex-start;
   }
 }

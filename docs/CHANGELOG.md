@@ -6,6 +6,34 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# Sprint 8
+
+## Sprint 8.1 - Table Productivity Enhancements
+
+### Added
+
+* Ordenamiento client-side por columnas en Patients.
+* Ordenamiento client-side por columnas en Appointments.
+* Filtro client-side por estatus en Appointments.
+* Boton visible de Agregar cita en Appointments.
+* Creacion global de cita con seleccion de paciente.
+
+### Changed
+
+* Sprint 8 inicio con mejoras de productividad sobre el Data Table Pattern reutilizable.
+* Se mantiene el pipeline client-side de busqueda, filtros, ordenamiento y paginacion en Patients y Appointments.
+* Duracion predeterminada de 60 minutos para nuevas citas.
+* Limpieza visual de la toolbar de Appointments.
+* Eliminado el boton visible Actualizar en Appointments, manteniendo el refresco automatico interno.
+* Alineacion responsive del CTA principal en Patients y Appointments.
+
+### Fixed
+
+* Corregido el ordenamiento por fecha y hora en Appointments usando comparacion cronologica real.
+* Validado que la vista global de citas mantiene refresco automatico despues de crear, editar, cancelar o eliminar.
+
+---
+
 # Sprint 7
 
 ## Sprint 7.1 - Data Table Pattern Architecture

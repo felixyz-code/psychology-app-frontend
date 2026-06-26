@@ -20,6 +20,10 @@
   min-width: 0;
 }
 
+.patients-card__create-button {
+  white-space: nowrap;
+}
+
 .patients-state {
   display: grid;
   justify-items: center;
@@ -94,8 +98,9 @@
     align-items: stretch;
   }
 
-  .patients-card__header button {
+  .patients-card__create-button {
     align-self: flex-start;
+    margin-left: -0.5rem;
   }
 
   .patients-table-wrapper {

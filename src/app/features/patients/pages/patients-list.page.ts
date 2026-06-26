@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
@@ -27,6 +28,7 @@ import { PatientsService } from '../services/patients.service';
     MatIconModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatSortModule,
     MatTableModule,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
@@ -159,6 +161,23 @@ export class PatientsListPage {
       pageIndex: event.pageIndex,
       pageSize: event.pageSize,
     }));
+  }
+
+  handlePatientsSortChange({ active, direction }: Sort): void {
+    this.tableState.update((state) => ({
+      ...state,
+      sortBy: direction ? active : undefined,
+      sortDirection: direction,
+      pageIndex: 0,
+    }));
+  }
+
+  getPatientsSortActive(): string {
+    return this.tableState().sortBy ?? '';
+  }
+
+  getPatientsSortDirection(): 'asc' | 'desc' | '' {
+    return this.tableState().sortDirection ?? '';
   }
 
   openCreatePatientDialog(): void {

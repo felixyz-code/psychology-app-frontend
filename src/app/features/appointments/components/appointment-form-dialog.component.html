@@ -1,11 +1,23 @@
 <div class="appointment-dialog">
   <div class="appointment-dialog__header">
     <h2>{{ getTitle() }}</h2>
-    <p>Registra la agenda asociada al paciente actual.</p>
+    <p>Completa los datos de la cita y el paciente asociado.</p>
   </div>
 
   <form class="appointment-dialog__form" [formGroup]="appointmentForm" (ngSubmit)="submit()">
     <div class="appointment-dialog__grid">
+      <mat-form-field appearance="outline" class="appointment-dialog__full">
+        <mat-label>Paciente</mat-label>
+        <mat-select formControlName="patientId" [disabled]="isLoadingPatients()">
+          @for (patient of availablePatients(); track patient.id) {
+            <mat-option [value]="patient.id">{{ getPatientLabel(patient) }}</mat-option>
+          }
+        </mat-select>
+        @if (hasRequiredError('patientId')) {
+          <mat-error>El paciente es obligatorio.</mat-error>
+        }
+      </mat-form-field>
+
       <mat-form-field appearance="outline">
         <mat-label>Fecha y hora</mat-label>
         <input matInput type="datetime-local" formControlName="scheduledAt" />
