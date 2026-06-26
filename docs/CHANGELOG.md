@@ -91,8 +91,22 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
-## Proximos cambios
+## Sprint 7.5 - Documents
 
-Sprint 7.5
+### Added
 
-* Documents
+* Busqueda client-side.
+* Paginacion client-side.
+* Integracion de DataTableToolbar.
+* Integracion de DataTableEmptyState.
+* Contador de resultados.
+
+### Changed
+
+* Documents ahora reutiliza completamente el Data Table Pattern implementado durante Sprint 7.
+
+### Fixed
+
+* Los filtros y paginacion se reinician correctamente al recargar documentos.
+* Se mantiene la funcionalidad existente de Ver, Descargar y Eliminar.
+* Build exitoso sin errores.

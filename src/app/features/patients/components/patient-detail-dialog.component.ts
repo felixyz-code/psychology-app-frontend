@@ -11,7 +11,7 @@ import { finalize } from 'rxjs';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
-import { matchesSearchTerm, paginateItems } from '../../../shared/utils/data-table';
+import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems } from '../../../shared/utils/data-table';
 import { AppointmentDeleteDialogComponent } from '../../appointments/components/appointment-delete-dialog.component';
 import { AppointmentFormDialogComponent } from '../../appointments/components/appointment-form-dialog.component';
 import { Appointment, AppointmentStatus } from '../../appointments/models/appointment.models';
@@ -73,6 +73,51 @@ export class PatientDetailDialogComponent {
   readonly documents = signal<ClinicalDocument[]>([]);
   readonly isDocumentsLoading = signal(false);
   readonly documentsErrorMessage = signal('');
+  readonly documentsPageSizeOptions = [5, 10, 20];
+  readonly documentsTableState = signal<DataTableState>({
+    searchTerm: '',
+    pageIndex: 0,
+    pageSize: 5,
+    sortBy: undefined,
+    sortDirection: '',
+  });
+  readonly documentsTableResult = computed<DataTableResult<ClinicalDocument>>(() => {
+    const state = this.documentsTableState();
+    const items = this.documents();
+    const filteredItems = items.filter((document) =>
+      matchesSearchTerm(document, state.searchTerm, (item) => this.getDocumentSearchValues(item))
+    );
+
+    return {
+      items,
+      filteredItems,
+      pagedItems: paginateItems(filteredItems, {
+        pageIndex: this.safeDocumentsPageIndex(),
+        pageSize: state.pageSize,
+      }),
+      totalItems: items.length,
+      totalFilteredItems: filteredItems.length,
+      hasActiveFilters: Boolean(state.searchTerm.trim()),
+    };
+  });
+  readonly safeDocumentsPageIndex = computed(() => {
+    const state = this.documentsTableState();
+    const totalFilteredItems = this.documents().filter((document) =>
+      matchesSearchTerm(document, state.searchTerm, (item) => this.getDocumentSearchValues(item))
+    ).length;
+
+    return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
+  });
+  readonly documentsCounterLabel = computed(() => {
+    const result = this.documentsTableResult();
+
+    return formatFilteredResultsLabel(
+      result.totalFilteredItems,
+      result.totalItems,
+      (count) => this.formatDocumentCount(count),
+      result.hasActiveFilters
+    );
+  });
   readonly sessionNotes = signal<SessionNote[]>([]);
   readonly isSessionNotesLoading = signal(false);
   readonly sessionNotesErrorMessage = signal('');
@@ -108,18 +153,18 @@ export class PatientDetailDialogComponent {
     const totalFilteredItems = this.sessionNotes().filter((sessionNote) =>
       matchesSearchTerm(sessionNote, state.searchTerm, (item) => this.getSessionNoteSearchValues(item))
     ).length;
-    const lastPageIndex = Math.max(Math.ceil(totalFilteredItems / state.pageSize) - 1, 0);
 
-    return Math.min(state.pageIndex, lastPageIndex);
+    return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
   });
   readonly sessionNotesCounterLabel = computed(() => {
     const result = this.sessionNotesTableResult();
 
-    if (result.hasActiveFilters) {
-      return `${result.totalFilteredItems} de ${this.formatSessionNoteCount(result.totalItems)}`;
-    }
-
-    return this.formatSessionNoteCount(result.totalItems);
+    return formatFilteredResultsLabel(
+      result.totalFilteredItems,
+      result.totalItems,
+      (count) => this.formatSessionNoteCount(count),
+      result.hasActiveFilters
+    );
   });
 
   constructor() {
@@ -508,6 +553,30 @@ export class PatientDetailDialogComponent {
     return sessionNote.title?.trim() || 'Sesion sin titulo';
   }
 
+  updateDocumentsSearchTerm(searchTerm: string): void {
+    this.documentsTableState.update((state) => ({
+      ...state,
+      searchTerm,
+      pageIndex: 0,
+    }));
+  }
+
+  clearDocumentsFilters(): void {
+    this.documentsTableState.update((state) => ({
+      ...state,
+      searchTerm: '',
+      pageIndex: 0,
+    }));
+  }
+
+  handleDocumentsPageChange(event: PageEvent): void {
+    this.documentsTableState.update((state) => ({
+      ...state,
+      pageIndex: event.pageIndex,
+      pageSize: event.pageSize,
+    }));
+  }
+
   updateSessionNotesSearchTerm(searchTerm: string): void {
     this.sessionNotesTableState.update((state) => ({
       ...state,
@@ -625,6 +694,7 @@ export class PatientDetailDialogComponent {
     this.documents.set([]);
     this.isDocumentsLoading.set(false);
     this.documentsErrorMessage.set('');
+    this.clearDocumentsFilters();
   }
 
   private getDocumentActionErrorMessage(error: HttpErrorResponse, action: 'ver' | 'descargar'): string {
@@ -658,6 +728,20 @@ export class PatientDetailDialogComponent {
       sessionNote.content,
       sessionNote.sessionDate,
     ];
+  }
+
+  private getDocumentSearchValues(document: ClinicalDocument): Array<string | null | undefined> {
+    return [
+      document.fileName,
+      document.mimeType,
+      this.getDocumentType(document),
+      document.uploadedAt,
+      document.updatedAt,
+    ];
+  }
+
+  private formatDocumentCount(count: number): string {
+    return count === 1 ? '1 documento' : `${count} documentos`;
   }
 
   private formatSessionNoteCount(count: number): string {

@@ -147,28 +147,57 @@
           {{ documentsErrorMessage() }}
         </p>
       } @else if (documents().length) {
-        <div class="patient-detail-dialog__documents-list">
-          @for (document of documents(); track document.id) {
-            <article class="patient-detail-dialog__document-card">
-              <div class="patient-detail-dialog__document-header">
-                <div>
-                  <h4>{{ document.fileName }}</h4>
-                  <p>{{ getDocumentType(document) }} - {{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
-                </div>
+        <app-data-table-toolbar
+          [searchTerm]="documentsTableState().searchTerm"
+          searchPlaceholder="Buscar por nombre, tipo o fecha"
+          [resultsLabel]="documentsCounterLabel()"
+          [hasActiveFilters]="documentsTableResult().hasActiveFilters"
+          (searchTermChange)="updateDocumentsSearchTerm($event)"
+          (clearFilters)="clearDocumentsFilters()"
+        />
 
-                <div class="patient-detail-dialog__document-actions">
-                  <button mat-button type="button" (click)="viewDocument(document)">Ver</button>
-                  <button mat-button type="button" (click)="downloadDocument(document)">Descargar</button>
-                  <button mat-button type="button" (click)="openDeleteDocumentDialog(document)">Eliminar</button>
+        @if (documentsTableResult().totalFilteredItems) {
+          <div class="patient-detail-dialog__documents-list">
+            @for (document of documentsTableResult().pagedItems; track document.id) {
+              <article class="patient-detail-dialog__document-card">
+                <div class="patient-detail-dialog__document-header">
+                  <div>
+                    <h4>{{ document.fileName }}</h4>
+                    <p>{{ getDocumentType(document) }} - {{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+                  </div>
+
+                  <div class="patient-detail-dialog__document-actions">
+                    <button mat-button type="button" (click)="viewDocument(document)">Ver</button>
+                    <button mat-button type="button" (click)="downloadDocument(document)">Descargar</button>
+                    <button mat-button type="button" (click)="openDeleteDocumentDialog(document)">Eliminar</button>
+                  </div>
                 </div>
-              </div>
-            </article>
-          }
-        </div>
+              </article>
+            }
+          </div>
+
+          <mat-paginator
+            class="patient-detail-dialog__paginator"
+            [length]="documentsTableResult().totalFilteredItems"
+            [pageIndex]="safeDocumentsPageIndex()"
+            [pageSize]="documentsTableState().pageSize"
+            [pageSizeOptions]="documentsPageSizeOptions"
+            showFirstLastButtons
+            (page)="handleDocumentsPageChange($event)"
+          />
+        } @else {
+          <app-data-table-empty-state
+            icon="search_off"
+            title="No se encontraron documentos"
+            message="Intenta ajustar tu busqueda"
+          />
+        }
       } @else {
-        <p class="patient-detail-dialog__message patient-detail-dialog__empty">
-          No hay documentos cargados en este expediente.
-        </p>
+        <app-data-table-empty-state
+          icon="folder_off"
+          title="No hay documentos cargados"
+          message="Cuando subas documentos, apareceran en este listado."
+        />
       }
     </section>
 

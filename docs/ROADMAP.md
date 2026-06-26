@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 7.4 - Session Notes Data Table Pattern
+Sprint 7.5 - Documents Data Table Pattern
 ```
 
 ---
@@ -89,6 +89,7 @@ Sprint 7.4 - Session Notes Data Table Pattern
 * Preview
 * Download
 * Delete
+* Sprint 7.5 completed - Data table pattern applied to the Documents block inside patient detail dialog
 
 ### Appointments
 
@@ -99,6 +100,10 @@ Sprint 7.4 - Session Notes Data Table Pattern
 * Cancel
 * Delete
 * Sprint 7.3 completed - Data table pattern applied to global appointments list
+
+### Sprint 7
+
+* Sprint 7 completed - Reusable Data Table Pattern applied across Patients, Appointments, Session Notes and Documents
 
 ---
 

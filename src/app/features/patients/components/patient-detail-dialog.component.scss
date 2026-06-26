@@ -17,10 +17,9 @@
   min-height: 0;
 }
 
-.patient-detail-dialog__header h2,
-.patient-detail-dialog__header p,
+.patient-detail-dialog__header :is(h2, p),
 .patient-detail-dialog__grid p,
-.patient-detail-dialog__section h3,
+.patient-detail-dialog__section :is(h3),
 .patient-detail-dialog__section-header p {
   margin: 0;
 }
@@ -136,12 +135,9 @@
   gap: 1rem;
 }
 
-.patient-detail-dialog__note-header h4,
-.patient-detail-dialog__note-header p,
-.patient-detail-dialog__appointment-header h4,
-.patient-detail-dialog__appointment-header p,
-.patient-detail-dialog__document-header h4,
-.patient-detail-dialog__document-header p,
+.patient-detail-dialog__note-header :is(h4, p),
+.patient-detail-dialog__appointment-header :is(h4, p),
+.patient-detail-dialog__document-header :is(h4, p),
 .patient-detail-dialog__appointment-notes,
 .patient-detail-dialog__note-content {
   margin: 0;
@@ -185,7 +181,9 @@
 }
 
 .patient-detail-dialog__paginator {
+  border-top: 1px solid var(--app-color-border);
   background: transparent;
+  color: var(--app-color-heading);
 }
 
 @media (max-width: 720px) {

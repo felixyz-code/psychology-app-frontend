@@ -14,7 +14,7 @@ import { DataTableEmptyStateComponent } from '../../../shared/components/data-ta
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
-import { matchesSearchTerm, paginateItems } from '../../../shared/utils/data-table';
+import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems } from '../../../shared/utils/data-table';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { AppointmentDeleteDialogComponent } from '../components/appointment-delete-dialog.component';
@@ -85,18 +85,18 @@ export class AppointmentsListPage {
     const totalFilteredItems = this.appointments().filter((appointment) =>
       matchesSearchTerm(appointment, state.searchTerm, (item) => this.getAppointmentSearchValues(item))
     ).length;
-    const lastPageIndex = Math.max(Math.ceil(totalFilteredItems / state.pageSize) - 1, 0);
 
-    return Math.min(state.pageIndex, lastPageIndex);
+    return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
   });
   readonly appointmentsCounterLabel = computed(() => {
     const result = this.appointmentsTableResult();
 
-    if (result.hasActiveFilters) {
-      return `${result.totalFilteredItems} de ${this.formatAppointmentCount(result.totalItems)}`;
-    }
-
-    return this.formatAppointmentCount(result.totalItems);
+    return formatFilteredResultsLabel(
+      result.totalFilteredItems,
+      result.totalItems,
+      (count) => this.formatAppointmentCount(count),
+      result.hasActiveFilters
+    );
   });
 
   constructor() {

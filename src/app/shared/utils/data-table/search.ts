@@ -22,3 +22,17 @@ export function matchesSearchTerm<T>(
   );
 }
 
+export function formatFilteredResultsLabel(
+  totalFilteredItems: number,
+  totalItems: number,
+  formatTotalLabel: (count: number) => string,
+  hasActiveFilters: boolean
+): string {
+  const totalLabel = formatTotalLabel(totalItems);
+
+  if (!hasActiveFilters) {
+    return totalLabel;
+  }
+
+  return `${totalFilteredItems} de ${totalLabel}`;
+}
