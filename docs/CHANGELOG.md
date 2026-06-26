@@ -8,6 +8,26 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 8
 
+## Sprint 8.2 - Calendar View
+
+### Added
+
+* Vista mensual de calendario en Appointments.
+* Alternancia entre vista Tabla y vista Calendario usando el mismo estado client-side.
+* Navegacion entre meses.
+* Boton Hoy para regresar al mes actual.
+* Resaltado visual del dia actual.
+* Visualizacion de citas por dia.
+* Estados visuales por cita reutilizando el Design System actual.
+* Creacion de cita desde dia disponible con fecha precargada.
+* Edicion de cita desde tarjeta del calendario.
+
+### Changed
+
+* La vista global de Appointments ahora mantiene tabla y calendario sobre la misma fuente de datos, filtros y logica existente.
+* El calendario permanece visible incluso en meses sin citas, manteniendo la navegacion mensual disponible.
+* Eliminada la duplicidad visual entre Hoy y Restablecer al regresar al mes actual en Calendar View.
+
 ## Sprint 8.1.1 - Appointments Date Range Filter
 
 ### Added

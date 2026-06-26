@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 8.1.1 - Appointments Date Range Filter
+Sprint 8.2 - Calendar View
 ```
 
 ---
@@ -95,12 +95,14 @@ Sprint 8.1.1 - Appointments Date Range Filter
 
 * List by patient
 * Global appointments list
+* Calendar view
 * Create
 * Edit
 * Cancel
 * Delete
 * Sprint 7.3 completed - Data table pattern applied to global appointments list
 * Sprint 8.1.1 completed - Global appointments list now includes client-side date range filtering with current-month default range
+* Sprint 8.2 completed - Global appointments list now includes a monthly calendar view sharing the same client-side state and CRUD flows
 
 ### Sprint 7
 
@@ -113,11 +115,12 @@ Sprint 8.1.1 - Appointments Date Range Filter
 * Sprint 8 started - Productivity improvements on the reusable Data Table Pattern
 * Sprint 8.1 completed - Table productivity enhancements delivered across Patients and Appointments
 * Sprint 8.1.1 completed - Appointments date range filter and responsive toolbar polish delivered on the global appointments list
+* Sprint 8.2 completed - Calendar View delivered for Appointments with shared state, month navigation and monthly visualization
 
 Next planned sprint:
 
 ```text
-Sprint 8.2 - Calendar View
+Sprint pending
 ```
 
 ---

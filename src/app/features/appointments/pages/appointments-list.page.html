@@ -5,17 +5,6 @@
         heading="Citas"
         subtitle="Agenda global registrada en el sistema."
       />
-
-      <button
-        mat-flat-button
-        type="button"
-        class="appointments-card__create-button"
-        [disabled]="isLoading()"
-        (click)="openCreateAppointmentDialog()"
-      >
-        <mat-icon>event_available</mat-icon>
-        <span>Agregar cita</span>
-      </button>
     </div>
 
     @if (isLoading()) {
@@ -29,6 +18,29 @@
       </div>
     } @else if (appointments().length) {
       <div class="appointments-toolbar">
+        <div class="appointments-toolbar__actions">
+          <button
+            mat-flat-button
+            type="button"
+            class="appointments-card__create-button"
+            [disabled]="isLoading()"
+            (click)="openCreateAppointmentDialog()"
+          >
+            <mat-icon>event_available</mat-icon>
+            <span>Agregar cita</span>
+          </button>
+
+          <mat-button-toggle-group
+            class="appointments-view-toggle"
+            [value]="viewMode()"
+            aria-label="Selector de vista de citas"
+            (valueChange)="updateViewMode($event)"
+          >
+            <mat-button-toggle value="table">Tabla</mat-button-toggle>
+            <mat-button-toggle value="calendar">Calendario</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+
         <div class="appointments-toolbar__filters">
           <mat-form-field appearance="outline" class="appointments-search-filter">
             <mat-label>Buscar</mat-label>
@@ -78,24 +90,17 @@
             {{ appointmentsCounterLabel() }}
           </span>
 
-          @if (showDateRangeReset()) {
+          @if (viewMode() === 'table' && showDateRangeReset() && !hasNonDateFilters()) {
             <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="resetDateRangeToCurrentMonth()">
               <mat-icon>today</mat-icon>
               <span>Mes actual</span>
             </button>
           }
 
-          @if (showToolbarReset() && !showDateRangeReset()) {
+          @if (hasNonDateFilters()) {
             <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="clearAppointmentFilters()">
               <mat-icon>filter_alt_off</mat-icon>
               <span>Limpiar</span>
-            </button>
-          }
-
-          @if (showToolbarReset() && showDateRangeReset()) {
-            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="clearAppointmentFilters()">
-              <mat-icon>restart_alt</mat-icon>
-              <span>Restablecer</span>
             </button>
           }
         </div>
@@ -107,86 +112,101 @@
         </p>
       }
 
-      @if (appointmentsTableResult().totalFilteredItems) {
-        <div class="appointments-table-wrapper">
-          <table
-            mat-table
-            matSort
-            [matSortActive]="getAppointmentsSortActive()"
-            [matSortDirection]="getAppointmentsSortDirection()"
-            [dataSource]="appointmentsTableResult().pagedItems"
-            class="appointments-table"
-            (matSortChange)="handleAppointmentsSortChange($event)"
-          >
-            <ng-container matColumnDef="patient">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="patient">Paciente</th>
-              <td mat-cell *matCellDef="let appointment">
-                {{ getPatientName(appointment.patientId) }}
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="scheduledAt">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="scheduledAt">Fecha y hora</th>
-              <td mat-cell *matCellDef="let appointment">
-                {{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="durationMinutes">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="durationMinutes">Duración</th>
-              <td mat-cell *matCellDef="let appointment">
-                {{ appointment.durationMinutes }} min
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="status">Estado</th>
-              <td mat-cell *matCellDef="let appointment">
-                <span class="app-status-badge {{ getAppointmentStatusClass(appointment.status) }}">
-                  {{ getAppointmentStatusLabel(appointment.status) }}
-                </span>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Acciones</th>
-              <td mat-cell *matCellDef="let appointment">
-                <div class="appointments-actions" aria-label="Acciones disponibles">
-                  <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openEditAppointmentDialog(appointment)" aria-label="Editar cita">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-
-                  @if (appointment.status !== 'CANCELLED') {
-                    <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="cancelAppointment(appointment)" aria-label="Cancelar cita">
-                      @if (cancellingAppointmentId() === appointment.id) {
-                        <mat-spinner diameter="20" />
-                      } @else {
-                        <mat-icon>event_busy</mat-icon>
-                      }
-                    </button>
-                  }
-
-                  <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openDeleteAppointmentDialog(appointment)" aria-label="Eliminar cita">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-          </table>
-        </div>
-
-        <mat-paginator
-          class="appointments-paginator"
-          [length]="appointmentsTableResult().totalFilteredItems"
-          [pageIndex]="safePageIndex()"
-          [pageSize]="tableState().pageSize"
-          [pageSizeOptions]="pageSizeOptions"
-          showFirstLastButtons
-          (page)="handleAppointmentsPageChange($event)"
+      @if (viewMode() === 'calendar') {
+        <app-appointments-calendar
+          [appointments]="calendarAppointments()"
+          [visibleMonth]="visibleCalendarMonth()"
+          [getPatientName]="patientNameResolver"
+          [getStatusLabel]="appointmentStatusLabelResolver"
+          [getStatusClass]="appointmentStatusClassResolver"
+          (previousMonth)="showPreviousCalendarMonth()"
+          (nextMonth)="showNextCalendarMonth()"
+          (today)="showCurrentCalendarMonth()"
+          (daySelected)="openCreateAppointmentDialog($event)"
+          (appointmentSelected)="openEditAppointmentDialog($event)"
         />
+      } @else if (appointmentsTableResult().totalFilteredItems) {
+        @if (viewMode() === 'table') {
+          <div class="appointments-table-wrapper">
+            <table
+              mat-table
+              matSort
+              [matSortActive]="getAppointmentsSortActive()"
+              [matSortDirection]="getAppointmentsSortDirection()"
+              [dataSource]="appointmentsTableResult().pagedItems"
+              class="appointments-table"
+              (matSortChange)="handleAppointmentsSortChange($event)"
+            >
+              <ng-container matColumnDef="patient">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="patient">Paciente</th>
+                <td mat-cell *matCellDef="let appointment">
+                  {{ getPatientName(appointment.patientId) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="scheduledAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="scheduledAt">Fecha y hora</th>
+                <td mat-cell *matCellDef="let appointment">
+                  {{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="durationMinutes">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="durationMinutes">Duración</th>
+                <td mat-cell *matCellDef="let appointment">
+                  {{ appointment.durationMinutes }} min
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="status">Estado</th>
+                <td mat-cell *matCellDef="let appointment">
+                  <span class="app-status-badge {{ getAppointmentStatusClass(appointment.status) }}">
+                    {{ getAppointmentStatusLabel(appointment.status) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let appointment">
+                  <div class="appointments-actions" aria-label="Acciones disponibles">
+                    <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openEditAppointmentDialog(appointment)" aria-label="Editar cita">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+
+                    @if (appointment.status !== 'CANCELLED') {
+                      <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="cancelAppointment(appointment)" aria-label="Cancelar cita">
+                        @if (cancellingAppointmentId() === appointment.id) {
+                          <mat-spinner diameter="20" />
+                        } @else {
+                          <mat-icon>event_busy</mat-icon>
+                        }
+                      </button>
+                    }
+
+                    <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openDeleteAppointmentDialog(appointment)" aria-label="Eliminar cita">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </div>
+
+          <mat-paginator
+            class="appointments-paginator"
+            [length]="appointmentsTableResult().totalFilteredItems"
+            [pageIndex]="safePageIndex()"
+            [pageSize]="tableState().pageSize"
+            [pageSizeOptions]="pageSizeOptions"
+            showFirstLastButtons
+            (page)="handleAppointmentsPageChange($event)"
+          />
+        }
       } @else {
         <app-data-table-empty-state
           icon="search_off"

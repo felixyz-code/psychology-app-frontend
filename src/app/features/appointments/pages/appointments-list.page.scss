@@ -9,10 +9,6 @@
 }
 
 .appointments-card__header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem;
   padding: 1.5rem 1.5rem 0;
 }
 
@@ -67,11 +63,24 @@
   padding: 1rem 1.5rem 0;
 }
 
+.appointments-toolbar__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+}
+
 .appointments-toolbar__filters {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(180px, 0.75fr) minmax(280px, 1fr);
+  grid-template-columns: minmax(240px, 1.45fr) minmax(180px, 0.75fr) minmax(280px, 1fr);
   gap: 0.75rem;
   align-items: start;
+}
+
+.appointments-view-toggle {
+  align-self: start;
+  flex-shrink: 0;
 }
 
 .appointments-toolbar__meta {
@@ -83,14 +92,7 @@
 }
 
 .appointments-search-filter,
-.appointments-status-filter {
-  width: 100%;
-}
-
-.appointments-status-filter {
-  min-width: 0;
-}
-
+.appointments-status-filter,
 .appointments-date-range-filter {
   width: 100%;
   min-width: 0;
@@ -105,7 +107,7 @@
   font-size: 0.92rem;
   font-weight: 600;
   line-height: 1.2;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .appointments-table-wrapper {
@@ -153,15 +155,27 @@
   color: var(--app-color-heading);
 }
 
-@media (max-width: 720px) {
-  .appointments-card__header {
-    flex-direction: column;
+@media (max-width: 1120px) {
+  .appointments-toolbar__actions {
     align-items: stretch;
   }
 
+  .appointments-toolbar__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .appointments-date-range-filter {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .appointments-card__header {
+    padding: 1.25rem 1rem 0;
+  }
+
   .appointments-card__create-button {
-    align-self: flex-start;
-    margin-left: -0.5rem;
+    width: 100%;
   }
 
   .appointments-table-wrapper {
@@ -176,19 +190,22 @@
     grid-template-columns: 1fr;
   }
 
-  .appointments-toolbar__meta {
+  .appointments-toolbar__actions {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .appointments-search-filter,
-  .appointments-status-filter {
+  .appointments-view-toggle {
     width: 100%;
   }
 
-  .appointments-date-range-filter {
-    width: 100%;
-    min-width: 0;
+  .appointments-view-toggle .mat-button-toggle {
+    flex: 1 1 0;
+  }
+
+  .appointments-toolbar__meta {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .appointments-toolbar-panel__counter {

@@ -1,0 +1,77 @@
+<section class="appointments-calendar" aria-label="Vista calendario de citas">
+  <div class="appointments-calendar__header">
+    <div class="appointments-calendar__title-group">
+      <p class="appointments-calendar__eyebrow">Vista mensual</p>
+      <h2>{{ monthLabel() }}</h2>
+    </div>
+
+    <div class="appointments-calendar__actions">
+      <button mat-stroked-button type="button" class="appointments-calendar__today" (click)="openToday()">
+        <mat-icon>today</mat-icon>
+        <span>Hoy</span>
+      </button>
+
+      <div class="appointments-calendar__nav">
+        <button mat-icon-button type="button" aria-label="Mes anterior" (click)="openPreviousMonth()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <button mat-icon-button type="button" aria-label="Mes siguiente" (click)="openNextMonth()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="appointments-calendar__scroll">
+    <div class="appointments-calendar__weekdays" aria-hidden="true">
+      @for (weekDay of weekDays; track weekDay) {
+        <span>{{ weekDay }}</span>
+      }
+    </div>
+
+    <div class="appointments-calendar__grid" role="grid">
+      @for (day of calendarDays(); track trackDay($index, day)) {
+        <button
+          type="button"
+          class="appointments-calendar__day"
+          [class.appointments-calendar__day--outside]="!day.isCurrentMonth"
+          [class.appointments-calendar__day--today]="day.isToday"
+          [attr.aria-label]="getDayAriaLabel(day)"
+          (click)="selectDay(day.date)"
+        >
+          <div class="appointments-calendar__day-header">
+            <span class="appointments-calendar__day-number">{{ day.date.getDate() }}</span>
+            @if (day.appointments.length) {
+              <span class="appointments-calendar__day-count">{{ day.appointments.length }}</span>
+            }
+          </div>
+
+          <div class="appointments-calendar__day-body">
+            @for (appointment of day.appointments; track trackAppointment($index, appointment)) {
+              <div
+                class="appointments-calendar__appointment"
+                [class.appointments-calendar__appointment--outside]="!day.isCurrentMonth"
+                (click)="selectAppointment(appointment, $event)"
+              >
+                <span class="appointments-calendar__appointment-time">
+                  {{ parseAppointmentDate(appointment.scheduledAt) | date: 'HH:mm' }}
+                </span>
+                <span class="appointments-calendar__appointment-patient">
+                  {{ getCompactPatientName(appointment.patientId) }}
+                </span>
+                <span class="app-status-badge" [ngClass]="getStatusClass()(appointment.status)">
+                  {{ getStatusLabel()(appointment.status) }}
+                </span>
+              </div>
+            }
+
+            @if (!day.appointments.length) {
+              <span class="appointments-calendar__empty">Disponible</span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  </div>
+</section>

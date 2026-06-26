@@ -28,6 +28,7 @@ interface AppointmentFormDialogData {
   patientId?: string;
   patients?: Patient[];
   appointment?: Appointment;
+  scheduledAt?: Date;
 }
 
 @Component({
@@ -62,7 +63,7 @@ export class AppointmentFormDialogComponent {
 
   readonly appointmentForm = this.formBuilder.nonNullable.group({
     patientId: [this.data.patientId ?? '', [Validators.required]],
-    scheduledAt: [this.getCurrentDateTimeLocal(), [Validators.required]],
+    scheduledAt: [this.getInitialScheduledAtValue(), [Validators.required]],
     durationMinutes: [60, [Validators.required, Validators.min(1)]],
     status: ['SCHEDULED' as AppointmentStatus, [Validators.required]],
     notes: [''],
@@ -217,5 +218,13 @@ export class AppointmentFormDialogComponent {
 
   private getCurrentDateTimeLocal(): string {
     return toDateTimeLocalValue(new Date());
+  }
+
+  private getInitialScheduledAtValue(): string {
+    if (this.data.scheduledAt) {
+      return toDateTimeLocalValue(this.data.scheduledAt);
+    }
+
+    return this.getCurrentDateTimeLocal();
   }
 }
