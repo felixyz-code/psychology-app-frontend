@@ -1,8 +1,20 @@
 <aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
   <div class="sidebar__section">
-    <p class="sidebar__label">Navegación</p>
+    <div class="sidebar__header">
+      <p class="sidebar__label">Navegaci&oacute;n</p>
 
-    <nav class="sidebar__nav" aria-label="Navegación principal">
+      <button
+        class="sidebar__close-button"
+        mat-icon-button
+        type="button"
+        aria-label="Cerrar men&uacute; de navegaci&oacute;n"
+        (click)="navSelected.emit()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <nav class="sidebar__nav" aria-label="Navegaci&oacute;n principal">
       <a
         routerLink="/dashboard"
         routerLinkActive="sidebar__link--active"
@@ -46,7 +58,7 @@
         <mat-icon>folder_shared</mat-icon>
         <span class="sidebar__content">
           <span class="sidebar__title">Expedientes</span>
-          <span class="sidebar__meta">Próximamente</span>
+          <span class="sidebar__meta">Pr&oacute;ximamente</span>
         </span>
       </div>
 
@@ -54,7 +66,7 @@
         <mat-icon>description</mat-icon>
         <span class="sidebar__content">
           <span class="sidebar__title">Documentos</span>
-          <span class="sidebar__meta">Próximamente</span>
+          <span class="sidebar__meta">Pr&oacute;ximamente</span>
         </span>
       </div>
     </nav>

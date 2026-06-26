@@ -110,3 +110,22 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 * Los filtros y paginacion se reinician correctamente al recargar documentos.
 * Se mantiene la funcionalidad existente de Ver, Descargar y Eliminar.
 * Build exitoso sin errores.
+
+---
+
+## Sprint 7.6 - Hardening & Polish
+
+### Changed
+
+* Se centralizo logica reutilizable del Data Table Pattern para reducir duplicacion.
+* Se mejoro la consistencia entre Patients, Appointments, Session Notes y Documents.
+
+### Fixed
+
+* Sidebar movil ahora funciona como un drawer overlay profesional.
+* El drawer ocupa correctamente toda la altura del viewport.
+* Se bloquea el scroll del documento mientras el drawer permanece abierto.
+* Se restaura la posicion del scroll al cerrar.
+* Se anadio un boton visible de cierre (X) en dispositivos moviles.
+* Se mejoro el espaciado superior del header del drawer movil.
+* Desktop permanece sin cambios.

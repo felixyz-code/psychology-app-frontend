@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 7.5 - Documents Data Table Pattern
+Sprint 7.6 - Hardening & Polish
 ```
 
 ---
@@ -104,6 +104,8 @@ Sprint 7.5 - Documents Data Table Pattern
 ### Sprint 7
 
 * Sprint 7 completed - Reusable Data Table Pattern applied across Patients, Appointments, Session Notes and Documents
+* Sprint 7.6 completed - Hardening & Polish finalized across the shared layout and Data Table Pattern consistency layer
+* Sprint 7.6.2 completed - Mobile sidebar UX polish completed as part of the Layout hardening closure
 
 ---
 
