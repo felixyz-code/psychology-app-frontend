@@ -41,6 +41,10 @@ export class DocumentUploadDialogComponent {
   }
 
   submit(): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     const file = this.selectedFile();
     const validationError = this.validateFile(file);
 

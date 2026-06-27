@@ -1,0 +1,114 @@
+<section class="appointments-agenda" aria-label="Vista de agenda diaria de citas">
+  <div class="appointments-agenda__header">
+    <div class="appointments-agenda__title-group">
+      <p class="appointments-agenda__eyebrow">Agenda del d&iacute;a</p>
+      <h2>{{ selectedDateLabel() }}</h2>
+    </div>
+
+    <div class="appointments-agenda__actions">
+      <button mat-flat-button type="button" class="appointments-agenda__create" (click)="openCreateAppointment()">
+        <mat-icon>event_available</mat-icon>
+        <span>Agregar cita</span>
+      </button>
+
+      <button mat-stroked-button type="button" class="appointments-agenda__today" (click)="openToday()">
+        <mat-icon>today</mat-icon>
+        <span>Hoy</span>
+      </button>
+
+      <div class="appointments-agenda__nav">
+        <button mat-icon-button type="button" aria-label="D&iacute;a anterior" (click)="openPreviousDay()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <button mat-icon-button type="button" aria-label="D&iacute;a siguiente" (click)="openNextDay()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (appointments().length) {
+    <div class="appointments-agenda__list">
+      @for (appointment of appointments(); track trackAppointment($index, appointment)) {
+        <article
+          class="appointments-agenda__item appointments-agenda__item--interactive"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'Abrir cita de ' + getPatientName()(appointment.patientId)"
+          (click)="openAppointment(appointment)"
+          (keydown)="handleAppointmentKeydown($event, appointment)"
+        >
+          <div class="appointments-agenda__top-row">
+            <div class="appointments-agenda__time">
+              <span>{{ parseAppointmentDate(appointment.scheduledAt) | date: 'HH:mm' }}</span>
+            </div>
+
+            <div class="appointments-agenda__patient">
+              <h3>{{ getCompactPatientName(appointment.patientId) }}</h3>
+            </div>
+
+            <div class="appointments-agenda__status">
+              <app-status-badge
+                [label]="getStatusLabel()(appointment.status)"
+                [variant]="getStatusClass()(appointment.status)"
+              />
+            </div>
+          </div>
+
+          <div class="appointments-agenda__bottom-row">
+            <div class="appointments-agenda__meta">
+              <span class="appointments-agenda__duration">{{ appointment.durationMinutes }} min</span>
+
+              @if (appointment.notes) {
+                <span class="appointments-agenda__separator" aria-hidden="true">&bull;</span>
+                <span class="appointments-agenda__note" [title]="appointment.notes">{{ appointment.notes }}</span>
+              }
+            </div>
+
+            <div class="appointments-agenda__item-actions" aria-label="Acciones disponibles">
+              <button mat-icon-button type="button" aria-label="Editar cita" (click)="openAppointment(appointment); $event.stopPropagation()">
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              @if (appointment.status !== 'CANCELLED') {
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Cancelar cita"
+                  [disabled]="cancellingAppointmentId() !== null"
+                  (click)="requestCancelAppointment(appointment, $event)"
+                >
+                  @if (isCancellingAppointment(appointment.id)) {
+                    <mat-spinner diameter="20" />
+                  } @else {
+                    <mat-icon>event_busy</mat-icon>
+                  }
+                </button>
+              }
+
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Eliminar cita"
+                [disabled]="cancellingAppointmentId() !== null"
+                (click)="requestDeleteAppointment(appointment, $event)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="appointments-agenda__empty">
+      <h3>No hay citas para este d&iacute;a</h3>
+      <p>Puedes agregar una nueva cita para esta fecha.</p>
+      <button mat-stroked-button type="button" (click)="openCreateAppointment()">
+        <mat-icon>add</mat-icon>
+        <span>Agregar cita</span>
+      </button>
+    </div>
+  }
+</section>

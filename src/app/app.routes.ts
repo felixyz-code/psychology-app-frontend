@@ -15,14 +15,24 @@ export const routes: Routes = [
       import('./core/layout/main-layout.component').then((m) => m.MainLayoutComponent),
     children: [
       {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/pages/dashboard.page').then((m) => m.DashboardPage),
+      },
+      {
         path: 'patients',
         loadComponent: () =>
           import('./features/patients/pages/patients-list.page').then((m) => m.PatientsListPage),
       },
       {
+        path: 'appointments',
+        loadComponent: () =>
+          import('./features/appointments/pages/appointments-list.page').then((m) => m.AppointmentsListPage),
+      },
+      {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'patients',
+        redirectTo: 'dashboard',
       },
     ],
   },

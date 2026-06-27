@@ -42,6 +42,10 @@ export class LoginPage {
   });
 
   submit(): void {
+    if (this.isLoading()) {
+      return;
+    }
+
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -57,7 +61,7 @@ export class LoginPage {
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: () => {
-          this.router.navigate(['/patients']);
+          this.router.navigate(['/dashboard']);
         },
         error: () => {
           this.errorMessage.set('Correo o contraseña incorrectos.');

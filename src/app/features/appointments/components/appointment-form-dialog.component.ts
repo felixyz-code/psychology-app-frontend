@@ -9,6 +9,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 
 import { AuthStore } from '../../../core/auth/auth.store';
+import { Patient } from '../../patients/models/patient.models';
+import { PatientsService } from '../../patients/services/patients.service';
+import {
+  localDateTimeValueToIso,
+  toDateTimeLocalValue,
+} from '../utils/appointment-datetime';
 import {
   Appointment,
   AppointmentStatus,
@@ -19,8 +25,10 @@ import { AppointmentsService } from '../services/appointments.service';
 
 interface AppointmentFormDialogData {
   mode: 'create' | 'edit';
-  patientId: string;
+  patientId?: string;
+  patients?: Patient[];
   appointment?: Appointment;
+  scheduledAt?: Date;
 }
 
 @Component({
@@ -41,18 +49,22 @@ interface AppointmentFormDialogData {
 export class AppointmentFormDialogComponent {
   private readonly data = inject<AppointmentFormDialogData>(MAT_DIALOG_DATA);
   private readonly appointmentsService = inject(AppointmentsService);
+  private readonly patientsService = inject(PatientsService);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<AppointmentFormDialogComponent, boolean>);
 
   readonly isSaving = signal(false);
+  readonly isLoadingPatients = signal(false);
   readonly errorMessage = signal('');
   readonly mode = this.data.mode;
   readonly statuses: AppointmentStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
+  readonly availablePatients = signal<Patient[]>(this.data.patients ?? []);
 
   readonly appointmentForm = this.formBuilder.nonNullable.group({
-    scheduledAt: [this.getCurrentDateTimeLocal(), [Validators.required]],
-    durationMinutes: [50, [Validators.required, Validators.min(1)]],
+    patientId: [this.data.patientId ?? '', [Validators.required]],
+    scheduledAt: [this.getInitialScheduledAtValue(), [Validators.required]],
+    durationMinutes: [60, [Validators.required, Validators.min(1)]],
     status: ['SCHEDULED' as AppointmentStatus, [Validators.required]],
     notes: [''],
   });
@@ -60,21 +72,31 @@ export class AppointmentFormDialogComponent {
   constructor() {
     if (this.mode === 'edit' && this.data.appointment) {
       this.appointmentForm.patchValue({
-        scheduledAt: this.toDateTimeLocalValue(this.data.appointment.scheduledAt),
+        patientId: this.data.patientId ?? this.data.appointment.patientId,
+        scheduledAt: toDateTimeLocalValue(this.data.appointment.scheduledAt),
         durationMinutes: this.data.appointment.durationMinutes,
         status: this.data.appointment.status,
         notes: this.data.appointment.notes ?? '',
       });
     }
+
+    if (!this.availablePatients().length) {
+      this.loadPatients();
+    }
   }
 
   submit(): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     if (this.appointmentForm.invalid) {
       this.appointmentForm.markAllAsTouched();
       return;
     }
 
     const psychologistId = this.authStore.user()?.id;
+    const patientId = this.appointmentForm.controls.patientId.getRawValue();
 
     if (!psychologistId) {
       this.errorMessage.set('No fue posible identificar al usuario autenticado.');
@@ -86,9 +108,9 @@ export class AppointmentFormDialogComponent {
 
     const rawValue = this.appointmentForm.getRawValue();
     const basePayload: UpdateAppointmentRequest = {
-      patientId: this.data.patientId,
+      patientId,
       psychologistId,
-      scheduledAt: new Date(rawValue.scheduledAt).toISOString(),
+      scheduledAt: localDateTimeValueToIso(rawValue.scheduledAt),
       durationMinutes: rawValue.durationMinutes,
       status: rawValue.status,
       notes: this.normalizeOptional(rawValue.notes),
@@ -102,13 +124,7 @@ export class AppointmentFormDialogComponent {
           next: () => {
             this.dialogRef.close(true);
           },
-          error: (error) => {
-            console.error('PATCH /appointments/:id failed', {
-              status: error?.status,
-              body: error?.error,
-              appointmentId: this.data.appointment?.id,
-              payload: basePayload,
-            });
+          error: () => {
             this.errorMessage.set('No fue posible guardar los cambios.');
           },
         });
@@ -117,10 +133,10 @@ export class AppointmentFormDialogComponent {
     }
 
     const payload: CreateAppointmentRequest = {
-      patientId: this.data.patientId,
+      patientId,
       psychologistId,
       scheduledAt: basePayload.scheduledAt ?? '',
-      durationMinutes: basePayload.durationMinutes ?? 50,
+      durationMinutes: basePayload.durationMinutes ?? 60,
       status: basePayload.status,
       notes: basePayload.notes,
     };
@@ -132,12 +148,7 @@ export class AppointmentFormDialogComponent {
         next: () => {
           this.dialogRef.close(true);
         },
-        error: (error) => {
-          console.error('POST /appointments failed', {
-            status: error?.status,
-            body: error?.error,
-            payload,
-          });
+        error: () => {
           this.errorMessage.set('No fue posible crear la cita.');
         },
       });
@@ -147,7 +158,7 @@ export class AppointmentFormDialogComponent {
     this.dialogRef.close(false);
   }
 
-  hasRequiredError(controlName: 'scheduledAt' | 'durationMinutes' | 'status'): boolean {
+  hasRequiredError(controlName: 'patientId' | 'scheduledAt' | 'durationMinutes' | 'status'): boolean {
     const control = this.appointmentForm.controls[controlName];
     return control.touched && control.hasError('required');
   }
@@ -170,10 +181,14 @@ export class AppointmentFormDialogComponent {
       SCHEDULED: 'Programada',
       COMPLETED: 'Completada',
       CANCELLED: 'Cancelada',
-      NO_SHOW: 'No asistio',
+      NO_SHOW: 'No asistió',
     };
 
     return labels[status];
+  }
+
+  getPatientLabel(patient: Patient): string {
+    return `${patient.firstName} ${patient.lastName}`;
   }
 
   private normalizeOptional(value: string): string | null {
@@ -181,19 +196,35 @@ export class AppointmentFormDialogComponent {
     return normalized ? normalized : null;
   }
 
-  private getCurrentDateTimeLocal(): string {
-    const now = new Date();
-    const offset = now.getTimezoneOffset();
-    const localDate = new Date(now.getTime() - offset * 60_000);
+  private loadPatients(): void {
+    this.isLoadingPatients.set(true);
 
-    return localDate.toISOString().slice(0, 16);
+    this.patientsService
+      .getPatients()
+      .pipe(finalize(() => this.isLoadingPatients.set(false)))
+      .subscribe({
+        next: (patients) => {
+          const sortedPatients = [...patients].sort((first, second) =>
+            this.getPatientLabel(first).localeCompare(this.getPatientLabel(second))
+          );
+
+          this.availablePatients.set(sortedPatients);
+        },
+        error: () => {
+          this.errorMessage.set('No fue posible cargar los pacientes para la cita.');
+        },
+      });
   }
 
-  private toDateTimeLocalValue(value: string): string {
-    const date = new Date(value);
-    const offset = date.getTimezoneOffset();
-    const localDate = new Date(date.getTime() - offset * 60_000);
+  private getCurrentDateTimeLocal(): string {
+    return toDateTimeLocalValue(new Date());
+  }
 
-    return localDate.toISOString().slice(0, 16);
+  private getInitialScheduledAtValue(): string {
+    if (this.data.scheduledAt) {
+      return toDateTimeLocalValue(this.data.scheduledAt);
+    }
+
+    return this.getCurrentDateTimeLocal();
   }
 }

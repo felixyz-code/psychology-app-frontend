@@ -1,0 +1,41 @@
+.data-table-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  margin: 1rem 1.5rem 1.5rem;
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--app-color-border);
+  border-radius: 8px;
+  background: var(--app-color-empty-bg);
+  color: var(--app-color-text-secondary);
+  text-align: center;
+}
+
+.data-table-empty-state mat-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--app-color-primary);
+  font-size: 2.5rem;
+}
+
+.data-table-empty-state h2,
+.data-table-empty-state p {
+  margin: 0;
+}
+
+.data-table-empty-state h2 {
+  color: var(--app-color-heading);
+  font-size: 1.1rem;
+}
+
+.data-table-empty-state p {
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .data-table-empty-state {
+    margin: 1rem;
+    padding: 2.5rem 1rem;
+  }
+}
+

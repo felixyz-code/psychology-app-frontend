@@ -1,0 +1,21 @@
+<header class="page-header">
+  <div>
+    @if (breadcrumbs().length) {
+      <nav class="page-header__breadcrumbs" aria-label="Ruta de navegación">
+        @for (breadcrumb of breadcrumbs(); track breadcrumb.label) {
+          @if (breadcrumb.url) {
+            <a [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
+          } @else {
+            <span aria-current="page">{{ breadcrumb.label }}</span>
+          }
+        }
+      </nav>
+    }
+
+    <h1>{{ heading() }}</h1>
+
+    @if (subtitle()) {
+      <p>{{ subtitle() }}</p>
+    }
+  </div>
+</header>

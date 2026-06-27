@@ -29,6 +29,10 @@ export class PatientDeleteDialogComponent {
   readonly patient = this.data.patient;
 
   confirmDelete(): void {
+    if (this.isDeleting()) {
+      return;
+    }
+
     this.isDeleting.set(true);
     this.errorMessage.set('');
 

@@ -2,28 +2,13 @@
   padding: 0;
 }
 
-.patients-card {
-  border-radius: 1.25rem;
-  box-shadow: 0 1rem 2.5rem rgba(24, 42, 37, 0.08);
-}
-
-.patients-card__header {
+.patients-card__header-actions {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.5rem 1.5rem 0;
 }
 
-.patients-card__header h1 {
-  margin: 0;
-  color: #16332d;
-  font-size: 1.75rem;
-}
-
-.patients-card__header p {
-  margin: 0.35rem 0 0;
-  color: #5a736b;
+.patients-card__create-button {
+  white-space: nowrap;
 }
 
 .patients-state {
@@ -32,11 +17,11 @@
   gap: 1rem;
   padding: 3rem 1.5rem;
   text-align: center;
-  color: #466159;
+  color: var(--app-color-text-secondary);
 }
 
 .patients-state--error {
-  color: #b3261e;
+  color: var(--app-color-danger-text);
 }
 
 .patients-state p {
@@ -45,7 +30,7 @@
 
 .patients-table-wrapper {
   overflow-x: auto;
-  padding: 1rem 1.5rem 1.5rem;
+  padding-top: 1rem;
 }
 
 .patients-table {
@@ -55,7 +40,7 @@
 }
 
 .patients-table .mat-mdc-header-cell {
-  color: #335149;
+  color: var(--app-color-muted);
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -67,23 +52,32 @@
   padding-bottom: 1rem;
 }
 
+.patients-table .mat-mdc-row:hover {
+  background: var(--app-color-table-hover);
+}
+
 .patients-actions {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
 
+.patients-actions button:last-child {
+  color: var(--app-color-danger-text);
+}
+
+.patients-paginator {
+  border-top: 1px solid var(--app-color-border);
+  background: transparent;
+  color: var(--app-color-heading);
+}
+
 @media (max-width: 720px) {
-  .patients-card__header {
-    flex-direction: column;
-    align-items: stretch;
+  .patients-card__create-button {
+    width: 100%;
   }
 
-  .patients-card__header button {
-    align-self: flex-start;
-  }
-
-  .patients-table-wrapper {
-    padding: 1rem;
+  .patients-card__header-actions {
+    width: 100%;
   }
 }

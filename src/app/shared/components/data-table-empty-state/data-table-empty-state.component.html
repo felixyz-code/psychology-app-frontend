@@ -1,0 +1,12 @@
+<div class="data-table-empty-state">
+  @if (icon()) {
+    <mat-icon aria-hidden="true">{{ icon() }}</mat-icon>
+  }
+
+  <h2>{{ title() }}</h2>
+
+  @if (message()) {
+    <p>{{ message() }}</p>
+  }
+</div>
+

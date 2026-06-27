@@ -1,11 +1,23 @@
 <div class="appointment-dialog">
   <div class="appointment-dialog__header">
     <h2>{{ getTitle() }}</h2>
-    <p>Registra la agenda asociada al paciente actual.</p>
+    <p>Completa los datos de la cita y el paciente asociado.</p>
   </div>
 
   <form class="appointment-dialog__form" [formGroup]="appointmentForm" (ngSubmit)="submit()">
     <div class="appointment-dialog__grid">
+      <mat-form-field appearance="outline" class="appointment-dialog__full">
+        <mat-label>Paciente</mat-label>
+        <mat-select formControlName="patientId" [disabled]="isLoadingPatients()">
+          @for (patient of availablePatients(); track patient.id) {
+            <mat-option [value]="patient.id">{{ getPatientLabel(patient) }}</mat-option>
+          }
+        </mat-select>
+        @if (hasRequiredError('patientId')) {
+          <mat-error>El paciente es obligatorio.</mat-error>
+        }
+      </mat-form-field>
+
       <mat-form-field appearance="outline">
         <mat-label>Fecha y hora</mat-label>
         <input matInput type="datetime-local" formControlName="scheduledAt" />
@@ -15,12 +27,12 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Duracion en minutos</mat-label>
+        <mat-label>Duración en minutos</mat-label>
         <input matInput type="number" min="1" formControlName="durationMinutes" />
         @if (hasRequiredError('durationMinutes')) {
-          <mat-error>La duracion es obligatoria.</mat-error>
+          <mat-error>La duración es obligatoria.</mat-error>
         } @else if (hasMinError()) {
-          <mat-error>La duracion debe ser mayor a 0.</mat-error>
+          <mat-error>La duración debe ser mayor a 0.</mat-error>
         }
       </mat-form-field>
 

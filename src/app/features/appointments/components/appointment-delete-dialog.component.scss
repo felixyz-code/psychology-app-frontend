@@ -1,42 +1,5 @@
 .appointment-delete-dialog {
-  display: grid;
   gap: 1rem;
-  padding: 0.5rem;
-}
-
-.appointment-delete-dialog h2,
-.appointment-delete-dialog p {
-  margin: 0;
-}
-
-.appointment-delete-dialog h2 {
-  color: #16332d;
-  font-size: 1.5rem;
-}
-
-.appointment-delete-dialog__summary {
-  display: grid;
-  gap: 0.35rem;
-  padding: 1rem;
-  border: 1px solid #d5e1dc;
-  border-radius: 0.9rem;
-  background: #f8fbfa;
-}
-
-.appointment-delete-dialog__title {
-  color: #16332d;
-  font-weight: 700;
-}
-
-.appointment-delete-dialog__error {
-  color: #9f2d2d;
-  font-weight: 600;
-}
-
-.appointment-delete-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
 }
 
 .appointment-delete-dialog__actions button {

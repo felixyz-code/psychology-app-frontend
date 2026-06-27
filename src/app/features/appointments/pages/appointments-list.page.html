@@ -1,0 +1,241 @@
+<section class="appointments-list-page">
+  <app-section-card title="Citas" subtitle="Agenda global registrada en el sistema.">
+    @if (isLoading()) {
+      <div class="appointments-state">
+        <mat-spinner diameter="40" />
+        <p>Cargando citas...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="appointments-state appointments-state--error">
+        <p>{{ errorMessage() }}</p>
+      </div>
+    } @else if (appointments().length) {
+      <div class="appointments-toolbar">
+        <div class="appointments-toolbar__actions">
+          <button
+            mat-flat-button
+            type="button"
+            class="appointments-card__create-button"
+            [disabled]="isLoading()"
+            (click)="openCreateAppointmentDialog()"
+          >
+            <mat-icon>event_available</mat-icon>
+            <span>Agregar cita</span>
+          </button>
+
+          <mat-button-toggle-group
+            class="appointments-view-toggle"
+            [value]="viewMode()"
+            aria-label="Selector de vista de citas"
+            (valueChange)="updateViewMode($event)"
+          >
+            <mat-button-toggle value="table">Tabla</mat-button-toggle>
+            <mat-button-toggle value="calendar">Calendario</mat-button-toggle>
+            <mat-button-toggle value="agenda">Agenda</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+
+        <div
+          class="appointments-toolbar__filters"
+          [class.appointments-toolbar__filters--with-date-range]="viewMode() !== 'agenda'"
+        >
+          <mat-form-field appearance="outline" class="appointments-search-filter">
+            <mat-label>Buscar</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input
+              matInput
+              type="search"
+              [value]="tableState().searchTerm"
+              placeholder="Buscar por paciente, estado o nota"
+              (input)="updateSearchTerm($any($event.target).value)"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="appointments-status-filter">
+            <mat-label>Estado</mat-label>
+            <mat-select [value]="tableState().statusFilter" (valueChange)="updateStatusFilter($event)">
+              <mat-option value="ALL">Todos</mat-option>
+              @for (status of appointmentStatuses; track status) {
+                <mat-option [value]="status">{{ getAppointmentStatusLabel(status) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          @if (viewMode() !== 'agenda') {
+            <mat-form-field appearance="outline" class="appointments-date-range-filter">
+              <mat-label>Rango de fechas</mat-label>
+              <mat-date-range-input [rangePicker]="appointmentsDateRangePicker">
+                <input
+                  matStartDate
+                  [value]="tableState().startDate"
+                  placeholder="Inicio"
+                  (dateChange)="updateStartDate($event)"
+                />
+                <input
+                  matEndDate
+                  [value]="tableState().endDate"
+                  placeholder="Fin"
+                  (dateChange)="updateEndDate($event)"
+                />
+              </mat-date-range-input>
+              <mat-datepicker-toggle matIconSuffix [for]="appointmentsDateRangePicker" />
+              <mat-date-range-picker #appointmentsDateRangePicker />
+            </mat-form-field>
+          }
+        </div>
+
+        <div class="appointments-toolbar__meta">
+          <span class="appointments-toolbar-panel__counter" aria-live="polite">
+            {{ appointmentsCounterLabel() }}
+          </span>
+
+          @if (viewMode() === 'table' && showDateRangeReset() && !hasNonDateFilters()) {
+            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="resetDateRangeToCurrentMonth()">
+              <mat-icon>today</mat-icon>
+              <span>Mes actual</span>
+            </button>
+          }
+
+          @if (hasNonDateFilters()) {
+            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="clearAppointmentFilters()">
+              <mat-icon>filter_alt_off</mat-icon>
+              <span>Limpiar</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (successMessage()) {
+        <p class="appointments-message appointments-message--success" role="status">
+          {{ successMessage() }}
+        </p>
+      }
+
+      @if (viewMode() === 'calendar') {
+        <app-appointments-calendar
+          [appointments]="calendarAppointments()"
+          [visibleMonth]="visibleCalendarMonth()"
+          [getPatientName]="patientNameResolver"
+          [getStatusLabel]="appointmentStatusLabelResolver"
+          [getStatusClass]="appointmentStatusClassResolver"
+          (previousMonth)="showPreviousCalendarMonth()"
+          (nextMonth)="showNextCalendarMonth()"
+          (today)="showCurrentCalendarMonth()"
+          (daySelected)="openCreateAppointmentDialog($event)"
+          (appointmentSelected)="openEditAppointmentDialog($event)"
+        />
+      } @else if (viewMode() === 'agenda') {
+        <app-appointments-daily-agenda
+          [appointments]="appointmentsForSelectedDay()"
+          [selectedDate]="selectedAgendaDate()"
+          [cancellingAppointmentId]="cancellingAppointmentId()"
+          [getPatientName]="patientNameResolver"
+          [getStatusLabel]="appointmentStatusLabelResolver"
+          [getStatusClass]="appointmentStatusClassResolver"
+          (previousDay)="showPreviousAgendaDay()"
+          (nextDay)="showNextAgendaDay()"
+          (today)="showTodayAgenda()"
+          (createAppointment)="openCreateAppointmentDialog(selectedAgendaDate())"
+          (appointmentSelected)="openEditAppointmentDialog($event)"
+          (cancelAppointment)="cancelAppointment($event)"
+          (deleteAppointment)="openDeleteAppointmentDialog($event)"
+        />
+      } @else if (appointmentsTableResult().totalFilteredItems) {
+        @if (viewMode() === 'table') {
+          <div class="appointments-table-wrapper">
+            <table
+              mat-table
+              matSort
+              [matSortActive]="getAppointmentsSortActive()"
+              [matSortDirection]="getAppointmentsSortDirection()"
+              [dataSource]="appointmentsTableResult().pagedItems"
+              class="appointments-table"
+              (matSortChange)="handleAppointmentsSortChange($event)"
+            >
+              <ng-container matColumnDef="patient">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="patient">Paciente</th>
+                <td mat-cell *matCellDef="let appointment">
+                  {{ getPatientName(appointment.patientId) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="scheduledAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="scheduledAt">Fecha y hora</th>
+                <td mat-cell *matCellDef="let appointment">
+                  {{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="durationMinutes">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="durationMinutes">Duración</th>
+                <td mat-cell *matCellDef="let appointment">
+                  {{ appointment.durationMinutes }} min
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="status">Estado</th>
+                <td mat-cell *matCellDef="let appointment">
+                  <app-status-badge
+                    [label]="getAppointmentStatusLabel(appointment.status)"
+                    [variant]="getAppointmentStatusClass(appointment.status)"
+                  />
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let appointment">
+                  <div class="appointments-actions" aria-label="Acciones disponibles">
+                    <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openEditAppointmentDialog(appointment)" aria-label="Editar cita">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+
+                    @if (appointment.status !== 'CANCELLED') {
+                      <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="cancelAppointment(appointment)" aria-label="Cancelar cita">
+                        @if (cancellingAppointmentId() === appointment.id) {
+                          <mat-spinner diameter="20" />
+                        } @else {
+                          <mat-icon>event_busy</mat-icon>
+                        }
+                      </button>
+                    }
+
+                    <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openDeleteAppointmentDialog(appointment)" aria-label="Eliminar cita">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </div>
+
+          <mat-paginator
+            class="appointments-paginator"
+            [length]="appointmentsTableResult().totalFilteredItems"
+            [pageIndex]="safePageIndex()"
+            [pageSize]="tableState().pageSize"
+            [pageSizeOptions]="pageSizeOptions"
+            showFirstLastButtons
+            (page)="handleAppointmentsPageChange($event)"
+          />
+        }
+      } @else {
+        <app-data-table-empty-state
+          icon="search_off"
+          title="No se encontraron citas"
+          message="Intenta ajustar tu búsqueda"
+        />
+      }
+    } @else {
+      <app-data-table-empty-state
+        icon="event_busy"
+        title="No hay citas registradas"
+        message="Cuando existan citas, aparecerán en este listado global."
+      />
+    }
+  </app-section-card>
+</section>

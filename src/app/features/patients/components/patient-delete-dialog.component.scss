@@ -1,41 +1,12 @@
 .patient-delete-dialog {
-  display: grid;
   gap: 1rem;
-  padding: 0.5rem;
-}
-
-.patient-delete-dialog h2,
-.patient-delete-dialog p {
-  margin: 0;
-}
-
-.patient-delete-dialog h2 {
-  color: #16332d;
-  font-size: 1.5rem;
 }
 
 .patient-delete-dialog__name {
+  color: var(--app-color-heading);
   font-weight: 700;
-  color: #16332d;
 }
 
 .patient-delete-dialog__warning {
-  color: #6e4338;
-}
-
-.patient-delete-dialog__error {
-  color: #b3261e;
-}
-
-.patient-delete-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-@media (max-width: 720px) {
-  .patient-delete-dialog__actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
+  color: var(--app-color-text-secondary);
 }

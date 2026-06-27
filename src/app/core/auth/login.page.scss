@@ -5,14 +5,15 @@
   justify-content: center;
   padding: 1.5rem;
   background:
-    radial-gradient(circle at top, rgba(62, 110, 98, 0.18), transparent 32rem),
-    linear-gradient(180deg, #f3f7f5 0%, #e6eeea 100%);
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 32rem),
+    linear-gradient(180deg, var(--app-color-app-bg) 0%, var(--app-color-surface-muted) 100%);
 }
 
 .login-card {
   width: min(100%, 26rem);
-  border-radius: 1.25rem;
-  box-shadow: 0 1.5rem 3rem rgba(27, 48, 42, 0.12);
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 8px;
+  box-shadow: var(--app-shadow-surface);
 }
 
 .login-card__header {
@@ -27,7 +28,7 @@
 
 .login-form__error {
   margin: 0;
-  color: #b3261e;
+  color: var(--app-color-danger-text);
   font-size: 0.95rem;
 }
 

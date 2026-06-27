@@ -1,10 +1,19 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs';
 
+import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
+import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
+import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
+import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
+import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems } from '../../../shared/utils/data-table';
 import { AppointmentDeleteDialogComponent } from '../../appointments/components/appointment-delete-dialog.component';
 import { AppointmentFormDialogComponent } from '../../appointments/components/appointment-form-dialog.component';
 import { Appointment, AppointmentStatus } from '../../appointments/models/appointment.models';
@@ -30,7 +39,18 @@ interface PatientDetailDialogData {
 @Component({
   selector: 'app-patient-detail-dialog',
   standalone: true,
-  imports: [DatePipe, MatButtonModule, MatDialogModule, MatProgressSpinnerModule],
+  imports: [
+    DatePipe,
+    MatButtonModule,
+    MatDialogModule,
+    MatIconModule,
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
+    DataTableEmptyStateComponent,
+    DataTableToolbarComponent,
+    SectionCardComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './patient-detail-dialog.component.html',
   styleUrl: './patient-detail-dialog.component.scss',
 })
@@ -49,15 +69,107 @@ export class PatientDetailDialogComponent {
   readonly appointments = signal<Appointment[]>([]);
   readonly isAppointmentsLoading = signal(true);
   readonly appointmentsErrorMessage = signal('');
+  readonly appointmentsSuccessMessage = signal('');
+  readonly cancellingAppointmentId = signal<string | null>(null);
   readonly caseFile = signal<CaseFile | null>(null);
   readonly isCaseFileLoading = signal(true);
   readonly caseFileErrorMessage = signal('');
   readonly documents = signal<ClinicalDocument[]>([]);
   readonly isDocumentsLoading = signal(false);
   readonly documentsErrorMessage = signal('');
+  readonly documentsPageSizeOptions = [5, 10, 20];
+  readonly documentsTableState = signal<DataTableState>({
+    searchTerm: '',
+    pageIndex: 0,
+    pageSize: 5,
+    sortBy: undefined,
+    sortDirection: '',
+  });
+  readonly documentsTableResult = computed<DataTableResult<ClinicalDocument>>(() => {
+    const state = this.documentsTableState();
+    const items = this.documents();
+    const filteredItems = items.filter((document) =>
+      matchesSearchTerm(document, state.searchTerm, (item) => this.getDocumentSearchValues(item))
+    );
+
+    return {
+      items,
+      filteredItems,
+      pagedItems: paginateItems(filteredItems, {
+        pageIndex: this.safeDocumentsPageIndex(),
+        pageSize: state.pageSize,
+      }),
+      totalItems: items.length,
+      totalFilteredItems: filteredItems.length,
+      hasActiveFilters: Boolean(state.searchTerm.trim()),
+    };
+  });
+  readonly safeDocumentsPageIndex = computed(() => {
+    const state = this.documentsTableState();
+    const totalFilteredItems = this.documents().filter((document) =>
+      matchesSearchTerm(document, state.searchTerm, (item) => this.getDocumentSearchValues(item))
+    ).length;
+
+    return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
+  });
+  readonly documentsCounterLabel = computed(() => {
+    const result = this.documentsTableResult();
+
+    return formatFilteredResultsLabel(
+      result.totalFilteredItems,
+      result.totalItems,
+      (count) => this.formatDocumentCount(count),
+      result.hasActiveFilters
+    );
+  });
   readonly sessionNotes = signal<SessionNote[]>([]);
   readonly isSessionNotesLoading = signal(false);
   readonly sessionNotesErrorMessage = signal('');
+  readonly sessionNotesPageSizeOptions = [5, 10, 20];
+  readonly sessionNotesTableState = signal<DataTableState>({
+    searchTerm: '',
+    pageIndex: 0,
+    pageSize: 5,
+    sortBy: undefined,
+    sortDirection: '',
+  });
+  readonly sessionNotesTableResult = computed<DataTableResult<SessionNote>>(() => {
+    const state = this.sessionNotesTableState();
+    const items = this.sessionNotes();
+    const filteredItems = items.filter((sessionNote) =>
+      matchesSearchTerm(sessionNote, state.searchTerm, (item) => this.getSessionNoteSearchValues(item))
+    );
+
+    return {
+      items,
+      filteredItems,
+      pagedItems: paginateItems(filteredItems, {
+        pageIndex: this.safeSessionNotesPageIndex(),
+        pageSize: state.pageSize,
+      }),
+      totalItems: items.length,
+      totalFilteredItems: filteredItems.length,
+      hasActiveFilters: Boolean(state.searchTerm.trim()),
+    };
+  });
+  readonly safeSessionNotesPageIndex = computed(() => {
+    const state = this.sessionNotesTableState();
+    const totalFilteredItems = this.sessionNotes().filter((sessionNote) =>
+      matchesSearchTerm(sessionNote, state.searchTerm, (item) => this.getSessionNoteSearchValues(item))
+    ).length;
+
+    return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
+  });
+  readonly sessionNotesCounterLabel = computed(() => {
+    const result = this.sessionNotesTableResult();
+
+    return formatFilteredResultsLabel(
+      result.totalFilteredItems,
+      result.totalItems,
+      (count) => this.formatSessionNoteCount(count),
+      result.hasActiveFilters
+    );
+  });
 
   constructor() {
     this.loadAppointments();
@@ -119,6 +231,8 @@ export class PatientDetailDialogComponent {
   }
 
   openCreateAppointmentDialog(): void {
+    this.appointmentsSuccessMessage.set('');
+
     const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
       width: '720px',
       maxWidth: '95vw',
@@ -137,6 +251,8 @@ export class PatientDetailDialogComponent {
   }
 
   openEditAppointmentDialog(appointment: Appointment): void {
+    this.appointmentsSuccessMessage.set('');
+
     const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
       width: '720px',
       maxWidth: '95vw',
@@ -156,14 +272,22 @@ export class PatientDetailDialogComponent {
   }
 
   cancelAppointment(appointment: Appointment): void {
+    if (this.cancellingAppointmentId()) {
+      return;
+    }
+
     this.appointmentsErrorMessage.set('');
+    this.appointmentsSuccessMessage.set('');
+    this.cancellingAppointmentId.set(appointment.id);
 
     this.appointmentsService
       .updateAppointment(appointment.id, {
         status: 'CANCELLED',
       })
+      .pipe(finalize(() => this.cancellingAppointmentId.set(null)))
       .subscribe({
         next: () => {
+          this.appointmentsSuccessMessage.set('La cita fue cancelada correctamente.');
           this.loadAppointments();
         },
         error: (error: HttpErrorResponse) => {
@@ -173,6 +297,8 @@ export class PatientDetailDialogComponent {
   }
 
   openDeleteAppointmentDialog(appointment: Appointment): void {
+    this.appointmentsSuccessMessage.set('');
+
     const dialogRef = this.dialog.open(AppointmentDeleteDialogComponent, {
       width: '520px',
       maxWidth: '95vw',
@@ -246,7 +372,7 @@ export class PatientDetailDialogComponent {
 
         if (!openedWindow) {
           URL.revokeObjectURL(blobUrl);
-          this.documentsErrorMessage.set('No fue posible abrir el documento en una nueva pestana.');
+          this.documentsErrorMessage.set('No fue posible abrir el documento en una nueva pestaña.');
           return;
         }
 
@@ -395,10 +521,21 @@ export class PatientDetailDialogComponent {
       SCHEDULED: 'Programada',
       COMPLETED: 'Completada',
       CANCELLED: 'Cancelada',
-      NO_SHOW: 'No asistio',
+      NO_SHOW: 'No asistió',
     };
 
     return labels[status];
+  }
+
+  getAppointmentStatusClass(status: AppointmentStatus): StatusBadgeVariant {
+    const classes: Record<AppointmentStatus, StatusBadgeVariant> = {
+      SCHEDULED: 'primary',
+      COMPLETED: 'success',
+      CANCELLED: 'danger',
+      NO_SHOW: 'warning',
+    };
+
+    return classes[status];
   }
 
   formatBirthDate(value?: string | null): string {
@@ -414,6 +551,58 @@ export class PatientDetailDialogComponent {
     }
 
     return `${day}/${month}/${year}`;
+  }
+
+  getSessionNoteTitle(sessionNote: SessionNote): string {
+    return sessionNote.title?.trim() || 'Sesion sin titulo';
+  }
+
+  updateDocumentsSearchTerm(searchTerm: string): void {
+    this.documentsTableState.update((state) => ({
+      ...state,
+      searchTerm,
+      pageIndex: 0,
+    }));
+  }
+
+  clearDocumentsFilters(): void {
+    this.documentsTableState.update((state) => ({
+      ...state,
+      searchTerm: '',
+      pageIndex: 0,
+    }));
+  }
+
+  handleDocumentsPageChange(event: PageEvent): void {
+    this.documentsTableState.update((state) => ({
+      ...state,
+      pageIndex: event.pageIndex,
+      pageSize: event.pageSize,
+    }));
+  }
+
+  updateSessionNotesSearchTerm(searchTerm: string): void {
+    this.sessionNotesTableState.update((state) => ({
+      ...state,
+      searchTerm,
+      pageIndex: 0,
+    }));
+  }
+
+  clearSessionNotesFilters(): void {
+    this.sessionNotesTableState.update((state) => ({
+      ...state,
+      searchTerm: '',
+      pageIndex: 0,
+    }));
+  }
+
+  handleSessionNotesPageChange(event: PageEvent): void {
+    this.sessionNotesTableState.update((state) => ({
+      ...state,
+      pageIndex: event.pageIndex,
+      pageSize: event.pageSize,
+    }));
   }
 
   private loadCaseFile(): void {
@@ -439,7 +628,7 @@ export class PatientDetailDialogComponent {
           return;
         }
 
-        this.caseFileErrorMessage.set('No fue posible cargar el expediente clinico.');
+        this.caseFileErrorMessage.set('No fue posible cargar el expediente clínico.');
       },
     });
   }
@@ -493,7 +682,7 @@ export class PatientDetailDialogComponent {
       error: () => {
         this.sessionNotes.set([]);
         this.isSessionNotesLoading.set(false);
-        this.sessionNotesErrorMessage.set('No fue posible cargar las notas de sesion.');
+        this.sessionNotesErrorMessage.set('No fue posible cargar las notas de sesión.');
       },
     });
   }
@@ -502,12 +691,14 @@ export class PatientDetailDialogComponent {
     this.sessionNotes.set([]);
     this.isSessionNotesLoading.set(false);
     this.sessionNotesErrorMessage.set('');
+    this.clearSessionNotesFilters();
   }
 
   private resetDocumentsState(): void {
     this.documents.set([]);
     this.isDocumentsLoading.set(false);
     this.documentsErrorMessage.set('');
+    this.clearDocumentsFilters();
   }
 
   private getDocumentActionErrorMessage(error: HttpErrorResponse, action: 'ver' | 'descargar'): string {
@@ -516,7 +707,7 @@ export class PatientDetailDialogComponent {
     }
 
     if (error.status === 404) {
-      return 'El documento ya no esta disponible.';
+      return 'El documento ya no está disponible.';
     }
 
     return `No fue posible ${action} el documento.`;
@@ -528,9 +719,36 @@ export class PatientDetailDialogComponent {
     }
 
     if (error.status === 404) {
-      return 'La cita ya no esta disponible.';
+      return 'La cita ya no está disponible.';
     }
 
     return `No fue posible ${action} la cita.`;
+  }
+
+  private getSessionNoteSearchValues(sessionNote: SessionNote): Array<string | null | undefined> {
+    return [
+      sessionNote.title,
+      this.getSessionNoteTitle(sessionNote),
+      sessionNote.content,
+      sessionNote.sessionDate,
+    ];
+  }
+
+  private getDocumentSearchValues(document: ClinicalDocument): Array<string | null | undefined> {
+    return [
+      document.fileName,
+      document.mimeType,
+      this.getDocumentType(document),
+      document.uploadedAt,
+      document.updatedAt,
+    ];
+  }
+
+  private formatDocumentCount(count: number): string {
+    return count === 1 ? '1 documento' : `${count} documentos`;
+  }
+
+  private formatSessionNoteCount(count: number): string {
+    return count === 1 ? '1 nota' : `${count} notas`;
   }
 }

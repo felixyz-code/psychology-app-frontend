@@ -1,11 +1,34 @@
-<section class="main-layout">
-  <app-navbar />
+<section class="main-layout" [class.main-layout--sidebar-collapsed]="isSidebarCollapsed()">
+  <app-navbar
+    [isSidebarCollapsed]="isSidebarCollapsed()"
+    [isSidebarOpen]="isSidebarOpen()"
+    (menuToggle)="toggleSidebar()"
+  />
 
   <div class="main-layout__body">
-    <app-sidebar class="main-layout__sidebar" />
+    <button
+      class="main-layout__overlay"
+      type="button"
+      aria-label="Cerrar menú de navegación"
+      [class.main-layout__overlay--visible]="isSidebarOpen()"
+      (click)="closeSidebar()"
+    ></button>
+
+    <app-sidebar
+      class="main-layout__sidebar"
+      [class.main-layout__sidebar--open]="isSidebarOpen()"
+      [class.main-layout__sidebar--collapsed]="isSidebarCollapsed()"
+      [collapsed]="isSidebarCollapsed()"
+      (navSelected)="closeSidebar()"
+    />
 
     <main class="main-layout__content">
       <router-outlet />
+
+      <footer class="main-layout__footer" aria-label="Informaci&oacute;n de la aplicaci&oacute;n">
+        <span>Psicolog&iacute;a App</span>
+        <span>Versi&oacute;n 1.0.0</span>
+      </footer>
     </main>
   </div>
 </section>

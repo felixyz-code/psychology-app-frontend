@@ -1,0 +1,200 @@
+.appointments-calendar {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.appointments-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.appointments-calendar__title-group h2,
+.appointments-calendar__title-group p {
+  margin: 0;
+}
+
+.appointments-calendar__title-group h2 {
+  color: var(--app-color-heading);
+  font-size: clamp(1.1rem, 1.8vw, 1.45rem);
+  line-height: 1.15;
+}
+
+.appointments-calendar__eyebrow {
+  color: var(--app-color-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.appointments-calendar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.appointments-calendar__today {
+  white-space: nowrap;
+}
+
+.appointments-calendar__nav {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--app-color-border);
+  border-radius: 999px;
+  background: var(--app-color-surface, #fff);
+}
+
+.appointments-calendar__scroll {
+  overflow-x: auto;
+}
+
+.appointments-calendar__weekdays,
+.appointments-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.6rem;
+  min-width: 760px;
+}
+
+.appointments-calendar__weekdays span {
+  color: var(--app-color-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.appointments-calendar__day {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0.55rem;
+  min-height: 148px;
+  padding: 0.72rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.96));
+  box-shadow: var(--app-shadow-surface);
+  text-align: left;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.appointments-calendar__day:hover {
+  transform: translateY(-1px);
+  border-color: var(--app-color-primary);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+}
+
+.appointments-calendar__day--outside {
+  opacity: 0.62;
+}
+
+.appointments-calendar__day--today {
+  border-color: var(--app-color-primary);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.14), var(--app-shadow-surface);
+}
+
+.appointments-calendar__day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.appointments-calendar__day-number {
+  color: var(--app-color-heading);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.appointments-calendar__day-count {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--app-color-primary-soft, rgba(59, 130, 246, 0.14));
+  color: var(--app-color-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.appointments-calendar__day-body {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+}
+
+.appointments-calendar__appointment {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.5rem 0.55rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 10px;
+  background: var(--app-color-surface, #fff);
+  cursor: pointer;
+}
+
+.appointments-calendar__appointment--outside {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.appointments-calendar__appointment-time {
+  color: var(--app-color-heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.appointments-calendar__appointment-patient {
+  color: var(--app-color-text);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+.appointments-calendar__appointment app-status-badge {
+  justify-self: start;
+  max-width: 100%;
+}
+
+.appointments-calendar__empty {
+  color: var(--app-color-text-secondary);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 900px) {
+  .appointments-calendar__header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .appointments-calendar__actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 720px) {
+  .appointments-calendar {
+    padding: 1rem 1rem 1.25rem;
+  }
+
+  .appointments-calendar__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .appointments-calendar__actions > button {
+    width: 100%;
+  }
+
+  .appointments-calendar__nav {
+    justify-content: space-between;
+  }
+
+  .appointments-calendar__weekdays,
+  .appointments-calendar__grid {
+    min-width: 720px;
+  }
+}
