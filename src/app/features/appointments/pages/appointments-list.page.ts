@@ -3,7 +3,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatCardModule } from '@angular/material/card';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatDialog } from '@angular/material/dialog';
@@ -18,7 +17,8 @@ import { MatTableModule } from '@angular/material/table';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
+import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
 import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems, sortItems } from '../../../shared/utils/data-table';
 import { Patient } from '../../patients/models/patient.models';
@@ -52,7 +52,6 @@ interface AppointmentsTableState extends DataTableState {
     DatePipe,
     MatButtonModule,
     MatButtonToggleModule,
-    MatCardModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
@@ -64,7 +63,8 @@ interface AppointmentsTableState extends DataTableState {
     MatSortModule,
     MatTableModule,
     DataTableEmptyStateComponent,
-    PageHeaderComponent,
+    SectionCardComponent,
+    StatusBadgeComponent,
     AppointmentsCalendarComponent,
     AppointmentsDailyAgendaComponent,
   ],
@@ -313,12 +313,12 @@ export class AppointmentsListPage {
     return labels[status];
   }
 
-  getAppointmentStatusClass(status: AppointmentStatus): string {
-    const classes: Record<AppointmentStatus, string> = {
-      SCHEDULED: 'app-status-badge--scheduled',
-      COMPLETED: 'app-status-badge--completed',
-      CANCELLED: 'app-status-badge--cancelled',
-      NO_SHOW: 'app-status-badge--no-show',
+  getAppointmentStatusClass(status: AppointmentStatus): StatusBadgeVariant {
+    const classes: Record<AppointmentStatus, StatusBadgeVariant> = {
+      SCHEDULED: 'primary',
+      COMPLETED: 'success',
+      CANCELLED: 'danger',
+      NO_SHOW: 'warning',
     };
 
     return classes[status];

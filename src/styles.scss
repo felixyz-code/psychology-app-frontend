@@ -130,7 +130,8 @@ body.dark-theme {
 button[mat-flat-button],
 button[mat-stroked-button],
 button[mat-button] {
-  border-radius: 8px;
+  min-height: 2.75rem;
+  border-radius: 12px;
 }
 
 .app-action-button {

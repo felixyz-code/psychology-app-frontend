@@ -1,7 +1,8 @@
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 import { isSameLocalDay, parseAppointmentDate, startOfLocalDay } from '../utils/appointment-datetime';
@@ -16,7 +17,7 @@ interface CalendarDay {
 @Component({
   selector: 'app-appointments-calendar',
   standalone: true,
-  imports: [DatePipe, NgClass, MatButtonModule, MatIconModule],
+  imports: [DatePipe, MatButtonModule, MatIconModule, StatusBadgeComponent],
   templateUrl: './appointments-calendar.component.html',
   styleUrl: './appointments-calendar.component.scss',
 })
@@ -25,7 +26,7 @@ export class AppointmentsCalendarComponent {
   readonly visibleMonth = input.required<Date>();
   readonly getPatientName = input.required<(patientId: string) => string>();
   readonly getStatusLabel = input.required<(status: AppointmentStatus) => string>();
-  readonly getStatusClass = input.required<(status: AppointmentStatus) => string>();
+  readonly getStatusClass = input.required<(status: AppointmentStatus) => StatusBadgeVariant>();
 
   readonly previousMonth = output<void>();
   readonly nextMonth = output<void>();

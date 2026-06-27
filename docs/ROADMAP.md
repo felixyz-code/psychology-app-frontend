@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 8.5 - Design System Foundation
+Sprint 8.6 - Global UI Polish
 ```
 
 ---
@@ -131,7 +131,7 @@ Sprint 8.5 - Design System Foundation
 Next planned sprint:
 
 ```text
-Sprint 8.6 - Global Polish
+Sprint 8.7 - Quality and UX Hardening
 ```
 
 ---

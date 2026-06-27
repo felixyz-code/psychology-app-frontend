@@ -1,10 +1,10 @@
 .document-upload-dialog {
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 .document-upload-dialog__field {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .document-upload-dialog__field p {
@@ -22,6 +22,11 @@
 .document-upload-dialog__field input {
   width: 100%;
   color: var(--app-color-heading);
+  min-height: 2.75rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 14px;
+  background: var(--app-color-input-bg);
 }
 
 .document-upload-dialog__selected {

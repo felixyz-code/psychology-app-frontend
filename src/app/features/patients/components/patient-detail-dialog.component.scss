@@ -10,7 +10,7 @@
 .patient-detail-dialog__content {
   display: grid;
   gap: 1rem;
-  padding: 0.5rem;
+  padding: 0.25rem;
   overflow-y: auto;
   overflow-x: hidden;
   max-height: calc(85vh - 5.5rem);
@@ -18,9 +18,7 @@
 }
 
 .patient-detail-dialog__header :is(h2, p),
-.patient-detail-dialog__grid p,
-.patient-detail-dialog__section :is(h3),
-.patient-detail-dialog__section-header p {
+.patient-detail-dialog__grid p {
   margin: 0;
 }
 
@@ -35,30 +33,9 @@
   color: var(--app-color-text-secondary);
 }
 
-.patient-detail-dialog__section {
-  display: grid;
-  gap: 1rem;
-  padding: 1.25rem;
-  border: 1px solid var(--app-color-card-border);
-  border-radius: 8px;
-  background: var(--app-color-card-bg);
-}
-
-.patient-detail-dialog__section h3 {
-  color: var(--app-color-heading);
-  font-size: 1.1rem;
-}
-
-.patient-detail-dialog__section-header {
+.patient-detail-dialog__section-actions {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.patient-detail-dialog__section-header p {
-  margin-top: 0.35rem;
-  color: var(--app-color-text-secondary);
 }
 
 .patient-detail-dialog__grid {
@@ -103,7 +80,7 @@
   justify-content: flex-end;
   gap: 0.75rem;
   flex-shrink: 0;
-  padding: 0.5rem;
+  padding: 0.75rem 0.5rem 0.25rem;
   border-top: 1px solid var(--app-color-card-border);
   background: var(--app-color-dialog-bg);
 }
@@ -122,7 +99,7 @@
   gap: 0.85rem;
   padding: 1rem;
   border: 1px solid var(--app-color-card-border);
-  border-radius: 8px;
+  border-radius: 16px;
   background: var(--app-color-card-soft-bg);
 }
 
@@ -164,7 +141,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 0.35rem;
+  gap: 0.5rem;
 }
 
 .patient-detail-dialog__note-content,
@@ -192,11 +169,10 @@
     max-height: calc(85vh - 6.5rem);
   }
 
-  .patient-detail-dialog__section {
-    padding: 1rem;
+  .patient-detail-dialog__section-actions {
+    width: 100%;
   }
 
-  .patient-detail-dialog__section-header,
   .patient-detail-dialog__note-header,
   .patient-detail-dialog__appointment-header,
   .patient-detail-dialog__document-header {
@@ -216,6 +192,6 @@
   .patient-detail-dialog__actions {
     flex-direction: column-reverse;
     align-items: stretch;
-    padding: 0.75rem 0;
+    padding: 0.75rem 0 0;
   }
 }

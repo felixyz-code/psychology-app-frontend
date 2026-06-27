@@ -90,7 +90,7 @@
 
       <div class="dashboard-hero__meta">
         <span class="dashboard-hero__label">Fecha actual</span>
-        <strong>{{ today() | date: 'EEEE, dd MMMM yyyy' }}</strong>
+        <strong>{{ currentDateLabel() }}</strong>
         <p>Tablero principal del consultorio.</p>
       </div>
     </mat-card>
@@ -199,7 +199,7 @@
                     <h3>{{ activity.title }}</h3>
                     <span>{{ activity.date | date: 'dd/MM HH:mm' }}</span>
                   </div>
-                  <p>{{ getActivityTypeLabel(activity.type) }} · {{ activity.patientName }}</p>
+                  <p>{{ getActivityTypeLabel(activity.type) }} - {{ activity.patientName }}</p>
                   <p>{{ activity.description }}</p>
                 </div>
               </article>
@@ -207,7 +207,7 @@
           </div>
 
           <div sectionCardFooter>
-            <button mat-button type="button" class="dashboard-history-link" disabled>Ver historial →</button>
+            <button mat-button type="button" class="dashboard-history-link" disabled>Ver historial ></button>
           </div>
         </app-section-card>
       </div>

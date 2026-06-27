@@ -8,6 +8,22 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 8
 
+## Sprint 8.6 - Global UI Polish
+
+### Changed
+
+* Patients y Appointments ahora reutilizan `SectionCardComponent` como contenedor principal para alinear cards, headers y espaciados con el Dashboard.
+* El detalle de paciente ahora reutiliza `SectionCardComponent` en los bloques de datos, citas, documentos, expediente clinico y notas de sesion.
+* Las vistas Table, Calendar y Daily Agenda de Appointments ahora reutilizan `StatusBadgeComponent` para estados de cita manteniendo el mismo significado visual.
+* El bloque de citas dentro de `patient-detail-dialog` ahora reutiliza `StatusBadgeComponent`.
+* Homogeneizados paddings, radios, acciones y espaciado interno en cards y listas secundarias del detalle de paciente.
+* Simplificados estilos duplicados en Patients, Appointments y dialogs al apoyarse mas en el Design System compartido.
+* Ajustada la consistencia visual de formularios y dialogs existentes sin modificar comportamiento.
+
+### Fixed
+
+* Mantenida la compatibilidad responsive de Patients, Appointments y dialogs clinicos despues de la migracion visual.
+
 ## Sprint 8.5 - Design System Foundation
 
 ### Added

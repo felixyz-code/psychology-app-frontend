@@ -49,9 +49,10 @@
             </div>
 
             <div class="appointments-agenda__status">
-              <span class="app-status-badge" [ngClass]="getStatusClass()(appointment.status)">
-                {{ getStatusLabel()(appointment.status) }}
-              </span>
+              <app-status-badge
+                [label]="getStatusLabel()(appointment.status)"
+                [variant]="getStatusClass()(appointment.status)"
+              />
             </div>
           </div>
 

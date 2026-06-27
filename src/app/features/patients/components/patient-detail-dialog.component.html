@@ -5,9 +5,7 @@
       <p>Detalle clínico y seguimiento del paciente.</p>
     </div>
 
-    <section class="patient-detail-dialog__section">
-      <h3>Datos del paciente</h3>
-
+    <app-section-card title="Datos del paciente">
       <div class="patient-detail-dialog__grid">
         <div>
           <span class="patient-detail-dialog__label">Nombre completo</span>
@@ -44,15 +42,10 @@
           <p>{{ patient.id }}</p>
         </div>
       </div>
-    </section>
+    </app-section-card>
 
-    <section class="patient-detail-dialog__section">
-      <div class="patient-detail-dialog__section-header">
-        <div>
-          <h3>Citas</h3>
-          <p>Agenda registrada para este paciente.</p>
-        </div>
-
+    <app-section-card title="Citas" subtitle="Agenda registrada para este paciente.">
+      <div sectionCardActions class="patient-detail-dialog__section-actions">
         <button mat-button class="app-action-button" type="button" (click)="openCreateAppointmentDialog()">
           <mat-icon>event_available</mat-icon>
           <span>Nueva cita</span>
@@ -81,12 +74,11 @@
               <div class="patient-detail-dialog__appointment-header">
                 <div>
                   <h4>{{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</h4>
-                  <p>
-                    {{ appointment.durationMinutes }} minutos
-                  </p>
-                  <span class="app-status-badge {{ getAppointmentStatusClass(appointment.status) }}">
-                    {{ getAppointmentStatusLabel(appointment.status) }}
-                  </span>
+                  <p>{{ appointment.durationMinutes }} minutos</p>
+                  <app-status-badge
+                    [label]="getAppointmentStatusLabel(appointment.status)"
+                    [variant]="getAppointmentStatusClass(appointment.status)"
+                  />
                 </div>
 
                 <div class="patient-detail-dialog__appointment-actions">
@@ -116,15 +108,10 @@
           No hay citas registradas para este paciente.
         </p>
       }
-    </section>
+    </app-section-card>
 
-    <section class="patient-detail-dialog__section">
-      <div class="patient-detail-dialog__section-header">
-        <div>
-          <h3>Documentos</h3>
-          <p>Archivos asociados al expediente clínico.</p>
-        </div>
-
+    <app-section-card title="Documentos" subtitle="Archivos asociados al expediente clínico.">
+      <div sectionCardActions class="patient-detail-dialog__section-actions">
         @if (caseFile()) {
           <button mat-button class="app-action-button" type="button" (click)="openUploadDocumentDialog()">
             <mat-icon>upload_file</mat-icon>
@@ -199,15 +186,10 @@
           message="Cuando subas documentos, apareceran en este listado."
         />
       }
-    </section>
+    </app-section-card>
 
-    <section class="patient-detail-dialog__section">
-      <div class="patient-detail-dialog__section-header">
-        <div>
-          <h3>Expediente clínico</h3>
-          <p>Diagnóstico y plan de tratamiento del paciente.</p>
-        </div>
-
+    <app-section-card title="Expediente clínico" subtitle="Diagnóstico y plan de tratamiento del paciente.">
+      <div sectionCardActions class="patient-detail-dialog__section-actions">
         @if (caseFile()) {
           <button mat-button class="app-action-button" type="button" (click)="openEditCaseFileDialog()">
             <mat-icon>folder_open</mat-icon>
@@ -257,15 +239,10 @@
           Este paciente aún no tiene expediente clínico.
         </p>
       }
-    </section>
+    </app-section-card>
 
-    <section class="patient-detail-dialog__section">
-      <div class="patient-detail-dialog__section-header">
-        <div>
-          <h3>Notas de sesión</h3>
-          <p>Seguimiento clínico registrado para este expediente.</p>
-        </div>
-
+    <app-section-card title="Notas de sesión" subtitle="Seguimiento clínico registrado para este expediente.">
+      <div sectionCardActions class="patient-detail-dialog__section-actions">
         @if (caseFile()) {
           <button mat-button class="app-action-button" type="button" (click)="openCreateSessionNoteDialog()">
             <mat-icon>note_add</mat-icon>
@@ -342,7 +319,7 @@
           message="Cuando agregues notas de sesion, apareceran en este listado."
         />
       }
-    </section>
+    </app-section-card>
   </div>
 
   <div class="patient-detail-dialog__actions">

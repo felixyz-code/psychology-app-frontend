@@ -1,11 +1,6 @@
 <section class="patients-list-page">
-  <mat-card class="patients-card">
-    <div class="patients-card__header">
-      <app-page-header
-        heading="Pacientes"
-        subtitle="Gestión de pacientes registrados."
-      />
-
+  <app-section-card title="Pacientes" subtitle="Gestión de pacientes registrados.">
+    <div sectionCardActions class="patients-card__header-actions">
       <button mat-flat-button type="button" class="patients-card__create-button" (click)="openCreatePatientDialog()">
         <mat-icon>person_add</mat-icon>
         <span>Nuevo paciente</span>
@@ -115,5 +110,5 @@
         message="Cuando agregues pacientes, aparecerán en este listado."
       />
     }
-  </mat-card>
+  </app-section-card>
 </section>

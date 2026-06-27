@@ -2,20 +2,6 @@
   padding: 0;
 }
 
-.appointments-card {
-  border: 1px solid var(--app-color-card-border);
-  border-radius: 8px;
-  box-shadow: var(--app-shadow-surface);
-}
-
-.appointments-card__header {
-  padding: 1.5rem 1.5rem 0;
-}
-
-.appointments-card__header app-page-header {
-  min-width: 0;
-}
-
 .appointments-card__create-button {
   flex-shrink: 0;
   white-space: nowrap;
@@ -45,7 +31,7 @@
 }
 
 .appointments-message {
-  margin: 1rem 1.5rem 0;
+  margin-top: 1rem;
 }
 
 .appointments-message--success {
@@ -60,7 +46,7 @@
 .appointments-toolbar {
   display: grid;
   gap: 0.75rem;
-  padding: 1rem 1.5rem 0;
+  padding-top: 1rem;
 }
 
 .appointments-toolbar__actions {
@@ -120,7 +106,7 @@
 
 .appointments-table-wrapper {
   overflow-x: auto;
-  padding: 1rem 1.5rem 0;
+  padding-top: 1rem;
 }
 
 .appointments-table {
@@ -158,7 +144,6 @@
 
 .appointments-paginator {
   border-top: 1px solid var(--app-color-border);
-  border-radius: 0 0 8px 8px;
   background: transparent;
   color: var(--app-color-heading);
 }
@@ -178,20 +163,8 @@
 }
 
 @media (max-width: 720px) {
-  .appointments-card__header {
-    padding: 1.25rem 1rem 0;
-  }
-
   .appointments-card__create-button {
     width: 100%;
-  }
-
-  .appointments-table-wrapper {
-    padding: 1rem 1rem 0;
-  }
-
-  .appointments-toolbar {
-    padding: 1rem 1rem 0;
   }
 
   .appointments-toolbar__filters {

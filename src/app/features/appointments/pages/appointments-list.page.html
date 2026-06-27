@@ -1,12 +1,5 @@
 <section class="appointments-list-page">
-  <mat-card class="appointments-card">
-    <div class="appointments-card__header">
-      <app-page-header
-        heading="Citas"
-        subtitle="Agenda global registrada en el sistema."
-      />
-    </div>
-
+  <app-section-card title="Citas" subtitle="Agenda global registrada en el sistema.">
     @if (isLoading()) {
       <div class="appointments-state">
         <mat-spinner diameter="40" />
@@ -183,9 +176,10 @@
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header="status">Estado</th>
                 <td mat-cell *matCellDef="let appointment">
-                  <span class="app-status-badge {{ getAppointmentStatusClass(appointment.status) }}">
-                    {{ getAppointmentStatusLabel(appointment.status) }}
-                  </span>
+                  <app-status-badge
+                    [label]="getAppointmentStatusLabel(appointment.status)"
+                    [variant]="getAppointmentStatusClass(appointment.status)"
+                  />
                 </td>
               </ng-container>
 
@@ -243,5 +237,5 @@
         message="Cuando existan citas, aparecerán en este listado global."
       />
     }
-  </mat-card>
+  </app-section-card>
 </section>

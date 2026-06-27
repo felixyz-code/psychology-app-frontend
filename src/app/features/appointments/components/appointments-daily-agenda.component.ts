@@ -1,8 +1,9 @@
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 import { parseAppointmentDate } from '../utils/appointment-datetime';
@@ -10,7 +11,7 @@ import { parseAppointmentDate } from '../utils/appointment-datetime';
 @Component({
   selector: 'app-appointments-daily-agenda',
   standalone: true,
-  imports: [DatePipe, NgClass, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [DatePipe, MatButtonModule, MatIconModule, MatProgressSpinnerModule, StatusBadgeComponent],
   templateUrl: './appointments-daily-agenda.component.html',
   styleUrl: './appointments-daily-agenda.component.scss',
 })
@@ -20,7 +21,7 @@ export class AppointmentsDailyAgendaComponent {
   readonly cancellingAppointmentId = input<string | null>(null);
   readonly getPatientName = input.required<(patientId: string) => string>();
   readonly getStatusLabel = input.required<(status: AppointmentStatus) => string>();
-  readonly getStatusClass = input.required<(status: AppointmentStatus) => string>();
+  readonly getStatusClass = input.required<(status: AppointmentStatus) => StatusBadgeVariant>();
 
   readonly previousDay = output<void>();
   readonly nextDay = output<void>();

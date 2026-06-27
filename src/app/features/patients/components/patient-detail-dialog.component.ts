@@ -10,6 +10,8 @@ import { finalize } from 'rxjs';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
+import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
+import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
 import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems } from '../../../shared/utils/data-table';
 import { AppointmentDeleteDialogComponent } from '../../appointments/components/appointment-delete-dialog.component';
@@ -46,6 +48,8 @@ interface PatientDetailDialogData {
     MatProgressSpinnerModule,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
+    SectionCardComponent,
+    StatusBadgeComponent,
   ],
   templateUrl: './patient-detail-dialog.component.html',
   styleUrl: './patient-detail-dialog.component.scss',
@@ -523,12 +527,12 @@ export class PatientDetailDialogComponent {
     return labels[status];
   }
 
-  getAppointmentStatusClass(status: AppointmentStatus): string {
-    const classes: Record<AppointmentStatus, string> = {
-      SCHEDULED: 'app-status-badge--scheduled',
-      COMPLETED: 'app-status-badge--completed',
-      CANCELLED: 'app-status-badge--cancelled',
-      NO_SHOW: 'app-status-badge--no-show',
+  getAppointmentStatusClass(status: AppointmentStatus): StatusBadgeVariant {
+    const classes: Record<AppointmentStatus, StatusBadgeVariant> = {
+      SCHEDULED: 'primary',
+      COMPLETED: 'success',
+      CANCELLED: 'danger',
+      NO_SHOW: 'warning',
     };
 
     return classes[status];

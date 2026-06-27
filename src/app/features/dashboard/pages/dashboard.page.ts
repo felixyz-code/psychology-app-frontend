@@ -152,6 +152,7 @@ export class DashboardPage {
   );
 
   readonly nextAppointment = computed(() => this.upcomingAppointments()[0] ?? this.todayAppointments()[0] ?? null);
+  readonly currentDateLabel = computed(() => this.formatCurrentDate(this.today()));
 
   readonly dashboardMetrics = computed<DashboardMetric[]>(() => [
     {
@@ -306,7 +307,7 @@ export class DashboardPage {
     const date = parseAppointmentDate(appointment.scheduledAt);
     const duration = `${appointment.durationMinutes} min`;
 
-    return `${this.formatAppointmentDate(date)} · ${duration}`;
+    return `${this.formatAppointmentDate(date)} - ${duration}`;
   }
 
   getAppointmentDescription(appointment: Appointment): string {
@@ -441,7 +442,7 @@ export class DashboardPage {
     }
 
     const appointmentDate = parseAppointmentDate(appointment.scheduledAt);
-    return `${this.getPatientName(appointment.patientId)} · ${this.formatRelativeDateLabel(appointmentDate)}`;
+    return `${this.getPatientName(appointment.patientId)} - ${this.formatRelativeDateLabel(appointmentDate)}`;
   }
 
   private formatRelativeDateLabel(date: Date): string {
@@ -474,19 +475,19 @@ export class DashboardPage {
     const time = this.formatTime(date);
 
     if (dayDifference === 0) {
-      return `Hoy · ${time}`;
+      return `Hoy - ${time}`;
     }
 
     if (dayDifference === 1) {
-      return `Manana · ${time}`;
+      return `Manana - ${time}`;
     }
 
     if (dayDifference === 2) {
-      return `Pasado manana · ${time}`;
+      return `Pasado manana - ${time}`;
     }
 
     if (dayDifference > 2 && dayDifference <= 7) {
-      return `${this.formatWeekday(date)} · ${time}`;
+      return `${this.formatWeekday(date)} - ${time}`;
     }
 
     return this.formatDateTime(date);
@@ -517,5 +518,14 @@ export class DashboardPage {
     }).format(date);
 
     return weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  }
+
+  private formatCurrentDate(date: Date): string {
+    return new Intl.DateTimeFormat('es-MX', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(date);
   }
 }

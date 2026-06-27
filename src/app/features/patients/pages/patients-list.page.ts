@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -10,7 +9,7 @@ import { MatTableModule } from '@angular/material/table';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
 import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems, sortItems } from '../../../shared/utils/data-table';
 import { PatientDeleteDialogComponent } from '../components/patient-delete-dialog.component';
@@ -24,7 +23,6 @@ import { PatientsService } from '../services/patients.service';
   standalone: true,
   imports: [
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
@@ -32,7 +30,7 @@ import { PatientsService } from '../services/patients.service';
     MatTableModule,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
-    PageHeaderComponent,
+    SectionCardComponent,
   ],
   templateUrl: './patients-list.page.html',
   styleUrl: './patients-list.page.scss',

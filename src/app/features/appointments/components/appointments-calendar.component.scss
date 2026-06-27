@@ -153,12 +153,9 @@
   word-break: keep-all;
 }
 
-.appointments-calendar__appointment .app-status-badge {
+.appointments-calendar__appointment app-status-badge {
   justify-self: start;
   max-width: 100%;
-  padding: 0.15rem 0.45rem;
-  font-size: 0.68rem;
-  line-height: 1.15;
 }
 
 .appointments-calendar__empty {
