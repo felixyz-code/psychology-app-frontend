@@ -8,6 +8,23 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 8
 
+## Sprint 8.5 - Design System Foundation
+
+### Added
+
+* Base inicial del Design System dentro de `shared/components`.
+* Nuevo `MetricCardComponent` reutilizable para metricas con variante visual y estado de carga.
+* Nuevo `SectionCardComponent` reutilizable para contenedores con header, acciones opcionales y footer opcional por proyeccion.
+* Nuevo `ActionCardComponent` reutilizable para acciones principales y secundarias.
+* Nuevo `StatusBadgeComponent` reutilizable para variantes de estado.
+
+### Changed
+
+* El Dashboard ahora reutiliza `MetricCardComponent`, `SectionCardComponent` y `ActionCardComponent` sin cambiar su apariencia aprobada en Sprint 8.4.
+* El badge de estado del Dashboard ahora utiliza el nuevo componente compartido de estados.
+* Reducida la duplicacion de HTML y estilos del Dashboard al mover patrones validados a componentes shared.
+* Se mantiene el comportamiento responsive existente en Desktop, Tablet y Mobile.
+
 ## Sprint 8.4 - Dashboard SaaS
 
 ### Added

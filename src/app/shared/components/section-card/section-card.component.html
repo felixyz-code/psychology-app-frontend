@@ -1,0 +1,22 @@
+<mat-card class="section-card">
+  <div class="section-card__header">
+    <div class="section-card__heading">
+      <h2>{{ title() }}</h2>
+      @if (subtitle()) {
+        <p>{{ subtitle() }}</p>
+      }
+    </div>
+
+    <div class="section-card__actions">
+      <ng-content select="[sectionCardActions]"></ng-content>
+    </div>
+  </div>
+
+  <div class="section-card__content">
+    <ng-content></ng-content>
+  </div>
+
+  <div class="section-card__footer">
+    <ng-content select="[sectionCardFooter]"></ng-content>
+  </div>
+</mat-card>

@@ -7,7 +7,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { catchError, forkJoin, of } from 'rxjs';
 
+import { ActionCardComponent } from '../../../shared/components/action-card/action-card.component';
+import { MetricCardComponent } from '../../../shared/components/metric-card/metric-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
+import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import { AppointmentFormDialogComponent } from '../../appointments/components/appointment-form-dialog.component';
 import { Appointment, AppointmentStatus } from '../../appointments/models/appointment.models';
 import {
@@ -57,7 +61,17 @@ interface DashboardMetric {
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [DatePipe, MatButtonModule, MatCardModule, MatIconModule, PageHeaderComponent],
+  imports: [
+    ActionCardComponent,
+    DatePipe,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MetricCardComponent,
+    PageHeaderComponent,
+    SectionCardComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.scss',
 })
@@ -255,15 +269,15 @@ export class DashboardPage {
     return labels[status];
   }
 
-  getStatusClass(status: AppointmentStatus): string {
-    const classes: Record<AppointmentStatus, string> = {
-      SCHEDULED: 'app-status-badge--scheduled',
-      COMPLETED: 'app-status-badge--completed',
-      CANCELLED: 'app-status-badge--cancelled',
-      NO_SHOW: 'app-status-badge--no-show',
+  getStatusVariant(status: AppointmentStatus): StatusBadgeVariant {
+    const variants: Record<AppointmentStatus, StatusBadgeVariant> = {
+      SCHEDULED: 'primary',
+      COMPLETED: 'success',
+      CANCELLED: 'danger',
+      NO_SHOW: 'warning',
     };
 
-    return classes[status];
+    return variants[status];
   }
 
   getActivityIcon(type: ActivityItem['type']): string {

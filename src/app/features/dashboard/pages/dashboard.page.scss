@@ -14,7 +14,6 @@
 }
 
 .dashboard-hero,
-.dashboard-panel,
 .dashboard-state {
   border: 1px solid var(--app-color-card-border);
   border-radius: 22px;
@@ -71,7 +70,6 @@
 }
 
 .dashboard-hero__meta strong,
-.dashboard-panel__header h2,
 .dashboard-list-item h3,
 .dashboard-activity-item h3,
 .dashboard-empty h3 {
@@ -86,8 +84,6 @@
 }
 
 .dashboard-hero__meta p,
-.dashboard-panel__header p,
-.metric-card__supporting,
 .dashboard-list-item p,
 .dashboard-activity-item p,
 .dashboard-empty p,
@@ -102,61 +98,12 @@
   gap: 0.9rem;
 }
 
-.metric-card {
-  --metric-accent: var(--app-color-primary);
-  --metric-soft: var(--app-color-primary-soft);
-  display: grid;
-  gap: 0.7rem;
-  min-height: 12rem;
-  padding: 1.05rem 1.1rem;
-  border: 1px solid color-mix(in srgb, var(--app-color-card-border) 76%, var(--metric-accent) 24%);
-  border-radius: 20px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--app-color-card-bg) 95%, var(--metric-soft) 5%) 0%, var(--app-color-card-bg) 100%);
-  box-shadow: var(--app-shadow-card);
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-}
-
-.metric-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--app-color-card-border) 34%, var(--metric-accent) 66%);
-  box-shadow: 0 1rem 2rem rgba(15, 23, 42, 0.12);
-}
-
-.metric-card--blue { --metric-accent: #2563eb; --metric-soft: rgba(37, 99, 235, 0.12); }
-.metric-card--green { --metric-accent: #15803d; --metric-soft: rgba(21, 128, 61, 0.12); }
-.metric-card--amber { --metric-accent: #b45309; --metric-soft: rgba(180, 83, 9, 0.12); }
-.metric-card--violet { --metric-accent: #7c3aed; --metric-soft: rgba(124, 58, 237, 0.12); }
-
-.metric-card__icon,
 .dashboard-activity-item__icon {
   display: inline-grid;
   place-items: center;
   width: 2.65rem;
   height: 2.65rem;
   border-radius: 14px;
-}
-
-.metric-card__icon {
-  background: color-mix(in srgb, var(--metric-soft) 86%, transparent);
-  color: var(--metric-accent);
-}
-
-.metric-card__label {
-  color: var(--app-color-text-secondary);
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-.metric-card__value {
-  color: var(--app-color-heading);
-  margin: 0;
-  font-size: clamp(1.7rem, 2vw, 2rem);
-  line-height: 1.05;
-}
-
-.metric-card__supporting {
-  font-size: 0.9rem;
-  line-height: 1.45;
 }
 
 .dashboard-content-grid {
@@ -171,37 +118,20 @@
   gap: 1.2rem;
 }
 
-.dashboard-panel {
-  display: grid;
-  gap: 1rem;
-  padding: 1.15rem;
-}
-
-.dashboard-panel__header,
-.dashboard-panel__footer,
 .dashboard-list-item__topline,
 .dashboard-activity-item__topline {
   display: flex;
   gap: 0.75rem;
 }
 
-.dashboard-panel__header,
 .dashboard-list-item__topline,
 .dashboard-activity-item__topline {
   align-items: flex-start;
   justify-content: space-between;
 }
 
-.dashboard-panel__header h2 {
-  font-size: 1.08rem;
-}
-
-.dashboard-panel__footer {
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.dashboard-panel__footer--end {
+.dashboard-footer-end {
+  display: flex;
   justify-content: flex-end;
 }
 
@@ -262,20 +192,6 @@
   overflow: hidden;
 }
 
-.quick-action {
-  justify-content: flex-start;
-  gap: 0.7rem;
-  min-height: 3.15rem;
-  padding-inline: 0.95rem;
-  border-radius: 16px !important;
-}
-
-.quick-action--primary {
-  background: var(--app-color-primary) !important;
-  color: var(--app-color-text-inverse) !important;
-  box-shadow: 0 0.9rem 1.8rem rgba(59, 130, 246, 0.22);
-}
-
 .dashboard-activity-item {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -323,7 +239,6 @@
   color: var(--app-color-muted) !important;
 }
 
-.metric-card__icon-skeleton,
 .dashboard-activity-item__icon-skeleton {
   width: 2.65rem;
   height: 2.65rem;
@@ -334,12 +249,9 @@
 .dashboard-skeleton-line--title { width: min(18rem, 100%); height: 1.45rem; }
 .dashboard-skeleton-line--subtitle,
 .dashboard-skeleton-line--panel-subtitle { height: 0.9rem; }
-.dashboard-skeleton-line--metric-label { width: 52%; height: 0.9rem; }
-.dashboard-skeleton-line--metric-value { width: 48%; height: 1.8rem; }
 .dashboard-skeleton-line--panel-title { height: 1rem; }
 .dashboard-skeleton-line--item-title { width: 56%; height: 0.95rem; }
 .dashboard-skeleton-line--item-meta,
-.dashboard-skeleton-line--metric-supporting,
 .dashboard-skeleton-line--item-body { height: 0.85rem; }
 .dashboard-skeleton-line--action { height: 3.15rem; border-radius: 16px; }
 
@@ -364,11 +276,8 @@
     gap: 1rem;
   }
 
-  .dashboard-hero,
-  .dashboard-panel,
-  .metric-card {
+  .dashboard-hero {
     padding: 1rem;
-    border-radius: 20px;
   }
 
   .dashboard-metrics {

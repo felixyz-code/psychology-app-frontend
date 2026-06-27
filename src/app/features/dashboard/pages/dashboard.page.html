@@ -11,12 +11,7 @@
 
       <div class="dashboard-metrics">
         @for (item of dashboardSkeletonKpis; track $index) {
-          <mat-card class="metric-card metric-card--skeleton">
-            <span class="app-skeleton metric-card__icon-skeleton" aria-hidden="true"></span>
-            <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--metric-label" aria-hidden="true"></span>
-            <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--metric-value" aria-hidden="true"></span>
-            <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--metric-supporting" aria-hidden="true"></span>
-          </mat-card>
+          <app-metric-card icon="hourglass_top" title="Cargando" value="--" [loading]="true" />
         }
       </div>
 
@@ -106,26 +101,21 @@
 
     <section class="dashboard-metrics" aria-label="Metricas principales">
       @for (metric of dashboardMetrics(); track metric.label) {
-        <mat-card class="metric-card" [class]="'metric-card metric-card--' + metric.tone">
-          <div class="metric-card__icon">
-            <mat-icon>{{ metric.icon }}</mat-icon>
-          </div>
-          <span class="metric-card__label">{{ metric.label }}</span>
-          <strong class="metric-card__value">{{ metric.value }}</strong>
-          <p class="metric-card__supporting">{{ metric.supportingText }}</p>
-        </mat-card>
+        <app-metric-card
+          [icon]="metric.icon"
+          [title]="metric.label"
+          [value]="metric.value"
+          [supportingText]="metric.supportingText"
+          [variant]="metric.tone"
+        />
       }
     </section>
 
     <div class="dashboard-content-grid">
-      <mat-card class="dashboard-panel">
-        <div class="dashboard-panel__header">
-          <div>
-            <h2>Proximas citas</h2>
-            <p>Atenciones programadas para hoy con acceso rapido al detalle.</p>
-          </div>
-        </div>
-
+      <app-section-card
+        title="Proximas citas"
+        subtitle="Atenciones programadas para hoy con acceso rapido al detalle."
+      >
         @if (upcomingAppointmentsPreview().length) {
           <div class="dashboard-list">
             @for (appointment of upcomingAppointmentsPreview(); track appointment.id) {
@@ -144,9 +134,10 @@
                 <div class="dashboard-list-item__content">
                   <div class="dashboard-list-item__topline">
                     <h3>{{ getPatientName(appointment.patientId) }}</h3>
-                    <span class="app-status-badge {{ getStatusClass(appointment.status) }}">
-                      {{ getStatusLabel(appointment.status) }}
-                    </span>
+                    <app-status-badge
+                      [label]="getStatusLabel(appointment.status)"
+                      [variant]="getStatusVariant(appointment.status)"
+                    />
                   </div>
 
                   <p class="dashboard-list-item__meta">{{ getAppointmentScheduleLabel(appointment) }}</p>
@@ -155,61 +146,47 @@
               </article>
             }
           </div>
-
-          <div class="dashboard-panel__footer dashboard-panel__footer--end">
-            <button mat-stroked-button type="button" class="dashboard-panel__link" (click)="navigateToAppointments()">
-              Ver agenda
-            </button>
-          </div>
         } @else {
           <div class="dashboard-empty">
             <h3>Sin citas para hoy</h3>
             <p>La agenda del dia esta libre. Puedes crear una nueva cita desde las acciones rapidas.</p>
           </div>
-
-          <div class="dashboard-panel__footer dashboard-panel__footer--end">
-            <button mat-stroked-button type="button" class="dashboard-panel__link" (click)="navigateToAppointments()">
-              Ver agenda
-            </button>
-          </div>
         }
-      </mat-card>
+
+        <div sectionCardFooter class="dashboard-footer-end">
+          <button mat-stroked-button type="button" (click)="navigateToAppointments()">Ver agenda</button>
+        </div>
+      </app-section-card>
 
       <div class="dashboard-side-column">
-        <mat-card class="dashboard-panel">
-          <div class="dashboard-panel__header">
-            <div>
-              <h2>Acciones rapidas</h2>
-              <p>Accesos frecuentes para iniciar tu flujo de trabajo sin salir del dashboard.</p>
-            </div>
-          </div>
-
+        <app-section-card
+          title="Acciones rapidas"
+          subtitle="Accesos frecuentes para iniciar tu flujo de trabajo sin salir del dashboard."
+        >
           <div class="quick-actions">
-            <button mat-flat-button type="button" class="quick-action quick-action--primary" (click)="openCreatePatientDialog()">
-              <mat-icon>person_add</mat-icon>
-              <span>Nuevo paciente</span>
-            </button>
-
-            <button mat-stroked-button type="button" class="quick-action" (click)="openCreateAppointmentDialog()">
-              <mat-icon>event_available</mat-icon>
-              <span>Nueva cita</span>
-            </button>
-
-            <button mat-stroked-button type="button" class="quick-action" (click)="navigateToPatients()">
-              <mat-icon>manage_search</mat-icon>
-              <span>Buscar paciente</span>
-            </button>
+            <app-action-card
+              icon="person_add"
+              label="Nuevo paciente"
+              variant="primary"
+              (triggered)="openCreatePatientDialog()"
+            />
+            <app-action-card
+              icon="event_available"
+              label="Nueva cita"
+              (triggered)="openCreateAppointmentDialog()"
+            />
+            <app-action-card
+              icon="manage_search"
+              label="Buscar paciente"
+              (triggered)="navigateToPatients()"
+            />
           </div>
-        </mat-card>
+        </app-section-card>
 
-        <mat-card class="dashboard-panel">
-          <div class="dashboard-panel__header">
-            <div>
-              <h2>Actividad reciente</h2>
-              <p>Eventos clinicos recientes listos para futura integracion con un feed dedicado.</p>
-            </div>
-          </div>
-
+        <app-section-card
+          title="Actividad reciente"
+          subtitle="Eventos clinicos recientes listos para futura integracion con un feed dedicado."
+        >
           <div class="dashboard-activity">
             @for (activity of recentActivity(); track activity.type + activity.id) {
               <article class="dashboard-activity-item">
@@ -229,12 +206,10 @@
             }
           </div>
 
-          <div class="dashboard-panel__footer">
-            <button mat-button type="button" class="dashboard-history-link" disabled>
-              Ver historial →
-            </button>
+          <div sectionCardFooter>
+            <button mat-button type="button" class="dashboard-history-link" disabled>Ver historial →</button>
           </div>
-        </mat-card>
+        </app-section-card>
       </div>
     </div>
   }

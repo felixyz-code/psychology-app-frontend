@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.action-card {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.7rem;
+  min-height: 3.15rem;
+  padding-inline: 0.95rem;
+  border-radius: 16px !important;
+}
+
+.action-card--primary {
+  background: var(--app-color-primary) !important;
+  color: var(--app-color-text-inverse) !important;
+  box-shadow: 0 0.9rem 1.8rem rgba(59, 130, 246, 0.22);
+}
