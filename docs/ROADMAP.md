@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 8.3 - Daily Agenda
+Sprint 8.4 - Dashboard SaaS
 ```
 
 ---
@@ -125,11 +125,12 @@ Sprint 8.3 - Daily Agenda
 * Sprint 8.1.1 completed - Appointments date range filter and responsive toolbar polish delivered on the global appointments list
 * Sprint 8.2 completed - Calendar View delivered for Appointments with shared state, month navigation and monthly visualization
 * Sprint 8.3 completed - Daily Agenda delivered for Appointments with shared state, daily navigation and polished responsive agenda cards
+* Sprint 8.4 completed - Dashboard delivered as a SaaS-style home screen with primary metrics, upcoming appointments, quick actions, recent activity, responsive behavior and final grid/spacing polish
 
 Next planned sprint:
 
 ```text
-Sprint pending
+Sprint 8.5 - Design System
 ```
 
 ---

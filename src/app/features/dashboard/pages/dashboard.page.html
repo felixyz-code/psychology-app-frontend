@@ -1,259 +1,241 @@
 <section class="dashboard-page">
-  <mat-card class="dashboard-card">
-    <div class="dashboard-card__header">
-      <app-page-header
-        heading="Dashboard clínico"
-        subtitle="Vista operativa del consultorio y seguimiento reciente."
-      />
-    </div>
+  @if (isLoading()) {
+    <section class="dashboard-skeleton" aria-label="Cargando dashboard clinico" aria-busy="true">
+      <mat-card class="dashboard-hero dashboard-hero--skeleton">
+        <div class="dashboard-hero__copy">
+          <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--eyebrow" aria-hidden="true"></span>
+          <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--title" aria-hidden="true"></span>
+          <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--subtitle" aria-hidden="true"></span>
+        </div>
+      </mat-card>
 
-    <div class="dashboard-card__content">
-      @if (isLoading()) {
-        <section class="dashboard-skeleton" aria-label="Cargando dashboard clínico" aria-busy="true">
-          <div class="dashboard-kpis">
-            @for (item of dashboardSkeletonKpis; track $index) {
-              <mat-card class="dashboard-kpi dashboard-kpi--skeleton">
-                <span class="app-skeleton app-skeleton--icon" aria-hidden="true"></span>
-                <span class="app-skeleton app-skeleton-line app-skeleton-line--label" aria-hidden="true"></span>
-                <span class="app-skeleton app-skeleton-line app-skeleton-line--value" aria-hidden="true"></span>
-              </mat-card>
+      <div class="dashboard-metrics">
+        @for (item of dashboardSkeletonKpis; track $index) {
+          <mat-card class="metric-card metric-card--skeleton">
+            <span class="app-skeleton metric-card__icon-skeleton" aria-hidden="true"></span>
+            <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--metric-label" aria-hidden="true"></span>
+            <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--metric-value" aria-hidden="true"></span>
+            <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--metric-supporting" aria-hidden="true"></span>
+          </mat-card>
+        }
+      </div>
+
+      <div class="dashboard-content-grid">
+        <mat-card class="dashboard-panel dashboard-panel--skeleton">
+          <div class="dashboard-panel__header">
+            <div>
+              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-title" aria-hidden="true"></span>
+              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-subtitle" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="dashboard-list">
+            @for (item of dashboardSkeletonList; track $index) {
+              <article class="dashboard-list-item dashboard-list-item--skeleton">
+                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-title" aria-hidden="true"></span>
+                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-meta" aria-hidden="true"></span>
+                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-body" aria-hidden="true"></span>
+              </article>
             }
           </div>
+        </mat-card>
 
-          <div class="dashboard-grid">
-            <mat-card class="dashboard-panel dashboard-panel--skeleton">
-              <div class="dashboard-panel__header">
-                <div>
-                  <span class="app-skeleton app-skeleton-line app-skeleton-line--title" aria-hidden="true"></span>
-                  <span class="app-skeleton app-skeleton-line app-skeleton-line--subtitle" aria-hidden="true"></span>
-                </div>
+        <div class="dashboard-side-column">
+          <mat-card class="dashboard-panel dashboard-panel--skeleton">
+            <div class="dashboard-panel__header">
+              <div>
+                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-title" aria-hidden="true"></span>
+                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-subtitle" aria-hidden="true"></span>
               </div>
+            </div>
 
-              <div class="dashboard-list">
-                @for (item of dashboardSkeletonList; track $index) {
-                  <article class="dashboard-list-item dashboard-list-item--skeleton">
-                    <div class="dashboard-list-item__content">
-                      <div class="dashboard-list-item__topline">
-                        <span class="app-skeleton app-skeleton-line app-skeleton-line--item-title" aria-hidden="true"></span>
-                        <span class="app-skeleton app-skeleton-line app-skeleton-line--badge" aria-hidden="true"></span>
-                      </div>
-                      <span class="app-skeleton app-skeleton-line app-skeleton-line--meta" aria-hidden="true"></span>
-                      <span class="app-skeleton app-skeleton-line app-skeleton-line--body" aria-hidden="true"></span>
-                    </div>
-                  </article>
-                }
-              </div>
-            </mat-card>
-
-            <mat-card class="dashboard-panel dashboard-panel--skeleton">
-              <div class="dashboard-panel__header">
-                <div>
-                  <span class="app-skeleton app-skeleton-line app-skeleton-line--title" aria-hidden="true"></span>
-                  <span class="app-skeleton app-skeleton-line app-skeleton-line--subtitle" aria-hidden="true"></span>
-                </div>
-              </div>
-
-              <div class="dashboard-list">
-                @for (item of dashboardSkeletonList; track $index) {
-                  <article class="dashboard-list-item dashboard-list-item--skeleton">
-                    <div class="dashboard-list-item__content">
-                      <div class="dashboard-list-item__topline">
-                        <span class="app-skeleton app-skeleton-line app-skeleton-line--item-title" aria-hidden="true"></span>
-                        <span class="app-skeleton app-skeleton-line app-skeleton-line--badge" aria-hidden="true"></span>
-                      </div>
-                      <span class="app-skeleton app-skeleton-line app-skeleton-line--meta" aria-hidden="true"></span>
-                      <span class="app-skeleton app-skeleton-line app-skeleton-line--body" aria-hidden="true"></span>
-                    </div>
-                  </article>
-                }
-              </div>
-            </mat-card>
-          </div>
+            <div class="quick-actions quick-actions--skeleton">
+              @for (item of dashboardSkeletonList; track $index) {
+                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--action" aria-hidden="true"></span>
+              }
+            </div>
+          </mat-card>
 
           <mat-card class="dashboard-panel dashboard-panel--skeleton">
             <div class="dashboard-panel__header">
               <div>
-                <span class="app-skeleton app-skeleton-line app-skeleton-line--title" aria-hidden="true"></span>
-                <span class="app-skeleton app-skeleton-line app-skeleton-line--subtitle" aria-hidden="true"></span>
+                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-title" aria-hidden="true"></span>
+                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-subtitle" aria-hidden="true"></span>
               </div>
             </div>
 
             <div class="dashboard-activity">
               @for (item of dashboardSkeletonList; track $index) {
                 <article class="dashboard-activity-item dashboard-activity-item--skeleton">
-                  <span class="app-skeleton app-skeleton--icon" aria-hidden="true"></span>
+                  <span class="app-skeleton dashboard-activity-item__icon-skeleton" aria-hidden="true"></span>
                   <div class="dashboard-activity-item__content">
-                    <span class="app-skeleton app-skeleton-line app-skeleton-line--item-title" aria-hidden="true"></span>
-                    <span class="app-skeleton app-skeleton-line app-skeleton-line--body" aria-hidden="true"></span>
+                    <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-title" aria-hidden="true"></span>
+                    <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-body" aria-hidden="true"></span>
                   </div>
                 </article>
               }
             </div>
           </mat-card>
-        </section>
-      } @else if (errorMessage()) {
-        <div class="dashboard-state dashboard-state--error">
-          <p>{{ errorMessage() }}</p>
         </div>
-      } @else {
-        @if (failedSourcesMessage()) {
-          <p class="dashboard-warning" role="status">{{ failedSourcesMessage() }}</p>
-        }
+      </div>
+    </section>
+  } @else if (errorMessage()) {
+    <mat-card class="dashboard-state dashboard-state--error">
+      <p>{{ errorMessage() }}</p>
+    </mat-card>
+  } @else {
+    <mat-card class="dashboard-hero">
+      <div class="dashboard-hero__copy">
+        <span class="dashboard-hero__eyebrow">Inicio del dia</span>
+        <app-page-header
+          heading="Bienvenido de nuevo"
+          subtitle="Resumen rapido para organizar tu jornada clinica y acceder a las acciones clave."
+        />
+      </div>
 
-        <div class="dashboard-kpis">
-          <mat-card class="dashboard-kpi">
-            <mat-icon>groups</mat-icon>
-            <span>Total de pacientes</span>
-            <strong>{{ data().patients.length }}</strong>
-          </mat-card>
+      <div class="dashboard-hero__meta">
+        <span class="dashboard-hero__label">Fecha actual</span>
+        <strong>{{ today() | date: 'EEEE, dd MMMM yyyy' }}</strong>
+        <p>Tablero principal del consultorio.</p>
+      </div>
+    </mat-card>
 
-          <mat-card class="dashboard-kpi">
-            <mat-icon>today</mat-icon>
-            <span>Citas de hoy</span>
-            <strong>{{ todayAppointments().length }}</strong>
-          </mat-card>
+    @if (failedSourcesMessage()) {
+      <p class="dashboard-warning" role="status">{{ failedSourcesMessage() }}</p>
+    }
 
-          <mat-card class="dashboard-kpi">
-            <mat-icon>event</mat-icon>
-            <span>Próximas citas</span>
-            <strong>{{ upcomingAppointments().length }}</strong>
-          </mat-card>
+    <section class="dashboard-metrics" aria-label="Metricas principales">
+      @for (metric of dashboardMetrics(); track metric.label) {
+        <mat-card class="metric-card" [class]="'metric-card metric-card--' + metric.tone">
+          <div class="metric-card__icon">
+            <mat-icon>{{ metric.icon }}</mat-icon>
+          </div>
+          <span class="metric-card__label">{{ metric.label }}</span>
+          <strong class="metric-card__value">{{ metric.value }}</strong>
+          <p class="metric-card__supporting">{{ metric.supportingText }}</p>
+        </mat-card>
+      }
+    </section>
 
-          <mat-card class="dashboard-kpi">
-            <mat-icon>notes</mat-icon>
-            <span>Notas recientes</span>
-            <strong>{{ recentNotes().length }}</strong>
-          </mat-card>
-
-          <mat-card class="dashboard-kpi">
-            <mat-icon>description</mat-icon>
-            <span>Documentos registrados</span>
-            <strong>{{ data().documents.length }}</strong>
-          </mat-card>
+    <div class="dashboard-content-grid">
+      <mat-card class="dashboard-panel">
+        <div class="dashboard-panel__header">
+          <div>
+            <h2>Proximas citas</h2>
+            <p>Atenciones programadas para hoy con acceso rapido al detalle.</p>
+          </div>
         </div>
 
-        <div class="dashboard-grid">
-          <mat-card class="dashboard-panel">
-            <div class="dashboard-panel__header">
-              <div>
-                <h2>Agenda de hoy</h2>
-                <p>Citas programadas para la jornada actual.</p>
-              </div>
-            </div>
+        @if (upcomingAppointmentsPreview().length) {
+          <div class="dashboard-list">
+            @for (appointment of upcomingAppointmentsPreview(); track appointment.id) {
+              <article
+                class="dashboard-list-item dashboard-list-item--interactive"
+                tabindex="0"
+                role="button"
+                [attr.aria-label]="'Abrir detalle de la cita de ' + getPatientName(appointment.patientId)"
+                (click)="openAppointmentDetails(appointment)"
+                (keydown)="handleAppointmentCardKeydown($event, appointment)"
+              >
+                <div class="dashboard-list-item__time">
+                  <span>{{ appointment.scheduledAt | date: 'HH:mm' }}</span>
+                </div>
 
-            @if (todayAppointments().length) {
-              <div class="dashboard-list">
-                @for (appointment of todayAppointmentsPreview(); track appointment.id) {
-                  <article
-                    class="dashboard-list-item dashboard-list-item--interactive"
-                    tabindex="0"
-                    role="button"
-                    [attr.aria-label]="'Abrir detalle de la cita de ' + getPatientName(appointment.patientId)"
-                    (click)="openAppointmentDetails(appointment)"
-                    (keydown)="handleAppointmentCardKeydown($event, appointment)"
-                  >
-                    <div class="dashboard-list-item__content">
-                      <div class="dashboard-list-item__topline">
-                        <h3>{{ getPatientName(appointment.patientId) }}</h3>
-                        <span class="app-status-badge {{ getStatusClass(appointment.status) }}">
-                          {{ getStatusLabel(appointment.status) }}
-                        </span>
-                      </div>
-                      <p class="dashboard-list-item__meta">{{ getAppointmentScheduleLabel(appointment) }}</p>
-                      <p class="dashboard-list-item__note">{{ getAppointmentDescription(appointment) }}</p>
-                    </div>
-                  </article>
-                }
-              </div>
-            } @else {
-              <div class="dashboard-empty">
-                <h3>No hay citas para hoy</h3>
-                <p>La agenda del día está libre.</p>
-              </div>
+                <div class="dashboard-list-item__content">
+                  <div class="dashboard-list-item__topline">
+                    <h3>{{ getPatientName(appointment.patientId) }}</h3>
+                    <span class="app-status-badge {{ getStatusClass(appointment.status) }}">
+                      {{ getStatusLabel(appointment.status) }}
+                    </span>
+                  </div>
+
+                  <p class="dashboard-list-item__meta">{{ getAppointmentScheduleLabel(appointment) }}</p>
+                  <p class="dashboard-list-item__note">{{ getAppointmentDescription(appointment) }}</p>
+                </div>
+              </article>
             }
-          </mat-card>
+          </div>
 
-          <mat-card class="dashboard-panel">
-            <div class="dashboard-panel__header">
-              <div>
-                <h2>Próximas citas</h2>
-                <p>Siguientes atenciones programadas.</p>
-              </div>
-            </div>
+          <div class="dashboard-panel__footer dashboard-panel__footer--end">
+            <button mat-stroked-button type="button" class="dashboard-panel__link" (click)="navigateToAppointments()">
+              Ver agenda
+            </button>
+          </div>
+        } @else {
+          <div class="dashboard-empty">
+            <h3>Sin citas para hoy</h3>
+            <p>La agenda del dia esta libre. Puedes crear una nueva cita desde las acciones rapidas.</p>
+          </div>
 
-            @if (upcomingAppointments().length) {
-              <div class="dashboard-list">
-                @for (appointment of upcomingAppointmentsPreview(); track appointment.id) {
-                  <article
-                    class="dashboard-list-item dashboard-list-item--interactive"
-                    tabindex="0"
-                    role="button"
-                    [attr.aria-label]="'Abrir detalle de la cita de ' + getPatientName(appointment.patientId)"
-                    (click)="openAppointmentDetails(appointment)"
-                    (keydown)="handleAppointmentCardKeydown($event, appointment)"
-                  >
-                    <div class="dashboard-list-item__content">
-                      <div class="dashboard-list-item__topline">
-                        <h3>{{ getPatientName(appointment.patientId) }}</h3>
-                        <span class="app-status-badge {{ getStatusClass(appointment.status) }}">
-                          {{ getStatusLabel(appointment.status) }}
-                        </span>
-                      </div>
-                      <p class="dashboard-list-item__meta">{{ getAppointmentScheduleLabel(appointment) }}</p>
-                      <p class="dashboard-list-item__note">{{ getAppointmentDescription(appointment) }}</p>
-                    </div>
-                  </article>
-                }
-              </div>
-            } @else {
-              <div class="dashboard-empty">
-                <h3>No hay próximas citas</h3>
-                <p>Las citas futuras aparecerán aquí.</p>
-              </div>
-            }
-          </mat-card>
-        </div>
-
-        @if (todayAppointments().length || upcomingAppointments().length) {
-          <div class="dashboard-agenda-cta">
-            <button type="button" class="dashboard-link" (click)="navigateToAppointments()">
-              Ver agenda completa →
+          <div class="dashboard-panel__footer dashboard-panel__footer--end">
+            <button mat-stroked-button type="button" class="dashboard-panel__link" (click)="navigateToAppointments()">
+              Ver agenda
             </button>
           </div>
         }
+      </mat-card>
+
+      <div class="dashboard-side-column">
+        <mat-card class="dashboard-panel">
+          <div class="dashboard-panel__header">
+            <div>
+              <h2>Acciones rapidas</h2>
+              <p>Accesos frecuentes para iniciar tu flujo de trabajo sin salir del dashboard.</p>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <button mat-flat-button type="button" class="quick-action quick-action--primary" (click)="openCreatePatientDialog()">
+              <mat-icon>person_add</mat-icon>
+              <span>Nuevo paciente</span>
+            </button>
+
+            <button mat-stroked-button type="button" class="quick-action" (click)="openCreateAppointmentDialog()">
+              <mat-icon>event_available</mat-icon>
+              <span>Nueva cita</span>
+            </button>
+
+            <button mat-stroked-button type="button" class="quick-action" (click)="navigateToPatients()">
+              <mat-icon>manage_search</mat-icon>
+              <span>Buscar paciente</span>
+            </button>
+          </div>
+        </mat-card>
 
         <mat-card class="dashboard-panel">
           <div class="dashboard-panel__header">
             <div>
               <h2>Actividad reciente</h2>
-              <p>Notas de sesión y documentos agregados recientemente.</p>
+              <p>Eventos clinicos recientes listos para futura integracion con un feed dedicado.</p>
             </div>
           </div>
 
-          @if (recentActivity().length) {
-            <div class="dashboard-activity">
-              @for (activity of recentActivity(); track activity.type + activity.id) {
-                <article class="dashboard-activity-item">
+          <div class="dashboard-activity">
+            @for (activity of recentActivity(); track activity.type + activity.id) {
+              <article class="dashboard-activity-item">
+                <div class="dashboard-activity-item__icon">
                   <mat-icon>{{ getActivityIcon(activity.type) }}</mat-icon>
-                  <div>
+                </div>
+
+                <div class="dashboard-activity-item__content">
+                  <div class="dashboard-activity-item__topline">
                     <h3>{{ activity.title }}</h3>
-                    <p>
-                      {{ getActivityTypeLabel(activity.type) }} ·
-                      {{ activity.patientName }} ·
-                      {{ activity.date | date: 'dd/MM/yyyy HH:mm' }}
-                    </p>
+                    <span>{{ activity.date | date: 'dd/MM HH:mm' }}</span>
                   </div>
-                </article>
-              }
-            </div>
-          } @else {
-            <div class="dashboard-empty">
-              <h3>No hay actividad reciente</h3>
-              <p>Las notas y documentos recientes aparecerán aquí.</p>
-            </div>
-          }
+                  <p>{{ getActivityTypeLabel(activity.type) }} · {{ activity.patientName }}</p>
+                  <p>{{ activity.description }}</p>
+                </div>
+              </article>
+            }
+          </div>
+
+          <div class="dashboard-panel__footer">
+            <button mat-button type="button" class="dashboard-history-link" disabled>
+              Ver historial →
+            </button>
+          </div>
         </mat-card>
-      }
+      </div>
     </div>
-  </mat-card>
+  }
 </section>

@@ -8,6 +8,33 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 8
 
+## Sprint 8.4 - Dashboard SaaS
+
+### Added
+
+* Nuevo Dashboard tipo SaaS como pantalla de inicio principal.
+* Header de bienvenida con fecha actual visible.
+* Cuatro metricas superiores para pacientes, citas de hoy, proxima cita y Session Notes.
+* Seccion de proximas citas con foco en la agenda del dia.
+* Seccion de acciones rapidas para crear paciente, crear cita y buscar paciente.
+* Seccion de actividad reciente como resumen clinico visible desde la pantalla inicial.
+
+### Changed
+
+* Reutilizados servicios existentes de Patients, Appointments, Session Notes, Documents y Case Files para construir la vista sin modificar contratos HTTP.
+* Redisenada la seccion de citas para enfocarla en las proximas atenciones del dia con mejor jerarquia visual y acceso rapido al detalle.
+* Reestructurada la actividad reciente para dejarla lista para futura conexion a un feed real usando primero datos derivados del estado actual.
+* Dashboard refinado para mostrar solo 3 citas proximas y 3 eventos recientes, manteniendo la experiencia como resumen ejecutivo.
+* Mejoradas las tarjetas de metricas con hover sutil, transiciones mas suaves y acentos cromaticos diferenciados por metrica.
+* Ajustados layout, grid y espaciado para alinear las columnas inferiores con la reticula de metricas superiores y mejorar el balance visual general.
+* Mejorado el comportamiento responsive del Dashboard para Desktop, Tablet y Mobile.
+
+### Fixed
+
+* Mantenida la carga segura del Dashboard mediante fallbacks por fuente sin romper la UI cuando algun endpoint no responde.
+* Evitada la dispersion de datos fallback al centralizarlos dentro del componente del Dashboard.
+* Corregida la separacion vertical entre Acciones rapidas y Actividad reciente para mantener un ritmo visual consistente.
+
 ## Sprint 8.3 - Daily Agenda
 
 ### Added
