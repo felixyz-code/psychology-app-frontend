@@ -1,7 +1,7 @@
 <section class="financial-transaction-detail-page">
   <app-page-header
     heading="Detalle de transaccion financiera"
-    subtitle="Placeholder minimo para futura vista de detalle."
+    subtitle="Consulta el movimiento financiero registrado en el sistema."
     [breadcrumbs]="[
       { label: 'Dashboard', url: '/dashboard' },
       { label: 'Finanzas', url: '/financial-transactions' },
@@ -9,16 +9,155 @@
     ]"
   />
 
-  <app-section-card
-    title="Detalle pendiente"
-    subtitle="Aqui vivira el consumo de `GET /financial-transactions/:id` y sus acciones asociadas."
-  >
-    <div class="financial-transaction-detail-placeholder">
-      <p><strong>ID de ruta:</strong> {{ transactionId || 'No disponible' }}</p>
-      <div class="financial-transaction-detail-placeholder__actions">
-        <a mat-button routerLink="/financial-transactions">Volver a finanzas</a>
-        <a mat-stroked-button [routerLink]="['/financial-transactions', transactionId, 'edit']">Editar placeholder</a>
+  @if (isLoading()) {
+    <app-section-card title="Detalle de transaccion" subtitle="Cargando informacion del movimiento financiero.">
+      <div class="financial-transaction-detail-state" aria-live="polite">
+        <mat-spinner diameter="40" />
+        <p>Cargando transaccion...</p>
       </div>
-    </div>
-  </app-section-card>
+    </app-section-card>
+  } @else if (errorMessage()) {
+    <app-section-card title="Detalle de transaccion" subtitle="No fue posible obtener la informacion solicitada.">
+      <div class="financial-transaction-detail-state financial-transaction-detail-state--error" role="alert">
+        <p>{{ errorMessage() }}</p>
+        <div class="financial-transaction-detail-actions">
+          <a mat-button routerLink="/financial-transactions">
+            <mat-icon>arrow_back</mat-icon>
+            <span>Volver al listado</span>
+          </a>
+          <button mat-stroked-button type="button" (click)="retryLoad()">
+            <mat-icon>refresh</mat-icon>
+            <span>Reintentar</span>
+          </button>
+        </div>
+      </div>
+    </app-section-card>
+  } @else if (transaction(); as transaction) {
+    <app-section-card
+      title="Resumen de la transaccion"
+      subtitle="Vista general del concepto, estado y referencias principales."
+    >
+      <div sectionCardActions class="financial-transaction-detail-header-actions">
+        <a mat-button routerLink="/financial-transactions">
+          <mat-icon>arrow_back</mat-icon>
+          <span>Volver al listado</span>
+        </a>
+        <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']">
+          <mat-icon>edit</mat-icon>
+          <span>Editar transaccion</span>
+        </a>
+      </div>
+
+      <div class="financial-transaction-detail-grid">
+        <div class="financial-transaction-detail-grid__full">
+          <span class="financial-transaction-detail-label">Concepto</span>
+          <p>{{ transaction.concept }}</p>
+        </div>
+
+        <div>
+          <span class="financial-transaction-detail-label">Tipo</span>
+          <app-status-badge [label]="getTypeLabel(transaction.type)" [variant]="getTypeVariant(transaction.type)" />
+        </div>
+
+        <div>
+          <span class="financial-transaction-detail-label">Estado</span>
+          <app-status-badge [label]="getStatusLabel(transaction.status)" [variant]="getStatusVariant(transaction.status)" />
+        </div>
+
+        <div>
+          <span class="financial-transaction-detail-label">Categoria</span>
+          <p>{{ getCategoryLabel(transaction.category) }}</p>
+        </div>
+
+        <div>
+          <span class="financial-transaction-detail-label">Monto</span>
+          <p class="financial-transaction-detail-amount">{{ formatAmount(transaction.amount, transaction.currency) }}</p>
+        </div>
+
+        <div>
+          <span class="financial-transaction-detail-label">Moneda</span>
+          <p>{{ transaction.currency }}</p>
+        </div>
+
+        <div>
+          <span class="financial-transaction-detail-label">Fecha del movimiento</span>
+          <p>{{ formatDateTime(transaction.occurredAt) }}</p>
+        </div>
+
+        @if (transaction.dueDate) {
+          <div>
+            <span class="financial-transaction-detail-label">Fecha de vencimiento</span>
+            <p>{{ formatDateTime(transaction.dueDate) }}</p>
+          </div>
+        }
+
+        @if (transaction.paymentMethod) {
+          <div>
+            <span class="financial-transaction-detail-label">Metodo de pago</span>
+            <p>{{ getPaymentMethodLabel(transaction.paymentMethod) }}</p>
+          </div>
+        }
+
+        @if (transaction.patientId) {
+          <div>
+            <span class="financial-transaction-detail-label">Paciente relacionado</span>
+            <p>{{ transaction.patientId }}</p>
+          </div>
+        }
+
+        @if (transaction.appointmentId) {
+          <div>
+            <span class="financial-transaction-detail-label">Cita relacionada</span>
+            <p>{{ transaction.appointmentId }}</p>
+          </div>
+        }
+
+        @if (transaction.createdById) {
+          <div>
+            <span class="financial-transaction-detail-label">Creado por</span>
+            <p>{{ transaction.createdById }}</p>
+          </div>
+        }
+      </div>
+    </app-section-card>
+
+    @if (transaction.description || transaction.notes) {
+      <app-section-card title="Informacion adicional" subtitle="Descripcion y notas asociadas al movimiento.">
+        <div class="financial-transaction-detail-grid">
+          @if (transaction.description) {
+            <div class="financial-transaction-detail-grid__full">
+              <span class="financial-transaction-detail-label">Descripcion</span>
+              <p class="financial-transaction-detail-multiline">{{ transaction.description }}</p>
+            </div>
+          }
+
+          @if (transaction.notes) {
+            <div class="financial-transaction-detail-grid__full">
+              <span class="financial-transaction-detail-label">Notas</span>
+              <p class="financial-transaction-detail-multiline">{{ transaction.notes }}</p>
+            </div>
+          }
+        </div>
+      </app-section-card>
+    }
+
+    <app-section-card title="Trazabilidad" subtitle="Datos tecnicos de creacion y actualizacion del registro.">
+      <div class="financial-transaction-detail-grid">
+        <div>
+          <span class="financial-transaction-detail-label">Fecha de creacion</span>
+          <p>{{ formatDateTime(transaction.createdAt) }}</p>
+        </div>
+
+        <div>
+          <span class="financial-transaction-detail-label">Ultima actualizacion</span>
+          <p>{{ formatDateTime(transaction.updatedAt) }}</p>
+        </div>
+
+        <div class="financial-transaction-detail-grid__full">
+          <span class="financial-transaction-detail-label">ID de la transaccion</span>
+          <p>{{ transaction.id }}</p>
+        </div>
+      </div>
+    </app-section-card>
+  }
 </section>

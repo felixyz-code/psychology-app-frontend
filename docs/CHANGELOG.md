@@ -8,6 +8,20 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 9
 
+## Sprint 9.11 - Financial Transaction Detail
+
+### Added
+
+* Pagina real `Detalle de transaccion financiera` conectada a `GET /financial-transactions/:id`.
+* Carga inicial por `id` con loading, error basico con reintento y acciones de navegacion hacia listado y edicion.
+* Visualizacion de los campos principales de la transaccion, incluyendo referencias opcionales y trazabilidad del registro.
+
+### Changed
+
+* Reemplazado el placeholder de detalle por una vista consistente con Patients, Appointments y Documents usando `SectionCardComponent`.
+* Reutilizado `StatusBadgeComponent` para representar tipo y estado sin modificar el contrato financiero existente.
+* Conservado `FinancialTransactionResponse.amount` como `string`, aplicando formato solo a nivel visual.
+
 ## Sprint 9.10 - Financial Transaction Edit
 
 ### Added
