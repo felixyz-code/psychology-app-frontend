@@ -54,6 +54,19 @@
         </span>
       </a>
 
+      <a
+        routerLink="/financial-transactions"
+        routerLinkActive="sidebar__link--active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        class="sidebar__link"
+        (click)="navSelected.emit()"
+      >
+        <mat-icon>payments</mat-icon>
+        <span class="sidebar__content">
+          <span class="sidebar__title">Finanzas</span>
+        </span>
+      </a>
+
       <div class="sidebar__link sidebar__link--disabled" aria-disabled="true">
         <mat-icon>folder_shared</mat-icon>
         <span class="sidebar__content">

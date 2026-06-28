@@ -30,6 +30,13 @@ export const routes: Routes = [
           import('./features/appointments/pages/appointments-list.page').then((m) => m.AppointmentsListPage),
       },
       {
+        path: 'financial-transactions',
+        loadChildren: () =>
+          import('./features/financial-transactions/financial-transactions.routes').then(
+            (m) => m.financialTransactionsRoutes
+          ),
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',

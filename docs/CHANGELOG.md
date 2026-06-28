@@ -6,6 +6,30 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# Sprint 9
+
+## Sprint 9.7 - Financial Transactions List
+
+### Added
+
+* Nueva vista de listado para `financial-transactions` conectada a `GET /financial-transactions`.
+* Tabla global de transacciones financieras reutilizando `SectionCardComponent` y el patron visual de listados existentes.
+* Empty state, loading state y manejo basico de error para el listado financiero.
+* Boton visible `Nueva transaccion` enlazado a la ruta placeholder ya creada.
+* Navegacion visible hacia detalle y edicion mediante las rutas placeholder existentes.
+
+### Changed
+
+* Reutilizado `StatusBadgeComponent` para representar tipo y estado de cada transaccion.
+* Conservado `amount` como `string` en el modelo de respuesta y formateado solo en la vista.
+* Mantenido el tratamiento de fechas como strings ISO, con formateo visual local en la pagina.
+
+### Fixed
+
+* La ruta de Finanzas deja de mostrarse como placeholder y queda alineada con la experiencia de tablas ya usada en Patients y Appointments.
+
+---
+
 # Sprint 8
 
 ## Sprint 8.6 - Global UI Polish

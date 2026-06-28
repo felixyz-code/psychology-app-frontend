@@ -1,0 +1,20 @@
+.financial-transaction-detail-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.financial-transaction-detail-placeholder {
+  display: grid;
+  gap: 1rem;
+}
+
+.financial-transaction-detail-placeholder p {
+  margin: 0;
+  color: #52607a;
+}
+
+.financial-transaction-detail-placeholder__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

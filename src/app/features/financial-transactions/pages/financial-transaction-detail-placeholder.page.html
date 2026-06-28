@@ -1,0 +1,24 @@
+<section class="financial-transaction-detail-page">
+  <app-page-header
+    heading="Detalle de transaccion financiera"
+    subtitle="Placeholder minimo para futura vista de detalle."
+    [breadcrumbs]="[
+      { label: 'Dashboard', url: '/dashboard' },
+      { label: 'Finanzas', url: '/financial-transactions' },
+      { label: 'Detalle' },
+    ]"
+  />
+
+  <app-section-card
+    title="Detalle pendiente"
+    subtitle="Aqui vivira el consumo de `GET /financial-transactions/:id` y sus acciones asociadas."
+  >
+    <div class="financial-transaction-detail-placeholder">
+      <p><strong>ID de ruta:</strong> {{ transactionId || 'No disponible' }}</p>
+      <div class="financial-transaction-detail-placeholder__actions">
+        <a mat-button routerLink="/financial-transactions">Volver a finanzas</a>
+        <a mat-stroked-button [routerLink]="['/financial-transactions', transactionId, 'edit']">Editar placeholder</a>
+      </div>
+    </div>
+  </app-section-card>
+</section>

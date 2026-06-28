@@ -1,0 +1,21 @@
+<section class="financial-transaction-form-page">
+  <app-page-header
+    heading="Nueva transaccion financiera"
+    subtitle="Placeholder minimo para la futura captura basada en CreateFinancialTransactionDto."
+    [breadcrumbs]="[
+      { label: 'Dashboard', url: '/dashboard' },
+      { label: 'Finanzas', url: '/financial-transactions' },
+      { label: 'Nuevo' },
+    ]"
+  />
+
+  <app-section-card
+    title="Formulario pendiente"
+    subtitle="Aqui vivira el flujo de alta cuando el sprint incluya formularios."
+  >
+    <div class="financial-transaction-form-placeholder">
+      <p>El contrato ya esta tipado en frontend y el servicio ya puede ejecutar `POST /financial-transactions`.</p>
+      <a mat-button routerLink="/financial-transactions">Volver a finanzas</a>
+    </div>
+  </app-section-card>
+</section>

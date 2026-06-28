@@ -1,0 +1,21 @@
+<section class="financial-transaction-edit-page">
+  <app-page-header
+    heading="Editar transaccion financiera"
+    subtitle="Placeholder minimo para futura edicion basada en UpdateFinancialTransactionDto."
+    [breadcrumbs]="[
+      { label: 'Dashboard', url: '/dashboard' },
+      { label: 'Finanzas', url: '/financial-transactions' },
+      { label: 'Editar' },
+    ]"
+  />
+
+  <app-section-card
+    title="Edicion pendiente"
+    subtitle="Aqui vivira el consumo de `PATCH /financial-transactions/:id`."
+  >
+    <div class="financial-transaction-edit-placeholder">
+      <p><strong>ID de ruta:</strong> {{ transactionId || 'No disponible' }}</p>
+      <a mat-button [routerLink]="['/financial-transactions', transactionId]">Volver al detalle</a>
+    </div>
+  </app-section-card>
+</section>
