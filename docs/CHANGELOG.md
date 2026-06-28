@@ -8,6 +8,20 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 9
 
+## Sprint 9.10 - Financial Transaction Edit
+
+### Added
+
+* Pagina real `Editar transaccion financiera` conectada a `GET /financial-transactions/:id` y `PATCH /financial-transactions/:id`.
+* Carga inicial por `id` con loading, prefill del formulario y error basico con reintento si la transaccion no se puede obtener.
+* Estado de submit durante la actualizacion y navegacion de regreso al listado financiero al guardar exitosamente.
+
+### Changed
+
+* Reutilizado el formulario financiero existente para los flujos de creacion y edicion manteniendo consistencia visual.
+* La edicion convierte fechas ISO del backend a valores compatibles con `datetime-local` y las envia nuevamente como strings compatibles con el backend.
+* El payload de actualizacion omite campos opcionales vacios sin alterar `FinancialTransactionResponse.amount` como `string`.
+
 ## Sprint 9.9 - Financial Transaction Create
 
 ### Added

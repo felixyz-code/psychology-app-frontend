@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 9.9 - Financial Transaction Create
+Sprint 9.10 - Financial Transaction Edit
 ```
 
 ---

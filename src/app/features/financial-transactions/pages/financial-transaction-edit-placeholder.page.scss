@@ -3,12 +3,38 @@
   gap: 1.5rem;
 }
 
-.financial-transaction-edit-placeholder {
+.financial-transaction-edit-state {
   display: grid;
+  justify-items: center;
   gap: 1rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  border: 1px solid var(--app-color-border, #d9e1ec);
+  border-radius: 1rem;
+  background: var(--app-color-surface, #ffffff);
 }
 
-.financial-transaction-edit-placeholder p {
+.financial-transaction-edit-state p {
   margin: 0;
-  color: #52607a;
+  color: var(--app-color-text-secondary, #52607a);
+}
+
+.financial-transaction-edit-state--error {
+  border-color: var(--app-color-danger-border, #f1b0b7);
+}
+
+.financial-transaction-edit-state__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .financial-transaction-edit-state__actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .financial-transaction-edit-state__actions button {
+    width: 100%;
+  }
 }
