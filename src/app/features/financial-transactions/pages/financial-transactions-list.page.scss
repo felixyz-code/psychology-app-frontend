@@ -12,6 +12,32 @@
   white-space: nowrap;
 }
 
+.financial-transactions-toolbar {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+}
+
+.financial-transactions-toolbar__filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.financial-transactions-filter {
+  width: 100%;
+  min-width: 0;
+}
+
+.financial-transactions-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
 .financial-transactions-state {
   display: grid;
   justify-items: center;
@@ -67,9 +93,27 @@
   gap: 0.25rem;
 }
 
+@media (max-width: 1120px) {
+  .financial-transactions-toolbar__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 720px) {
   .financial-transactions-card__header-actions,
   .financial-transactions-card__create-button {
+    width: 100%;
+  }
+
+  .financial-transactions-toolbar__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .financial-transactions-toolbar__actions {
+    justify-content: stretch;
+  }
+
+  .financial-transactions-toolbar__actions button {
     width: 100%;
   }
 }

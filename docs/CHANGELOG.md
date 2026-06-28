@@ -8,6 +8,35 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 9
 
+## Sprint 9.9 - Financial Transaction Create
+
+### Added
+
+* Pagina real `Nueva transaccion` conectada a `POST /financial-transactions`.
+* Formulario Reactive Forms con todos los campos permitidos por `CreateFinancialTransactionDto`.
+* Estados de submit con loading, error basico y navegacion de regreso al listado al crear exitosamente.
+* Boton `Cancelar` para volver al listado financiero sin enviar cambios.
+
+### Changed
+
+* Reemplazado el placeholder de creacion por una captura funcional alineada al patron visual de formularios existente.
+* Los campos opcionales se omiten del payload cuando no tienen valor para respetar el contrato backend.
+* `amount` se envia como `number` y las fechas como strings derivadas del formulario compatibles con el backend.
+
+## Sprint 9.8 - Financial Transactions Filters
+
+### Added
+
+* Toolbar de filtros basicos en el listado global de transacciones financieras.
+* Controles visibles para tipo, estado, categoria, metodo de pago, fecha desde y fecha hasta.
+* Botones `Aplicar filtros` y `Limpiar filtros` alineados al patron responsive usado en listados existentes.
+
+### Changed
+
+* El listado financiero ahora consume `GET /financial-transactions` con query params opcionales soportados por el backend.
+* Reutilizado el servicio HTTP existente de Finanzas sin modificar el contrato ni el backend.
+* Conservado el comportamiento de loading, empty state, error y reintento durante la carga filtrada o completa.
+
 ## Sprint 9.7 - Financial Transactions List
 
 ### Added

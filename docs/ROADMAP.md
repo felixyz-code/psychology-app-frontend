@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 8.6 - Global UI Polish
+Sprint 9.9 - Financial Transaction Create
 ```
 
 ---
@@ -131,7 +131,7 @@ Sprint 8.6 - Global UI Polish
 Next planned sprint:
 
 ```text
-Sprint 8.7 - Quality and UX Hardening
+Sprint 10.0 - Financial Transactions Continuation
 ```
 
 ---

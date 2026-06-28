@@ -1,9 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { ReactiveFormsModule, NonNullableFormBuilder } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
@@ -12,6 +16,7 @@ import { SectionCardComponent } from '../../../shared/components/section-card/se
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import {
   FinancialTransactionCategory,
+  FindFinancialTransactionsQueryDto,
   FinancialTransactionResponse,
   FinancialTransactionStatus,
   FinancialTransactionType,
@@ -24,10 +29,14 @@ import { FinancialTransactionsService } from '../services/financial-transactions
   standalone: true,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
+    MatFormFieldModule,
     MatIconModule,
+    MatInputModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     MatTableModule,
     DataTableEmptyStateComponent,
     PageHeaderComponent,
@@ -39,21 +48,45 @@ import { FinancialTransactionsService } from '../services/financial-transactions
 })
 export class FinancialTransactionsListPage {
   private readonly financialTransactionsService = inject(FinancialTransactionsService);
+  private readonly formBuilder = inject(NonNullableFormBuilder);
 
   readonly displayedColumns = ['concept', 'type', 'category', 'amount', 'currency', 'status', 'occurredAt', 'paymentMethod', 'actions'];
+  readonly transactionTypes: FinancialTransactionType[] = ['INCOME', 'EXPENSE', 'ADJUSTMENT', 'REFUND'];
+  readonly transactionStatuses: FinancialTransactionStatus[] = ['PENDING', 'COMPLETED', 'CANCELLED'];
+  readonly transactionCategories: FinancialTransactionCategory[] = [
+    'SESSION',
+    'ASSESSMENT',
+    'MANUAL',
+    'RENT',
+    'UTILITIES',
+    'SUPPLIES',
+    'SOFTWARE',
+    'SALARY',
+    'OTHER',
+  ];
+  readonly paymentMethods: PaymentMethod[] = ['CASH', 'CARD', 'TRANSFER', 'CHECK', 'OTHER'];
   readonly transactions = signal<FinancialTransactionResponse[]>([]);
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
+  readonly appliedFilters = signal<FindFinancialTransactionsQueryDto>({});
+  readonly filtersForm = this.formBuilder.group({
+    type: '',
+    status: '',
+    category: '',
+    paymentMethod: '',
+    from: '',
+    to: '',
+  });
 
   constructor() {
     this.loadTransactions();
   }
 
-  loadTransactions(): void {
+  loadTransactions(query: FindFinancialTransactionsQueryDto = this.appliedFilters()): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    this.financialTransactionsService.findAll().subscribe({
+    this.financialTransactionsService.findAll(query).subscribe({
       next: (transactions) => {
         this.transactions.set(transactions);
         this.isLoading.set(false);
@@ -64,6 +97,29 @@ export class FinancialTransactionsListPage {
         this.isLoading.set(false);
       },
     });
+  }
+
+  applyFilters(): void {
+    const filters = this.buildFiltersQuery();
+    this.appliedFilters.set(filters);
+    this.loadTransactions(filters);
+  }
+
+  clearFilters(): void {
+    this.filtersForm.reset({
+      type: '',
+      status: '',
+      category: '',
+      paymentMethod: '',
+      from: '',
+      to: '',
+    });
+    this.appliedFilters.set({});
+    this.loadTransactions({});
+  }
+
+  hasActiveFilters(): boolean {
+    return Object.keys(this.appliedFilters()).length > 0;
   }
 
   getTypeLabel(type: FinancialTransactionType): string {
@@ -165,5 +221,18 @@ export class FinancialTransactionsListPage {
       month: '2-digit',
       year: 'numeric',
     });
+  }
+
+  private buildFiltersQuery(): FindFinancialTransactionsQueryDto {
+    const rawValue = this.filtersForm.getRawValue();
+
+    return {
+      type: (rawValue.type || undefined) as FinancialTransactionType | undefined,
+      status: (rawValue.status || undefined) as FinancialTransactionStatus | undefined,
+      category: (rawValue.category || undefined) as FinancialTransactionCategory | undefined,
+      paymentMethod: (rawValue.paymentMethod || undefined) as PaymentMethod | undefined,
+      from: rawValue.from || undefined,
+      to: rawValue.to || undefined,
+    };
   }
 }

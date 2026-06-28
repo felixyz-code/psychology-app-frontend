@@ -19,6 +19,71 @@
       </a>
     </div>
 
+    <form class="financial-transactions-toolbar" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+      <div class="financial-transactions-toolbar__filters">
+        <mat-form-field appearance="outline" class="financial-transactions-filter">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="">Todos</mat-option>
+            @for (type of transactionTypes; track type) {
+              <mat-option [value]="type">{{ getTypeLabel(type) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="financial-transactions-filter">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">Todos</mat-option>
+            @for (status of transactionStatuses; track status) {
+              <mat-option [value]="status">{{ getStatusLabel(status) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="financial-transactions-filter">
+          <mat-label>Categoría</mat-label>
+          <mat-select formControlName="category">
+            <mat-option value="">Todas</mat-option>
+            @for (category of transactionCategories; track category) {
+              <mat-option [value]="category">{{ getCategoryLabel(category) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="financial-transactions-filter">
+          <mat-label>Método de pago</mat-label>
+          <mat-select formControlName="paymentMethod">
+            <mat-option value="">Todos</mat-option>
+            @for (paymentMethod of paymentMethods; track paymentMethod) {
+              <mat-option [value]="paymentMethod">{{ getPaymentMethodLabel(paymentMethod) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="financial-transactions-filter">
+          <mat-label>Fecha desde</mat-label>
+          <input matInput type="date" formControlName="from" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="financial-transactions-filter">
+          <mat-label>Fecha hasta</mat-label>
+          <input matInput type="date" formControlName="to" />
+        </mat-form-field>
+      </div>
+
+      <div class="financial-transactions-toolbar__actions">
+        <button mat-flat-button type="submit" [disabled]="isLoading()">
+          <mat-icon>filter_alt</mat-icon>
+          <span>Aplicar filtros</span>
+        </button>
+        <button mat-stroked-button type="button" [disabled]="isLoading()" (click)="clearFilters()">
+          <mat-icon>filter_alt_off</mat-icon>
+          <span>Limpiar filtros</span>
+        </button>
+      </div>
+    </form>
+
     @if (isLoading()) {
       <div class="financial-transactions-state">
         <mat-spinner diameter="40" />
