@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 9.11 - Financial Transaction Detail
+Sprint 9.14 - Global Filter Toolbar Design System
 ```
 
 ---

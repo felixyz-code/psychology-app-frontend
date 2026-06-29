@@ -235,15 +235,17 @@ The UI follows the same clinical workflow implemented by the backend.
 
 ---
 
-# ADR-012 â€” Responsive Table Toolbar Layout
+# ADR-012 - Responsive Filter Toolbar Layout
 
 ## Decision
 
-Table toolbars use a shared responsive layout pattern.
+Dense filter toolbars use a shared responsive layout pattern.
 
 Desktop:
 
-- Filters align horizontally in a single row whenever space allows.
+- Primary filters align in a first row with comfortable control widths.
+- Secondary filters and action buttons align in a second row.
+- Action buttons remain naturally aligned at the end of the toolbar.
 
 Mobile:
 
@@ -251,9 +253,9 @@ Mobile:
 
 ## Rationale
 
-This rule improves consistency across table experiences and prevents staggered filter layouts.
+This rule improves consistency across data-heavy experiences and avoids compressed controls, truncated labels and poor readability.
 
-It also establishes a reusable UX baseline for future views such as Calendar View, Finance and Reports.
+It establishes a reusable UX baseline for future views such as Patients, Appointments, Finance, Documents, Recruitment and Reports.
 
 ---
 

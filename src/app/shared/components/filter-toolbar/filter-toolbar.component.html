@@ -1,0 +1,15 @@
+<div class="filter-toolbar">
+  <div class="filter-toolbar__row filter-toolbar__row--primary">
+    <ng-content select="[filterToolbarPrimary]"></ng-content>
+  </div>
+
+  <div class="filter-toolbar__footer">
+    <div class="filter-toolbar__row filter-toolbar__row--secondary">
+      <ng-content select="[filterToolbarSecondary]"></ng-content>
+    </div>
+
+    <div class="filter-toolbar__actions">
+      <ng-content select="[filterToolbarActions]"></ng-content>
+    </div>
+  </div>
+</div>

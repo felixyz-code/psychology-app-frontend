@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
+import { FinancialTransactionDeleteDialogComponent } from '../components/financial-transaction-delete-dialog.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
@@ -36,6 +38,8 @@ import { FinancialTransactionsService } from '../services/financial-transactions
 })
 export class FinancialTransactionDetailPlaceholderPage {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
   private readonly financialTransactionsService = inject(FinancialTransactionsService);
 
   readonly transactionId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -49,6 +53,30 @@ export class FinancialTransactionDetailPlaceholderPage {
 
   retryLoad(): void {
     this.loadTransaction();
+  }
+
+  openDeleteDialog(): void {
+    const transaction = this.transaction();
+
+    if (!transaction) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(FinancialTransactionDeleteDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      disableClose: this.isLoading(),
+      data: {
+        transaction,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((deleted) => {
+      if (deleted) {
+        void this.router.navigate(['/financial-transactions']);
+      }
+    });
   }
 
   getTypeLabel(type: FinancialTransactionType): string {

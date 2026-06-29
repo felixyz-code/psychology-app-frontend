@@ -8,6 +8,44 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 9
 
+## Sprint 9.14 - Global Filter Toolbar Design System
+
+### Changed
+
+* La vista `financial-transactions` ahora precarga por defecto el rango del mes actual usando `from` como el primer dia del mes y `to` como la fecha actual.
+* El listado y el summary financiero se cargan al entrar con el mismo rango mensual, reutilizando los query params ya soportados por el contrato actual.
+* `Limpiar filtros` vuelve a un historico completo sin rango de fechas aplicado.
+* Se reemplazo la compactacion agresiva de filtros por un patron oficial de toolbar reutilizable con dos filas en desktop, reacomodo natural en tablet y una columna en mobile.
+* Finanzas ahora implementa ese patron oficial usando un componente shared de layout sin introducir logica de dominio en `shared`.
+* Las tarjetas KPI reducen altura visual mediante menor padding vertical, iconos ligeramente mas pequenos y menor separacion interna, conservando presencia visual.
+* Se ajustaron textos de apoyo y layout del modulo financiero manteniendo consistencia con el Design System y sin cambios de backend.
+
+## Sprint 9.13 - Financial Summary Cards
+
+### Added
+
+* Resumen financiero conectado a `GET /financial-transactions/summary` en la pantalla principal de Finanzas.
+* Cuatro tarjetas KPI visibles sobre el listado para ingresos, egresos, balance neto y total de transacciones segun el contrato disponible.
+* Estado de carga independiente para el summary y mensaje de error basico con reintento sin bloquear el listado.
+
+### Changed
+
+* El modulo financiero ahora recarga el summary junto con el listado al entrar, aplicar filtros, limpiar filtros o eliminar una transaccion.
+* Se reutiliza `FinancialTransactionSummaryDto` y el Design System existente sin modificar el contrato backend.
+
+## Sprint 9.12 - Financial Transaction Delete
+
+### Added
+
+* Eliminacion de transacciones financieras conectada a `DELETE /financial-transactions/:id`.
+* Dialogo de confirmacion reutilizable dentro del modulo financiero con estado de proceso y error basico.
+* Accion de eliminar disponible tanto en el listado financiero como en el detalle de transaccion.
+
+### Changed
+
+* El listado financiero ahora recarga los datos despues de una eliminacion exitosa.
+* El detalle de transaccion ahora redirige de regreso al listado despues de eliminar correctamente.
+
 ## Sprint 9.11 - Financial Transaction Detail
 
 ### Added

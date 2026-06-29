@@ -1,0 +1,23 @@
+.financial-transaction-delete-dialog {
+  gap: 1rem;
+}
+
+.financial-transaction-delete-dialog__summary {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.financial-transaction-delete-dialog__title {
+  color: var(--app-color-heading);
+  font-weight: 700;
+}
+
+.financial-transaction-delete-dialog__error {
+  color: var(--app-color-danger-text);
+}
+
+.financial-transaction-delete-dialog__actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}

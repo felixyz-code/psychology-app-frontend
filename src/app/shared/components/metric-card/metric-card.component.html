@@ -1,4 +1,4 @@
-<mat-card class="metric-card" [class]="'metric-card metric-card--' + variant()">
+<mat-card class="metric-card" [class]="'metric-card metric-card--' + variant()" [class.metric-card--compact]="compact()">
   @if (loading()) {
     <span class="app-skeleton metric-card__icon-skeleton" aria-hidden="true"></span>
     <span class="app-skeleton-line metric-card__line metric-card__line--label" aria-hidden="true"></span>

@@ -18,4 +18,5 @@ export class MetricCardComponent {
   readonly supportingText = input('');
   readonly variant = input<MetricCardVariant>('blue');
   readonly loading = input(false);
+  readonly compact = input(false);
 }
