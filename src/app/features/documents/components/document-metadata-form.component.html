@@ -1,0 +1,53 @@
+@if (!isDialogLayout()) {
+  <section class="document-metadata-page">
+    <app-page-header
+      [heading]="getTitle()"
+      [subtitle]="getSubtitle()"
+      [breadcrumbs]="[
+        { label: 'Dashboard', url: '/dashboard' },
+        { label: 'Documentos', url: '/documents' },
+        { label: 'Editar metadata' },
+      ]"
+    />
+
+    <app-section-card [title]="getCardTitle()" [subtitle]="getCardSubtitle()">
+      <ng-container *ngTemplateOutlet="metadataFormContent" />
+    </app-section-card>
+  </section>
+} @else {
+  <ng-container *ngTemplateOutlet="metadataFormContent" />
+}
+
+<ng-template #metadataFormContent>
+    <form class="document-metadata-form" [formGroup]="metadataForm" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre del documento</mat-label>
+        <input matInput formControlName="fileName" maxlength="255" />
+        <mat-hint align="end">{{ metadataForm.controls.fileName.value.length }}/255</mat-hint>
+        @if (hasRequiredError('fileName')) {
+          <mat-error>Ingresa un nombre de documento valido.</mat-error>
+        } @else if (hasMaxLengthError('fileName')) {
+          <mat-error>El nombre del documento no puede exceder 255 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      @if (errorMessage()) {
+        <p class="document-metadata-form__error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      @if (isSaving()) {
+        <div class="document-metadata-form__saving" aria-live="polite">
+          <mat-spinner diameter="20" />
+          <span>{{ getSavingLabel() }}</span>
+        </div>
+      }
+
+      <div class="document-metadata-form__actions">
+        <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">Cancelar</button>
+        <button mat-flat-button type="submit" [disabled]="isSubmitDisabled()">
+          <mat-icon>save</mat-icon>
+          <span>{{ getSubmitLabel() }}</span>
+        </button>
+      </div>
+    </form>
+</ng-template>

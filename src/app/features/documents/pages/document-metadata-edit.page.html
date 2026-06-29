@@ -1,0 +1,25 @@
+@if (flow.isLoading()) {
+  <section class="document-edit-state">
+    <mat-spinner diameter="40" />
+    <p>Cargando documento...</p>
+  </section>
+} @else if (flow.loadErrorMessage()) {
+  <section class="document-edit-state document-edit-state--error">
+    <p>{{ flow.loadErrorMessage() }}</p>
+    <div class="document-edit-state__actions">
+      <button mat-stroked-button type="button" (click)="retryLoad()">Reintentar</button>
+      <button mat-button type="button" (click)="cancel()">Cancelar</button>
+    </div>
+  </section>
+} @else {
+  @if (flow.document(); as document) {
+    <app-document-metadata-form
+      mode="edit"
+      [initialValue]="document"
+      [isSaving]="flow.isSaving()"
+      [errorMessage]="flow.saveErrorMessage()"
+      (formSubmitted)="submit($event)"
+      (cancelled)="cancel()"
+    />
+  }
+}

@@ -1,0 +1,14 @@
+.document-form-dialog {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.document-form-dialog__header h2,
+.document-form-dialog__header p {
+  margin: 0;
+}
+
+.document-form-dialog__header p {
+  margin-top: 0.35rem;
+  color: var(--app-color-text-secondary);
+}

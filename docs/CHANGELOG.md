@@ -8,6 +8,102 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 9
 
+## Sprint 10.7 - Documents Modal Forms UX
+
+### Added
+
+* Nuevo dialogo modal para `Nuevo documento` desde `/documents`, reutilizando `DocumentUploadFormComponent`.
+* Nuevo dialogo modal para `Editar metadata` desde `/documents`, reutilizando `DocumentMetadataFormComponent`.
+* Stores de flujo compartidas para upload y metadata edit, reutilizadas tanto por dialogs como por rutas fallback existentes.
+
+### Changed
+
+* El flujo principal de upload de Documents deja de navegar a `/documents/new` desde el listado global y ahora se resuelve dentro de un modal.
+* El flujo principal de edicion de metadata deja de navegar a `/documents/:id/edit` desde el listado global y ahora se resuelve dentro de un modal.
+* Al guardar correctamente desde cualquiera de los dos modales, el listado global se recarga manteniendo al usuario en `/documents`.
+* Los formularios existentes de Documents ahora soportan renderizado embebido para uso en dialogos sin duplicar UI ni logica de formulario.
+
+## Sprint 10.6 - Documents Metadata Edit
+
+### Added
+
+* Accion `Editar metadata` en el listado global de Documents.
+* Nueva ruta `/documents/:id/edit` conectada a `GET /documents/:id` y `PATCH /documents/:id`.
+* Formulario de edicion con carga inicial, submit, cancelacion y manejo basico de errores.
+
+### Changed
+
+* La edicion de Documents expone solo `fileName` y `mimeType` como campos visibles.
+* Si el contrato requiere `filePath`, el frontend conserva el valor original de forma interna sin mostrarlo en la UI.
+
+## Sprint 10.5 - Documents Global Delete
+
+### Added
+
+* Accion de eliminar en el listado global de Documents conectada a `DELETE /documents/:id`.
+* Dialogo de confirmacion antes de eliminar con nombre de archivo visible, estado de loading y error basico.
+
+### Changed
+
+* El listado global de Documents ahora recarga los datos despues de una eliminacion exitosa.
+* El mensaje de confirmacion aclara que solo se elimina el registro del documento y no el archivo fisico.
+
+## Sprint 10.4 - Documents Upload Page
+
+### Added
+
+* Nueva pagina dedicada `/documents/new` para carga de documentos.
+* Formulario Reactive Forms con `caseFileId`, `uploadedById` y seleccion de archivo.
+* Validaciones frontend basicas para tipo permitido y tamano maximo de 10 MB.
+* Resumen visual del archivo seleccionado con nombre, tamano, icono y opcion de reemplazo antes del envio.
+* Boton visible `Nuevo documento` en el listado global.
+
+### Changed
+
+* El flujo de carga global reutiliza `DocumentsService.upload(...)` para consumir exactamente `POST /documents/upload` mediante `FormData`.
+* La navegacion vuelve al listado global despues de un upload exitoso sin modificar el contrato backend.
+* `uploadedById` deja de mostrarse en la UI y ahora se toma del usuario autenticado disponible en frontend.
+* `caseFileId` deja de capturarse manualmente y ahora se selecciona desde expedientes cargados con servicios existentes de Case Files y Patients.
+
+## Sprint 10.3 - Documents Preview Dialog
+
+### Added
+
+* Dialogo interno de vista previa para documentos consumiendo `GET /documents/:id/view` como `blob`.
+* Soporte de preview embebido para PDF, PNG y JPEG/JPG con nombre de archivo, accion de cierre y accion de descarga.
+* Estados basicos de carga y error dentro del preview, con liberacion del `ObjectURL` al cerrar el dialogo.
+
+### Changed
+
+* La accion `Visualizar` del listado global de Documents deja de abrir una pestana nueva y ahora muestra el documento dentro de la aplicacion.
+* La accion `Descargar` existente se mantiene sin cambios de contrato ni cambios de backend.
+
+## Sprint 10.2 - Documents Global List
+
+### Added
+
+* Vista real de listado global para `/documents` conectada a `GET /documents`.
+* Tabla global de documentos reutilizando `PageHeaderComponent`, `SectionCardComponent` y el Data Table Pattern visual del proyecto.
+* Estados visibles de carga, vacio y error con reintento para el listado global.
+* Acciones de visualizacion y descarga conectadas a `GET /documents/:id/view` y `GET /documents/:id/download` consumiendo `blob`.
+
+### Changed
+
+* El placeholder inicial de Documents fue reemplazado por una pagina funcional sin alterar la ruta lazy existente.
+* Se reutilizo `DocumentsService` ya existente sin modificar el contrato backend ni agregar query params.
+
+## Sprint 10.1 - Documents Module Foundation
+
+### Added
+
+* Nueva ruta lazy `documents` conectada al layout principal.
+* Pagina placeholder minima para la ruta base de Documents reutilizando `PageHeaderComponent`, `SectionCardComponent` y `DataTableEmptyStateComponent`.
+
+### Changed
+
+* La opcion `Documentos` deja de mostrarse como `Proximamente` en el sidebar y ahora navega al feature real.
+* Normalizado `DocumentsService` con un `basePath` interno sin alterar el contrato backend existente ni los flujos clinicos ya integrados en pacientes y dashboard.
+
 ## Sprint 9.14 - Global Filter Toolbar Design System
 
 ### Changed

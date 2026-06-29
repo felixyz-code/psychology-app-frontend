@@ -37,6 +37,10 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'documents',
+        loadChildren: () => import('./features/documents/documents.routes').then((m) => m.documentsRoutes),
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',

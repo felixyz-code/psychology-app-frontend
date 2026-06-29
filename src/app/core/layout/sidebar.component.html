@@ -75,13 +75,18 @@
         </span>
       </div>
 
-      <div class="sidebar__link sidebar__link--disabled" aria-disabled="true">
+      <a
+        routerLink="/documents"
+        routerLinkActive="sidebar__link--active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        class="sidebar__link"
+        (click)="navSelected.emit()"
+      >
         <mat-icon>description</mat-icon>
         <span class="sidebar__content">
           <span class="sidebar__title">Documentos</span>
-          <span class="sidebar__meta">Pr&oacute;ximamente</span>
         </span>
-      </div>
+      </a>
     </nav>
   </div>
 </aside>

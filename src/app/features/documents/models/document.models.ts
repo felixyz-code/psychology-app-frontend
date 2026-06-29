@@ -9,6 +9,12 @@ export interface Document {
   updatedAt: string;
 }
 
+export interface UpdateDocumentRequest {
+  fileName: string;
+  mimeType?: string;
+  filePath?: string;
+}
+
 export interface UploadDocumentRequest {
   caseFileId: string;
   uploadedById: string;

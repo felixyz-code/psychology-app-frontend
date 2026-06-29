@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 9.14 - Global Filter Toolbar Design System
+Sprint 10.7 - Documents Modal Forms UX
 ```
 
 ---
@@ -89,6 +89,7 @@ Sprint 9.14 - Global Filter Toolbar Design System
 * Preview
 * Download
 * Delete
+* Metadata edit
 * Sprint 7.5 completed - Data table pattern applied to the Documents block inside patient detail dialog
 
 ### Appointments
