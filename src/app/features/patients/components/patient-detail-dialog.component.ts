@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,8 +8,10 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 
+import { ActionCardComponent } from '../../../shared/components/action-card/action-card.component';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
+import { MetricCardComponent, MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
@@ -28,6 +30,7 @@ import { SessionNoteFormDialogComponent } from '../../session-notes/components/s
 import { SessionNote } from '../../session-notes/models/session-note.models';
 import { SessionNotesService } from '../../session-notes/services/session-notes.service';
 import { Patient } from '../models/patient.models';
+import { PatientFormDialogComponent } from './patient-form-dialog.component';
 
 interface PatientDetailDialogData {
   patient: Patient;
@@ -43,9 +46,11 @@ interface PatientDetailDialogData {
     MatIconModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    ActionCardComponent,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
     DocumentsListComponent,
+    MetricCardComponent,
     SectionCardComponent,
     StatusBadgeComponent,
   ],
@@ -53,6 +58,15 @@ interface PatientDetailDialogData {
   styleUrl: './patient-detail-dialog.component.scss',
 })
 export class PatientDetailDialogComponent {
+  private static readonly DATE_TIME_FORMATTER = new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
   private readonly data = inject<PatientDetailDialogData>(MAT_DIALOG_DATA);
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly caseFilesService = inject(CaseFilesService);
@@ -62,7 +76,9 @@ export class PatientDetailDialogComponent {
     MatDialogRef<PatientDetailDialogComponent, { action: 'close' } | { action: 'edit'; patient: Patient }>
   );
 
-  readonly patient = this.data.patient;
+  readonly workspaceContent = viewChild<ElementRef<HTMLElement>>('workspaceContent');
+  readonly documentsSection = viewChild<ElementRef<HTMLElement>>('documentsSection');
+  readonly patient = signal(this.data.patient);
   readonly appointments = signal<Appointment[]>([]);
   readonly isAppointmentsLoading = signal(true);
   readonly appointmentsErrorMessage = signal('');
@@ -119,6 +135,49 @@ export class PatientDetailDialogComponent {
       result.hasActiveFilters
     );
   });
+  readonly clinicalSummaryCards = computed(() => {
+    const currentCaseFile = this.caseFile();
+    const loading = this.isCaseFileLoading();
+
+    return [
+      {
+        icon: 'update',
+        title: 'Ultima actualizacion',
+        value: this.formatDateTimeValue(currentCaseFile?.updatedAt),
+        supportingText: currentCaseFile
+          ? 'Ultimo movimiento registrado en el expediente.'
+          : 'Sin actualizaciones clinicas disponibles.',
+        tone: 'blue' as MetricCardVariant,
+        loading,
+      },
+      {
+        icon: 'folder_shared',
+        title: 'Alta del expediente',
+        value: this.formatDateTimeValue(currentCaseFile?.createdAt, 'Pendiente'),
+        supportingText: currentCaseFile
+          ? 'Fecha de apertura del expediente clinico.'
+          : 'El expediente aun no ha sido creado.',
+        tone: 'green' as MetricCardVariant,
+        loading,
+      },
+      {
+        icon: 'health_and_safety',
+        title: 'Estado del expediente',
+        value: this.getCaseFileStatusLabel(),
+        supportingText: this.getCaseFileStatusSupportingText(),
+        tone: 'amber' as MetricCardVariant,
+        loading,
+      },
+      {
+        icon: 'assignment_turned_in',
+        title: 'Informacion base',
+        value: this.getFoundationStatusValue(),
+        supportingText: this.getFoundationStatusSupportingText(),
+        tone: 'violet' as MetricCardVariant,
+        loading,
+      },
+    ];
+  });
 
   constructor() {
     this.loadAppointments();
@@ -129,13 +188,6 @@ export class PatientDetailDialogComponent {
     this.dialogRef.close({ action: 'close' });
   }
 
-  edit(): void {
-    this.dialogRef.close({
-      action: 'edit',
-      patient: this.patient,
-    });
-  }
-
   openCreateCaseFileDialog(): void {
     const dialogRef = this.dialog.open(CaseFileFormDialogComponent, {
       width: '720px',
@@ -143,7 +195,7 @@ export class PatientDetailDialogComponent {
       autoFocus: false,
       data: {
         mode: 'create',
-        patientId: this.patient.id,
+        patientId: this.patient().id,
       },
     });
 
@@ -167,7 +219,7 @@ export class PatientDetailDialogComponent {
       autoFocus: false,
       data: {
         mode: 'edit',
-        patientId: this.patient.id,
+        patientId: this.patient().id,
         caseFile: currentCaseFile,
       },
     });
@@ -188,7 +240,7 @@ export class PatientDetailDialogComponent {
       autoFocus: false,
       data: {
         mode: 'create',
-        patientId: this.patient.id,
+        patientId: this.patient().id,
       },
     });
 
@@ -208,7 +260,7 @@ export class PatientDetailDialogComponent {
       autoFocus: false,
       data: {
         mode: 'edit',
-        patientId: this.patient.id,
+        patientId: this.patient().id,
         appointment,
       },
     });
@@ -288,6 +340,31 @@ export class PatientDetailDialogComponent {
     });
   }
 
+  openEditPatientDialog(): void {
+    const scrollTop = this.workspaceContent()?.nativeElement.scrollTop ?? 0;
+    const dialogRef = this.dialog.open(PatientFormDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        mode: 'edit',
+        patient: this.patient(),
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((updated) => {
+      this.restoreWorkspaceScroll(scrollTop);
+
+      if (updated && typeof updated !== 'boolean') {
+        this.patient.update((currentPatient) => ({
+          ...currentPatient,
+          ...updated,
+        }));
+      }
+    });
+  }
+
   openEditSessionNoteDialog(sessionNote: SessionNote): void {
     const currentCaseFile = this.caseFile();
 
@@ -354,7 +431,41 @@ export class PatientDetailDialogComponent {
   }
 
   getFullName(): string {
-    return `${this.patient.firstName} ${this.patient.lastName}`;
+    const patient = this.patient();
+    return `${patient.firstName} ${patient.lastName}`;
+  }
+
+  getPatientInitials(): string {
+    const patient = this.patient();
+    return `${patient.firstName.charAt(0)}${patient.lastName.charAt(0)}`.trim().toUpperCase();
+  }
+
+  getPatientAge(): string {
+    const patient = this.patient();
+
+    if (!patient.birthDate) {
+      return 'Pendiente';
+    }
+
+    const birthDate = new Date(patient.birthDate);
+
+    if (Number.isNaN(birthDate.getTime())) {
+      return 'Pendiente';
+    }
+
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age -= 1;
+    }
+
+    if (age < 0) {
+      return 'Pendiente';
+    }
+
+    return age === 1 ? '1 año' : `${age} años`;
   }
 
   getDisplayValue(value?: string | null): string {
@@ -398,6 +509,92 @@ export class PatientDetailDialogComponent {
     return `${day}/${month}/${year}`;
   }
 
+  getCaseFileStatusLabel(): string {
+    if (this.isCaseFileLoading()) {
+      return 'Cargando';
+    }
+
+    const currentCaseFile = this.caseFile();
+
+    if (!currentCaseFile) {
+      return 'Pendiente';
+    }
+
+    return this.hasFoundationInformation(currentCaseFile) ? 'Base completa' : 'Informacion pendiente';
+  }
+
+  getCaseFileStatusVariant(): StatusBadgeVariant {
+    if (this.isCaseFileLoading()) {
+      return 'neutral';
+    }
+
+    const currentCaseFile = this.caseFile();
+
+    if (!currentCaseFile) {
+      return 'warning';
+    }
+
+    return this.hasFoundationInformation(currentCaseFile) ? 'success' : 'warning';
+  }
+
+  getCaseFileStatusSupportingText(): string {
+    const currentCaseFile = this.caseFile();
+
+    if (!currentCaseFile) {
+      return 'Sin expediente clinico disponible todavia.';
+    }
+
+    return this.hasFoundationInformation(currentCaseFile)
+      ? 'Diagnostico y plan de tratamiento visibles.'
+      : 'Aun falta completar la informacion base.';
+  }
+
+  getFoundationStatusValue(): string {
+    const currentCaseFile = this.caseFile();
+
+    if (!currentCaseFile) {
+      return 'Pendiente';
+    }
+
+    return this.hasFoundationInformation(currentCaseFile) ? 'Completa' : 'Pendiente';
+  }
+
+  getFoundationStatusSupportingText(): string {
+    const currentCaseFile = this.caseFile();
+
+    if (!currentCaseFile) {
+      return 'Falta crear el expediente clinico.';
+    }
+
+    const hasDiagnosis = this.hasText(currentCaseFile.diagnosis);
+    const hasTreatmentPlan = this.hasText(currentCaseFile.treatmentPlan);
+
+    if (hasDiagnosis && hasTreatmentPlan) {
+      return 'Informacion base disponible en el contrato actual.';
+    }
+
+    if (!hasDiagnosis && !hasTreatmentPlan) {
+      return 'Falta diagnostico y plan de tratamiento.';
+    }
+
+    return hasDiagnosis ? 'Falta plan de tratamiento.' : 'Falta diagnostico.';
+  }
+
+  getCaseFileCreatedAtLabel(): string {
+    if (this.isCaseFileLoading()) {
+      return 'Cargando...';
+    }
+
+    return this.formatDateTimeValue(this.caseFile()?.createdAt, 'Pendiente');
+  }
+
+  scrollToDocuments(): void {
+    this.documentsSection()?.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
   getSessionNoteTitle(sessionNote: SessionNote): string {
     return sessionNote.title?.trim() || 'Sesion sin titulo';
   }
@@ -431,7 +628,7 @@ export class PatientDetailDialogComponent {
     this.caseFileErrorMessage.set('');
     this.resetSessionNotesState();
 
-    this.caseFilesService.getCaseFileByPatientId(this.patient.id).subscribe({
+    this.caseFilesService.getCaseFileByPatientId(this.patient().id).subscribe({
       next: (caseFile) => {
         this.caseFile.set(caseFile);
         this.isCaseFileLoading.set(false);
@@ -456,7 +653,7 @@ export class PatientDetailDialogComponent {
     this.appointmentsErrorMessage.set('');
     this.appointments.set([]);
 
-    this.appointmentsService.getAppointmentsByPatientId(this.patient.id).subscribe({
+    this.appointmentsService.getAppointmentsByPatientId(this.patient().id).subscribe({
       next: (appointments) => {
         this.appointments.set(appointments);
         this.isAppointmentsLoading.set(false);
@@ -494,6 +691,16 @@ export class PatientDetailDialogComponent {
     this.clearSessionNotesFilters();
   }
 
+  private restoreWorkspaceScroll(scrollTop: number): void {
+    queueMicrotask(() => {
+      const contentElement = this.workspaceContent()?.nativeElement;
+
+      if (contentElement) {
+        contentElement.scrollTop = scrollTop;
+      }
+    });
+  }
+
   private getAppointmentActionErrorMessage(error: HttpErrorResponse, action: 'cancelar'): string {
     if (error.status === 401 || error.status === 403) {
       return `No tienes permisos para ${action} esta cita.`;
@@ -512,5 +719,27 @@ export class PatientDetailDialogComponent {
 
   private formatSessionNoteCount(count: number): string {
     return count === 1 ? '1 nota' : `${count} notas`;
+  }
+
+  private formatDateTimeValue(value?: string | null, fallback = 'Pendiente'): string {
+    if (!value) {
+      return fallback;
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return fallback;
+    }
+
+    return PatientDetailDialogComponent.DATE_TIME_FORMATTER.format(date).replace(',', '');
+  }
+
+  private hasFoundationInformation(caseFile: CaseFile): boolean {
+    return this.hasText(caseFile.diagnosis) && this.hasText(caseFile.treatmentPlan);
+  }
+
+  private hasText(value?: string | null): boolean {
+    return Boolean(value?.trim());
   }
 }

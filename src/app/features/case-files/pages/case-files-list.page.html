@@ -1,0 +1,190 @@
+<section class="case-files-page">
+  <app-page-header
+    heading="Expedientes cl&iacute;nicos"
+    subtitle="Espacio base para consultar expedientes asociados a pacientes y acceder al contexto cl&iacute;nico existente."
+    [breadcrumbs]="[
+      { label: 'Dashboard', url: '/dashboard' },
+      { label: 'Expedientes' },
+    ]"
+  />
+
+  <section class="case-files-summary" aria-label="Resumen de expedientes">
+    <article class="case-files-summary__item">
+      <span class="case-files-summary__label">Expedientes</span>
+      <strong>{{ caseFiles().length }}</strong>
+    </article>
+
+    <article class="case-files-summary__item">
+      <span class="case-files-summary__label">Base completa</span>
+      <strong>{{ completeFoundationCount() }}</strong>
+    </article>
+
+    <article class="case-files-summary__item">
+      <span class="case-files-summary__label">Informaci&oacute;n pendiente</span>
+      <strong>{{ pendingFoundationCount() }}</strong>
+    </article>
+  </section>
+
+  <app-section-card
+    title="Listado de expedientes"
+    subtitle="Base operativa para revisar paciente, trazabilidad y acciones disponibles sin duplicar la integraci&oacute;n cl&iacute;nica existente."
+  >
+    <div sectionCardActions class="case-files-card__header-actions">
+      <button mat-stroked-button type="button" class="case-files-card__refresh-button" [disabled]="isLoading()" (click)="loadCaseFiles()">
+        <mat-icon>refresh</mat-icon>
+        <span>Actualizar</span>
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="case-files-state">
+        <mat-spinner diameter="40" />
+        <p>Cargando expedientes cl&iacute;nicos...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="case-files-state case-files-state--error">
+        <p>{{ errorMessage() }}</p>
+        <button mat-stroked-button type="button" (click)="loadCaseFiles()">Reintentar</button>
+      </div>
+    } @else if (caseFiles().length) {
+      @if (patientLoadWarning()) {
+        <div class="case-files-inline-warning" role="status">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <p>{{ patientLoadWarning() }}</p>
+        </div>
+      }
+
+      <app-data-table-toolbar
+        class="case-files-data-toolbar"
+        [searchTerm]="tableState().searchTerm"
+        searchPlaceholder="Buscar por paciente, contacto o expediente"
+        [resultsLabel]="caseFilesCounterLabel()"
+        [hasActiveFilters]="caseFilesTableResult().hasActiveFilters"
+        (searchTermChange)="updateSearchTerm($event)"
+        (clearFilters)="clearCaseFileFilters()"
+      />
+
+      @if (caseFilesTableResult().totalFilteredItems) {
+        <div class="case-files-table-wrapper">
+          <table
+            mat-table
+            matSort
+            [matSortActive]="getCaseFilesSortActive()"
+            [matSortDirection]="getCaseFilesSortDirection()"
+            [dataSource]="caseFilesTableResult().pagedItems"
+            class="case-files-table"
+            (matSortChange)="handleCaseFilesSortChange($event)"
+          >
+            <ng-container matColumnDef="patient">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="patient">Paciente</th>
+              <td mat-cell *matCellDef="let caseFile">
+                <div class="case-files-patient-cell">
+                  <div class="case-files-patient-cell__icon" aria-hidden="true">
+                    <mat-icon>folder_shared</mat-icon>
+                  </div>
+
+                  <div class="case-files-patient-cell__content">
+                    <strong>{{ getPatientName(caseFile) }}</strong>
+                    <span>{{ getPatientSecondaryInfo(caseFile) }}</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="foundationStatus">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="foundationStatus">Estado base</th>
+              <td mat-cell *matCellDef="let caseFile">
+                <div class="case-files-status-cell">
+                  <app-status-badge
+                    [label]="getFoundationStatusLabel(caseFile)"
+                    [variant]="getFoundationStatusVariant(caseFile)"
+                  />
+                  <span>{{ getMissingInformationLabel(caseFile) }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="createdAt">Creado</th>
+              <td mat-cell *matCellDef="let caseFile">
+                {{ caseFile.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="updatedAt">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="updatedAt">Actualizado</th>
+              <td mat-cell *matCellDef="let caseFile">
+                {{ caseFile.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let caseFile">
+                <div class="case-files-actions" aria-label="Acciones disponibles">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    aria-label="Abrir paciente"
+                    [disabled]="!getPatient(caseFile)"
+                    matTooltip="Abrir paciente"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); openPatientDetailDialog(caseFile)"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    aria-label="Editar expediente"
+                    matTooltip="Editar expediente"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); openEditCaseFileDialog(caseFile)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns"
+              class="app-clickable-table-row"
+              tabindex="0"
+              role="button"
+              matTooltip="Abrir paciente"
+              [matTooltipShowDelay]="150"
+              (click)="openPatientDetailDialog(row)"
+              (keydown.enter)="openPatientDetailDialog(row)"
+              (keydown.space)="stopRowClick($event); $event.preventDefault(); openPatientDetailDialog(row)"
+            ></tr>
+          </table>
+        </div>
+
+        <mat-paginator
+          class="case-files-paginator"
+          [length]="caseFilesTableResult().totalFilteredItems"
+          [pageIndex]="safePageIndex()"
+          [pageSize]="tableState().pageSize"
+          [pageSizeOptions]="pageSizeOptions"
+          showFirstLastButtons
+          (page)="handleCaseFilesPageChange($event)"
+        />
+      } @else {
+        <app-data-table-empty-state
+          icon="search_off"
+          title="No se encontraron expedientes"
+          message="Intenta ajustar la busqueda."
+        />
+      }
+    } @else {
+      <app-data-table-empty-state
+        icon="folder_shared"
+        title="No hay expedientes registrados"
+        message="Cuando existan expedientes clinicos, apareceran en este espacio."
+      />
+    }
+  </app-section-card>
+</section>

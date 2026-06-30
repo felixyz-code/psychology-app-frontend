@@ -8,6 +8,25 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 9
 
+## Sprint 10.10 - Case Files Foundation
+
+### Added
+
+* Nueva ruta lazy `/case-files` para la base global del modulo de Expedientes Clinicos.
+* Nueva pagina base `CaseFilesListPage` conectada a `GET /case-files` y enriquecida con datos de `GET /patients` cuando estan disponibles.
+* Listado profesional de expedientes con paciente asociado, estado visual de informacion base, fechas de creacion/actualizacion, busqueda, ordenamiento, paginacion y estados de carga/error/vacio.
+* Acciones rapidas para abrir el contexto clinico del paciente y editar el expediente existente reutilizando dialogs actuales.
+
+### Changed
+
+* La opcion `Expedientes` del sidebar deja de mostrarse como `Proximamente` y ahora navega al feature real.
+* La integracion clinica existente dentro del detalle de paciente se mantiene como punto de acceso a citas, notas de sesion y documentos del expediente.
+* La foundation no introduce nuevos endpoints, no modifica backend y no duplica la logica de Documents.
+
+### Pending
+
+* Queda pendiente contrato backend para estado clinico formal del expediente, ultima cita/sesion, conteo/resumen de documentos y detalle clinico global independiente del dialog de paciente.
+
 ## Sprint 10.9 - Documents Table Simplification & Detail Modal
 
 ### Added

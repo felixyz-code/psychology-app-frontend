@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 10.9 - Documents Table Simplification & Detail Modal
+Sprint 10.10 - Case Files Foundation
 ```
 
 ---
@@ -72,6 +72,8 @@ Sprint 10.9 - Documents Table Simplification & Detail Modal
 * Detail
 * Create
 * Edit
+* Global foundation route `/case-files`
+* Sprint 10.10 completed - Case Files foundation delivered with lazy routing, sidebar navigation, professional base list, patient context access and no new backend contract assumptions
 
 ### Session Notes
 
@@ -133,7 +135,7 @@ Sprint 10.9 - Documents Table Simplification & Detail Modal
 Next planned sprint:
 
 ```text
-Sprint 10.0 - Financial Transactions Continuation
+To be defined after Case Files backend contract review
 ```
 
 ---
@@ -147,6 +149,7 @@ Current development efforts include:
 * Data table improvements
 * User experience refinement
 * Frontend architecture stabilization
+* Case Files clinical workspace foundation
 
 ---
 

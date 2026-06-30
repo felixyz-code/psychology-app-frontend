@@ -67,13 +67,18 @@
         </span>
       </a>
 
-      <div class="sidebar__link sidebar__link--disabled" aria-disabled="true">
+      <a
+        routerLink="/case-files"
+        routerLinkActive="sidebar__link--active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        class="sidebar__link"
+        (click)="navSelected.emit()"
+      >
         <mat-icon>folder_shared</mat-icon>
         <span class="sidebar__content">
           <span class="sidebar__title">Expedientes</span>
-          <span class="sidebar__meta">Pr&oacute;ximamente</span>
         </span>
-      </div>
+      </a>
 
       <a
         routerLink="/documents"

@@ -3,7 +3,6 @@
   flex-direction: column;
   max-height: 85vh;
   overflow: hidden;
-  overflow-x: hidden;
   min-height: 0;
 }
 
@@ -12,36 +11,131 @@
   gap: 1rem;
   padding: 0.25rem;
   overflow-y: auto;
-  overflow-x: hidden;
   max-height: calc(85vh - 5.5rem);
   min-height: 0;
 }
 
-.patient-detail-dialog__header :is(h2, p),
+.patient-detail-dialog__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(14rem, 0.9fr);
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--app-color-card-soft-bg) 0%, var(--app-color-card-bg) 100%);
+}
+
+.patient-detail-dialog__hero-main {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.patient-detail-dialog__avatar {
+  display: grid;
+  place-items: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 14px;
+  background: var(--app-color-primary);
+  color: var(--app-color-text-inverse);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.patient-detail-dialog__identity :is(h2, p),
+.patient-detail-dialog__hero-status p,
+.patient-detail-dialog__summary-panel p,
 .patient-detail-dialog__grid p {
   margin: 0;
 }
 
-.patient-detail-dialog__header h2 {
+.patient-detail-dialog__identity,
+.patient-detail-dialog__hero-status {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.patient-detail-dialog__eyebrow {
+  color: var(--app-color-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.patient-detail-dialog__identity h2 {
   color: var(--app-color-heading);
-  font-size: 1.55rem;
+  font-size: clamp(1.55rem, 2vw, 1.9rem);
   line-height: 1.2;
 }
 
-.patient-detail-dialog__header p {
-  margin-top: 0.35rem;
+.patient-detail-dialog__identity p,
+.patient-detail-dialog__hero-status p,
+.patient-detail-dialog__message {
   color: var(--app-color-text-secondary);
+}
+
+.patient-detail-dialog__hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+}
+
+.patient-detail-dialog__hero-meta span {
+  display: inline-flex;
+  align-items: center;
+  color: var(--app-color-heading);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.patient-detail-dialog__hero-meta span + span::before {
+  content: '·';
+  margin-right: 1rem;
+  color: var(--app-color-text-secondary);
+}
+
+.patient-detail-dialog__hero-status {
+  padding: 0.9rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 16px;
+  background: var(--app-color-card-bg);
+}
+
+.patient-detail-dialog__metrics-grid,
+.patient-detail-dialog__summary-grid,
+.patient-detail-dialog__quick-actions,
+.patient-detail-dialog__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.patient-detail-dialog__summary-grid {
+  margin-top: 1rem;
+}
+
+.patient-detail-dialog__summary-panel {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.95rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 16px;
+  background: var(--app-color-card-soft-bg);
+}
+
+.patient-detail-dialog__summary-panel p {
+  color: var(--app-color-heading);
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 .patient-detail-dialog__section-actions {
   display: flex;
   align-items: flex-start;
-}
-
-.patient-detail-dialog__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
 }
 
 .patient-detail-dialog__label {
@@ -62,11 +156,6 @@
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  color: var(--app-color-text-secondary);
-}
-
-.patient-detail-dialog__message {
-  margin: 0;
   color: var(--app-color-text-secondary);
 }
 
@@ -117,9 +206,10 @@
 }
 
 .patient-detail-dialog__note-header h4,
-.patient-detail-dialog__appointment-header h4 {
+.patient-detail-dialog__appointment-header h4,
+.patient-detail-dialog__note-content,
+.patient-detail-dialog__appointment-notes {
   color: var(--app-color-heading);
-  font-size: 1rem;
 }
 
 .patient-detail-dialog__note-header p,
@@ -139,7 +229,6 @@
 
 .patient-detail-dialog__note-content,
 .patient-detail-dialog__appointment-notes {
-  color: var(--app-color-heading);
   line-height: 1.5;
 }
 
@@ -162,17 +251,33 @@
     max-height: calc(85vh - 6.5rem);
   }
 
-  .patient-detail-dialog__section-actions {
-    width: 100%;
+  .patient-detail-dialog__hero,
+  .patient-detail-dialog__metrics-grid,
+  .patient-detail-dialog__summary-grid,
+  .patient-detail-dialog__quick-actions,
+  .patient-detail-dialog__grid {
+    grid-template-columns: 1fr;
   }
 
+  .patient-detail-dialog__hero-main,
   .patient-detail-dialog__note-header,
-  .patient-detail-dialog__appointment-header {
+  .patient-detail-dialog__appointment-header,
+  .patient-detail-dialog__actions {
     flex-direction: column;
   }
 
-  .patient-detail-dialog__grid {
-    grid-template-columns: 1fr;
+  .patient-detail-dialog__hero-meta {
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .patient-detail-dialog__hero-meta span + span::before {
+    margin-right: 0.6rem;
+  }
+
+  .patient-detail-dialog__section-actions,
+  .patient-detail-dialog__actions {
+    width: 100%;
   }
 
   .patient-detail-dialog__note-actions,
@@ -181,7 +286,6 @@
   }
 
   .patient-detail-dialog__actions {
-    flex-direction: column;
     align-items: stretch;
     padding: 0.75rem 0 0;
   }

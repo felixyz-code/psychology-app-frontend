@@ -37,6 +37,10 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'case-files',
+        loadChildren: () => import('./features/case-files/case-files.routes').then((m) => m.caseFilesRoutes),
+      },
+      {
         path: 'documents',
         loadChildren: () => import('./features/documents/documents.routes').then((m) => m.documentsRoutes),
       },
