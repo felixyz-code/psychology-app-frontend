@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, effect, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -53,6 +53,7 @@ export class DocumentUploadFormComponent {
   readonly isCaseFilesLoading = input(false);
   readonly caseFilesLoadErrorMessage = input('');
   readonly caseFileOptions = input<DocumentCaseFileOption[]>([]);
+  readonly fixedCaseFileId = input('');
 
   readonly formSubmitted = output<UploadDocumentRequest>();
   readonly cancelled = output<void>();
@@ -63,6 +64,22 @@ export class DocumentUploadFormComponent {
   readonly uploadForm = this.formBuilder.group({
     caseFileId: ['', [Validators.required, Validators.maxLength(64)]],
   });
+
+  constructor() {
+    effect(() => {
+      const fixedCaseFileId = this.fixedCaseFileId().trim();
+      const control = this.uploadForm.controls.caseFileId;
+
+      if (fixedCaseFileId) {
+        control.setValue(fixedCaseFileId, { emitEvent: false });
+        control.setValidators([Validators.maxLength(64)]);
+      } else {
+        control.setValidators([Validators.required, Validators.maxLength(64)]);
+      }
+
+      control.updateValueAndValidity({ emitEvent: false });
+    });
+  }
 
   openFilePicker(): void {
     this.fileInput()?.nativeElement.click();
@@ -133,6 +150,10 @@ export class DocumentUploadFormComponent {
   }
 
   hasRequiredError(controlName: 'caseFileId'): boolean {
+    if (this.isCaseFileSelectionHidden()) {
+      return false;
+    }
+
     const control = this.uploadForm.controls[controlName];
     return control.touched && control.hasError('required');
   }
@@ -192,15 +213,21 @@ export class DocumentUploadFormComponent {
   }
 
   isSubmitDisabled(): boolean {
+    const isCaseFileFixed = this.isCaseFileSelectionHidden();
+
     return (
       this.isSaving() ||
-      this.isCaseFilesLoading() ||
-      !this.caseFileOptions().length ||
+      (!isCaseFileFixed && this.isCaseFilesLoading()) ||
+      (!isCaseFileFixed && !this.caseFileOptions().length) ||
       !this.hasSelectedFile() ||
       !this.hasValidCaseFileSelection() ||
       this.uploadForm.invalid ||
       this.hasFileValidationError()
     );
+  }
+
+  isCaseFileSelectionHidden(): boolean {
+    return !!this.fixedCaseFileId().trim();
   }
 
   private getUploadedById(): string {

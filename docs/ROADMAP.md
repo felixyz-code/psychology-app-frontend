@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 10.7 - Documents Modal Forms UX
+Sprint 10.9 - Documents Table Simplification & Detail Modal
 ```
 
 ---
@@ -91,6 +91,7 @@ Sprint 10.7 - Documents Modal Forms UX
 * Delete
 * Metadata edit
 * Sprint 7.5 completed - Data table pattern applied to the Documents block inside patient detail dialog
+* Sprint 10.9 completed - Documents table simplified for end users and technical metadata moved to a reusable detail modal
 
 ### Appointments
 

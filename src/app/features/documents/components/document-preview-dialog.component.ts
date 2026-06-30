@@ -15,6 +15,8 @@ interface DocumentPreviewDialogData {
 
 type PreviewKind = 'pdf' | 'image' | 'unsupported' | 'unavailable';
 
+const PDF_VIEWER_OPEN_PARAMETERS = '#toolbar=1&navpanes=0&zoom=80';
+
 @Component({
   selector: 'app-document-preview-dialog',
   standalone: true,
@@ -119,7 +121,7 @@ export class DocumentPreviewDialogComponent implements OnDestroy {
 
         if (mimeType === 'application/pdf') {
           this.previewKind.set('pdf');
-          this.previewResourceUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl));
+          this.previewResourceUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.buildPdfPreviewUrl(objectUrl)));
         } else if (mimeType === 'image/png' || mimeType === 'image/jpeg') {
           this.previewKind.set('image');
           this.previewResourceUrl.set(null);
@@ -143,6 +145,10 @@ export class DocumentPreviewDialogComponent implements OnDestroy {
     const documentType = this.document.mimeType?.trim() ?? '';
 
     return blobType || documentType;
+  }
+
+  private buildPdfPreviewUrl(objectUrl: string): string {
+    return `${objectUrl}${PDF_VIEWER_OPEN_PARAMETERS}`;
   }
 
   private revokePreviewUrl(): void {

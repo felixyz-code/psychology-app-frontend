@@ -2,7 +2,13 @@
   <div class="document-form-dialog__header">
     <div>
       <h2>Nuevo documento</h2>
-      <p>Carga un documento sin salir del listado global.</p>
+      <p>
+        @if (isCaseFileFixed()) {
+          Carga un documento para este expediente sin solicitar una seleccion adicional.
+        } @else {
+          Carga un documento sin salir del listado global.
+        }
+      </p>
     </div>
   </div>
 
@@ -14,6 +20,7 @@
     [isCaseFilesLoading]="flow.isCaseFilesLoading()"
     [caseFilesLoadErrorMessage]="flow.caseFilesLoadErrorMessage()"
     [caseFileOptions]="flow.caseFileOptions()"
+    [fixedCaseFileId]="flow.fixedCaseFileId()"
     (formSubmitted)="submit($event)"
     (cancelled)="cancel()"
   />

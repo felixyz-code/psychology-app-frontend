@@ -8,6 +8,20 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 9
 
+## Sprint 10.9 - Documents Table Simplification & Detail Modal
+
+### Added
+
+* Nuevo dialogo reutilizable de detalle tecnico para Documents con metadata completa del registro.
+* Nueva accion `Ver detalle` disponible tanto en `/documents` como en la seccion Documents del expediente clinico.
+
+### Changed
+
+* `app-documents-list` simplifica la tabla visible para usuario final mostrando solo Archivo, Tipo, Fecha y Acciones.
+* `mimeType` ahora se presenta con etiquetas amigables como `PDF`, `Imagen PNG` e `Imagen JPG`.
+* La metadata tecnica `caseFileId`, `uploadedById` y fechas completas deja de mostrarse directamente en la tabla y se consulta desde el modal de detalle.
+* La misma implementacion reutilizable sigue siendo usada en la vista global y dentro del expediente clinico sin duplicar tablas.
+
 ## Sprint 10.7 - Documents Modal Forms UX
 
 ### Added

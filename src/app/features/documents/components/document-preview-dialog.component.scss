@@ -1,15 +1,25 @@
-.document-preview-dialog {
-  display: grid;
-  gap: 1rem;
-  width: min(92vw, 1100px);
-  max-width: 1100px;
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
 }
 
-.document-preview-dialog__header {
+.document-preview-dialog {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  gap: 1.25rem;
+  overflow: hidden;
+  padding: 1.25rem;
+  background: transparent;
+  color: var(--app-color-heading);
+}
+
+:host .document-preview-dialog {
+  display: flex;
 }
 
 .document-preview-dialog__title-row {
@@ -41,51 +51,88 @@
   margin: 0;
 }
 
-.document-preview-dialog__type-label {
-  display: inline-block;
-  margin-bottom: 0.35rem;
-  color: var(--app-color-text-secondary);
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .document-preview-dialog__title-block p {
   margin-top: 0.35rem;
   color: var(--app-color-text-secondary);
   word-break: break-word;
 }
 
-.document-preview-dialog__actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
+.detail-dialog-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 0;
+  padding-bottom: 0.25rem;
 }
 
-.document-preview-dialog__actions button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+.preview-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .document-preview-dialog__content {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
+  padding: 0.25rem;
+  min-height: 0;
+  max-height: none;
+}
+
+.document-preview-dialog--pdf {
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.document-preview-dialog--pdf .document-preview-dialog__content {
+  flex: 1 1 0;
+  gap: 0.5rem;
+  padding: 0;
 }
 
 .document-preview-dialog__viewer-shell {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
   padding: 1rem;
+  box-sizing: border-box;
   border: 1px solid var(--app-color-border-subtle);
   border-radius: 1rem;
   background: var(--app-color-surface-muted);
 }
 
+.document-preview-dialog__viewer-shell--pdf {
+  flex: 1 1 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.document-preview-dialog--pdf .document-preview-dialog__viewer-shell--pdf {
+  height: auto;
+  padding: 0;
+}
+
+.document-preview-dialog--pdf .detail-dialog-footer {
+  padding: 0.625rem 0.25rem 0;
+}
+
+.document-preview-dialog__viewer-shell--image {
+  height: 100%;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: auto;
+  padding: 1.5rem;
+}
+
 .document-preview-dialog__state {
   display: grid;
+  flex: 1 1 auto;
   justify-items: center;
   gap: 1rem;
-  min-height: 420px;
+  min-height: 0;
   padding: 2rem;
   border: 1px solid var(--app-color-border-subtle);
   border-radius: 1rem;
@@ -108,8 +155,6 @@
 .document-preview-dialog__frame,
 .document-preview-dialog__image-wrapper {
   width: 100%;
-  min-height: 70vh;
-  max-height: 70vh;
   border: 1px solid var(--app-color-border-subtle);
   border-radius: 0.85rem;
   background: var(--app-color-surface);
@@ -117,47 +162,52 @@
 
 .document-preview-dialog__frame {
   display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
 }
 
 .document-preview-dialog__image-wrapper {
-  display: grid;
-  place-items: center;
-  overflow: auto;
-  padding: 1rem;
+  display: flex;
+  min-height: 0;
+  width: auto;
+  max-width: 100%;
+  justify-content: center;
+  align-items: flex-start;
+  border: 0;
+  background: transparent;
 }
 
 .document-preview-dialog__image {
+  display: block;
   max-width: 100%;
   height: auto;
+  flex: 0 0 auto;
+}
+
+.detail-dialog-footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 0.75rem 0.5rem 0.25rem;
+  border-top: 1px solid var(--app-color-card-border);
+  background: var(--app-color-dialog-bg);
 }
 
 @media (max-width: 768px) {
-  .document-preview-dialog {
-    width: 100%;
-  }
-
-  .document-preview-dialog__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .document-preview-dialog__title-row {
     align-items: center;
-  }
-
-  .document-preview-dialog__actions {
-    justify-content: space-between;
-    flex-wrap: wrap;
   }
 
   .document-preview-dialog__viewer-shell {
     padding: 0.75rem;
   }
 
-  .document-preview-dialog__frame,
-  .document-preview-dialog__image-wrapper,
+  .document-preview-dialog__viewer-shell--image,
   .document-preview-dialog__state {
-    min-height: 55vh;
-    max-height: 55vh;
+    padding: 1rem;
   }
 }

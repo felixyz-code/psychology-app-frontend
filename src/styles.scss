@@ -134,6 +134,21 @@ button[mat-button] {
   border-radius: 12px;
 }
 
+.app-secondary-button {
+  border: 1px solid var(--app-color-border) !important;
+  background: var(--app-color-surface-muted) !important;
+  color: var(--app-color-heading) !important;
+}
+
+.app-secondary-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--app-color-surface-muted) 78%, var(--app-color-border) 22%) !important;
+  border-color: color-mix(in srgb, var(--app-color-border) 82%, var(--app-color-muted) 18%) !important;
+}
+
+.app-secondary-button:disabled {
+  opacity: 0.7;
+}
+
 .app-action-button {
   display: inline-flex;
   align-items: center;
@@ -167,6 +182,23 @@ button[mat-button] {
 
 .app-action-button:disabled {
   opacity: 0.65;
+}
+
+.app-clickable-table-row {
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.app-clickable-table-row:hover {
+  background: var(--app-color-table-hover);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-color-border) 72%, transparent);
+}
+
+.app-clickable-table-row:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--app-color-primary) 75%, white);
+  outline-offset: -2px;
 }
 
 .app-skeleton,
@@ -295,6 +327,44 @@ body.dark-theme .app-status-badge--no-show {
   padding: 0.5rem;
 }
 
+.app-detail-dialog-panel {
+  max-height: 85vh !important;
+}
+
+.app-detail-dialog-panel .mat-mdc-dialog-container,
+.app-detail-dialog-panel .mat-mdc-dialog-inner-container,
+.app-detail-dialog-panel .mat-mdc-dialog-surface,
+.app-detail-dialog-panel .mdc-dialog__surface {
+  max-height: 85vh;
+  height: auto;
+  min-height: 0;
+}
+
+.app-document-preview-panel.cdk-overlay-pane {
+  width: min(92vw, 1500px) !important;
+  max-width: 92vw !important;
+  height: 88vh !important;
+  max-height: 88vh !important;
+}
+
+.app-document-preview-panel .mat-mdc-dialog-container,
+.app-document-preview-panel .mat-mdc-dialog-inner-container,
+.app-document-preview-panel .mdc-dialog,
+.app-document-preview-panel .mdc-dialog__container,
+.app-document-preview-panel .mat-mdc-dialog-surface,
+.app-document-preview-panel .mdc-dialog__surface {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-document-preview-panel .mat-mdc-dialog-inner-container {
+  padding: 0.5rem;
+}
+
 .mat-mdc-dialog-container [class$='-dialog'] {
   display: grid;
   gap: 1.5rem;
@@ -410,7 +480,7 @@ body.dark-theme .app-status-badge--no-show {
   }
 
   .mat-mdc-dialog-container [class$='__actions'] {
-    flex-direction: column-reverse;
+    flex-direction: column;
     align-items: stretch;
   }
 }

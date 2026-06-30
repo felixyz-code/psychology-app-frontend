@@ -21,10 +21,7 @@ import { AppointmentsService } from '../../appointments/services/appointments.se
 import { CaseFileFormDialogComponent } from '../../case-files/components/case-file-form-dialog.component';
 import { CaseFile } from '../../case-files/models/case-file.models';
 import { CaseFilesService } from '../../case-files/services/case-files.service';
-import { DocumentDeleteDialogComponent } from '../../documents/components/document-delete-dialog.component';
-import { DocumentUploadDialogComponent } from '../../documents/components/document-upload-dialog.component';
-import { Document as ClinicalDocument } from '../../documents/models/document.models';
-import { DocumentsService } from '../../documents/services/documents.service';
+import { DocumentsListComponent } from '../../documents/components/documents-list.component';
 import { SessionNoteDeleteDialogComponent } from '../../session-notes/components/session-note-delete-dialog.component';
 import { SessionNoteDetailDialogComponent } from '../../session-notes/components/session-note-detail-dialog.component';
 import { SessionNoteFormDialogComponent } from '../../session-notes/components/session-note-form-dialog.component';
@@ -48,6 +45,7 @@ interface PatientDetailDialogData {
     MatProgressSpinnerModule,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
+    DocumentsListComponent,
     SectionCardComponent,
     StatusBadgeComponent,
   ],
@@ -58,7 +56,6 @@ export class PatientDetailDialogComponent {
   private readonly data = inject<PatientDetailDialogData>(MAT_DIALOG_DATA);
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly caseFilesService = inject(CaseFilesService);
-  private readonly documentsService = inject(DocumentsService);
   private readonly sessionNotesService = inject(SessionNotesService);
   private readonly dialog = inject(MatDialog);
   private readonly dialogRef = inject(
@@ -74,54 +71,6 @@ export class PatientDetailDialogComponent {
   readonly caseFile = signal<CaseFile | null>(null);
   readonly isCaseFileLoading = signal(true);
   readonly caseFileErrorMessage = signal('');
-  readonly documents = signal<ClinicalDocument[]>([]);
-  readonly isDocumentsLoading = signal(false);
-  readonly documentsErrorMessage = signal('');
-  readonly documentsPageSizeOptions = [5, 10, 20];
-  readonly documentsTableState = signal<DataTableState>({
-    searchTerm: '',
-    pageIndex: 0,
-    pageSize: 5,
-    sortBy: undefined,
-    sortDirection: '',
-  });
-  readonly documentsTableResult = computed<DataTableResult<ClinicalDocument>>(() => {
-    const state = this.documentsTableState();
-    const items = this.documents();
-    const filteredItems = items.filter((document) =>
-      matchesSearchTerm(document, state.searchTerm, (item) => this.getDocumentSearchValues(item))
-    );
-
-    return {
-      items,
-      filteredItems,
-      pagedItems: paginateItems(filteredItems, {
-        pageIndex: this.safeDocumentsPageIndex(),
-        pageSize: state.pageSize,
-      }),
-      totalItems: items.length,
-      totalFilteredItems: filteredItems.length,
-      hasActiveFilters: Boolean(state.searchTerm.trim()),
-    };
-  });
-  readonly safeDocumentsPageIndex = computed(() => {
-    const state = this.documentsTableState();
-    const totalFilteredItems = this.documents().filter((document) =>
-      matchesSearchTerm(document, state.searchTerm, (item) => this.getDocumentSearchValues(item))
-    ).length;
-
-    return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
-  });
-  readonly documentsCounterLabel = computed(() => {
-    const result = this.documentsTableResult();
-
-    return formatFilteredResultsLabel(
-      result.totalFilteredItems,
-      result.totalItems,
-      (count) => this.formatDocumentCount(count),
-      result.hasActiveFilters
-    );
-  });
   readonly sessionNotes = signal<SessionNote[]>([]);
   readonly isSessionNotesLoading = signal(false);
   readonly sessionNotesErrorMessage = signal('');
@@ -339,94 +288,6 @@ export class PatientDetailDialogComponent {
     });
   }
 
-  openUploadDocumentDialog(): void {
-    const currentCaseFile = this.caseFile();
-
-    if (!currentCaseFile) {
-      return;
-    }
-
-    const dialogRef = this.dialog.open(DocumentUploadDialogComponent, {
-      width: '560px',
-      maxWidth: '95vw',
-      autoFocus: false,
-      data: {
-        caseFileId: currentCaseFile.id,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((uploaded) => {
-      if (uploaded) {
-        this.loadDocuments(currentCaseFile.id);
-      }
-    });
-  }
-
-  viewDocument(document: ClinicalDocument): void {
-    this.documentsErrorMessage.set('');
-
-    this.documentsService.view(document.id).subscribe({
-      next: (blob) => {
-        const blobUrl = URL.createObjectURL(blob);
-        const openedWindow = window.open(blobUrl, '_blank');
-
-        if (!openedWindow) {
-          URL.revokeObjectURL(blobUrl);
-          this.documentsErrorMessage.set('No fue posible abrir el documento en una nueva pestaña.');
-          return;
-        }
-
-        openedWindow.opener = null;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.documentsErrorMessage.set(this.getDocumentActionErrorMessage(error, 'ver'));
-      },
-    });
-  }
-
-  downloadDocument(document: ClinicalDocument): void {
-    this.documentsErrorMessage.set('');
-
-    this.documentsService.download(document.id).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = globalThis.document.createElement('a');
-
-        link.href = url;
-        link.download = document.fileName;
-        link.click();
-
-        URL.revokeObjectURL(url);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.documentsErrorMessage.set(this.getDocumentActionErrorMessage(error, 'descargar'));
-      },
-    });
-  }
-
-  openDeleteDocumentDialog(document: ClinicalDocument): void {
-    const currentCaseFile = this.caseFile();
-
-    if (!currentCaseFile) {
-      return;
-    }
-
-    const dialogRef = this.dialog.open(DocumentDeleteDialogComponent, {
-      width: '520px',
-      maxWidth: '95vw',
-      autoFocus: false,
-      data: {
-        document,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((deleted) => {
-      if (deleted) {
-        this.loadDocuments(currentCaseFile.id);
-      }
-    });
-  }
-
   openEditSessionNoteDialog(sessionNote: SessionNote): void {
     const currentCaseFile = this.caseFile();
 
@@ -500,28 +361,12 @@ export class PatientDetailDialogComponent {
     return value?.trim() || '-';
   }
 
-  getDocumentType(document: ClinicalDocument): string {
-    if (document.mimeType === 'application/pdf') {
-      return 'PDF';
-    }
-
-    if (document.mimeType === 'image/jpeg') {
-      return 'Imagen JPEG';
-    }
-
-    if (document.mimeType === 'image/png') {
-      return 'Imagen PNG';
-    }
-
-    return document.mimeType ?? 'Tipo no disponible';
-  }
-
   getAppointmentStatusLabel(status: AppointmentStatus): string {
     const labels: Record<AppointmentStatus, string> = {
       SCHEDULED: 'Programada',
       COMPLETED: 'Completada',
       CANCELLED: 'Cancelada',
-      NO_SHOW: 'No asistió',
+      NO_SHOW: 'No asistio',
     };
 
     return labels[status];
@@ -557,30 +402,6 @@ export class PatientDetailDialogComponent {
     return sessionNote.title?.trim() || 'Sesion sin titulo';
   }
 
-  updateDocumentsSearchTerm(searchTerm: string): void {
-    this.documentsTableState.update((state) => ({
-      ...state,
-      searchTerm,
-      pageIndex: 0,
-    }));
-  }
-
-  clearDocumentsFilters(): void {
-    this.documentsTableState.update((state) => ({
-      ...state,
-      searchTerm: '',
-      pageIndex: 0,
-    }));
-  }
-
-  handleDocumentsPageChange(event: PageEvent): void {
-    this.documentsTableState.update((state) => ({
-      ...state,
-      pageIndex: event.pageIndex,
-      pageSize: event.pageSize,
-    }));
-  }
-
   updateSessionNotesSearchTerm(searchTerm: string): void {
     this.sessionNotesTableState.update((state) => ({
       ...state,
@@ -608,27 +429,24 @@ export class PatientDetailDialogComponent {
   private loadCaseFile(): void {
     this.isCaseFileLoading.set(true);
     this.caseFileErrorMessage.set('');
-    this.resetDocumentsState();
     this.resetSessionNotesState();
 
     this.caseFilesService.getCaseFileByPatientId(this.patient.id).subscribe({
       next: (caseFile) => {
         this.caseFile.set(caseFile);
         this.isCaseFileLoading.set(false);
-        this.loadDocuments(caseFile.id);
         this.loadSessionNotes(caseFile.id);
       },
       error: (error: HttpErrorResponse) => {
         this.caseFile.set(null);
         this.isCaseFileLoading.set(false);
-        this.resetDocumentsState();
         this.resetSessionNotesState();
 
         if (error.status === 404) {
           return;
         }
 
-        this.caseFileErrorMessage.set('No fue posible cargar el expediente clínico.');
+        this.caseFileErrorMessage.set('No fue posible cargar el expediente clinico.');
       },
     });
   }
@@ -651,24 +469,6 @@ export class PatientDetailDialogComponent {
     });
   }
 
-  private loadDocuments(caseFileId: string): void {
-    this.isDocumentsLoading.set(true);
-    this.documentsErrorMessage.set('');
-    this.documents.set([]);
-
-    this.documentsService.getByCaseFile(caseFileId).subscribe({
-      next: (documents) => {
-        this.documents.set(documents);
-        this.isDocumentsLoading.set(false);
-      },
-      error: () => {
-        this.documents.set([]);
-        this.isDocumentsLoading.set(false);
-        this.documentsErrorMessage.set('No fue posible cargar los documentos.');
-      },
-    });
-  }
-
   private loadSessionNotes(caseFileId: string): void {
     this.isSessionNotesLoading.set(true);
     this.sessionNotesErrorMessage.set('');
@@ -682,7 +482,7 @@ export class PatientDetailDialogComponent {
       error: () => {
         this.sessionNotes.set([]);
         this.isSessionNotesLoading.set(false);
-        this.sessionNotesErrorMessage.set('No fue posible cargar las notas de sesión.');
+        this.sessionNotesErrorMessage.set('No fue posible cargar las notas de sesion.');
       },
     });
   }
@@ -694,58 +494,20 @@ export class PatientDetailDialogComponent {
     this.clearSessionNotesFilters();
   }
 
-  private resetDocumentsState(): void {
-    this.documents.set([]);
-    this.isDocumentsLoading.set(false);
-    this.documentsErrorMessage.set('');
-    this.clearDocumentsFilters();
-  }
-
-  private getDocumentActionErrorMessage(error: HttpErrorResponse, action: 'ver' | 'descargar'): string {
-    if (error.status === 401 || error.status === 403) {
-      return `No tienes permisos para ${action} este documento.`;
-    }
-
-    if (error.status === 404) {
-      return 'El documento ya no está disponible.';
-    }
-
-    return `No fue posible ${action} el documento.`;
-  }
-
   private getAppointmentActionErrorMessage(error: HttpErrorResponse, action: 'cancelar'): string {
     if (error.status === 401 || error.status === 403) {
       return `No tienes permisos para ${action} esta cita.`;
     }
 
     if (error.status === 404) {
-      return 'La cita ya no está disponible.';
+      return 'La cita ya no esta disponible.';
     }
 
     return `No fue posible ${action} la cita.`;
   }
 
   private getSessionNoteSearchValues(sessionNote: SessionNote): Array<string | null | undefined> {
-    return [
-      sessionNote.title,
-      this.getSessionNoteTitle(sessionNote),
-      sessionNote.content,
-      sessionNote.sessionDate,
-    ];
-  }
-
-  private getDocumentSearchValues(document: ClinicalDocument): Array<string | null | undefined> {
-    return [
-      document.fileName,
-      document.mimeType,
-      this.getDocumentType(document),
-      document.uploadedAt,
-      document.updatedAt,
-    ];
-  }
-
-  private formatDocumentCount(count: number): string {
-    return count === 1 ? '1 documento' : `${count} documentos`;
+    return [sessionNote.title, this.getSessionNoteTitle(sessionNote), sessionNote.content, sessionNote.sessionDate];
   }
 
   private formatSessionNoteCount(count: number): string {

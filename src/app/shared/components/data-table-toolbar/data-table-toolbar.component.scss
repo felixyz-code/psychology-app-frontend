@@ -3,11 +3,11 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.5rem 0;
+  padding: var(--data-table-toolbar-padding, 1rem 1.5rem 0);
 }
 
 .data-table-toolbar__search {
-  width: min(100%, 26rem);
+  width: min(100%, var(--data-table-toolbar-search-width, 26rem));
 }
 
 .data-table-toolbar__meta {
@@ -49,4 +49,3 @@
     min-height: 0;
   }
 }
-

@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReactiveFormsModule, NonNullableFormBuilder } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -17,6 +18,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import { FinancialTransactionDeleteDialogComponent } from '../components/financial-transaction-delete-dialog.component';
+import { FinancialTransactionDetailDialogComponent } from '../components/financial-transaction-detail-dialog.component';
 import {
   FinancialTransactionCategory,
   FindFinancialTransactionsQueryDto,
@@ -42,6 +44,7 @@ import { FinancialTransactionsService } from '../services/financial-transactions
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
+    MatTooltipModule,
     DataTableEmptyStateComponent,
     MetricCardComponent,
     PageHeaderComponent,
@@ -195,6 +198,21 @@ export class FinancialTransactionsListPage {
         this.reloadData();
       }
     });
+  }
+
+  openDetailDialog(transaction: FinancialTransactionResponse): void {
+    this.dialog.open(FinancialTransactionDetailDialogComponent, {
+      width: '960px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: {
+        transaction,
+      },
+    });
+  }
+
+  stopRowClick(event: Event): void {
+    event.stopPropagation();
   }
 
   hasActiveFilters(): boolean {

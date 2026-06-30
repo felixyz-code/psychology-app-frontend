@@ -1,35 +1,19 @@
-<div class="document-preview-dialog">
-  <div class="document-preview-dialog__header">
+<div class="detail-dialog-shell document-preview-dialog" [class.document-preview-dialog--pdf]="previewKind() === 'pdf'">
+  <header class="detail-dialog-header">
     <div class="document-preview-dialog__title-row">
       <div class="document-preview-dialog__file-type" aria-hidden="true">
         <mat-icon>{{ getPreviewIcon() }}</mat-icon>
       </div>
 
       <div class="document-preview-dialog__title-block">
-        <span class="document-preview-dialog__type-label">{{ getPreviewTypeLabel() }}</span>
+        <span class="detail-dialog-eyebrow">{{ getPreviewTypeLabel() }}</span>
         <h2>Vista previa del documento</h2>
         <p>{{ document.fileName }}</p>
       </div>
     </div>
+  </header>
 
-    <div class="document-preview-dialog__actions">
-      <button mat-stroked-button type="button" [disabled]="isDownloading()" (click)="download()">
-        <mat-icon>download</mat-icon>
-        <span>{{ isDownloading() ? 'Descargando...' : 'Descargar' }}</span>
-      </button>
-
-      <button mat-button type="button" (click)="close()">
-        <mat-icon>close</mat-icon>
-        <span>Cerrar</span>
-      </button>
-
-      <button mat-icon-button type="button" aria-label="Cerrar vista previa" (click)="close()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-  </div>
-
-  <div class="document-preview-dialog__content">
+  <div class="detail-dialog-body document-preview-dialog__content preview-body">
     @if (isLoading()) {
       <div class="document-preview-dialog__state">
         <mat-spinner diameter="40" />
@@ -40,7 +24,7 @@
         <p>{{ errorMessage() }}</p>
       </div>
     } @else if (previewKind() === 'pdf' && previewResourceUrl()) {
-      <div class="document-preview-dialog__viewer-shell">
+      <div class="document-preview-dialog__viewer-shell document-preview-dialog__viewer-shell--pdf">
         <iframe
           class="document-preview-dialog__frame"
           [src]="previewResourceUrl()"
@@ -48,7 +32,7 @@
         ></iframe>
       </div>
     } @else if (previewKind() === 'image' && previewUrl()) {
-      <div class="document-preview-dialog__viewer-shell">
+      <div class="document-preview-dialog__viewer-shell document-preview-dialog__viewer-shell--image">
         <div class="document-preview-dialog__image-wrapper">
           <img class="document-preview-dialog__image" [src]="previewUrl()" [alt]="document.fileName" />
         </div>
@@ -64,4 +48,12 @@
       <p class="document-preview-dialog__inline-error" role="alert">{{ errorMessage() }}</p>
     }
   </div>
+
+  <footer class="detail-dialog-footer">
+    <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
+    <button mat-flat-button type="button" [disabled]="isDownloading()" (click)="download()">
+      <mat-icon>download</mat-icon>
+      <span>{{ isDownloading() ? 'Descargando...' : 'Descargar' }}</span>
+    </button>
+  </footer>
 </div>

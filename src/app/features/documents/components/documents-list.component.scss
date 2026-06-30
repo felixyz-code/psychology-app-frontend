@@ -1,0 +1,101 @@
+.documents-card__header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.documents-card__create-button {
+  width: fit-content;
+  white-space: nowrap;
+}
+
+.documents-state {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--app-color-text-secondary);
+}
+
+.documents-state--error {
+  color: var(--app-color-danger-text);
+}
+
+.documents-state p {
+  margin: 0;
+}
+
+.documents-inline-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem 0;
+  color: var(--app-color-danger-text);
+}
+
+.documents-inline-error p {
+  margin: 0;
+}
+
+.documents-table-wrapper {
+  overflow-x: auto;
+  padding-top: 0.75rem;
+}
+
+.documents-table {
+  width: 100%;
+  min-width: 720px;
+  background: transparent;
+}
+
+.documents-table .mat-mdc-header-cell {
+  color: var(--app-color-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.documents-table .mat-mdc-cell,
+.documents-table .mat-mdc-header-cell {
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+}
+
+.documents-table .mat-mdc-row:hover {
+  background: var(--app-color-table-hover);
+}
+
+.documents-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.documents-file-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.documents-file-cell__icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  background: var(--app-color-surface-muted);
+  color: var(--app-color-heading);
+  flex-shrink: 0;
+}
+
+.documents-file-cell__content {
+  min-width: 0;
+}
+
+.documents-file-cell__content strong {
+  display: block;
+  color: var(--app-color-heading);
+  font-weight: 600;
+  word-break: break-word;
+}

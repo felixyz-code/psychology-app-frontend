@@ -16,7 +16,7 @@
       <p>{{ flow.loadErrorMessage() }}</p>
       <div class="document-form-dialog__state-actions">
         <button mat-stroked-button type="button" (click)="retryLoad()">Reintentar</button>
-        <button mat-button type="button" (click)="cancel()">Cerrar</button>
+        <button mat-button class="app-secondary-button" type="button" (click)="cancel()">Cerrar</button>
       </div>
     </div>
   } @else if (flow.document(); as document) {

@@ -14,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
@@ -24,6 +25,7 @@ import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, pagina
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { AppointmentDeleteDialogComponent } from '../components/appointment-delete-dialog.component';
+import { AppointmentDetailDialogComponent } from '../components/appointment-detail-dialog.component';
 import { AppointmentsCalendarComponent } from '../components/appointments-calendar.component';
 import { AppointmentsDailyAgendaComponent } from '../components/appointments-daily-agenda.component';
 import { AppointmentFormDialogComponent } from '../components/appointment-form-dialog.component';
@@ -62,6 +64,7 @@ interface AppointmentsTableState extends DataTableState {
     MatSelectModule,
     MatSortModule,
     MatTableModule,
+    MatTooltipModule,
     DataTableEmptyStateComponent,
     SectionCardComponent,
     StatusBadgeComponent,
@@ -229,6 +232,24 @@ export class AppointmentsListPage {
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
         this.loadAppointments();
+      }
+    });
+  }
+
+  openAppointmentDetailDialog(appointment: Appointment): void {
+    const dialogRef = this.dialog.open(AppointmentDetailDialogComponent, {
+      width: '960px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: {
+        appointment,
+        patientName: this.getPatientName(appointment.patientId),
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.action === 'edit' && result.appointment) {
+        this.openEditAppointmentDialog(result.appointment);
       }
     });
   }
@@ -442,6 +463,10 @@ export class AppointmentsListPage {
 
   getAppointmentsSortDirection(): 'asc' | 'desc' | '' {
     return this.tableState().sortDirection ?? '';
+  }
+
+  stopRowClick(event: Event): void {
+    event.stopPropagation();
   }
 
   private buildPatientNames(patients: Patient[]): Record<string, string> {

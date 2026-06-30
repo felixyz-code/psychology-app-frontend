@@ -1,9 +1,13 @@
 import { Component, inject } from '@angular/core';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { DocumentUploadFormComponent } from './document-upload-form.component';
 import { UploadDocumentRequest } from '../models/document.models';
 import { DocumentUploadFlowStore } from '../services/document-upload-flow.store';
+
+interface DocumentUploadModalDialogData {
+  caseFileId?: string;
+}
 
 @Component({
   selector: 'app-document-upload-modal-dialog',
@@ -14,10 +18,18 @@ import { DocumentUploadFlowStore } from '../services/document-upload-flow.store'
   providers: [DocumentUploadFlowStore],
 })
 export class DocumentUploadModalDialogComponent {
+  private readonly data = inject<DocumentUploadModalDialogData | null>(MAT_DIALOG_DATA, { optional: true });
   private readonly dialogRef = inject(MatDialogRef<DocumentUploadModalDialogComponent, boolean>);
   readonly flow = inject(DocumentUploadFlowStore);
 
   constructor() {
+    const caseFileId = this.data?.caseFileId?.trim();
+
+    if (caseFileId) {
+      this.flow.configureFixedCaseFile(caseFileId);
+      return;
+    }
+
     this.flow.loadCaseFileOptions();
   }
 
@@ -29,5 +41,9 @@ export class DocumentUploadModalDialogComponent {
 
   cancel(): void {
     this.dialogRef.close(false);
+  }
+
+  isCaseFileFixed(): boolean {
+    return !!this.flow.fixedCaseFileId();
   }
 }

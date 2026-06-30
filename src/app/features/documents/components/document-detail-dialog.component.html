@@ -1,0 +1,69 @@
+<div class="detail-dialog-shell">
+  <header class="detail-dialog-header">
+    <div>
+      <span class="detail-dialog-eyebrow">Detalle tecnico</span>
+      <h2>Detalle del documento</h2>
+      <p>{{ getDisplayValue(document.fileName) }}</p>
+    </div>
+
+    <button mat-icon-button type="button" aria-label="Cerrar detalle del documento" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="detail-dialog-body">
+    <div class="detail-dialog-grid">
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">ID del documento</span>
+        <p class="detail-dialog-value detail-dialog-value--technical">{{ getDisplayValue(document.id) }}</p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Nombre de archivo</span>
+        <p class="detail-dialog-value">{{ getDisplayValue(document.fileName) }}</p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Tipo MIME</span>
+        <p class="detail-dialog-value detail-dialog-value--technical">
+          {{ getDisplayValue(document.mimeType) }}
+        </p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Expediente</span>
+        <p class="detail-dialog-value detail-dialog-value--technical">
+          {{ getDisplayValue(document.caseFileId) }}
+        </p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Subido por</span>
+        <p class="detail-dialog-value detail-dialog-value--technical">
+          {{ getDisplayValue(document.uploadedById) }}
+        </p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Fecha de subida</span>
+        <p class="detail-dialog-value">{{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Ultima actualizacion</span>
+        <p class="detail-dialog-value">{{ document.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+
+      @if (document.filePath) {
+        <div class="detail-dialog-item detail-dialog-item--full">
+          <span class="detail-dialog-label">Ruta del archivo</span>
+          <p class="detail-dialog-value detail-dialog-value--technical">{{ document.filePath }}</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <footer class="detail-dialog-footer">
+    <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
+  </footer>
+</div>

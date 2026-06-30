@@ -86,15 +86,13 @@
 }
 
 .patient-detail-dialog__notes-list,
-.patient-detail-dialog__appointments-list,
-.patient-detail-dialog__documents-list {
+.patient-detail-dialog__appointments-list {
   display: grid;
   gap: 0.9rem;
 }
 
 .patient-detail-dialog__note-card,
-.patient-detail-dialog__appointment-card,
-.patient-detail-dialog__document-card {
+.patient-detail-dialog__appointment-card {
   display: grid;
   gap: 0.85rem;
   padding: 1rem;
@@ -104,8 +102,7 @@
 }
 
 .patient-detail-dialog__note-header,
-.patient-detail-dialog__appointment-header,
-.patient-detail-dialog__document-header {
+.patient-detail-dialog__appointment-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -114,30 +111,26 @@
 
 .patient-detail-dialog__note-header :is(h4, p),
 .patient-detail-dialog__appointment-header :is(h4, p),
-.patient-detail-dialog__document-header :is(h4, p),
 .patient-detail-dialog__appointment-notes,
 .patient-detail-dialog__note-content {
   margin: 0;
 }
 
 .patient-detail-dialog__note-header h4,
-.patient-detail-dialog__appointment-header h4,
-.patient-detail-dialog__document-header h4 {
+.patient-detail-dialog__appointment-header h4 {
   color: var(--app-color-heading);
   font-size: 1rem;
 }
 
 .patient-detail-dialog__note-header p,
-.patient-detail-dialog__appointment-header p,
-.patient-detail-dialog__document-header p {
+.patient-detail-dialog__appointment-header p {
   margin-top: 0.25rem;
   color: var(--app-color-text-secondary);
   font-size: 0.9rem;
 }
 
 .patient-detail-dialog__note-actions,
-.patient-detail-dialog__appointment-actions,
-.patient-detail-dialog__document-actions {
+.patient-detail-dialog__appointment-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -174,8 +167,7 @@
   }
 
   .patient-detail-dialog__note-header,
-  .patient-detail-dialog__appointment-header,
-  .patient-detail-dialog__document-header {
+  .patient-detail-dialog__appointment-header {
     flex-direction: column;
   }
 
@@ -184,13 +176,12 @@
   }
 
   .patient-detail-dialog__note-actions,
-  .patient-detail-dialog__appointment-actions,
-  .patient-detail-dialog__document-actions {
+  .patient-detail-dialog__appointment-actions {
     justify-content: flex-start;
   }
 
   .patient-detail-dialog__actions {
-    flex-direction: column-reverse;
+    flex-direction: column;
     align-items: stretch;
     padding: 0.75rem 0 0;
   }

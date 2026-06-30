@@ -1,0 +1,130 @@
+@let currentTransaction = transaction();
+
+<app-section-card
+  title="Resumen de la transaccion"
+  subtitle="Vista general del concepto, estado y referencias principales."
+>
+  <div class="financial-transaction-detail-grid">
+    <div class="financial-transaction-detail-grid__full">
+      <span class="financial-transaction-detail-label">Concepto</span>
+      <p class="financial-transaction-detail-value">{{ currentTransaction.concept }}</p>
+    </div>
+
+    <div>
+      <span class="financial-transaction-detail-label">Tipo</span>
+      <app-status-badge [label]="getTypeLabel(currentTransaction.type)" [variant]="getTypeVariant(currentTransaction.type)" />
+    </div>
+
+    <div>
+      <span class="financial-transaction-detail-label">Estado</span>
+      <app-status-badge
+        [label]="getStatusLabel(currentTransaction.status)"
+        [variant]="getStatusVariant(currentTransaction.status)"
+      />
+    </div>
+
+    <div>
+      <span class="financial-transaction-detail-label">Categoria</span>
+      <p class="financial-transaction-detail-value">{{ getCategoryLabel(currentTransaction.category) }}</p>
+    </div>
+
+    <div>
+      <span class="financial-transaction-detail-label">Monto</span>
+      <p class="financial-transaction-detail-amount">{{ formatAmount(currentTransaction.amount, currentTransaction.currency) }}</p>
+    </div>
+
+    <div>
+      <span class="financial-transaction-detail-label">Moneda</span>
+      <p class="financial-transaction-detail-value">{{ currentTransaction.currency }}</p>
+    </div>
+
+    <div>
+      <span class="financial-transaction-detail-label">Fecha del movimiento</span>
+      <p class="financial-transaction-detail-value">{{ formatDateTime(currentTransaction.occurredAt) }}</p>
+    </div>
+
+    @if (currentTransaction.dueDate) {
+      <div>
+        <span class="financial-transaction-detail-label">Fecha de vencimiento</span>
+        <p class="financial-transaction-detail-value">{{ formatDateTime(currentTransaction.dueDate) }}</p>
+      </div>
+    }
+
+    @if (currentTransaction.paymentMethod) {
+      <div>
+        <span class="financial-transaction-detail-label">Metodo de pago</span>
+        <p class="financial-transaction-detail-value">{{ getPaymentMethodLabel(currentTransaction.paymentMethod) }}</p>
+      </div>
+    }
+
+    @if (currentTransaction.patientId) {
+      <div>
+        <span class="financial-transaction-detail-label">Paciente relacionado</span>
+        <p class="financial-transaction-detail-value financial-transaction-detail-value--technical">
+          {{ currentTransaction.patientId }}
+        </p>
+      </div>
+    }
+
+    @if (currentTransaction.appointmentId) {
+      <div>
+        <span class="financial-transaction-detail-label">Cita relacionada</span>
+        <p class="financial-transaction-detail-value financial-transaction-detail-value--technical">
+          {{ currentTransaction.appointmentId }}
+        </p>
+      </div>
+    }
+
+    @if (currentTransaction.createdById) {
+      <div>
+        <span class="financial-transaction-detail-label">Creado por</span>
+        <p class="financial-transaction-detail-value financial-transaction-detail-value--technical">
+          {{ currentTransaction.createdById }}
+        </p>
+      </div>
+    }
+  </div>
+</app-section-card>
+
+@if (currentTransaction.description || currentTransaction.notes) {
+  <app-section-card title="Informacion adicional" subtitle="Descripcion y notas asociadas al movimiento.">
+    <div class="financial-transaction-detail-grid">
+      @if (currentTransaction.description) {
+        <div class="financial-transaction-detail-grid__full">
+          <span class="financial-transaction-detail-label">Descripcion</span>
+          <p class="financial-transaction-detail-value financial-transaction-detail-multiline">
+            {{ currentTransaction.description }}
+          </p>
+        </div>
+      }
+
+      @if (currentTransaction.notes) {
+        <div class="financial-transaction-detail-grid__full">
+          <span class="financial-transaction-detail-label">Notas</span>
+          <p class="financial-transaction-detail-value financial-transaction-detail-multiline">{{ currentTransaction.notes }}</p>
+        </div>
+      }
+    </div>
+  </app-section-card>
+}
+
+<app-section-card title="Trazabilidad" subtitle="Datos tecnicos de creacion y actualizacion del registro.">
+  <div class="financial-transaction-detail-grid">
+    <div>
+      <span class="financial-transaction-detail-label">Fecha de creacion</span>
+      <p class="financial-transaction-detail-value">{{ formatDateTime(currentTransaction.createdAt) }}</p>
+    </div>
+
+    <div>
+      <span class="financial-transaction-detail-label">Ultima actualizacion</span>
+      <p class="financial-transaction-detail-value">{{ formatDateTime(currentTransaction.updatedAt) }}</p>
+    </div>
+
+    <div class="financial-transaction-detail-grid__full">
+      <span class="financial-transaction-detail-label">ID de la transaccion</span>
+      <p class="financial-transaction-detail-value financial-transaction-detail-value--technical">
+        {{ currentTransaction.id }}
+      </p>
+    </div>
+  </div>
+</app-section-card>

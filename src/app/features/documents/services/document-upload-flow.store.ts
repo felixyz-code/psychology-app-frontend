@@ -23,8 +23,17 @@ export class DocumentUploadFlowStore {
   readonly caseFilesLoadErrorMessage = signal('');
   readonly caseFileOptions = signal<{ value: string; label: string }[]>([]);
   readonly uploadedById = signal(this.authStore.user()?.id ?? '');
+  readonly fixedCaseFileId = signal('');
+
+  configureFixedCaseFile(caseFileId: string): void {
+    this.fixedCaseFileId.set(caseFileId);
+    this.isCaseFilesLoading.set(false);
+    this.caseFilesLoadErrorMessage.set('');
+    this.caseFileOptions.set([]);
+  }
 
   loadCaseFileOptions(): void {
+    this.fixedCaseFileId.set('');
     this.isCaseFilesLoading.set(true);
     this.caseFilesLoadErrorMessage.set('');
 

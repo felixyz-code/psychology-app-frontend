@@ -54,7 +54,7 @@
 
 .financial-transactions-toolbar__row--secondary {
   grid-template-columns: repeat(4, minmax(180px, 1fr));
-  align-items: end;
+  align-items: start;
 }
 
 .financial-transactions-filter {
@@ -68,7 +68,12 @@
   flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.75rem;
+  gap: 1rem;
+  min-height: 3.5rem;
+}
+
+.financial-transactions-toolbar__actions button {
+  height: 3.5rem;
 }
 
 .financial-transactions-state {
@@ -110,10 +115,6 @@
 .financial-transactions-table .mat-mdc-header-cell {
   padding-top: 0.8rem;
   padding-bottom: 0.8rem;
-}
-
-.financial-transactions-table .mat-mdc-row:hover {
-  background: var(--app-color-table-hover);
 }
 
 .financial-transactions-table__amount {

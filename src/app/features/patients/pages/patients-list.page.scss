@@ -11,6 +11,11 @@
   white-space: nowrap;
 }
 
+.patients-data-toolbar {
+  --data-table-toolbar-padding: 0.35rem 0 0;
+  --data-table-toolbar-search-width: 24rem;
+}
+
 .patients-state {
   display: grid;
   justify-items: center;
@@ -50,10 +55,6 @@
 .patients-table .mat-mdc-header-cell {
   padding-top: 1rem;
   padding-bottom: 1rem;
-}
-
-.patients-table .mat-mdc-row:hover {
-  background: var(--app-color-table-hover);
 }
 
 .patients-actions {
