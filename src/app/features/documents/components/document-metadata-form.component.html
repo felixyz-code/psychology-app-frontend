@@ -19,8 +19,9 @@
 }
 
 <ng-template #metadataFormContent>
-    <form class="document-metadata-form" [formGroup]="metadataForm" (ngSubmit)="submit()">
-      <mat-form-field appearance="outline">
+  <form class="document-metadata-form app-form" [formGroup]="metadataForm" (ngSubmit)="submit()">
+    <div class="document-metadata-form__grid app-form-grid">
+      <mat-form-field appearance="outline" class="app-form-field--full">
         <mat-label>Nombre del documento</mat-label>
         <input matInput formControlName="fileName" maxlength="255" />
         <mat-hint align="end">{{ metadataForm.controls.fileName.value.length }}/255</mat-hint>
@@ -30,24 +31,25 @@
           <mat-error>El nombre del documento no puede exceder 255 caracteres.</mat-error>
         }
       </mat-form-field>
-
-      @if (errorMessage()) {
-        <p class="document-metadata-form__error" role="alert">{{ errorMessage() }}</p>
-      }
-
-      @if (isSaving()) {
-        <div class="document-metadata-form__saving" aria-live="polite">
-          <mat-spinner diameter="20" />
-          <span>{{ getSavingLabel() }}</span>
-        </div>
-      }
-
-      <div class="document-metadata-form__actions">
-        <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">Cancelar</button>
-        <button mat-flat-button type="submit" [disabled]="isSubmitDisabled()">
-          <mat-icon>save</mat-icon>
-          <span>{{ getSubmitLabel() }}</span>
-        </button>
       </div>
-    </form>
+
+    @if (errorMessage()) {
+      <p class="document-metadata-form__error app-form-error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    @if (isSaving()) {
+      <div class="document-metadata-form__saving app-form-saving" aria-live="polite">
+        <mat-spinner diameter="20" />
+        <span>{{ getSavingLabel() }}</span>
+      </div>
+    }
+
+    <div class="document-metadata-form__actions app-form-actions">
+      <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">Cancelar</button>
+      <button mat-flat-button type="submit" [disabled]="isSubmitDisabled()">
+        <mat-icon>save</mat-icon>
+        <span>{{ getSubmitLabel() }}</span>
+      </button>
+    </div>
+  </form>
 </ng-template>

@@ -674,6 +674,14 @@ export class PatientDetailDialogComponent {
     return this.formatDateTimeValue(this.caseFile()?.createdAt, 'Pendiente');
   }
 
+  getCaseFileActionLabel(): string {
+    return this.caseFile() ? 'Editar expediente' : 'Crear expediente';
+  }
+
+  getCaseFileActionIcon(): string {
+    return this.caseFile() ? 'folder_open' : 'create_new_folder';
+  }
+
   getNextAppointmentLabel(): string {
     return this.formatDateTimeValue(this.workspaceSummary()?.nextAppointmentAt, 'Pendiente');
   }

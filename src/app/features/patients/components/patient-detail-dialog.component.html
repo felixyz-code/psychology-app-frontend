@@ -70,7 +70,12 @@
         subtitle="Accesos directos para continuar el flujo clinico sin perder el contexto del expediente."
       >
         <div class="patient-detail-dialog__quick-actions">
-          <app-action-card icon="folder_open" label="Editar expediente" variant="primary" (triggered)="openCaseFileActionDialog()" />
+          <app-action-card
+            [icon]="getCaseFileActionIcon()"
+            [label]="getCaseFileActionLabel()"
+            variant="primary"
+            (triggered)="openCaseFileActionDialog()"
+          />
           <app-action-card icon="person" label="Editar paciente" (triggered)="openEditPatientDialog()" />
           <app-action-card icon="event" label="Nueva cita" (triggered)="openCreateAppointmentDialog()" />
           <app-action-card icon="note_add" label="Nueva nota" [disabled]="!caseFile()" (triggered)="openCreateSessionNoteDialog()" />

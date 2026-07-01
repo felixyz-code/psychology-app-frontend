@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 11.4 - Data Tables & List Actions Polish
+Sprint 11.6A - Dialog Framework Polish
 ```
 
 ---
@@ -105,6 +105,7 @@ Sprint 11.4 - Data Tables & List Actions Polish
 * Sprint 11.2 completed - Global documents page and list spacing aligned with the shared page baseline
 * Sprint 11.3 completed - Global upload CTA moved to the page header and document row actions now follow a clearer action order and icon semantics
 * Sprint 11.4 completed - Document row actions, tooltips and table states now follow the same action hierarchy and visual density as the other operational lists
+* Sprint 11.6A completed - Document modal wrappers now align more closely with the shared dialog header/footer baseline without changing embedded form internals
 
 ### Appointments
 
@@ -128,6 +129,7 @@ Sprint 11.4 - Data Tables & List Actions Polish
 * Sprint 11.2 completed - Global header, toolbar spacing, calendar spacing and agenda spacing aligned with the shared page baseline
 * Sprint 11.3 completed - Primary CTA moved to the page header and the toolbar action hierarchy was normalized without changing the manual multi-view workflow
 * Sprint 11.4 completed - Table and agenda actions now follow the shared action order, icon-button tooltips and more homogeneous loading and empty states
+* Sprint 11.6A completed - Appointment dialog structure now follows the shared dialog header/footer and action hierarchy baseline
 * The module now provides a stable foundation for future additions such as working hours, availability, drag & drop, reminders and notification integration without requiring major refactors
 
 ### Dashboard
@@ -149,6 +151,7 @@ Sprint 11.4 - Data Tables & List Actions Polish
 * Sprint 11.2 completed - Summary cards, page spacing and primary content rhythm aligned with the shared page baseline
 * Sprint 11.3 completed - Primary movement CTA moved to the page header and finance filters now share a stronger visual action hierarchy
 * Sprint 11.4 completed - Manual toolbar, row actions and table feedback states aligned more closely with the shared data-table language
+* Financial Transactions mantiene formularios basados en pagina; no participaron en Sprint 11.6A al no existir aun un dialog equivalente dentro del flujo actual
 
 ### Sprint 7
 
@@ -187,6 +190,7 @@ Current development efforts include:
 * Clinical Workspace documentation consolidation
 * Cross-module visual consistency baseline
 * Cross-module action language consistency
+* Shared dialog framework consolidation
 * Final manual validation of the Clinical Workspace checklist in a browser-capable environment
 * Incremental consolidation of shared table/list visual primitives
 
@@ -258,7 +262,7 @@ These features are intentionally outside the current MVP.
 Current technical debt includes:
 
 * Secondary UI consistency refinements after the new shared page baseline
-* Remaining secondary-action inconsistencies inside dialogs and some workspace sections after the table/list action polish
+* Remaining dialog/form layout inconsistencies inside embedded document forms and some workspace sections after the dialog framework baseline
 * Shared component extraction
 * Design system consolidation
 * Automated frontend testing

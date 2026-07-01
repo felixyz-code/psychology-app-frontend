@@ -4,13 +4,10 @@
 }
 
 .document-upload-form {
-  display: grid;
   gap: 1.25rem;
 }
 
 .document-upload-form__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -84,51 +81,25 @@
   color: var(--app-color-muted);
 }
 
-.document-upload-form__error {
-  color: var(--app-color-danger-text);
-}
-
 .document-upload-form__inline-state {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
   color: var(--app-color-text-secondary);
 }
 
 .document-upload-form__empty-message {
   margin: 0;
-  color: var(--app-color-text-secondary);
-}
-
-.document-upload-form__saving {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.document-upload-form__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
 }
 
 @media (max-width: 720px) {
-  .document-upload-form__grid {
-    grid-template-columns: 1fr;
-  }
-
   .document-upload-form__file-header {
     flex-direction: column;
   }
 
-  .document-upload-form__file-actions,
-  .document-upload-form__actions {
+  .document-upload-form__file-actions {
     justify-content: stretch;
     flex-direction: column-reverse;
   }
 
-  .document-upload-form__file-actions button,
-  .document-upload-form__actions button {
+  .document-upload-form__file-actions button {
     width: 100%;
   }
 }

@@ -115,7 +115,7 @@ export class CaseFileFormDialogComponent {
   }
 
   getSubmitLabel(): string {
-    return this.mode === 'edit' ? 'Guardar cambios' : 'Guardar expediente';
+    return this.mode === 'edit' ? 'Guardar cambios' : 'Crear expediente';
   }
 
   private normalizeOptional(value: string): string | null {

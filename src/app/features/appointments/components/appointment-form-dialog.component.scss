@@ -1,28 +1,76 @@
 .appointment-dialog {
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  max-height: min(85vh, calc(100dvh - 2rem));
+  height: min(85vh, calc(100dvh - 2rem));
+  min-height: 0;
+  gap: 0.4rem;
+  overflow: hidden;
 }
 
-.appointment-dialog__form,
-.appointment-dialog__grid {
-  display: grid;
-  gap: 1rem;
+.appointment-dialog__form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.appointment-dialog__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 0;
 }
 
 .appointment-dialog__grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  flex: 0 0 auto;
+  gap: 0.4rem 0.75rem;
+  min-height: auto;
 }
 
 .appointment-dialog__full {
   grid-column: 1 / -1;
 }
 
-@media (max-width: 720px) {
-  .appointment-dialog__grid {
-    grid-template-columns: 1fr;
-  }
+.appointment-dialog__error,
+.appointment-dialog__saving {
+  margin-top: 0.3rem;
+}
 
-  .appointment-dialog__actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
+.appointment-dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 0.4rem;
+  background: var(--app-color-dialog-bg);
+}
+
+.appointment-dialog__grid .mat-mdc-form-field {
+  --mat-form-field-container-height: 52px;
+  --mat-form-field-container-vertical-padding: 14px;
+}
+
+.appointment-dialog__grid .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 0.05rem;
+}
+
+.appointment-dialog__grid textarea.mat-mdc-input-element {
+  min-height: 2.9rem;
+  line-height: 1.4;
+  overflow-y: auto;
+  resize: none;
+}
+
+@media (max-width: 720px) {
+  .appointment-dialog {
+    max-height: calc(100dvh - 1.25rem);
+    height: calc(100dvh - 1.25rem);
   }
 }

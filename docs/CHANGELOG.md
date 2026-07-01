@@ -8,6 +8,31 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 11
 
+## Sprint 11.6A - Dialog Framework Polish
+
+### Changed
+
+* Se homologo la estructura visual base de los dialogs CRUD principales sin modificar logica, payloads, validaciones ni controles de formulario.
+* `Patient Form`, `Appointment Form`, `Case File Form` y `Session Note Form` ahora comparten mejor el mismo patron de header, footer, padding y jerarquia de acciones.
+* Los dialogs modales de `Documents` alinean su wrapper visual con la misma base compartida para reducir diferencias de tono y espaciado frente al resto del producto.
+* Las acciones de footer refuerzan el patron `Cancelar` a la izquierda y accion primaria a la derecha, manteniendo una jerarquia mas consistente entre modulos.
+* Las confirmaciones destructivas adoptan una presentacion compartida mas clara para titulo, resumen, separacion y accion destructiva principal.
+
+### Technical
+
+* Se incorporo una capa global reutilizable para dialogs en `styles.scss` mediante clases compartidas de estructura y acciones.
+* No hubo cambios de backend.
+* No hubo cambios de contratos.
+* No hubo cambios de navegacion.
+* No se modificaron `document-upload-form.component.html` ni `document-metadata-form.component.html` en este sprint.
+* `npm.cmd run build` finalizo correctamente.
+
+### Notes
+
+* `Financial Transaction Form` permanece como pagina y no como dialog, por lo que no formo parte del ajuste estructural aplicado en este sprint.
+* Se mantienen los warnings de budget SCSS ya conocidos en `dashboard.page.scss`, `patient-detail-dialog.component.scss` y `appointments-calendar.component.scss`.
+* Queda pendiente una futura iteracion de polish para layouts internos de formularios y formularios embebidos de Documents.
+
 ## Sprint 11.4 - Data Tables & List Actions Polish
 
 ### Changed

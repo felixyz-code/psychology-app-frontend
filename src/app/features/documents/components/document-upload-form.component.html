@@ -22,10 +22,10 @@
 }
 
 <ng-template #uploadFormContent>
-  <form class="document-upload-form" [formGroup]="uploadForm" (ngSubmit)="submit()">
+  <form class="document-upload-form app-form" [formGroup]="uploadForm" (ngSubmit)="submit()">
     @if (!isCaseFileSelectionHidden()) {
-      <div class="document-upload-form__grid">
-        <mat-form-field appearance="outline">
+      <div class="document-upload-form__grid app-form-grid">
+        <mat-form-field appearance="outline" class="app-form-field--compact">
           <mat-label>Expediente</mat-label>
           <mat-select formControlName="caseFileId" [disabled]="isCaseFilesLoading() || !caseFileOptions().length">
             @for (option of caseFileOptions(); track option.value) {
@@ -41,14 +41,14 @@
       </div>
 
       @if (isCaseFilesLoading()) {
-        <div class="document-upload-form__inline-state" aria-live="polite">
+        <div class="document-upload-form__inline-state app-form-inline-state" aria-live="polite">
           <mat-spinner diameter="20" />
           <span>Cargando expedientes disponibles...</span>
         </div>
       } @else if (caseFilesLoadErrorMessage()) {
-        <p class="document-upload-form__error" role="alert">{{ caseFilesLoadErrorMessage() }}</p>
+        <p class="document-upload-form__error app-form-error" role="alert">{{ caseFilesLoadErrorMessage() }}</p>
       } @else if (!caseFileOptions().length) {
-        <p class="document-upload-form__empty-message">No hay expedientes disponibles para seleccionar.</p>
+        <p class="document-upload-form__empty-message app-form-help">No hay expedientes disponibles para seleccionar.</p>
       }
     }
 
@@ -93,22 +93,22 @@
       </div>
 
       @if (fileErrorMessage()) {
-        <p class="document-upload-form__error" role="alert">{{ fileErrorMessage() }}</p>
+        <p class="document-upload-form__error app-form-error" role="alert">{{ fileErrorMessage() }}</p>
       }
     </div>
 
     @if (errorMessage()) {
-      <p class="document-upload-form__error" role="alert">{{ errorMessage() }}</p>
+      <p class="document-upload-form__error app-form-error" role="alert">{{ errorMessage() }}</p>
     }
 
     @if (isSaving()) {
-      <div class="document-upload-form__saving" aria-live="polite">
+      <div class="document-upload-form__saving app-form-saving" aria-live="polite">
         <mat-spinner diameter="20" />
         <span>{{ getSavingLabel() }}</span>
       </div>
     }
 
-    <div class="document-upload-form__actions">
+    <div class="document-upload-form__actions app-form-actions">
       <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">Cancelar</button>
       <button mat-flat-button type="submit" [disabled]="isSubmitDisabled()">
         <mat-icon>save</mat-icon>

@@ -4,8 +4,8 @@
     <p>{{ getSubtitle() }}</p>
   </div>
 
-  <form class="patient-dialog__form app-dialog__form" [formGroup]="patientForm" (ngSubmit)="submit()">
-    <div class="patient-dialog__grid app-dialog__grid">
+  <form class="patient-dialog__form app-dialog__form app-form" [formGroup]="patientForm" (ngSubmit)="submit()">
+    <div class="patient-dialog__grid app-dialog__grid app-form-grid">
       <mat-form-field appearance="outline">
         <mat-label>Nombre</mat-label>
         <input matInput formControlName="firstName" />
@@ -45,11 +45,11 @@
     </div>
 
     @if (errorMessage()) {
-      <p class="patient-dialog__error app-dialog__error" role="alert">{{ errorMessage() }}</p>
+      <p class="patient-dialog__error app-dialog__error app-form-error" role="alert">{{ errorMessage() }}</p>
     }
 
     @if (isSaving()) {
-      <div class="patient-dialog__saving app-dialog__saving" aria-live="polite">
+      <div class="patient-dialog__saving app-dialog__saving app-form-saving" aria-live="polite">
         <mat-spinner diameter="20" />
         <span>Guardando...</span>
       </div>
@@ -57,7 +57,7 @@
 
     <div class="patient-dialog__actions app-dialog__actions">
       <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>
-      <div class="app-dialog__actions-group">
+      <div class="app-dialog__actions-group app-form-actions__group">
         <button mat-flat-button type="submit" [disabled]="isSaving()">{{ getSubmitLabel() }}</button>
       </div>
     </div>
