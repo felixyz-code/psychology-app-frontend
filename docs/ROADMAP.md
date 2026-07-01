@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 11.2 - Global Page Baseline
+Sprint 11.3 - Toolbars, CTAs, Buttons & Iconography
 ```
 
 ---
@@ -67,6 +67,7 @@ Sprint 11.2 - Global Page Baseline
 * Edit
 * Detail
 * Sprint 11.2 completed - Global page baseline aligned with the shared header and spacing rhythm used across the main modules
+* Sprint 11.3 completed - Primary CTA moved to the shared page header and table actions remain aligned with the common action language
 
 ### Case Files
 
@@ -77,6 +78,7 @@ Sprint 11.2 - Global Page Baseline
 * Sprint 10.6 completed - Clinical Workspace closure documented with aggregated workspace endpoint, timeline scope decision and registered technical debt
 * Sprint 10.10 completed - Case Files foundation delivered with lazy routing, sidebar navigation, professional base list, patient context access and no new backend contract assumptions
 * Sprint 11.2 completed - Header, summary spacing and main content rhythm aligned with the shared page baseline
+* Sprint 11.3 completed - Secondary header action and case-file iconography aligned with the common action language
 * Clinical Workspace documentation delivered - patient-centered cross-feature workflow is now documented as part of the technical source of truth
 
 ### Session Notes
@@ -99,6 +101,7 @@ Sprint 11.2 - Global Page Baseline
 * Sprint 7.5 completed - Data table pattern applied to the Documents block inside patient detail dialog
 * Sprint 10.9 completed - Documents table simplified for end users and technical metadata moved to a reusable detail modal
 * Sprint 11.2 completed - Global documents page and list spacing aligned with the shared page baseline
+* Sprint 11.3 completed - Global upload CTA moved to the page header and document row actions now follow a clearer action order and icon semantics
 
 ### Appointments
 
@@ -120,6 +123,7 @@ Sprint 11.2 - Global Page Baseline
 * Sprint 8.2 completed - Global appointments list now includes a monthly calendar view sharing the same client-side state and CRUD flows
 * Sprint 8.3 completed - Global appointments list now includes a daily agenda view sharing the same search, filters, state and CRUD flows
 * Sprint 11.2 completed - Global header, toolbar spacing, calendar spacing and agenda spacing aligned with the shared page baseline
+* Sprint 11.3 completed - Primary CTA moved to the page header and the toolbar action hierarchy was normalized without changing the manual multi-view workflow
 * The module now provides a stable foundation for future additions such as working hours, availability, drag & drop, reminders and notification integration without requiring major refactors
 
 ### Dashboard
@@ -127,6 +131,7 @@ Sprint 11.2 - Global Page Baseline
 * SaaS-style home screen delivered
 * Shared metrics, sections and quick actions foundation in production
 * Sprint 11.2 completed - Metric rhythm and lower content spacing aligned with the shared page baseline
+* Sprint 11.3 completed - Quick appointment action iconography aligned with the shared action language
 
 ### Financial Transactions
 
@@ -138,6 +143,7 @@ Sprint 11.2 - Global Page Baseline
 * Detail
 * Delete
 * Sprint 11.2 completed - Summary cards, page spacing and primary content rhythm aligned with the shared page baseline
+* Sprint 11.3 completed - Primary movement CTA moved to the page header and finance filters now share a stronger visual action hierarchy
 
 ### Sprint 7
 
@@ -175,6 +181,7 @@ Current development efforts include:
 * Case Files clinical workspace foundation
 * Clinical Workspace documentation consolidation
 * Cross-module visual consistency baseline
+* Cross-module action language consistency
 * Final manual validation of the Clinical Workspace checklist in a browser-capable environment
 
 ---
@@ -245,6 +252,7 @@ These features are intentionally outside the current MVP.
 Current technical debt includes:
 
 * Secondary UI consistency refinements after the new shared page baseline
+* Remaining secondary-action inconsistencies inside dialogs, table rows and some workspace sections after the new CTA/header unification
 * Shared component extraction
 * Design system consolidation
 * Automated frontend testing

@@ -19,15 +19,6 @@
   margin: 0;
 }
 
-.financial-transactions-card__header-actions {
-  display: flex;
-  align-items: flex-start;
-}
-
-.financial-transactions-card__create-button {
-  white-space: nowrap;
-}
-
 .financial-transactions-toolbar {
   display: grid;
   gap: 0.85rem 1rem;
@@ -147,11 +138,6 @@
   }
 
   .financial-transactions-summary-error button {
-    width: 100%;
-  }
-
-  .financial-transactions-card__header-actions,
-  .financial-transactions-card__create-button {
     width: 100%;
   }
 

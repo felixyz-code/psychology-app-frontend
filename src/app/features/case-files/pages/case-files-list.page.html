@@ -6,7 +6,12 @@
       { label: 'Dashboard', url: '/dashboard' },
       { label: 'Expedientes' },
     ]"
-  />
+  >
+    <button mat-stroked-button type="button" class="app-page-header-action" [disabled]="isLoading()" (click)="loadCaseFiles()">
+      <mat-icon>refresh</mat-icon>
+      <span>Actualizar</span>
+    </button>
+  </app-page-header>
 
   <section class="case-files-summary app-page__metrics" aria-label="Resumen de expedientes">
     <article class="case-files-summary__item">
@@ -29,13 +34,6 @@
     title="Listado de expedientes"
     subtitle="Base operativa para revisar paciente, trazabilidad y acciones disponibles sin duplicar la integraci&oacute;n cl&iacute;nica existente."
   >
-    <div sectionCardActions class="case-files-card__header-actions">
-      <button mat-stroked-button type="button" class="case-files-card__refresh-button" [disabled]="isLoading()" (click)="loadCaseFiles()">
-        <mat-icon>refresh</mat-icon>
-        <span>Actualizar</span>
-      </button>
-    </div>
-
     @if (isLoading()) {
       <div class="case-files-state">
         <mat-spinner diameter="40" />
@@ -80,7 +78,7 @@
               <td mat-cell *matCellDef="let caseFile">
                 <div class="case-files-patient-cell">
                   <div class="case-files-patient-cell__icon" aria-hidden="true">
-                    <mat-icon>folder_shared</mat-icon>
+                    <mat-icon>folder_open</mat-icon>
                   </div>
 
                   <div class="case-files-patient-cell__content">

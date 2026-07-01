@@ -3,9 +3,20 @@
     heading="Citas"
     subtitle="Agenda global registrada en el sistema."
     [breadcrumbs]="[{ label: 'Dashboard', url: '/dashboard' }, { label: 'Citas' }]"
-  />
+  >
+    <button
+      mat-flat-button
+      type="button"
+      class="app-page-header-action"
+      [disabled]="isLoading()"
+      (click)="openCreateAppointmentDialog()"
+    >
+      <mat-icon>event</mat-icon>
+      <span>Nueva cita</span>
+    </button>
+  </app-page-header>
 
-  <app-section-card title="Citas" subtitle="Agenda global registrada en el sistema.">
+  <app-section-card title="Agenda global" subtitle="Agenda global registrada en el sistema.">
     @if (isLoading()) {
       <div class="appointments-state">
         <mat-spinner diameter="40" />
@@ -18,17 +29,6 @@
     } @else if (appointments().length) {
       <div class="appointments-toolbar">
         <div class="appointments-toolbar__actions">
-          <button
-            mat-flat-button
-            type="button"
-            class="appointments-card__create-button"
-            [disabled]="isLoading()"
-            (click)="openCreateAppointmentDialog()"
-          >
-            <mat-icon>event_available</mat-icon>
-            <span>Agregar cita</span>
-          </button>
-
           <mat-button-toggle-group
             class="appointments-view-toggle"
             [value]="viewMode()"
@@ -96,14 +96,14 @@
           </span>
 
           @if (viewMode() === 'table' && showDateRangeReset() && !hasNonDateFilters()) {
-            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="resetDateRangeToCurrentMonth()">
+            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset app-toolbar-meta-button" (click)="resetDateRangeToCurrentMonth()">
               <mat-icon>today</mat-icon>
               <span>Mes actual</span>
             </button>
           }
 
           @if (hasNonDateFilters()) {
-            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset" (click)="clearAppointmentFilters()">
+            <button mat-stroked-button type="button" class="appointments-toolbar-panel__reset app-toolbar-meta-button" (click)="clearAppointmentFilters()">
               <mat-icon>filter_alt_off</mat-icon>
               <span>Limpiar</span>
             </button>
@@ -173,7 +173,7 @@
               </ng-container>
 
               <ng-container matColumnDef="durationMinutes">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header="durationMinutes">Duración</th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="durationMinutes">Duracion</th>
                 <td mat-cell *matCellDef="let appointment">
                   {{ appointment.durationMinutes }} min
                 </td>
@@ -244,14 +244,14 @@
         <app-data-table-empty-state
           icon="search_off"
           title="No se encontraron citas"
-          message="Intenta ajustar tu búsqueda"
+          message="Intenta ajustar tu busqueda"
         />
       }
     } @else {
       <app-data-table-empty-state
         icon="event_busy"
         title="No hay citas registradas"
-        message="Cuando existan citas, aparecerán en este listado global."
+        message="Cuando existan citas, apareceran en este listado global."
       />
     }
   </app-section-card>

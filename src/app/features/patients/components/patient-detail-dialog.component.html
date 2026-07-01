@@ -71,7 +71,7 @@
       <div class="patient-detail-dialog__quick-actions">
         <app-action-card icon="folder_open" label="Editar expediente" variant="primary" (triggered)="openCaseFileActionDialog()" />
         <app-action-card icon="person" label="Editar paciente" (triggered)="openEditPatientDialog()" />
-        <app-action-card icon="event_available" label="Nueva cita" (triggered)="openCreateAppointmentDialog()" />
+        <app-action-card icon="event" label="Nueva cita" (triggered)="openCreateAppointmentDialog()" />
         <app-action-card icon="note_add" label="Nueva nota" [disabled]="!caseFile()" (triggered)="openCreateSessionNoteDialog()" />
         <app-action-card icon="description" label="Ver documentos" [disabled]="!caseFile()" (triggered)="scrollToDocuments()" />
       </div>
@@ -94,7 +94,7 @@
     <app-section-card title="Citas" subtitle="Agenda registrada para este paciente.">
       <div sectionCardActions class="patient-detail-dialog__section-actions">
         <button mat-button class="app-action-button" type="button" (click)="openCreateAppointmentDialog()">
-          <mat-icon>event_available</mat-icon>
+          <mat-icon>event</mat-icon>
           <span>Nueva cita</span>
         </button>
       </div>

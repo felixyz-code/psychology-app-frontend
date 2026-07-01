@@ -138,6 +138,18 @@ button[mat-button] {
   border-radius: 12px;
 }
 
+.app-page-header-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.app-toolbar-meta-button {
+  min-height: 2.5rem !important;
+}
+
 .app-secondary-button {
   border: 1px solid var(--app-color-border) !important;
   background: var(--app-color-surface-muted) !important;
@@ -157,6 +169,10 @@ button[mat-button] {
 @media (max-width: 720px) {
   .app-page {
     gap: var(--app-page-gap-tight);
+  }
+
+  .app-page-header-action {
+    width: 100%;
   }
 }
 

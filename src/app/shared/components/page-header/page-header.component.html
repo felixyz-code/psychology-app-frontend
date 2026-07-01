@@ -1,5 +1,5 @@
 <header class="page-header">
-  <div>
+  <div class="page-header__copy">
     @if (breadcrumbs().length) {
       <nav class="page-header__breadcrumbs" aria-label="Ruta de navegación">
         @for (breadcrumb of breadcrumbs(); track breadcrumb.label) {
@@ -17,5 +17,9 @@
     @if (subtitle()) {
       <p>{{ subtitle() }}</p>
     }
+  </div>
+
+  <div class="page-header__actions">
+    <ng-content />
   </div>
 </header>

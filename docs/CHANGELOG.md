@@ -8,6 +8,31 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 11
 
+## Sprint 11.3 - Toolbars, CTAs, Buttons & Iconography
+
+### Changed
+
+* Se unifico la ubicacion de los CTAs principales en `Patients`, `Appointments`, `Documents` y `Financial Transactions`, moviendolos al `PageHeader` para reforzar una jerarquia de accion consistente por pagina.
+* `Case Files` mueve `Actualizar` al encabezado como accion secundaria para evitar duplicidad visual dentro del card principal.
+* `PageHeaderComponent` ahora admite acciones proyectadas para compartir el mismo patron de encabezado con CTA principal o accion secundaria sin crear nuevos componentes.
+* `Appointments` conserva su toolbar manual por necesidades de vista, pero se homologa visualmente con el resto mediante una jerarquia mas clara entre selector de vista, filtros y acciones de limpieza.
+* `Documents` adopta `upload_file` como icono consistente para subida y reordena las acciones por fila a `Ver`, `Editar`, `Descargar`, `Eliminar`.
+* `Appointments`, `Dashboard` y `Clinical Workspace` homologan la accion de crear cita usando `event` en lugar de variantes mixtas.
+* `Case Files` homologan la semantica visual del acceso al expediente usando `folder_open`.
+* Se agregan clases globales minimas para acciones de header y botones de toolbar, evitando nuevas primitivas o cambios de arquitectura.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo cambios de contratos.
+* No hubo cambios de navegacion.
+* `npm.cmd run build` finalizo correctamente.
+
+### Notes
+
+* Se mantienen los warnings de budget SCSS ya conocidos en `dashboard.page.scss`, `patient-detail-dialog.component.scss` y `appointments-calendar.component.scss`.
+* Permanecen pendientes algunas inconsistencias de acciones secundarias dentro de dialogs y superficies clinicas compuestas para una futura iteracion de polish.
+
 ## Sprint 11.2 - Global Page Baseline
 
 ### Changed

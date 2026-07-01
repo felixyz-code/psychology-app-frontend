@@ -1,10 +1,12 @@
 <app-section-card [title]="cardTitle()" [subtitle]="cardSubtitle()">
-  <div sectionCardActions class="documents-card__header-actions">
-    <button mat-flat-button class="documents-card__create-button" type="button" (click)="openUploadDialog()">
-      <mat-icon>add</mat-icon>
-      <span>{{ uploadButtonLabel() }}</span>
-    </button>
-  </div>
+  @if (showUploadAction()) {
+    <div sectionCardActions class="documents-card__header-actions">
+      <button mat-flat-button class="documents-card__create-button" type="button" (click)="openUploadDialog()">
+        <mat-icon>upload_file</mat-icon>
+        <span>{{ uploadButtonLabel() }}</span>
+      </button>
+    </div>
+  }
 
   @if (isLoading()) {
     <div class="documents-state">
@@ -61,22 +63,22 @@
               <button
                 mat-icon-button
                 type="button"
-                aria-label="Editar metadata del documento"
-                matTooltip="Editar metadata"
-                [matTooltipShowDelay]="150"
-                (click)="stopRowClick($event); openEditDialog(document)"
-              >
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
                 aria-label="Visualizar documento"
                 matTooltip="Visualizar"
                 [matTooltipShowDelay]="150"
                 (click)="stopRowClick($event); viewDocument(document)"
               >
                 <mat-icon>visibility</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Editar metadata del documento"
+                matTooltip="Editar metadata"
+                [matTooltipShowDelay]="150"
+                (click)="stopRowClick($event); openEditDialog(document)"
+              >
+                <mat-icon>edit</mat-icon>
               </button>
               <button
                 mat-icon-button

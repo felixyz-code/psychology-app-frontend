@@ -47,6 +47,7 @@ export class DocumentsListComponent {
   readonly emptyTitle = input('No hay documentos registrados');
   readonly emptyMessage = input('Cuando existan documentos disponibles, apareceran en este listado.');
   readonly uploadButtonLabel = input('Nuevo documento');
+  readonly showUploadAction = input(true);
   readonly items = input<Document[] | null>(null);
   readonly externalLoading = input(false);
   readonly externalErrorMessage = input('');

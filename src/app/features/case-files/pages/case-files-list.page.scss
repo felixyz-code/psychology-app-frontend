@@ -24,16 +24,6 @@
   line-height: 1;
 }
 
-.case-files-card__header-actions {
-  display: flex;
-  align-items: center;
-}
-
-.case-files-card__refresh-button {
-  width: fit-content;
-  white-space: nowrap;
-}
-
 .case-files-data-toolbar {
   --data-table-toolbar-padding: 0.35rem 0 0;
   --data-table-toolbar-search-width: 26rem;
@@ -162,12 +152,5 @@
 @media (max-width: 860px) {
   .case-files-summary {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .case-files-card__header-actions,
-  .case-files-card__refresh-button {
-    width: 100%;
   }
 }
