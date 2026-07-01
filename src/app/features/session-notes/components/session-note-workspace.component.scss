@@ -1,0 +1,107 @@
+.session-note-workspace {
+  display: grid;
+  gap: 1rem;
+}
+
+.session-note-workspace__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.95fr);
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--app-color-card-soft-bg) 0%, var(--app-color-card-bg) 100%);
+}
+
+.session-note-workspace__hero-main,
+.session-note-workspace__hero-side,
+.session-note-workspace__summary-item,
+.session-note-workspace__record-item {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.session-note-workspace__hero-main :is(h2, p),
+.session-note-workspace__record-item p {
+  margin: 0;
+}
+
+.session-note-workspace__eyebrow,
+.session-note-workspace__label {
+  color: var(--app-color-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.session-note-workspace__eyebrow {
+  color: var(--app-color-primary);
+  letter-spacing: 0.08em;
+}
+
+.session-note-workspace__hero-main h2,
+.session-note-workspace__summary-item strong,
+.session-note-workspace__record-item p,
+.session-note-workspace__narrative {
+  color: var(--app-color-heading);
+}
+
+.session-note-workspace__hero-main h2 {
+  font-size: clamp(1.5rem, 2vw, 1.9rem);
+  line-height: 1.2;
+}
+
+.session-note-workspace__hero-main p {
+  color: var(--app-color-text-secondary);
+  line-height: 1.6;
+}
+
+.session-note-workspace__hero-side {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+}
+
+.session-note-workspace__summary-item,
+.session-note-workspace__record-item {
+  padding: 0.95rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--app-color-card-bg) 92%, transparent);
+}
+
+.session-note-workspace__summary-item strong,
+.session-note-workspace__record-item p {
+  overflow-wrap: anywhere;
+}
+
+.session-note-workspace__narrative {
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.session-note-workspace__record-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.session-note-workspace__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .session-note-workspace__hero,
+  .session-note-workspace__hero-side,
+  .session-note-workspace__record-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .session-note-workspace__actions {
+    justify-content: stretch;
+  }
+}

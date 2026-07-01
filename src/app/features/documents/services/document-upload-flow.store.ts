@@ -2,7 +2,6 @@ import { inject, Injectable, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
-import { AuthStore } from '../../../core/auth/auth.store';
 import { CaseFile } from '../../case-files/models/case-file.models';
 import { CaseFilesService } from '../../case-files/services/case-files.service';
 import { Patient } from '../../patients/models/patient.models';
@@ -12,7 +11,6 @@ import { DocumentsService } from './documents.service';
 
 @Injectable()
 export class DocumentUploadFlowStore {
-  private readonly authStore = inject(AuthStore);
   private readonly caseFilesService = inject(CaseFilesService);
   private readonly documentsService = inject(DocumentsService);
   private readonly patientsService = inject(PatientsService);
@@ -22,7 +20,6 @@ export class DocumentUploadFlowStore {
   readonly isCaseFilesLoading = signal(true);
   readonly caseFilesLoadErrorMessage = signal('');
   readonly caseFileOptions = signal<{ value: string; label: string }[]>([]);
-  readonly uploadedById = signal(this.authStore.user()?.id ?? '');
   readonly fixedCaseFileId = signal('');
 
   configureFixedCaseFile(caseFileId: string): void {
@@ -58,18 +55,11 @@ export class DocumentUploadFlowStore {
       return;
     }
 
-    const uploadedById = this.uploadedById().trim();
-
-    if (!uploadedById) {
-      this.errorMessage.set('No fue posible identificar al usuario autenticado.');
-      return;
-    }
-
     this.isSaving.set(true);
     this.errorMessage.set('');
 
     this.documentsService
-      .upload(payload.caseFileId, uploadedById, payload.file)
+      .upload(payload.caseFileId, payload.file)
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
         next: () => {

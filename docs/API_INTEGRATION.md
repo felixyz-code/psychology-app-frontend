@@ -179,6 +179,8 @@ POST /documents/upload
 Current implementation:
 
 - multipart/form-data
+- `file`
+- `caseFileId`
 - FormData
 - Blob downloads
 - Blob previews

@@ -74,6 +74,7 @@ Sprint 10.10 - Case Files Foundation
 * Edit
 * Global foundation route `/case-files`
 * Sprint 10.10 completed - Case Files foundation delivered with lazy routing, sidebar navigation, professional base list, patient context access and no new backend contract assumptions
+* Clinical Workspace documentation delivered - patient-centered cross-feature workflow is now documented as part of the technical source of truth
 
 ### Session Notes
 
@@ -150,6 +151,7 @@ Current development efforts include:
 * User experience refinement
 * Frontend architecture stabilization
 * Case Files clinical workspace foundation
+* Clinical Workspace documentation consolidation
 
 ---
 
@@ -247,6 +249,7 @@ Related documentation:
 * PROJECT.md
 * ARCHITECTURE.md
 * STANDARDS.md
+* CLINICAL_WORKSPACE.md
 * API_INTEGRATION.md
 * DECISION_LOG.md
 

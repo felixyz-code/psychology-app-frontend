@@ -17,6 +17,5 @@ export interface UpdateDocumentRequest {
 
 export interface UploadDocumentRequest {
   caseFileId: string;
-  uploadedById: string;
   file: File;
 }

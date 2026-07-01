@@ -207,6 +207,7 @@ export class CaseFilesListPage {
       autoFocus: false,
       data: {
         patient,
+        caseFileId: caseFile.id,
       },
     });
 

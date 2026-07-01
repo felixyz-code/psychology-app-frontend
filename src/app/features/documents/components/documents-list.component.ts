@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -47,14 +47,29 @@ export class DocumentsListComponent {
   readonly emptyTitle = input('No hay documentos registrados');
   readonly emptyMessage = input('Cuando existan documentos disponibles, apareceran en este listado.');
   readonly uploadButtonLabel = input('Nuevo documento');
+  readonly items = input<Document[] | null>(null);
+  readonly externalLoading = input(false);
+  readonly externalErrorMessage = input('');
   readonly displayedColumns = ['fileName', 'type', 'uploadedAt', 'actions'];
   readonly documents = signal<Document[]>([]);
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
   readonly actionErrorMessage = signal('');
+  readonly documentsLoaded = output<Document[]>();
+  readonly documentsChanged = output<void>();
 
   constructor() {
     effect(() => {
+      const providedItems = this.items();
+
+      if (providedItems !== null) {
+        this.documents.set(providedItems);
+        this.errorMessage.set(this.externalErrorMessage());
+        this.isLoading.set(this.externalLoading());
+        this.documentsLoaded.emit(providedItems);
+        return;
+      }
+
       const scope = this.scope();
       const caseFileId = this.caseFileId();
 
@@ -82,10 +97,12 @@ export class DocumentsListComponent {
     request$.subscribe({
       next: (documents) => {
         this.documents.set(documents);
+        this.documentsLoaded.emit(documents);
         this.isLoading.set(false);
       },
       error: () => {
         this.documents.set([]);
+        this.documentsLoaded.emit([]);
         this.errorMessage.set('No fue posible cargar los documentos.');
         this.isLoading.set(false);
       },
@@ -104,6 +121,11 @@ export class DocumentsListComponent {
 
     dialogRef.afterClosed().subscribe((created) => {
       if (created) {
+        if (this.items() !== null) {
+          this.documentsChanged.emit();
+          return;
+        }
+
         this.loadDocuments();
       }
     });
@@ -157,6 +179,11 @@ export class DocumentsListComponent {
 
     dialogRef.afterClosed().subscribe((deleted) => {
       if (deleted) {
+        if (this.items() !== null) {
+          this.documentsChanged.emit();
+          return;
+        }
+
         this.loadDocuments();
       }
     });
@@ -177,6 +204,11 @@ export class DocumentsListComponent {
 
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
+        if (this.items() !== null) {
+          this.documentsChanged.emit();
+          return;
+        }
+
         this.loadDocuments();
       }
     });

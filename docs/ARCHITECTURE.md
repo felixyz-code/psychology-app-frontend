@@ -155,6 +155,28 @@ Each feature owns:
 
 Dependencies between features should be minimized.
 
+Cross-feature workflows should be composed from existing feature ownership boundaries instead of creating a parallel domain layer.
+
+---
+
+# Clinical Workspace Composition
+
+The current frontend includes a patient-centered `Clinical Workspace`.
+
+This workspace is implemented as a composed detail surface that orchestrates existing features around one patient context.
+
+Current characteristics:
+
+* Implemented through `PatientDetailDialogComponent`
+* Reached from both `patients` and `case-files`
+* Uses shared presentational components from `shared/components`
+* Reuses existing feature dialogs for create, edit and delete flows
+* Loads feature data through feature-owned services only
+
+This is intentionally an orchestration pattern and not a new business module.
+
+Detailed behavior is documented in `CLINICAL_WORKSPACE.md`.
+
 ---
 
 # Routing Strategy
@@ -299,6 +321,7 @@ Related documentation:
 
 * PROJECT.md
 * STANDARDS.md
+* CLINICAL_WORKSPACE.md
 * API_INTEGRATION.md
 * DECISION_LOG.md
 * ROADMAP.md

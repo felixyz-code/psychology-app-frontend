@@ -62,6 +62,8 @@
                 mat-icon-button
                 type="button"
                 aria-label="Editar metadata del documento"
+                matTooltip="Editar metadata"
+                [matTooltipShowDelay]="150"
                 (click)="stopRowClick($event); openEditDialog(document)"
               >
                 <mat-icon>edit</mat-icon>
@@ -70,6 +72,8 @@
                 mat-icon-button
                 type="button"
                 aria-label="Visualizar documento"
+                matTooltip="Visualizar"
+                [matTooltipShowDelay]="150"
                 (click)="stopRowClick($event); viewDocument(document)"
               >
                 <mat-icon>visibility</mat-icon>
@@ -78,6 +82,8 @@
                 mat-icon-button
                 type="button"
                 aria-label="Descargar documento"
+                matTooltip="Descargar"
+                [matTooltipShowDelay]="150"
                 (click)="stopRowClick($event); downloadDocument(document)"
               >
                 <mat-icon>download</mat-icon>
@@ -86,6 +92,8 @@
                 mat-icon-button
                 type="button"
                 aria-label="Eliminar documento"
+                matTooltip="Eliminar"
+                [matTooltipShowDelay]="150"
                 (click)="stopRowClick($event); openDeleteDialog(document)"
               >
                 <mat-icon>delete</mat-icon>

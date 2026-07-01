@@ -6,6 +6,24 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# Sprint 10
+
+## Sprint 10B - Clinical Workspace Aggregated Endpoint Adoption
+
+### Changed
+
+* `POST /documents/upload` deja de enviar `uploadedById` y ahora envia solo `file` y `caseFileId`.
+* `CaseFilesService` incorpora `getWorkspace(caseFileId)` para consumir `GET /case-files/:id/workspace`.
+* `PatientDetailDialogComponent` adopta el workspace agregado como fuente principal para paciente, expediente, resumen, citas, notas, documentos y timeline.
+* El summary clinico deja de calcular conteos y fechas manualmente cuando el backend ya las entrega en `summary`.
+* El timeline clinico deja de reconstruirse en frontend y ahora consume eventos reales del backend, mapeando solo copy, iconos y navegacion UI.
+* El acceso desde `/case-files` ahora pasa `caseFileId` al Clinical Workspace para evitar resoluciones redundantes por paciente cuando ya existe contexto de expediente.
+
+### Fixed
+
+* Upload, rename y delete de documentos dentro del expediente ahora disparan recarga del workspace agregado para mantener sincronizados resumen, timeline y listado.
+* Crear, editar y eliminar notas o citas dentro del Clinical Workspace ahora refresca el workspace agregado completo.
+
 # Sprint 9
 
 ## Sprint 10.10 - Case Files Foundation

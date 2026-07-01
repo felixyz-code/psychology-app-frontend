@@ -9,10 +9,11 @@
 .patient-detail-dialog__content {
   display: grid;
   gap: 1rem;
-  padding: 0.25rem;
+  padding: 0.25rem 0.25rem 0.5rem;
   overflow-y: auto;
   max-height: calc(85vh - 5.5rem);
   min-height: 0;
+  scrollbar-gutter: stable;
 }
 
 .patient-detail-dialog__hero {
@@ -107,10 +108,15 @@
 
 .patient-detail-dialog__metrics-grid,
 .patient-detail-dialog__summary-grid,
-.patient-detail-dialog__quick-actions,
 .patient-detail-dialog__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.patient-detail-dialog__quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
   gap: 1rem;
 }
 
@@ -131,6 +137,26 @@
   color: var(--app-color-heading);
   line-height: 1.6;
   white-space: pre-wrap;
+}
+
+.patient-detail-dialog__section-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  color: var(--app-color-text-secondary);
+  font-size: 0.88rem;
+}
+
+.patient-detail-dialog__section-footer span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.patient-detail-dialog__section-footer span + span::before {
+  content: '|';
+  margin-right: 1rem;
+  color: var(--app-color-card-border);
 }
 
 .patient-detail-dialog__section-actions {
@@ -157,6 +183,10 @@
   align-items: center;
   gap: 0.75rem;
   color: var(--app-color-text-secondary);
+}
+
+.patient-detail-dialog__message {
+  line-height: 1.5;
 }
 
 .patient-detail-dialog__message--error {
@@ -254,7 +284,6 @@
   .patient-detail-dialog__hero,
   .patient-detail-dialog__metrics-grid,
   .patient-detail-dialog__summary-grid,
-  .patient-detail-dialog__quick-actions,
   .patient-detail-dialog__grid {
     grid-template-columns: 1fr;
   }
@@ -278,6 +307,16 @@
   .patient-detail-dialog__section-actions,
   .patient-detail-dialog__actions {
     width: 100%;
+  }
+
+  .patient-detail-dialog__section-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .patient-detail-dialog__section-footer span + span::before {
+    display: none;
   }
 
   .patient-detail-dialog__note-actions,

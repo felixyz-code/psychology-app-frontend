@@ -6,9 +6,11 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angu
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { finalize } from 'rxjs';
 
 import { ActionCardComponent } from '../../../shared/components/action-card/action-card.component';
+import { ClinicalTimelineComponent, ClinicalTimelineItem } from '../../../shared/components/clinical-timeline/clinical-timeline.component';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
 import { MetricCardComponent, MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
@@ -17,23 +19,30 @@ import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/compon
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
 import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems } from '../../../shared/utils/data-table';
 import { AppointmentDeleteDialogComponent } from '../../appointments/components/appointment-delete-dialog.component';
+import { AppointmentDetailDialogComponent } from '../../appointments/components/appointment-detail-dialog.component';
 import { AppointmentFormDialogComponent } from '../../appointments/components/appointment-form-dialog.component';
 import { Appointment, AppointmentStatus } from '../../appointments/models/appointment.models';
 import { AppointmentsService } from '../../appointments/services/appointments.service';
 import { CaseFileFormDialogComponent } from '../../case-files/components/case-file-form-dialog.component';
-import { CaseFile } from '../../case-files/models/case-file.models';
+import {
+  CaseFile,
+  CaseFileWorkspaceResponse,
+  ClinicalTimelineEvent,
+} from '../../case-files/models/case-file.models';
 import { CaseFilesService } from '../../case-files/services/case-files.service';
 import { DocumentsListComponent } from '../../documents/components/documents-list.component';
+import { DocumentPreviewDialogComponent } from '../../documents/components/document-preview-dialog.component';
+import { Document } from '../../documents/models/document.models';
 import { SessionNoteDeleteDialogComponent } from '../../session-notes/components/session-note-delete-dialog.component';
 import { SessionNoteDetailDialogComponent } from '../../session-notes/components/session-note-detail-dialog.component';
 import { SessionNoteFormDialogComponent } from '../../session-notes/components/session-note-form-dialog.component';
 import { SessionNote } from '../../session-notes/models/session-note.models';
-import { SessionNotesService } from '../../session-notes/services/session-notes.service';
 import { Patient } from '../models/patient.models';
 import { PatientFormDialogComponent } from './patient-form-dialog.component';
 
 interface PatientDetailDialogData {
   patient: Patient;
+  caseFileId?: string | null;
 }
 
 @Component({
@@ -46,7 +55,9 @@ interface PatientDetailDialogData {
     MatIconModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     ActionCardComponent,
+    ClinicalTimelineComponent,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
     DocumentsListComponent,
@@ -70,7 +81,6 @@ export class PatientDetailDialogComponent {
   private readonly data = inject<PatientDetailDialogData>(MAT_DIALOG_DATA);
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly caseFilesService = inject(CaseFilesService);
-  private readonly sessionNotesService = inject(SessionNotesService);
   private readonly dialog = inject(MatDialog);
   private readonly dialogRef = inject(
     MatDialogRef<PatientDetailDialogComponent, { action: 'close' } | { action: 'edit'; patient: Patient }>
@@ -79,17 +89,31 @@ export class PatientDetailDialogComponent {
   readonly workspaceContent = viewChild<ElementRef<HTMLElement>>('workspaceContent');
   readonly documentsSection = viewChild<ElementRef<HTMLElement>>('documentsSection');
   readonly patient = signal(this.data.patient);
+  readonly caseFileId = signal(this.data.caseFileId?.trim() ?? '');
+
   readonly appointments = signal<Appointment[]>([]);
-  readonly isAppointmentsLoading = signal(true);
+  readonly isAppointmentsLoading = signal(false);
   readonly appointmentsErrorMessage = signal('');
   readonly appointmentsSuccessMessage = signal('');
   readonly cancellingAppointmentId = signal<string | null>(null);
+
   readonly caseFile = signal<CaseFile | null>(null);
   readonly isCaseFileLoading = signal(true);
   readonly caseFileErrorMessage = signal('');
+
+  readonly documents = signal<Document[]>([]);
+  readonly isDocumentsLoading = signal(false);
+  readonly documentsErrorMessage = signal('');
+
   readonly sessionNotes = signal<SessionNote[]>([]);
   readonly isSessionNotesLoading = signal(false);
   readonly sessionNotesErrorMessage = signal('');
+
+  readonly workspaceSummary = signal<CaseFileWorkspaceResponse['summary'] | null>(null);
+  readonly backendTimeline = signal<ClinicalTimelineEvent[]>([]);
+  readonly isTimelineLoading = signal(false);
+  readonly timelineErrorMessage = signal('');
+
   readonly sessionNotesPageSizeOptions = [5, 10, 20];
   readonly sessionNotesTableState = signal<DataTableState>({
     searchTerm: '',
@@ -98,6 +122,7 @@ export class PatientDetailDialogComponent {
     sortBy: undefined,
     sortDirection: '',
   });
+
   readonly sessionNotesTableResult = computed<DataTableResult<SessionNote>>(() => {
     const state = this.sessionNotesTableState();
     const items = this.sessionNotes();
@@ -117,6 +142,7 @@ export class PatientDetailDialogComponent {
       hasActiveFilters: Boolean(state.searchTerm.trim()),
     };
   });
+
   readonly safeSessionNotesPageIndex = computed(() => {
     const state = this.sessionNotesTableState();
     const totalFilteredItems = this.sessionNotes().filter((sessionNote) =>
@@ -125,6 +151,7 @@ export class PatientDetailDialogComponent {
 
     return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
   });
+
   readonly sessionNotesCounterLabel = computed(() => {
     const result = this.sessionNotesTableResult();
 
@@ -135,53 +162,64 @@ export class PatientDetailDialogComponent {
       result.hasActiveFilters
     );
   });
+
   readonly clinicalSummaryCards = computed(() => {
-    const currentCaseFile = this.caseFile();
-    const loading = this.isCaseFileLoading();
+    const summary = this.workspaceSummary();
+    const lastActivityLabel = summary?.lastActivityAt ? this.formatDateTimeValue(summary.lastActivityAt) : 'Pendiente';
+    const lastActivityEvent = this.timelineItems()[0];
 
     return [
       {
-        icon: 'update',
-        title: 'Ultima actualizacion',
-        value: this.formatDateTimeValue(currentCaseFile?.updatedAt),
-        supportingText: currentCaseFile
-          ? 'Ultimo movimiento registrado en el expediente.'
-          : 'Sin actualizaciones clinicas disponibles.',
+        icon: 'event',
+        title: 'Total de citas',
+        value: summary ? this.formatMetricCount(summary.appointmentsCount, 'cita', 'citas') : 'Pendiente',
+        supportingText: 'Total de citas visibles en el workspace clinico.',
         tone: 'blue' as MetricCardVariant,
-        loading,
+        loading: this.isCaseFileLoading(),
       },
       {
-        icon: 'folder_shared',
-        title: 'Alta del expediente',
-        value: this.formatDateTimeValue(currentCaseFile?.createdAt, 'Pendiente'),
-        supportingText: currentCaseFile
-          ? 'Fecha de apertura del expediente clinico.'
-          : 'El expediente aun no ha sido creado.',
+        icon: 'notes',
+        title: 'Total de notas',
+        value: summary ? this.formatMetricCount(summary.sessionNotesCount, 'nota', 'notas') : 'Pendiente',
+        supportingText: this.caseFile()
+          ? 'Notas de sesion vinculadas al expediente actual.'
+          : 'Pendiente hasta que exista un expediente clinico.',
         tone: 'green' as MetricCardVariant,
-        loading,
+        loading: this.isCaseFileLoading(),
       },
       {
-        icon: 'health_and_safety',
-        title: 'Estado del expediente',
-        value: this.getCaseFileStatusLabel(),
-        supportingText: this.getCaseFileStatusSupportingText(),
+        icon: 'description',
+        title: 'Total de documentos',
+        value: summary ? this.formatMetricCount(summary.documentsCount, 'documento', 'documentos') : 'Pendiente',
+        supportingText: this.caseFile()
+          ? 'Documentos asociados al expediente actual.'
+          : 'Pendiente hasta que exista un expediente clinico.',
         tone: 'amber' as MetricCardVariant,
-        loading,
+        loading: this.isCaseFileLoading(),
       },
       {
-        icon: 'assignment_turned_in',
-        title: 'Informacion base',
-        value: this.getFoundationStatusValue(),
-        supportingText: this.getFoundationStatusSupportingText(),
+        icon: 'timeline',
+        title: 'Ultima actividad',
+        value: lastActivityLabel,
+        supportingText: lastActivityEvent?.title ?? 'Todavia no hay actividad clinica visible.',
         tone: 'violet' as MetricCardVariant,
-        loading,
+        loading: this.isTimelineLoading(),
       },
     ];
   });
 
+  readonly workspaceFooterText = computed(() => {
+    return this.formatDateTimeValue(this.caseFile()?.updatedAt, 'Pendiente');
+  });
+
+  readonly timelineItems = computed<ClinicalTimelineItem[]>(() => {
+    return this.backendTimeline()
+      .map((event) => this.mapTimelineEvent(event))
+      .filter((event): event is ClinicalTimelineItem => event !== null);
+  });
+
   constructor() {
-    this.loadAppointments();
-    this.loadCaseFile();
+    this.loadWorkspace();
   }
 
   close(): void {
@@ -201,7 +239,7 @@ export class PatientDetailDialogComponent {
 
     dialogRef.afterClosed().subscribe((created) => {
       if (created) {
-        this.loadCaseFile();
+        this.loadWorkspace();
       }
     });
   }
@@ -226,9 +264,18 @@ export class PatientDetailDialogComponent {
 
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
-        this.loadCaseFile();
+        this.loadWorkspace();
       }
     });
+  }
+
+  openCaseFileActionDialog(): void {
+    if (this.caseFile()) {
+      this.openEditCaseFileDialog();
+      return;
+    }
+
+    this.openCreateCaseFileDialog();
   }
 
   openCreateAppointmentDialog(): void {
@@ -246,7 +293,7 @@ export class PatientDetailDialogComponent {
 
     dialogRef.afterClosed().subscribe((created) => {
       if (created) {
-        this.loadAppointments();
+        this.refreshWorkspaceFromCaseFileContext();
       }
     });
   }
@@ -267,7 +314,7 @@ export class PatientDetailDialogComponent {
 
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
-        this.loadAppointments();
+        this.loadWorkspace();
       }
     });
   }
@@ -289,7 +336,7 @@ export class PatientDetailDialogComponent {
       .subscribe({
         next: () => {
           this.appointmentsSuccessMessage.set('La cita fue cancelada correctamente.');
-          this.loadAppointments();
+          this.loadWorkspace();
         },
         error: (error: HttpErrorResponse) => {
           this.appointmentsErrorMessage.set(this.getAppointmentActionErrorMessage(error, 'cancelar'));
@@ -311,7 +358,7 @@ export class PatientDetailDialogComponent {
 
     dialogRef.afterClosed().subscribe((deleted) => {
       if (deleted) {
-        this.loadAppointments();
+        this.loadWorkspace();
       }
     });
   }
@@ -335,7 +382,7 @@ export class PatientDetailDialogComponent {
 
     dialogRef.afterClosed().subscribe((created) => {
       if (created) {
-        this.loadSessionNotes(currentCaseFile.id);
+        this.loadWorkspace();
       }
     });
   }
@@ -361,6 +408,10 @@ export class PatientDetailDialogComponent {
           ...currentPatient,
           ...updated,
         }));
+
+        if (this.caseFileId()) {
+          this.loadWorkspace();
+        }
       }
     });
   }
@@ -385,16 +436,20 @@ export class PatientDetailDialogComponent {
 
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
-        this.loadSessionNotes(currentCaseFile.id);
+        this.loadWorkspace();
       }
     });
   }
 
   openSessionNoteDetailDialog(sessionNote: SessionNote): void {
     const dialogRef = this.dialog.open(SessionNoteDetailDialogComponent, {
-      width: '720px',
+      width: '960px',
       maxWidth: '95vw',
+      maxHeight: '85vh',
+      height: '85vh',
       autoFocus: false,
+      restoreFocus: false,
+      panelClass: 'app-detail-dialog-panel',
       data: {
         sessionNote,
       },
@@ -403,8 +458,70 @@ export class PatientDetailDialogComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.action === 'edit') {
         this.openEditSessionNoteDialog(result.sessionNote);
+        return;
+      }
+
+      if (result?.action === 'delete') {
+        this.openDeleteSessionNoteDialog(result.sessionNote);
       }
     });
+  }
+
+  handleTimelineEventSelected(event: ClinicalTimelineItem): void {
+    if (!event.sourceType || !event.sourceId) {
+      return;
+    }
+
+    if (event.sourceType === 'SESSION_NOTE') {
+      const sessionNote = this.sessionNotes().find((item) => item.id === event.sourceId);
+
+      if (sessionNote) {
+        this.openSessionNoteDetailDialog(sessionNote);
+      }
+
+      return;
+    }
+
+    if (event.sourceType === 'DOCUMENT') {
+      const document = this.documents().find((item) => item.id === event.sourceId);
+
+      if (document) {
+        this.dialog.open(DocumentPreviewDialogComponent, {
+          autoFocus: false,
+          disableClose: false,
+          panelClass: 'app-document-preview-panel',
+          data: {
+            document,
+          },
+        });
+      }
+
+      return;
+    }
+
+    if (event.sourceType === 'APPOINTMENT') {
+      const appointment = this.appointments().find((item) => item.id === event.sourceId);
+
+      if (!appointment) {
+        return;
+      }
+
+      const dialogRef = this.dialog.open(AppointmentDetailDialogComponent, {
+        width: '760px',
+        maxWidth: '95vw',
+        autoFocus: false,
+        data: {
+          appointment,
+          patientName: this.getFullName(),
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result?.action === 'edit') {
+          this.openEditAppointmentDialog(result.appointment);
+        }
+      });
+    }
   }
 
   openDeleteSessionNoteDialog(sessionNote: SessionNote): void {
@@ -425,7 +542,7 @@ export class PatientDetailDialogComponent {
 
     dialogRef.afterClosed().subscribe((deleted) => {
       if (deleted) {
-        this.loadSessionNotes(currentCaseFile.id);
+        this.loadWorkspace();
       }
     });
   }
@@ -465,7 +582,7 @@ export class PatientDetailDialogComponent {
       return 'Pendiente';
     }
 
-    return age === 1 ? '1 año' : `${age} años`;
+    return age === 1 ? '1 a\u00f1o' : `${age} a\u00f1os`;
   }
 
   getDisplayValue(value?: string | null): string {
@@ -549,43 +666,20 @@ export class PatientDetailDialogComponent {
       : 'Aun falta completar la informacion base.';
   }
 
-  getFoundationStatusValue(): string {
-    const currentCaseFile = this.caseFile();
-
-    if (!currentCaseFile) {
-      return 'Pendiente';
-    }
-
-    return this.hasFoundationInformation(currentCaseFile) ? 'Completa' : 'Pendiente';
-  }
-
-  getFoundationStatusSupportingText(): string {
-    const currentCaseFile = this.caseFile();
-
-    if (!currentCaseFile) {
-      return 'Falta crear el expediente clinico.';
-    }
-
-    const hasDiagnosis = this.hasText(currentCaseFile.diagnosis);
-    const hasTreatmentPlan = this.hasText(currentCaseFile.treatmentPlan);
-
-    if (hasDiagnosis && hasTreatmentPlan) {
-      return 'Informacion base disponible en el contrato actual.';
-    }
-
-    if (!hasDiagnosis && !hasTreatmentPlan) {
-      return 'Falta diagnostico y plan de tratamiento.';
-    }
-
-    return hasDiagnosis ? 'Falta plan de tratamiento.' : 'Falta diagnostico.';
-  }
-
   getCaseFileCreatedAtLabel(): string {
     if (this.isCaseFileLoading()) {
       return 'Cargando...';
     }
 
     return this.formatDateTimeValue(this.caseFile()?.createdAt, 'Pendiente');
+  }
+
+  getNextAppointmentLabel(): string {
+    return this.formatDateTimeValue(this.workspaceSummary()?.nextAppointmentAt, 'Pendiente');
+  }
+
+  getLastAppointmentLabel(): string {
+    return this.formatDateTimeValue(this.workspaceSummary()?.lastAppointmentAt, 'Pendiente');
   }
 
   scrollToDocuments(): void {
@@ -623,21 +717,76 @@ export class PatientDetailDialogComponent {
     }));
   }
 
-  private loadCaseFile(): void {
+  refreshWorkspaceData(): void {
+    this.loadWorkspace();
+  }
+
+  private refreshWorkspaceFromCaseFileContext(): void {
+    const currentCaseFileId = this.caseFileId().trim();
+
+    if (!currentCaseFileId) {
+      return;
+    }
+
+    this.loadWorkspaceByCaseFileId(currentCaseFileId);
+  }
+
+  private loadWorkspace(): void {
+    const currentCaseFileId = this.caseFileId();
+
+    if (currentCaseFileId) {
+      this.loadWorkspaceByCaseFileId(currentCaseFileId);
+      return;
+    }
+
+    this.loadCaseFileByPatient();
+  }
+
+  private loadWorkspaceByCaseFileId(caseFileId: string): void {
+    this.isCaseFileLoading.set(true);
+    this.isTimelineLoading.set(true);
+    this.isAppointmentsLoading.set(true);
+    this.isSessionNotesLoading.set(true);
+    this.isDocumentsLoading.set(true);
+    this.caseFileErrorMessage.set('');
+    this.timelineErrorMessage.set('');
+    this.appointmentsErrorMessage.set('');
+    this.sessionNotesErrorMessage.set('');
+    this.documentsErrorMessage.set('');
+
+    this.caseFilesService.getWorkspace(caseFileId).subscribe({
+      next: (workspace) => {
+        this.applyWorkspace(workspace);
+      },
+      error: () => {
+        this.resetWorkspaceData();
+        this.caseFileErrorMessage.set('No fue posible cargar el Clinical Workspace.');
+        this.isCaseFileLoading.set(false);
+        this.isTimelineLoading.set(false);
+      },
+    });
+  }
+
+  private loadCaseFileByPatient(): void {
     this.isCaseFileLoading.set(true);
     this.caseFileErrorMessage.set('');
+    this.workspaceSummary.set(null);
+    this.backendTimeline.set([]);
+    this.isTimelineLoading.set(false);
+    this.timelineErrorMessage.set('');
+    this.resetAppointmentsState();
     this.resetSessionNotesState();
+    this.resetDocumentsState();
 
     this.caseFilesService.getCaseFileByPatientId(this.patient().id).subscribe({
       next: (caseFile) => {
-        this.caseFile.set(caseFile);
-        this.isCaseFileLoading.set(false);
-        this.loadSessionNotes(caseFile.id);
+        this.caseFileId.set(caseFile.id);
+        this.loadWorkspaceByCaseFileId(caseFile.id);
       },
       error: (error: HttpErrorResponse) => {
+        this.caseFileId.set('');
         this.caseFile.set(null);
         this.isCaseFileLoading.set(false);
-        this.resetSessionNotesState();
 
         if (error.status === 404) {
           return;
@@ -648,40 +797,44 @@ export class PatientDetailDialogComponent {
     });
   }
 
-  private loadAppointments(): void {
-    this.isAppointmentsLoading.set(true);
-    this.appointmentsErrorMessage.set('');
-    this.appointments.set([]);
-
-    this.appointmentsService.getAppointmentsByPatientId(this.patient().id).subscribe({
-      next: (appointments) => {
-        this.appointments.set(appointments);
-        this.isAppointmentsLoading.set(false);
-      },
-      error: () => {
-        this.appointments.set([]);
-        this.isAppointmentsLoading.set(false);
-        this.appointmentsErrorMessage.set('No fue posible cargar las citas.');
-      },
+  private applyWorkspace(workspace: CaseFileWorkspaceResponse): void {
+    this.caseFileId.set(workspace.caseFile.id);
+    this.caseFile.set(workspace.caseFile);
+    this.patient.set({
+      ...this.patient(),
+      ...workspace.patient,
     });
+    this.workspaceSummary.set(workspace.summary);
+    this.appointments.set(workspace.appointments);
+    this.sessionNotes.set(workspace.sessionNotes);
+    this.documents.set(workspace.documents);
+    this.backendTimeline.set(workspace.timeline);
+
+    this.isAppointmentsLoading.set(false);
+    this.isSessionNotesLoading.set(false);
+    this.isDocumentsLoading.set(false);
+    this.isCaseFileLoading.set(false);
+    this.isTimelineLoading.set(false);
+
+    this.appointmentsErrorMessage.set('');
+    this.sessionNotesErrorMessage.set('');
+    this.documentsErrorMessage.set('');
+    this.timelineErrorMessage.set('');
   }
 
-  private loadSessionNotes(caseFileId: string): void {
-    this.isSessionNotesLoading.set(true);
-    this.sessionNotesErrorMessage.set('');
-    this.sessionNotes.set([]);
+  private resetWorkspaceData(): void {
+    this.caseFile.set(null);
+    this.workspaceSummary.set(null);
+    this.backendTimeline.set([]);
+    this.resetAppointmentsState();
+    this.resetSessionNotesState();
+    this.resetDocumentsState();
+  }
 
-    this.sessionNotesService.getSessionNotesByCaseFileId(caseFileId).subscribe({
-      next: (sessionNotes) => {
-        this.sessionNotes.set(sessionNotes);
-        this.isSessionNotesLoading.set(false);
-      },
-      error: () => {
-        this.sessionNotes.set([]);
-        this.isSessionNotesLoading.set(false);
-        this.sessionNotesErrorMessage.set('No fue posible cargar las notas de sesion.');
-      },
-    });
+  private resetAppointmentsState(): void {
+    this.appointments.set([]);
+    this.isAppointmentsLoading.set(false);
+    this.appointmentsErrorMessage.set('');
   }
 
   private resetSessionNotesState(): void {
@@ -689,6 +842,12 @@ export class PatientDetailDialogComponent {
     this.isSessionNotesLoading.set(false);
     this.sessionNotesErrorMessage.set('');
     this.clearSessionNotesFilters();
+  }
+
+  private resetDocumentsState(): void {
+    this.documents.set([]);
+    this.isDocumentsLoading.set(false);
+    this.documentsErrorMessage.set('');
   }
 
   private restoreWorkspaceScroll(scrollTop: number): void {
@@ -699,6 +858,34 @@ export class PatientDetailDialogComponent {
         contentElement.scrollTop = scrollTop;
       }
     });
+  }
+
+  private mapTimelineEvent(event: ClinicalTimelineEvent): ClinicalTimelineItem | null {
+    const config: Record<
+      ClinicalTimelineEvent['type'],
+      { icon: string; title: string }
+    > = {
+      CASE_FILE_CREATED: { icon: 'folder_open', title: 'Expediente creado' },
+      APPOINTMENT_COMPLETED: { icon: 'event', title: 'Cita completada' },
+      SESSION_NOTE_CREATED: { icon: 'notes', title: 'Nota de sesion registrada' },
+      DOCUMENT_UPLOADED: { icon: 'description', title: 'Documento agregado' },
+    };
+
+    const eventConfig = config[event.type];
+
+    if (!eventConfig) {
+      return null;
+    }
+
+    return {
+      id: event.id,
+      icon: eventConfig.icon,
+      title: eventConfig.title,
+      timestamp: event.occurredAt,
+      description: event.description?.trim() || event.title?.trim() || null,
+      sourceType: event.sourceType,
+      sourceId: event.sourceId,
+    };
   }
 
   private getAppointmentActionErrorMessage(error: HttpErrorResponse, action: 'cancelar'): string {
@@ -719,6 +906,10 @@ export class PatientDetailDialogComponent {
 
   private formatSessionNoteCount(count: number): string {
     return count === 1 ? '1 nota' : `${count} notas`;
+  }
+
+  private formatMetricCount(count: number, singular: string, plural: string): string {
+    return `${count} ${count === 1 ? singular : plural}`;
   }
 
   private formatDateTimeValue(value?: string | null, fallback = 'Pendiente'): string {

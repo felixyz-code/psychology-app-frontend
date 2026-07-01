@@ -49,7 +49,6 @@ export class DocumentUploadFormComponent {
   readonly layout = input<DocumentFormLayout>('page');
   readonly isSaving = input(false);
   readonly errorMessage = input('');
-  readonly uploadedById = input('');
   readonly isCaseFilesLoading = input(false);
   readonly caseFilesLoadErrorMessage = input('');
   readonly caseFileOptions = input<DocumentCaseFileOption[]>([]);
@@ -132,15 +131,8 @@ export class DocumentUploadFormComponent {
     }
 
     const rawValue = this.uploadForm.getRawValue();
-    const uploadedById = this.getUploadedById();
-
-    if (!uploadedById) {
-      return;
-    }
-
     this.formSubmitted.emit({
       caseFileId: rawValue.caseFileId.trim(),
-      uploadedById,
       file,
     });
   }
@@ -228,10 +220,6 @@ export class DocumentUploadFormComponent {
 
   isCaseFileSelectionHidden(): boolean {
     return !!this.fixedCaseFileId().trim();
-  }
-
-  private getUploadedById(): string {
-    return this.uploadedById().trim();
   }
 
   private validateFile(file: File | null): string {

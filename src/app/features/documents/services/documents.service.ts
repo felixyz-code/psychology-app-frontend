@@ -27,12 +27,11 @@ export class DocumentsService {
     return this.http.patch<Document>(`${this.basePath}/${id}`, payload);
   }
 
-  upload(caseFileId: string, uploadedById: string, file: File): Observable<Document> {
+  upload(caseFileId: string, file: File): Observable<Document> {
     const formData = new FormData();
 
     formData.append('file', file);
     formData.append('caseFileId', caseFileId);
-    formData.append('uploadedById', uploadedById);
 
     return this.http.post<Document>(`${this.basePath}/upload`, formData);
   }

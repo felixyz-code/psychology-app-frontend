@@ -25,7 +25,7 @@
 
     <app-section-card
       title="Resumen clinico"
-      subtitle="Lectura ejecutiva del expediente usando unicamente la informacion disponible en el contrato actual."
+      subtitle="Lectura ejecutiva del expediente usando exclusivamente el resumen consolidado devuelto por backend."
     >
       <div class="patient-detail-dialog__metrics-grid">
         @for (metric of clinicalSummaryCards(); track metric.title) {
@@ -43,6 +43,16 @@
 
       <div class="patient-detail-dialog__summary-grid">
         <article class="patient-detail-dialog__summary-panel">
+          <span class="patient-detail-dialog__label">Proxima cita</span>
+          <p>{{ getNextAppointmentLabel() }}</p>
+        </article>
+
+        <article class="patient-detail-dialog__summary-panel">
+          <span class="patient-detail-dialog__label">Ultima cita</span>
+          <p>{{ getLastAppointmentLabel() }}</p>
+        </article>
+
+        <article class="patient-detail-dialog__summary-panel">
           <span class="patient-detail-dialog__label">Diagnostico</span>
           <p>{{ caseFile() ? getDisplayValue(caseFile()?.diagnosis) : 'Pendiente' }}</p>
         </article>
@@ -56,28 +66,29 @@
 
     <app-section-card
       title="Acciones rapidas"
-      subtitle="Accesos directos para continuar el flujo clinico sin salir del expediente."
+      subtitle="Accesos directos para continuar el flujo clinico sin perder el contexto del expediente."
     >
       <div class="patient-detail-dialog__quick-actions">
-        @if (caseFile()) {
-          <app-action-card icon="folder_open" label="Editar expediente" variant="primary" (triggered)="openEditCaseFileDialog()" />
-        } @else {
-          <app-action-card
-            icon="create_new_folder"
-            label="Crear expediente"
-            variant="primary"
-            (triggered)="openCreateCaseFileDialog()"
-          />
-        }
-
+        <app-action-card icon="folder_open" label="Editar expediente" variant="primary" (triggered)="openCaseFileActionDialog()" />
         <app-action-card icon="person" label="Editar paciente" (triggered)="openEditPatientDialog()" />
         <app-action-card icon="event_available" label="Nueva cita" (triggered)="openCreateAppointmentDialog()" />
-
-        @if (caseFile()) {
-          <app-action-card icon="note_add" label="Nueva nota" (triggered)="openCreateSessionNoteDialog()" />
-          <app-action-card icon="description" label="Ver documentos" (triggered)="scrollToDocuments()" />
-        }
+        <app-action-card icon="note_add" label="Nueva nota" [disabled]="!caseFile()" (triggered)="openCreateSessionNoteDialog()" />
+        <app-action-card icon="description" label="Ver documentos" [disabled]="!caseFile()" (triggered)="scrollToDocuments()" />
       </div>
+    </app-section-card>
+
+    <app-section-card
+      title="Timeline clinico"
+      subtitle="Cronologia recibida desde backend y enriquecida solo con copy, iconos y navegacion UI."
+    >
+      <app-clinical-timeline
+        [events]="timelineItems()"
+        [loading]="isTimelineLoading()"
+        [errorMessage]="timelineErrorMessage()"
+        emptyTitle="Sin actividad clinica registrada"
+        emptyMessage="Todavia no existe actividad clinica visible para este expediente."
+        (eventSelected)="handleTimelineEventSelected($event)"
+      />
     </app-section-card>
 
     <app-section-card title="Citas" subtitle="Agenda registrada para este paciente.">
@@ -121,6 +132,8 @@
                   <button
                     mat-button
                     type="button"
+                    matTooltip="Editar cita"
+                    [matTooltipShowDelay]="150"
                     [disabled]="cancellingAppointmentId() !== null"
                     (click)="openEditAppointmentDialog(appointment)"
                   >
@@ -130,6 +143,8 @@
                     <button
                       mat-button
                       type="button"
+                      matTooltip="Cancelar cita"
+                      [matTooltipShowDelay]="150"
                       [disabled]="cancellingAppointmentId() !== null"
                       (click)="cancelAppointment(appointment)"
                     >
@@ -144,6 +159,8 @@
                   <button
                     mat-button
                     type="button"
+                    matTooltip="Eliminar cita"
+                    [matTooltipShowDelay]="150"
                     [disabled]="cancellingAppointmentId() !== null"
                     (click)="openDeleteAppointmentDialog(appointment)"
                   >
@@ -159,10 +176,17 @@
           }
         </div>
       } @else {
-        <p class="patient-detail-dialog__message patient-detail-dialog__empty">
-          No hay citas registradas para este paciente.
-        </p>
+        <app-data-table-empty-state
+          icon="event_busy"
+          title="No hay citas registradas"
+          message="Cuando registres una cita para este paciente, aparecera aqui."
+        />
       }
+
+      <div sectionCardFooter class="patient-detail-dialog__section-footer">
+        <span>Proxima cita: {{ getNextAppointmentLabel() }}</span>
+        <span>Ultima cita: {{ getLastAppointmentLabel() }}</span>
+      </div>
     </app-section-card>
 
     <app-section-card title="Base clinica" subtitle="Diagnostico y plan de tratamiento disponibles para este expediente.">
@@ -198,10 +222,17 @@
           </div>
         </div>
       } @else {
-        <p class="patient-detail-dialog__message patient-detail-dialog__empty">
-          Este paciente aun no tiene expediente clinico.
-        </p>
+        <app-data-table-empty-state
+          icon="folder_open"
+          title="Sin expediente clinico"
+          message="Crea el expediente para habilitar el resumen, el timeline y los registros clinicos asociados."
+        />
       }
+
+      <div sectionCardFooter class="patient-detail-dialog__section-footer">
+        <span>Estado actual: {{ getCaseFileStatusLabel() }}</span>
+        <span>Ultima actualizacion: {{ workspaceFooterText() }}</span>
+      </div>
     </app-section-card>
 
     <app-section-card title="Notas de sesion" subtitle="Seguimiento clinico registrado para este expediente.">
@@ -215,9 +246,11 @@
       </div>
 
       @if (!caseFile()) {
-        <p class="patient-detail-dialog__message">
-          Crea un expediente clinico para comenzar a registrar notas de sesion.
-        </p>
+        <app-data-table-empty-state
+          icon="note_alt"
+          title="Sin expediente para registrar notas"
+          message="Crea primero el expediente clinico para comenzar a documentar el seguimiento de sesiones."
+        />
       } @else if (isSessionNotesLoading()) {
         <div class="patient-detail-dialog__loading" aria-live="polite">
           <mat-spinner diameter="22" />
@@ -248,9 +281,9 @@
                   </div>
 
                   <div class="patient-detail-dialog__note-actions">
-                    <button mat-button type="button" (click)="openSessionNoteDetailDialog(note)">Ver</button>
-                    <button mat-button type="button" (click)="openEditSessionNoteDialog(note)">Editar</button>
-                    <button mat-button type="button" (click)="openDeleteSessionNoteDialog(note)">Eliminar</button>
+                    <button mat-button type="button" matTooltip="Abrir nota" [matTooltipShowDelay]="150" (click)="openSessionNoteDetailDialog(note)">Ver</button>
+                    <button mat-button type="button" matTooltip="Editar nota" [matTooltipShowDelay]="150" (click)="openEditSessionNoteDialog(note)">Editar</button>
+                    <button mat-button type="button" matTooltip="Eliminar nota" [matTooltipShowDelay]="150" (click)="openDeleteSessionNoteDialog(note)">Eliminar</button>
                   </div>
                 </div>
 
@@ -286,20 +319,27 @@
 
     @if (!caseFile()) {
       <app-section-card title="Documentos" subtitle="Archivos asociados al expediente clinico.">
-        <p class="patient-detail-dialog__message">
-          Crea un expediente clinico para comenzar a subir documentos.
-        </p>
+        <app-data-table-empty-state
+          icon="description"
+          title="Sin expediente para documentos"
+          message="Crea primero el expediente clinico para comenzar a subir y organizar documentos."
+        />
       </app-section-card>
     } @else if (caseFile(); as currentCaseFile) {
       <div #documentsSection>
         <app-documents-list
           scope="case-file"
           [caseFileId]="currentCaseFile.id"
+          [items]="documents()"
+          [externalLoading]="isDocumentsLoading()"
+          [externalErrorMessage]="documentsErrorMessage()"
           cardTitle="Documentos"
           cardSubtitle="Archivos asociados al expediente clinico."
           emptyTitle="No hay documentos cargados"
           emptyMessage="Cuando subas documentos, apareceran en este listado."
           uploadButtonLabel="Nuevo documento"
+          (documentsLoaded)="documents.set($event)"
+          (documentsChanged)="refreshWorkspaceData()"
         />
       </div>
     }
@@ -345,7 +385,7 @@
   </div>
 
   <div class="patient-detail-dialog__actions">
-    <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
-    <button mat-flat-button type="button" (click)="openEditPatientDialog()">Editar paciente</button>
+    <button mat-button class="app-secondary-button" type="button" matTooltip="Cerrar workspace" [matTooltipShowDelay]="150" (click)="close()">Cerrar</button>
+    <button mat-flat-button type="button" matTooltip="Actualizar datos del paciente" [matTooltipShowDelay]="150" (click)="openEditPatientDialog()">Editar paciente</button>
   </div>
 </div>
