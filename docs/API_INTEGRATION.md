@@ -166,6 +166,34 @@ Services encapsulate HTTP communication.
 
 Components should never call HttpClient directly.
 
+## Clinical Workspace Aggregated Endpoint
+
+The Clinical Workspace now prefers a single aggregated backend contract whenever a `caseFileId` is available.
+
+Primary endpoint:
+
+```text
+GET /case-files/:id/workspace
+```
+
+This endpoint replaces the previous frontend-first manual composition of:
+
+- appointments
+- sessionNotes
+- documents
+- caseFile
+- patient
+- timeline
+
+Current integration rules:
+
+- `CaseFilesService.getWorkspace(caseFileId)` is the primary entry point for the workspace
+- backend-provided `summary` is consumed directly when available
+- backend-provided `timeline` is consumed directly when available
+- manual orchestration remains only as a fallback when the UI still starts from patient context without a resolved `caseFileId`
+
+This keeps the frontend aligned with the backend-first architecture and avoids reconstructing clinical state in the client.
+
 ---
 
 # File Upload Strategy

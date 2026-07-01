@@ -133,6 +133,15 @@ Patient
       -> Workspace
 ```
 
+The aggregated workspace endpoint replaces the previous manual frontend composition of:
+
+* appointments
+* sessionNotes
+* documents
+* caseFile
+* patient
+* timeline
+
 ---
 
 # Loading And Empty States
@@ -180,6 +189,20 @@ Current accepted event sources:
 * `APPOINTMENT_COMPLETED`
 * `SESSION_NOTE_CREATED`
 * `DOCUMENT_UPLOADED`
+
+## Clinical Timeline - Scheduled Appointments
+
+Current product decision:
+
+* The timeline represents clinical history, not the agenda
+* `SCHEDULED` appointments do not appear in the clinical timeline
+* Scheduled appointments remain visible in the summary, appointments section and calendar flows
+
+Future evaluation remains open for:
+
+* Whether `CANCELLED` appointments should appear in the timeline
+* Whether `NO_SHOW` appointments should appear in the timeline
+* Whether a fuller appointment status-history timeline is needed later
 
 The frontend only maps copy, iconography and click behavior.
 
@@ -256,6 +279,41 @@ Current limitations include:
 * Timeline drill-down is currently implemented only for session notes
 * Data is refreshed by reloading the aggregated workspace after dialogs close or document actions finish
 * The workspace depends on the current backend contract and intentionally avoids inferred relationships beyond it
+* Minor visual flicker remains when closing the child `Editar paciente` dialog back into the workspace shell
+
+---
+
+# Sprint 10 Final Validation
+
+This sprint is a closure and validation sprint.
+
+Target validation flow:
+
+1. Open case file from `/case-files`
+2. Open case file from `/patients`
+3. Create appointment from Clinical Workspace
+4. Confirm summary refresh
+5. Confirm `SCHEDULED` appointment appears in appointments and next appointment summary, but not in timeline
+6. Change appointment to `COMPLETED`
+7. Confirm it appears in timeline
+8. Create session note from Clinical Workspace
+9. Confirm the note appears in timeline
+10. Open session note from timeline
+11. Upload document from Clinical Workspace
+12. Confirm the document appears in timeline
+13. Open document from timeline
+14. Edit patient
+15. Edit case file
+16. Delete note or document and confirm refresh
+17. Confirm workspace context is preserved
+
+Current execution status in this repository session:
+
+* Frontend local target reachable at `http://localhost:4200`
+* Backend local target reachable at `http://localhost:3000`
+* Manual browser-driven E2E validation could not be completed from this session because no browser runtime was available for interactive navigation
+
+This means Sprint 10 closure documentation is complete, but the manual UI checklist above still requires execution in a browser-capable session with backend access.
 
 These limitations are acceptable for the current MVP and should only change when the product flow requires it.
 

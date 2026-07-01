@@ -259,6 +259,34 @@ It establishes a reusable UX baseline for future views such as Patients, Appoint
 
 ---
 
+# ADR-013 - Clinical Timeline Scope
+
+## Decision
+
+The Clinical Workspace timeline represents clinical history and does not include appointments in `SCHEDULED` status.
+
+Scheduled appointments remain visible through:
+
+- summary and next appointment indicators
+- the workspace appointments section
+- calendar and agenda views
+
+## Rationale
+
+The timeline is intended to highlight completed or clinically meaningful records instead of duplicating scheduling views.
+
+This keeps the workspace easier to scan and avoids mixing future agenda items with historical events.
+
+## Pending Evaluation
+
+Future product review should decide:
+
+- whether `CANCELLED` appointments belong in the timeline
+- whether `NO_SHOW` appointments belong in the timeline
+- whether a full appointment status-history timeline is needed
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 10.10 - Case Files Foundation
+Sprint 10.6 - Clinical Workspace Final Validation & Documentation
 ```
 
 ---
@@ -73,6 +73,7 @@ Sprint 10.10 - Case Files Foundation
 * Create
 * Edit
 * Global foundation route `/case-files`
+* Sprint 10.6 completed - Clinical Workspace closure documented with aggregated workspace endpoint, timeline scope decision and registered technical debt
 * Sprint 10.10 completed - Case Files foundation delivered with lazy routing, sidebar navigation, professional base list, patient context access and no new backend contract assumptions
 * Clinical Workspace documentation delivered - patient-centered cross-feature workflow is now documented as part of the technical source of truth
 
@@ -136,7 +137,7 @@ Sprint 10.10 - Case Files Foundation
 Next planned sprint:
 
 ```text
-To be defined after Case Files backend contract review
+To be defined after Sprint 10 manual browser validation and backlog reprioritization
 ```
 
 ---
@@ -152,6 +153,7 @@ Current development efforts include:
 * Frontend architecture stabilization
 * Case Files clinical workspace foundation
 * Clinical Workspace documentation consolidation
+* Final manual validation of the Clinical Workspace checklist in a browser-capable environment
 
 ---
 
@@ -224,6 +226,10 @@ Current technical debt includes:
 * Shared component extraction
 * Design system consolidation
 * Automated frontend testing
+* Minor visual flicker when closing the child `Editar paciente` dialog from Clinical Workspace
+* SCSS budget warnings in `patient-detail-dialog.component.scss`, `dashboard.page.scss` and `appointments-calendar.component.scss`
+* Potential future timeline/backend event coverage for `APPOINTMENT_CANCELLED`, `APPOINTMENT_NO_SHOW` and `CASE_FILE_UPDATED`
+* Potential evolution of `SessionNote` toward a more structured clinical schema including motivo, objetivos, intervenciones, observaciones, tareas and plan de siguiente sesion
 
 Technical debt should be addressed incrementally.
 

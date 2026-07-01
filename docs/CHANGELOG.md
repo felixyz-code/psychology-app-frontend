@@ -8,6 +8,27 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 10
 
+## Sprint 10.6 - Clinical Workspace Final Validation & Documentation
+
+### Documented
+
+* El endpoint agregado `GET /case-files/:id/workspace` queda formalmente documentado como fuente principal del Clinical Workspace.
+* Se registra que este endpoint reemplaza la composicion manual frontend de `appointments`, `sessionNotes`, `documents`, `caseFile`, `patient` y `timeline`.
+* Queda documentada la decision vigente de producto: las citas `SCHEDULED` no aparecen en el timeline clinico porque el timeline representa historial, no agenda.
+* Se registran como pendientes futuras la evaluacion de eventos `APPOINTMENT_CANCELLED`, `APPOINTMENT_NO_SHOW` y `CASE_FILE_UPDATED`.
+* Se registra la posible evolucion de `SessionNote` hacia una estructura clinica mas guiada por campos.
+
+### Validation
+
+* Se deja trazada la checklist E2E de cierre para el Clinical Workspace.
+* En esta sesion de repositorio se confirmo disponibilidad local de frontend `http://localhost:4200` y backend `http://localhost:3000`.
+* La ejecucion manual completa de la checklist UI queda pendiente en una sesion con navegador interactivo disponible; por lo tanto este sprint no introduce cambios funcionales y solo consolida validacion/documentacion.
+
+### Technical Debt
+
+* Registrado flicker visual menor al cerrar el modal hijo `Editar paciente` desde Clinical Workspace.
+* Registrados warnings de budget SCSS en `patient-detail-dialog.component.scss`, `dashboard.page.scss` y `appointments-calendar.component.scss`.
+
 ## Sprint 10B - Clinical Workspace Aggregated Endpoint Adoption
 
 ### Changed
