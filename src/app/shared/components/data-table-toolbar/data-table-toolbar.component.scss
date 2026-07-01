@@ -1,6 +1,6 @@
 .data-table-toolbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem 1.25rem;
   padding: var(--data-table-toolbar-padding, 1rem 1.5rem 0);
@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.6rem 0.75rem;
-  min-height: 3.5rem;
+  min-height: 0;
 }
 
 .data-table-toolbar__counter {

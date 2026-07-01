@@ -17,6 +17,18 @@
   </app-page-header>
 
   <app-section-card title="Agenda global" subtitle="Agenda global registrada en el sistema.">
+    <mat-button-toggle-group
+      sectionCardActions
+      class="appointments-view-toggle"
+      [value]="viewMode()"
+      aria-label="Selector de vista de citas"
+      (valueChange)="updateViewMode($event)"
+    >
+      <mat-button-toggle value="table">Tabla</mat-button-toggle>
+      <mat-button-toggle value="calendar">Calendario</mat-button-toggle>
+      <mat-button-toggle value="agenda">Agenda</mat-button-toggle>
+    </mat-button-toggle-group>
+
     @if (isLoading()) {
       <div class="appointments-state app-table-loading-state">
         <mat-spinner diameter="40" />
@@ -28,19 +40,6 @@
       </div>
     } @else if (appointments().length) {
       <div class="appointments-toolbar">
-        <div class="appointments-toolbar__actions">
-          <mat-button-toggle-group
-            class="appointments-view-toggle"
-            [value]="viewMode()"
-            aria-label="Selector de vista de citas"
-            (valueChange)="updateViewMode($event)"
-          >
-            <mat-button-toggle value="table">Tabla</mat-button-toggle>
-            <mat-button-toggle value="calendar">Calendario</mat-button-toggle>
-            <mat-button-toggle value="agenda">Agenda</mat-button-toggle>
-          </mat-button-toggle-group>
-        </div>
-
         <div
           class="appointments-toolbar__filters"
           [class.appointments-toolbar__filters--with-date-range]="viewMode() !== 'agenda'"

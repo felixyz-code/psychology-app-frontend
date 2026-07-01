@@ -6,12 +6,7 @@
       { label: 'Dashboard', url: '/dashboard' },
       { label: 'Expedientes' },
     ]"
-  >
-    <button mat-stroked-button type="button" class="app-page-header-action" [disabled]="isLoading()" (click)="loadCaseFiles()">
-      <mat-icon>refresh</mat-icon>
-      <span>Actualizar</span>
-    </button>
-  </app-page-header>
+  />
 
   <section class="case-files-summary app-page__metrics" aria-label="Resumen de expedientes">
     <article class="case-files-summary__item">
