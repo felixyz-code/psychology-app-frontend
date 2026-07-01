@@ -580,6 +580,178 @@ body.dark-theme .app-status-badge--no-show {
   filter: brightness(1.03);
 }
 
+.mat-mdc-dialog-container .app-dialog {
+  gap: 1.5rem;
+}
+
+.mat-mdc-dialog-container .app-dialog__header {
+  display: grid;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--app-color-border) 82%, transparent);
+}
+
+.mat-mdc-dialog-container .app-dialog__header h2,
+.mat-mdc-dialog-container .app-dialog__header p {
+  margin: 0;
+}
+
+.mat-mdc-dialog-container .app-dialog__header p {
+  max-width: 65ch;
+  color: var(--app-color-text-secondary);
+}
+
+.mat-mdc-dialog-container .app-dialog__form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.mat-mdc-dialog-container .app-dialog__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.mat-mdc-dialog-container .app-dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--app-color-border) 82%, transparent);
+}
+
+.mat-mdc-dialog-container .app-dialog__actions-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-left: auto;
+}
+
+.mat-mdc-dialog-container .app-dialog__error {
+  margin: 0;
+  color: var(--app-color-danger-text);
+  font-weight: 600;
+}
+
+.mat-mdc-dialog-container .app-dialog__saving,
+.mat-mdc-dialog-container .app-dialog__inline-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--app-color-text-secondary);
+}
+
+.mat-mdc-dialog-container .app-dialog__danger.mat-mdc-unelevated-button:not(:disabled) {
+  background: var(--app-color-danger);
+  color: #fff;
+}
+
+.mat-mdc-dialog-container .app-dialog__danger.mat-mdc-unelevated-button:not(:disabled):hover {
+  filter: brightness(0.97);
+}
+
+.mat-mdc-dialog-container .app-dialog__danger.mat-mdc-unelevated-button:disabled {
+  opacity: 0.72;
+}
+
+.mat-mdc-dialog-container .app-dialog__danger-text.mat-mdc-button:not(:disabled) {
+  color: var(--app-color-danger-text);
+}
+
+.mat-mdc-dialog-container .app-dialog__danger-text.mat-mdc-button:not(:disabled):hover {
+  background: color-mix(in srgb, var(--app-color-danger-soft) 82%, transparent);
+}
+
+.mat-mdc-dialog-container .app-dialog__summary {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 16px;
+  background: var(--app-color-card-soft-bg);
+}
+
+.mat-mdc-dialog-container .app-dialog__summary p {
+  margin: 0;
+}
+
+.mat-mdc-dialog-container .app-dialog__summary-title {
+  color: var(--app-color-heading);
+  font-weight: 700;
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] {
+  gap: 1.25rem;
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] > h2,
+.mat-mdc-dialog-container [class$='-delete-dialog'] > p {
+  margin: 0;
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] > h2 {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--app-color-border) 82%, transparent);
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] > p {
+  color: var(--app-color-text-secondary);
+  line-height: 1.55;
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__summary'] {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 16px;
+  background: var(--app-color-card-soft-bg);
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__summary'] p {
+  margin: 0;
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__title'],
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__name'] {
+  color: var(--app-color-heading);
+  font-weight: 700;
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__warning'] {
+  color: var(--app-color-text-secondary);
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__error'] {
+  margin: 0;
+  color: var(--app-color-danger-text);
+  font-weight: 600;
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__actions'] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--app-color-border) 82%, transparent);
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__actions'] button:last-child.mat-mdc-unelevated-button:not(:disabled) {
+  background: var(--app-color-danger);
+  color: #fff;
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__actions'] button:last-child.mat-mdc-unelevated-button:not(:disabled):hover {
+  filter: brightness(0.97);
+}
+
+.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__actions'] button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .mat-mdc-dialog-container .mat-mdc-text-field-wrapper {
   border-radius: 14px;
   background: var(--app-color-input-bg);
@@ -600,6 +772,27 @@ body.dark-theme .app-status-badge--no-show {
   .mat-mdc-dialog-container [class$='__actions'] {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .mat-mdc-dialog-container .app-dialog__actions {
+    align-items: stretch;
+  }
+
+  .mat-mdc-dialog-container .app-dialog__actions-group {
+    display: grid;
+    gap: 0.75rem;
+    margin-left: 0;
+  }
+
+  .mat-mdc-dialog-container .app-dialog__actions button,
+  .mat-mdc-dialog-container .app-dialog__actions-group button,
+  .mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__actions'] button {
+    width: 100%;
+  }
+
+  .mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__actions'] {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 
