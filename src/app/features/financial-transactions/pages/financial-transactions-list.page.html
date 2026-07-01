@@ -1,4 +1,4 @@
-<section class="financial-transactions-page">
+<section class="financial-transactions-page app-page">
   <app-page-header
     heading="Finanzas"
     subtitle="Listado global de transacciones financieras registradas en el sistema."
@@ -8,7 +8,7 @@
     ]"
   />
 
-  <section class="financial-transactions-summary" aria-label="Resumen financiero">
+  <section class="financial-transactions-summary app-page__metrics" aria-label="Resumen financiero">
     @for (card of summaryCards(); track card.label) {
       <app-metric-card
         [icon]="card.icon"

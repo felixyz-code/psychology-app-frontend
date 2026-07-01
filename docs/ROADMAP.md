@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 10.6 - Clinical Workspace Final Validation & Documentation
+Sprint 11.2 - Global Page Baseline
 ```
 
 ---
@@ -66,6 +66,7 @@ Sprint 10.6 - Clinical Workspace Final Validation & Documentation
 * Create
 * Edit
 * Detail
+* Sprint 11.2 completed - Global page baseline aligned with the shared header and spacing rhythm used across the main modules
 
 ### Case Files
 
@@ -75,6 +76,7 @@ Sprint 10.6 - Clinical Workspace Final Validation & Documentation
 * Global foundation route `/case-files`
 * Sprint 10.6 completed - Clinical Workspace closure documented with aggregated workspace endpoint, timeline scope decision and registered technical debt
 * Sprint 10.10 completed - Case Files foundation delivered with lazy routing, sidebar navigation, professional base list, patient context access and no new backend contract assumptions
+* Sprint 11.2 completed - Header, summary spacing and main content rhythm aligned with the shared page baseline
 * Clinical Workspace documentation delivered - patient-centered cross-feature workflow is now documented as part of the technical source of truth
 
 ### Session Notes
@@ -96,6 +98,7 @@ Sprint 10.6 - Clinical Workspace Final Validation & Documentation
 * Metadata edit
 * Sprint 7.5 completed - Data table pattern applied to the Documents block inside patient detail dialog
 * Sprint 10.9 completed - Documents table simplified for end users and technical metadata moved to a reusable detail modal
+* Sprint 11.2 completed - Global documents page and list spacing aligned with the shared page baseline
 
 ### Appointments
 
@@ -116,7 +119,25 @@ Sprint 10.6 - Clinical Workspace Final Validation & Documentation
 * Sprint 8.1.1 completed - Global appointments list now includes client-side date range filtering with current-month default range
 * Sprint 8.2 completed - Global appointments list now includes a monthly calendar view sharing the same client-side state and CRUD flows
 * Sprint 8.3 completed - Global appointments list now includes a daily agenda view sharing the same search, filters, state and CRUD flows
+* Sprint 11.2 completed - Global header, toolbar spacing, calendar spacing and agenda spacing aligned with the shared page baseline
 * The module now provides a stable foundation for future additions such as working hours, availability, drag & drop, reminders and notification integration without requiring major refactors
+
+### Dashboard
+
+* SaaS-style home screen delivered
+* Shared metrics, sections and quick actions foundation in production
+* Sprint 11.2 completed - Metric rhythm and lower content spacing aligned with the shared page baseline
+
+### Financial Transactions
+
+* Global list
+* Summary cards
+* Filters
+* Create
+* Edit
+* Detail
+* Delete
+* Sprint 11.2 completed - Summary cards, page spacing and primary content rhythm aligned with the shared page baseline
 
 ### Sprint 7
 
@@ -153,6 +174,7 @@ Current development efforts include:
 * Frontend architecture stabilization
 * Case Files clinical workspace foundation
 * Clinical Workspace documentation consolidation
+* Cross-module visual consistency baseline
 * Final manual validation of the Clinical Workspace checklist in a browser-capable environment
 
 ---
@@ -222,12 +244,14 @@ These features are intentionally outside the current MVP.
 
 Current technical debt includes:
 
-* UI consistency refinements
+* Secondary UI consistency refinements after the new shared page baseline
 * Shared component extraction
 * Design system consolidation
 * Automated frontend testing
 * Minor visual flicker when closing the child `Editar paciente` dialog from Clinical Workspace
 * SCSS budget warnings in `patient-detail-dialog.component.scss`, `dashboard.page.scss` and `appointments-calendar.component.scss`
+* Potential future consolidation of duplicated page titles between `PageHeaderComponent` and some `SectionCardComponent` list shells
+* Remaining dashboard-specific hero personality versus the more neutral baseline used by the other operational modules
 * Potential future timeline/backend event coverage for `APPOINTMENT_CANCELLED`, `APPOINTMENT_NO_SHOW` and `CASE_FILE_UPDATED`
 * Potential evolution of `SessionNote` toward a more structured clinical schema including motivo, objetivos, intervenciones, observaciones, tareas and plan de siguiente sesion
 

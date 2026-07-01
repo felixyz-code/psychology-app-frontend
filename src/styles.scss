@@ -36,6 +36,10 @@ body {
 
 :root {
   --app-navbar-height: 4.25rem;
+  --app-page-gap: 1.25rem;
+  --app-page-gap-tight: 1rem;
+  --app-page-section-gap: 0.9rem;
+  --app-page-block-padding: 1rem;
   --app-color-sidebar-bg: #172a46;
   --app-color-header-bg: #1d4ed8;
   --app-color-primary: #3b82f6;
@@ -138,6 +142,22 @@ button[mat-button] {
   border: 1px solid var(--app-color-border) !important;
   background: var(--app-color-surface-muted) !important;
   color: var(--app-color-heading) !important;
+}
+
+.app-page {
+  display: grid;
+  gap: var(--app-page-gap);
+}
+
+.app-page__metrics {
+  display: grid;
+  gap: var(--app-page-section-gap);
+}
+
+@media (max-width: 720px) {
+  .app-page {
+    gap: var(--app-page-gap-tight);
+  }
 }
 
 .app-secondary-button:hover:not(:disabled) {

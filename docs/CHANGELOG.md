@@ -6,6 +6,34 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# Sprint 11
+
+## Sprint 11.2 - Global Page Baseline
+
+### Changed
+
+* Se unifico la linea base visual de las pantallas principales sin introducir cambios funcionales.
+* Se incorporo un contenedor comun de pagina (`.app-page`) para homologar separacion vertical entre encabezado, metricas y contenido principal.
+* `Patients` y `Appointments` adoptan el mismo patron de encabezado superior ya utilizado por Dashboard, Case Files, Documents y Finanzas.
+* `PageHeaderComponent`, `SectionCardComponent` y `MetricCardComponent` ajustan padding y ritmo visual para reducir pequenas diferencias entre modulos.
+* `Dashboard`, `Case Files`, `Documents`, `Appointments`, `Patients` y `Financial Transactions` ahora comparten mejor la misma baseline de espaciado general.
+* `Appointments` normaliza el espaciado entre toolbar, tabla, calendario y agenda sin alterar vistas, filtros ni flujos CRUD.
+* El `Clinical Workspace` recibe solo ajustes sutiles de spacing en su shell para alinearse mejor con el sistema visual existente.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo cambios de contratos.
+* No hubo cambios funcionales.
+* `npm.cmd run build` finalizo correctamente.
+
+### Notes
+
+* Se mantienen los warnings de budget SCSS ya conocidos en `dashboard.page.scss`, `patient-detail-dialog.component.scss` y `appointments-calendar.component.scss`.
+* Permanecen pendientes algunas diferencias menores de personalidad visual, especialmente el hero propio del Dashboard y la duplicidad titulo/header en algunos listados, para una futura iteracion de polish.
+
+---
+
 # Sprint 10
 
 ## Sprint 10.6 - Clinical Workspace Final Validation & Documentation

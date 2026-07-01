@@ -1,12 +1,5 @@
-.financial-transactions-page {
-  display: grid;
-  gap: 1.1rem;
-}
-
 .financial-transactions-summary {
-  display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.85rem;
 }
 
 .financial-transactions-summary-error {
@@ -38,7 +31,7 @@
 .financial-transactions-toolbar {
   display: grid;
   gap: 0.85rem 1rem;
-  padding-top: 0.9rem;
+  padding-top: 0.15rem;
 }
 
 .financial-transactions-toolbar__row {
@@ -95,7 +88,7 @@
 
 .financial-transactions-table-wrapper {
   overflow-x: auto;
-  padding-top: 0.75rem;
+  padding-top: 0.85rem;
 }
 
 .financial-transactions-table {

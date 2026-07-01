@@ -1,12 +1,5 @@
-.case-files-page {
-  display: grid;
-  gap: 1.1rem;
-}
-
 .case-files-summary {
-  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
 }
 
 .case-files-summary__item {
@@ -67,7 +60,7 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  padding: 0.85rem 0 0;
+  padding: 0.15rem 0 0;
   color: var(--app-color-text-secondary);
 }
 
@@ -81,7 +74,7 @@
 
 .case-files-table-wrapper {
   overflow-x: auto;
-  padding-top: 1rem;
+  padding-top: 0.85rem;
 }
 
 .case-files-table {

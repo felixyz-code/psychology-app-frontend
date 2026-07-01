@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.9rem 1rem 0;
+  padding: 0.15rem 0 0;
   color: var(--app-color-danger-text);
 }
 
@@ -39,7 +39,7 @@
 
 .documents-table-wrapper {
   overflow-x: auto;
-  padding-top: 0.75rem;
+  padding-top: 0.85rem;
 }
 
 .documents-table {

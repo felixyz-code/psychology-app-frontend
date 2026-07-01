@@ -1,4 +1,10 @@
-<section class="patients-list-page">
+<section class="patients-list-page app-page">
+  <app-page-header
+    heading="Pacientes"
+    subtitle="Gestión de pacientes registrados."
+    [breadcrumbs]="[{ label: 'Dashboard', url: '/dashboard' }, { label: 'Pacientes' }]"
+  />
+
   <app-section-card title="Pacientes" subtitle="Gestión de pacientes registrados.">
     <div sectionCardActions class="patients-card__header-actions">
       <button mat-flat-button type="button" class="patients-card__create-button" (click)="openCreatePatientDialog()">

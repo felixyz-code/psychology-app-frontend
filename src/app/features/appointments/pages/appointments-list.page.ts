@@ -18,6 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
@@ -66,6 +67,7 @@ interface AppointmentsTableState extends DataTableState {
     MatTableModule,
     MatTooltipModule,
     DataTableEmptyStateComponent,
+    PageHeaderComponent,
     SectionCardComponent,
     StatusBadgeComponent,
     AppointmentsCalendarComponent,

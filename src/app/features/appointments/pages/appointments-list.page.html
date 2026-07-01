@@ -1,4 +1,10 @@
-<section class="appointments-list-page">
+<section class="appointments-list-page app-page">
+  <app-page-header
+    heading="Citas"
+    subtitle="Agenda global registrada en el sistema."
+    [breadcrumbs]="[{ label: 'Dashboard', url: '/dashboard' }, { label: 'Citas' }]"
+  />
+
   <app-section-card title="Citas" subtitle="Agenda global registrada en el sistema.">
     @if (isLoading()) {
       <div class="appointments-state">

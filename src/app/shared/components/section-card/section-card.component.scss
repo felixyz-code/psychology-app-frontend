@@ -5,7 +5,7 @@
 .section-card {
   display: grid;
   gap: 1rem;
-  padding: 1.15rem;
+  padding: 1.1rem;
   border: 1px solid var(--app-color-card-border);
   border-radius: 22px;
   background: var(--app-color-card-bg);
@@ -21,6 +21,7 @@
 
 .section-card__header {
   justify-content: space-between;
+  padding-bottom: 0.1rem;
 }
 
 .section-card__heading {
