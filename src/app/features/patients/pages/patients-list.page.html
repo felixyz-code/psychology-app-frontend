@@ -12,12 +12,12 @@
 
   <app-section-card title="Listado de pacientes" subtitle="Gestion de pacientes registrados.">
     @if (isLoading()) {
-      <div class="patients-state">
+      <div class="patients-state app-table-loading-state">
         <mat-spinner diameter="40" />
         <p>Cargando pacientes...</p>
       </div>
     } @else if (errorMessage()) {
-      <div class="patients-state patients-state--error">
+      <div class="patients-state patients-state--error app-table-feedback-state app-table-feedback-state--error">
         <p>{{ errorMessage() }}</p>
       </div>
     } @else if (patients().length) {
@@ -32,14 +32,14 @@
       />
 
       @if (patientsTableResult().totalFilteredItems) {
-        <div class="patients-table-wrapper">
+        <div class="patients-table-wrapper app-table-wrapper">
           <table
             mat-table
             matSort
             [matSortActive]="getPatientsSortActive()"
             [matSortDirection]="getPatientsSortDirection()"
             [dataSource]="patientsTableResult().pagedItems"
-            class="patients-table"
+            class="patients-table app-data-table"
             (matSortChange)="handlePatientsSortChange($event)"
           >
             <ng-container matColumnDef="name">
@@ -73,14 +73,14 @@
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef>Acciones</th>
               <td mat-cell *matCellDef="let patient">
-                <div class="patients-actions" aria-label="Acciones disponibles">
-                  <button mat-icon-button type="button" (click)="stopRowClick($event); openPatientDetailDialog(patient)" [attr.aria-label]="'Ver ' + getFullName(patient)">
+                <div class="patients-actions app-table-actions" aria-label="Acciones disponibles">
+                  <button mat-icon-button type="button" matTooltip="Ver paciente" [matTooltipShowDelay]="150" (click)="stopRowClick($event); openPatientDetailDialog(patient)" [attr.aria-label]="'Ver ' + getFullName(patient)">
                     <mat-icon>visibility</mat-icon>
                   </button>
-                  <button mat-icon-button type="button" (click)="stopRowClick($event); openEditPatientDialog(patient)" [attr.aria-label]="'Editar ' + getFullName(patient)">
+                  <button mat-icon-button type="button" matTooltip="Editar paciente" [matTooltipShowDelay]="150" (click)="stopRowClick($event); openEditPatientDialog(patient)" [attr.aria-label]="'Editar ' + getFullName(patient)">
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <button mat-icon-button type="button" (click)="stopRowClick($event); openDeletePatientDialog(patient)" [attr.aria-label]="'Eliminar ' + getFullName(patient)">
+                  <button mat-icon-button type="button" class="app-table-action--danger" matTooltip="Eliminar paciente" [matTooltipShowDelay]="150" (click)="stopRowClick($event); openDeletePatientDialog(patient)" [attr.aria-label]="'Eliminar ' + getFullName(patient)">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>

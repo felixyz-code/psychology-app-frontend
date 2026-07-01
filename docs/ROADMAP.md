@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 11.3 - Toolbars, CTAs, Buttons & Iconography
+Sprint 11.4 - Data Tables & List Actions Polish
 ```
 
 ---
@@ -68,6 +68,7 @@ Sprint 11.3 - Toolbars, CTAs, Buttons & Iconography
 * Detail
 * Sprint 11.2 completed - Global page baseline aligned with the shared header and spacing rhythm used across the main modules
 * Sprint 11.3 completed - Primary CTA moved to the shared page header and table actions remain aligned with the common action language
+* Sprint 11.4 completed - Row actions, tooltips, loading states and table density aligned more closely with the shared list system
 
 ### Case Files
 
@@ -79,6 +80,7 @@ Sprint 11.3 - Toolbars, CTAs, Buttons & Iconography
 * Sprint 10.10 completed - Case Files foundation delivered with lazy routing, sidebar navigation, professional base list, patient context access and no new backend contract assumptions
 * Sprint 11.2 completed - Header, summary spacing and main content rhythm aligned with the shared page baseline
 * Sprint 11.3 completed - Secondary header action and case-file iconography aligned with the common action language
+* Sprint 11.4 completed - Table actions, loading/empty states and list density refined to match the shared data-table baseline
 * Clinical Workspace documentation delivered - patient-centered cross-feature workflow is now documented as part of the technical source of truth
 
 ### Session Notes
@@ -102,6 +104,7 @@ Sprint 11.3 - Toolbars, CTAs, Buttons & Iconography
 * Sprint 10.9 completed - Documents table simplified for end users and technical metadata moved to a reusable detail modal
 * Sprint 11.2 completed - Global documents page and list spacing aligned with the shared page baseline
 * Sprint 11.3 completed - Global upload CTA moved to the page header and document row actions now follow a clearer action order and icon semantics
+* Sprint 11.4 completed - Document row actions, tooltips and table states now follow the same action hierarchy and visual density as the other operational lists
 
 ### Appointments
 
@@ -124,6 +127,7 @@ Sprint 11.3 - Toolbars, CTAs, Buttons & Iconography
 * Sprint 8.3 completed - Global appointments list now includes a daily agenda view sharing the same search, filters, state and CRUD flows
 * Sprint 11.2 completed - Global header, toolbar spacing, calendar spacing and agenda spacing aligned with the shared page baseline
 * Sprint 11.3 completed - Primary CTA moved to the page header and the toolbar action hierarchy was normalized without changing the manual multi-view workflow
+* Sprint 11.4 completed - Table and agenda actions now follow the shared action order, icon-button tooltips and more homogeneous loading and empty states
 * The module now provides a stable foundation for future additions such as working hours, availability, drag & drop, reminders and notification integration without requiring major refactors
 
 ### Dashboard
@@ -144,6 +148,7 @@ Sprint 11.3 - Toolbars, CTAs, Buttons & Iconography
 * Delete
 * Sprint 11.2 completed - Summary cards, page spacing and primary content rhythm aligned with the shared page baseline
 * Sprint 11.3 completed - Primary movement CTA moved to the page header and finance filters now share a stronger visual action hierarchy
+* Sprint 11.4 completed - Manual toolbar, row actions and table feedback states aligned more closely with the shared data-table language
 
 ### Sprint 7
 
@@ -183,6 +188,7 @@ Current development efforts include:
 * Cross-module visual consistency baseline
 * Cross-module action language consistency
 * Final manual validation of the Clinical Workspace checklist in a browser-capable environment
+* Incremental consolidation of shared table/list visual primitives
 
 ---
 
@@ -252,7 +258,7 @@ These features are intentionally outside the current MVP.
 Current technical debt includes:
 
 * Secondary UI consistency refinements after the new shared page baseline
-* Remaining secondary-action inconsistencies inside dialogs, table rows and some workspace sections after the new CTA/header unification
+* Remaining secondary-action inconsistencies inside dialogs and some workspace sections after the table/list action polish
 * Shared component extraction
 * Design system consolidation
 * Automated frontend testing

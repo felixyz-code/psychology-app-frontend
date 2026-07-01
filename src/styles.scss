@@ -220,6 +220,88 @@ button[mat-button] {
   opacity: 0.65;
 }
 
+.app-table-loading-state,
+.app-table-feedback-state {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--app-color-text-secondary);
+}
+
+.app-table-feedback-state p,
+.app-table-loading-state p {
+  margin: 0;
+}
+
+.app-table-feedback-state--error {
+  color: var(--app-color-danger-text);
+}
+
+.app-table-toolbar-counter {
+  color: var(--app-color-text-secondary);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.app-table-wrapper {
+  overflow-x: auto;
+  padding-top: 0.85rem;
+}
+
+.app-table-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.app-table-actions .mat-mdc-icon-button {
+  color: var(--app-color-muted);
+}
+
+.app-table-actions .mat-mdc-icon-button:hover:not(:disabled) {
+  color: var(--app-color-heading);
+}
+
+.app-table-actions .app-table-action--danger {
+  color: var(--app-color-danger-text);
+}
+
+.app-table-actions .mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: currentColor;
+}
+
+.app-data-table {
+  width: 100%;
+  background: transparent;
+}
+
+.app-data-table .mat-mdc-header-cell {
+  color: var(--app-color-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.app-data-table .mat-mdc-cell,
+.app-data-table .mat-mdc-header-cell {
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  vertical-align: middle;
+}
+
+.app-data-table .mat-mdc-cell:last-child,
+.app-data-table .mat-mdc-header-cell:last-child {
+  text-align: right;
+}
+
+.app-data-table .mat-column-actions {
+  width: 1%;
+  white-space: nowrap;
+}
+
 .app-clickable-table-row {
   cursor: pointer;
   transition:

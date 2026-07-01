@@ -145,25 +145,10 @@
 }
 
 .appointments-agenda__item-actions {
-  display: inline-flex;
-  align-items: center;
   align-self: center;
   justify-content: flex-end;
-  gap: 0.25rem;
   grid-column: 3;
   white-space: nowrap;
-}
-
-.appointments-agenda__item-actions button:last-child {
-  color: var(--app-color-danger-text);
-}
-
-.appointments-agenda__empty {
-  display: grid;
-  gap: 0.6rem;
-  padding: 1.25rem;
-  border: 1px dashed var(--app-color-border);
-  border-radius: 12px;
 }
 
 @media (max-width: 900px) {

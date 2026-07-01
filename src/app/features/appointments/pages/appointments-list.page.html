@@ -18,12 +18,12 @@
 
   <app-section-card title="Agenda global" subtitle="Agenda global registrada en el sistema.">
     @if (isLoading()) {
-      <div class="appointments-state">
+      <div class="appointments-state app-table-loading-state">
         <mat-spinner diameter="40" />
         <p>Cargando citas...</p>
       </div>
     } @else if (errorMessage()) {
-      <div class="appointments-state appointments-state--error">
+      <div class="appointments-state appointments-state--error app-table-feedback-state app-table-feedback-state--error">
         <p>{{ errorMessage() }}</p>
       </div>
     } @else if (appointments().length) {
@@ -91,7 +91,7 @@
         </div>
 
         <div class="appointments-toolbar__meta">
-          <span class="appointments-toolbar-panel__counter" aria-live="polite">
+          <span class="appointments-toolbar-panel__counter app-table-toolbar-counter" aria-live="polite">
             {{ appointmentsCounterLabel() }}
           </span>
 
@@ -148,14 +148,14 @@
         />
       } @else if (appointmentsTableResult().totalFilteredItems) {
         @if (viewMode() === 'table') {
-          <div class="appointments-table-wrapper">
+          <div class="appointments-table-wrapper app-table-wrapper">
             <table
               mat-table
               matSort
               [matSortActive]="getAppointmentsSortActive()"
               [matSortDirection]="getAppointmentsSortDirection()"
               [dataSource]="appointmentsTableResult().pagedItems"
-              class="appointments-table"
+              class="appointments-table app-data-table"
               (matSortChange)="handleAppointmentsSortChange($event)"
             >
               <ng-container matColumnDef="patient">
@@ -192,13 +192,16 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let appointment">
-                  <div class="appointments-actions" aria-label="Acciones disponibles">
-                    <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openEditAppointmentDialog(appointment)" aria-label="Editar cita">
+                  <div class="appointments-actions app-table-actions" aria-label="Acciones disponibles">
+                    <button mat-icon-button type="button" matTooltip="Ver cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openAppointmentDetailDialog(appointment)" aria-label="Ver cita">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" matTooltip="Editar cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openEditAppointmentDialog(appointment)" aria-label="Editar cita">
                       <mat-icon>edit</mat-icon>
                     </button>
 
                     @if (appointment.status !== 'CANCELLED') {
-                      <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); cancelAppointment(appointment)" aria-label="Cancelar cita">
+                      <button mat-icon-button type="button" matTooltip="Cancelar cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); cancelAppointment(appointment)" aria-label="Cancelar cita">
                         @if (cancellingAppointmentId() === appointment.id) {
                           <mat-spinner diameter="20" />
                         } @else {
@@ -207,7 +210,7 @@
                       </button>
                     }
 
-                    <button mat-icon-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openDeleteAppointmentDialog(appointment)" aria-label="Eliminar cita">
+                    <button mat-icon-button type="button" class="app-table-action--danger" matTooltip="Eliminar cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openDeleteAppointmentDialog(appointment)" aria-label="Eliminar cita">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </div>

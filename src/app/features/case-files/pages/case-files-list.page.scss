@@ -29,23 +29,6 @@
   --data-table-toolbar-search-width: 26rem;
 }
 
-.case-files-state {
-  display: grid;
-  justify-items: center;
-  gap: 1rem;
-  padding: 3rem 1.5rem;
-  text-align: center;
-  color: var(--app-color-text-secondary);
-}
-
-.case-files-state--error {
-  color: var(--app-color-danger-text);
-}
-
-.case-files-state p {
-  margin: 0;
-}
-
 .case-files-inline-warning {
   display: flex;
   align-items: center;
@@ -63,26 +46,11 @@
 }
 
 .case-files-table-wrapper {
-  overflow-x: auto;
-  padding-top: 0.85rem;
+  min-width: 0;
 }
 
 .case-files-table {
-  width: 100%;
   min-width: 840px;
-  background: transparent;
-}
-
-.case-files-table .mat-mdc-header-cell {
-  color: var(--app-color-muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.case-files-table .mat-mdc-cell,
-.case-files-table .mat-mdc-header-cell {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
 }
 
 .case-files-patient-cell {
@@ -138,9 +106,7 @@
 }
 
 .case-files-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
+  justify-content: flex-end;
 }
 
 .case-files-paginator {

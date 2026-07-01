@@ -35,12 +35,12 @@
     subtitle="Base operativa para revisar paciente, trazabilidad y acciones disponibles sin duplicar la integraci&oacute;n cl&iacute;nica existente."
   >
     @if (isLoading()) {
-      <div class="case-files-state">
+      <div class="case-files-state app-table-loading-state">
         <mat-spinner diameter="40" />
         <p>Cargando expedientes cl&iacute;nicos...</p>
       </div>
     } @else if (errorMessage()) {
-      <div class="case-files-state case-files-state--error">
+      <div class="case-files-state case-files-state--error app-table-feedback-state app-table-feedback-state--error">
         <p>{{ errorMessage() }}</p>
         <button mat-stroked-button type="button" (click)="loadCaseFiles()">Reintentar</button>
       </div>
@@ -63,14 +63,14 @@
       />
 
       @if (caseFilesTableResult().totalFilteredItems) {
-        <div class="case-files-table-wrapper">
+        <div class="case-files-table-wrapper app-table-wrapper">
           <table
             mat-table
             matSort
             [matSortActive]="getCaseFilesSortActive()"
             [matSortDirection]="getCaseFilesSortDirection()"
             [dataSource]="caseFilesTableResult().pagedItems"
-            class="case-files-table"
+            class="case-files-table app-data-table"
             (matSortChange)="handleCaseFilesSortChange($event)"
           >
             <ng-container matColumnDef="patient">
@@ -119,7 +119,7 @@
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef>Acciones</th>
               <td mat-cell *matCellDef="let caseFile">
-                <div class="case-files-actions" aria-label="Acciones disponibles">
+                <div class="case-files-actions app-table-actions" aria-label="Acciones disponibles">
                   <button
                     mat-icon-button
                     type="button"

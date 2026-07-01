@@ -8,6 +8,32 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 11
 
+## Sprint 11.4 - Data Tables & List Actions Polish
+
+### Changed
+
+* Se homologo el orden visual de acciones secundarias en tablas y listados bajo la regla `Ver` -> `Editar` -> acciones complementarias -> acciones destructivas.
+* `Patients`, `Appointments`, `Documents`, `Case Files`, `Financial Transactions` y `Daily Agenda` alinean mejor el lenguaje de acciones por fila sin modificar comportamiento ni flujos.
+* Se agregaron `matTooltip` en icon buttons de acciones donde el significado no era suficientemente evidente o donde la densidad del listado lo requeria.
+* `Daily Agenda` adopta un empty state alineado con el patron compartido del sistema para sentirse parte de la misma familia de listados.
+* Se homogeneizaron loading states y feedback states simples entre tablas/listados para reducir diferencias de tono, espaciado y jerarquia visual.
+* `DataTableEmptyState` ajusta radio, espaciado y tono visual para integrarse mejor con `SectionCard` y el resto del sistema.
+* `DataTableToolbar` refina gaps y contador para mantener una presentacion mas consistente entre toolbars shared y toolbars manuales.
+* `Financial Transactions` conserva su toolbar manual, pero mejora la alineacion visual entre contador, filtros, acciones y boton de limpiar.
+
+### Technical
+
+* Se incorporan estilos globales reutilizables para tablas y estados: `app-data-table`, `app-table-actions`, `app-table-loading-state` y `app-table-feedback-state`.
+* No hubo cambios de backend.
+* No hubo cambios de contratos.
+* No hubo cambios de navegacion.
+* `npm.cmd run build` finalizo correctamente.
+
+### Notes
+
+* Se mantienen los warnings de budget SCSS ya conocidos en `dashboard.page.scss`, `patient-detail-dialog.component.scss` y `appointments-calendar.component.scss`.
+* Permanecen pendientes algunas inconsistencias visuales secundarias dentro de dialogs, Clinical Workspace y superficies compuestas para una futura iteracion de polish.
+
 ## Sprint 11.3 - Toolbars, CTAs, Buttons & Iconography
 
 ### Changed

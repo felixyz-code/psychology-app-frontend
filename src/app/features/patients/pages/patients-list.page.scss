@@ -3,55 +3,16 @@
   --data-table-toolbar-search-width: 24rem;
 }
 
-.patients-state {
-  display: grid;
-  justify-items: center;
-  gap: 1rem;
-  padding: 3rem 1.5rem;
-  text-align: center;
-  color: var(--app-color-text-secondary);
-}
-
-.patients-state--error {
-  color: var(--app-color-danger-text);
-}
-
-.patients-state p {
-  margin: 0;
-}
-
 .patients-table-wrapper {
-  overflow-x: auto;
-  padding-top: 0.85rem;
+  min-width: 0;
 }
 
 .patients-table {
-  width: 100%;
   min-width: 720px;
-  background: transparent;
-}
-
-.patients-table .mat-mdc-header-cell {
-  color: var(--app-color-muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.patients-table .mat-mdc-cell,
-.patients-table .mat-mdc-header-cell {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
 }
 
 .patients-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.patients-actions button:last-child {
-  color: var(--app-color-danger-text);
+  justify-content: flex-end;
 }
 
 .patients-paginator {

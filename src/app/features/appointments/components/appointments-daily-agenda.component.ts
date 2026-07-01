@@ -3,6 +3,8 @@ import { Component, computed, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
@@ -11,7 +13,15 @@ import { parseAppointmentDate } from '../utils/appointment-datetime';
 @Component({
   selector: 'app-appointments-daily-agenda',
   standalone: true,
-  imports: [DatePipe, MatButtonModule, MatIconModule, MatProgressSpinnerModule, StatusBadgeComponent],
+  imports: [
+    DatePipe,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    DataTableEmptyStateComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './appointments-daily-agenda.component.html',
   styleUrl: './appointments-daily-agenda.component.scss',
 })
