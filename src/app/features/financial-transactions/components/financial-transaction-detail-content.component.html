@@ -60,27 +60,21 @@
     @if (currentTransaction.patientId) {
       <div>
         <span class="financial-transaction-detail-label">Paciente relacionado</span>
-        <p class="financial-transaction-detail-value financial-transaction-detail-value--technical">
-          {{ currentTransaction.patientId }}
-        </p>
+        <p class="financial-transaction-detail-value">{{ getPatientRelationLabel(currentTransaction.patientId) }}</p>
       </div>
     }
 
     @if (currentTransaction.appointmentId) {
       <div>
         <span class="financial-transaction-detail-label">Cita relacionada</span>
-        <p class="financial-transaction-detail-value financial-transaction-detail-value--technical">
-          {{ currentTransaction.appointmentId }}
-        </p>
+        <p class="financial-transaction-detail-value">{{ getAppointmentRelationLabel(currentTransaction.appointmentId) }}</p>
       </div>
     }
 
     @if (currentTransaction.createdById) {
       <div>
         <span class="financial-transaction-detail-label">Creado por</span>
-        <p class="financial-transaction-detail-value financial-transaction-detail-value--technical">
-          {{ currentTransaction.createdById }}
-        </p>
+        <p class="financial-transaction-detail-value">{{ getCreatedByLabel(currentTransaction.createdById) }}</p>
       </div>
     }
   </div>
@@ -108,7 +102,7 @@
   </app-section-card>
 }
 
-<app-section-card title="Trazabilidad" subtitle="Datos tecnicos de creacion y actualizacion del registro.">
+<app-section-card title="Trazabilidad" subtitle="Fechas de creacion y actualizacion del registro.">
   <div class="financial-transaction-detail-grid">
     <div>
       <span class="financial-transaction-detail-label">Fecha de creacion</span>
@@ -118,13 +112,6 @@
     <div>
       <span class="financial-transaction-detail-label">Ultima actualizacion</span>
       <p class="financial-transaction-detail-value">{{ formatDateTime(currentTransaction.updatedAt) }}</p>
-    </div>
-
-    <div class="financial-transaction-detail-grid__full">
-      <span class="financial-transaction-detail-label">ID de la transaccion</span>
-      <p class="financial-transaction-detail-value financial-transaction-detail-value--technical">
-        {{ currentTransaction.id }}
-      </p>
     </div>
   </div>
 </app-section-card>

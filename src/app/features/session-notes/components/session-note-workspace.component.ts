@@ -42,7 +42,7 @@ export class SessionNoteWorkspaceComponent {
       },
       {
         label: 'Autor responsable',
-        value: this.sessionNote().authorId,
+        value: 'Registrado en el sistema',
       },
       {
         label: 'Ultima actualizacion',
@@ -54,7 +54,7 @@ export class SessionNoteWorkspaceComponent {
   readonly recordSummary = computed(() => [
     {
       label: 'Expediente clinico',
-      value: this.sessionNote().caseFileId,
+      value: 'Asociado al expediente actual',
     },
     {
       label: 'Fecha de creacion',
@@ -63,10 +63,6 @@ export class SessionNoteWorkspaceComponent {
     {
       label: 'Fecha de actualizacion',
       value: this.formatDateTime(this.parseDate(this.sessionNote().updatedAt)),
-    },
-    {
-      label: 'ID de la nota',
-      value: this.sessionNote().id,
     },
   ]);
 

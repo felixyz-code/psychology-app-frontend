@@ -37,13 +37,8 @@
       </div>
 
       <div class="detail-dialog-item">
-        <span class="detail-dialog-label">ID de la cita</span>
-        <p class="detail-dialog-value detail-dialog-value--technical">{{ appointment.id }}</p>
-      </div>
-
-      <div class="detail-dialog-item">
         <span class="detail-dialog-label">Psicologo</span>
-        <p class="detail-dialog-value detail-dialog-value--technical">{{ appointment.psychologistId }}</p>
+        <p class="detail-dialog-value">{{ getPsychologistDisplayName() }}</p>
       </div>
 
       <div class="detail-dialog-item">

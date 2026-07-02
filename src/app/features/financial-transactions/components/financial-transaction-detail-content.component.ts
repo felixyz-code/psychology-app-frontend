@@ -1,5 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 
+import { AuthStore } from '../../../core/auth/auth.store';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import {
@@ -18,6 +19,8 @@ import {
   styleUrl: './financial-transaction-detail-content.component.scss',
 })
 export class FinancialTransactionDetailContentComponent {
+  private readonly authStore = inject(AuthStore);
+
   readonly transaction = input.required<FinancialTransactionResponse>();
 
   getTypeLabel(type: FinancialTransactionType): string {
@@ -117,5 +120,23 @@ export class FinancialTransactionDetailContentComponent {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  getCreatedByLabel(createdById: string): string {
+    const currentUser = this.authStore.user();
+
+    if (currentUser && currentUser.id === createdById) {
+      return currentUser.name;
+    }
+
+    return createdById ? 'Usuario del sistema' : 'Registrado en el sistema';
+  }
+
+  getPatientRelationLabel(patientId: string | null): string {
+    return patientId ? 'Paciente asociado' : 'No disponible';
+  }
+
+  getAppointmentRelationLabel(appointmentId: string | null): string {
+    return appointmentId ? 'Cita asociada' : 'No disponible';
   }
 }

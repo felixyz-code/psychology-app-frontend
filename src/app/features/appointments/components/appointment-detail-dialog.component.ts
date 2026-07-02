@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { AuthStore } from '../../../core/auth/auth.store';
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 
@@ -21,6 +22,7 @@ interface AppointmentDetailDialogData {
 })
 export class AppointmentDetailDialogComponent {
   private readonly data = inject<AppointmentDetailDialogData>(MAT_DIALOG_DATA);
+  private readonly authStore = inject(AuthStore);
   private readonly dialogRef = inject(
     MatDialogRef<AppointmentDetailDialogComponent, { action: 'close' } | { action: 'edit'; appointment: Appointment }>
   );
@@ -41,6 +43,16 @@ export class AppointmentDetailDialogComponent {
 
   getDisplayValue(value?: string | null): string {
     return value?.trim() || '-';
+  }
+
+  getPsychologistDisplayName(): string {
+    const currentUser = this.authStore.user();
+
+    if (currentUser && currentUser.id === this.appointment.psychologistId) {
+      return currentUser.name;
+    }
+
+    return this.appointment.psychologistId ? 'Profesional asignado' : 'No disponible';
   }
 
   getAppointmentStatusLabel(status: AppointmentStatus): string {
