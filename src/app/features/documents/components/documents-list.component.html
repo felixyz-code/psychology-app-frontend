@@ -36,7 +36,7 @@
               </div>
 
               <div class="documents-file-cell__content">
-                <strong>{{ document.fileName }}</strong>
+                <strong class="app-truncate-2" [title]="document.fileName">{{ document.fileName }}</strong>
               </div>
             </div>
           </td>
@@ -63,8 +63,8 @@
               <button
                 mat-icon-button
                 type="button"
-                aria-label="Visualizar documento"
-                matTooltip="Visualizar"
+                [attr.aria-label]="'Ver documento ' + document.fileName"
+                matTooltip="Ver documento"
                 [matTooltipShowDelay]="150"
                 (click)="stopRowClick($event); viewDocument(document)"
               >
@@ -73,7 +73,7 @@
               <button
                 mat-icon-button
                 type="button"
-                aria-label="Editar metadata del documento"
+                [attr.aria-label]="'Editar metadata de ' + document.fileName"
                 matTooltip="Editar metadata"
                 [matTooltipShowDelay]="150"
                 (click)="stopRowClick($event); openEditDialog(document)"
@@ -83,7 +83,7 @@
               <button
                 mat-icon-button
                 type="button"
-                aria-label="Descargar documento"
+                [attr.aria-label]="'Descargar documento ' + document.fileName"
                 matTooltip="Descargar"
                 [matTooltipShowDelay]="150"
                 (click)="stopRowClick($event); downloadDocument(document)"
@@ -94,7 +94,7 @@
                 mat-icon-button
                 class="app-table-action--danger"
                 type="button"
-                aria-label="Eliminar documento"
+                [attr.aria-label]="'Eliminar documento ' + document.fileName"
                 matTooltip="Eliminar"
                 [matTooltipShowDelay]="150"
                 (click)="stopRowClick($event); openDeleteDialog(document)"
@@ -112,7 +112,7 @@
           class="app-clickable-table-row"
           tabindex="0"
           role="button"
-          aria-label="Ver documento"
+          [attr.aria-label]="'Ver documento ' + row.fileName"
           matTooltip="Ver documento"
           [matTooltipShowDelay]="150"
           (click)="viewDocument(row)"

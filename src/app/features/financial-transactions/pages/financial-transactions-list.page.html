@@ -92,22 +92,25 @@
           <input matInput type="date" formControlName="to" />
         </mat-form-field>
 
-        <div class="financial-transactions-toolbar__meta">
-          <span class="app-table-toolbar-counter" aria-live="polite">
-            {{ transactions().length === 1 ? '1 transaccion' : `${transactions().length} transacciones` }}
-          </span>
-        </div>
-
-        <div class="financial-transactions-toolbar__actions">
+        <div class="financial-transactions-toolbar__action-slot">
           <button mat-flat-button type="submit" class="app-toolbar-meta-button" [disabled]="isLoading()">
             <mat-icon>filter_alt</mat-icon>
             <span>Aplicar filtros</span>
           </button>
+        </div>
+
+        <div class="financial-transactions-toolbar__action-slot">
           <button mat-stroked-button type="button" class="app-toolbar-meta-button" [disabled]="isLoading() || !hasActiveFilters()" (click)="clearFilters()">
             <mat-icon>filter_alt_off</mat-icon>
             <span>Limpiar filtros</span>
           </button>
         </div>
+      </div>
+
+      <div class="financial-transactions-toolbar__meta">
+        <span class="app-table-toolbar-counter" aria-live="polite">
+          {{ transactions().length === 1 ? '1 transaccion' : `${transactions().length} transacciones` }}
+        </span>
       </div>
     </form>
 
@@ -127,7 +130,9 @@
           <ng-container matColumnDef="concept">
             <th mat-header-cell *matHeaderCellDef>Concepto</th>
             <td mat-cell *matCellDef="let transaction">
-              {{ transaction.concept }}
+              <span class="financial-transactions-table__concept app-truncate-2" [title]="transaction.concept">
+                {{ transaction.concept }}
+              </span>
             </td>
           </ng-container>
 
@@ -144,7 +149,9 @@
           <ng-container matColumnDef="category">
             <th mat-header-cell *matHeaderCellDef>Categoria</th>
             <td mat-cell *matCellDef="let transaction">
-              {{ getCategoryLabel(transaction.category) }}
+              <span class="financial-transactions-table__meta-text app-truncate-1" [title]="getCategoryLabel(transaction.category)">
+                {{ getCategoryLabel(transaction.category) }}
+              </span>
             </td>
           </ng-container>
 
@@ -182,7 +189,9 @@
           <ng-container matColumnDef="paymentMethod">
             <th mat-header-cell *matHeaderCellDef>Metodo de pago</th>
             <td mat-cell *matCellDef="let transaction">
-              {{ getPaymentMethodLabel(transaction.paymentMethod) }}
+              <span class="financial-transactions-table__meta-text app-truncate-1" [title]="getPaymentMethodLabel(transaction.paymentMethod)">
+                {{ getPaymentMethodLabel(transaction.paymentMethod) }}
+              </span>
             </td>
           </ng-container>
 
@@ -193,7 +202,7 @@
                 <button
                   mat-icon-button
                   type="button"
-                  aria-label="Ver transaccion"
+                  [attr.aria-label]="'Ver transaccion ' + transaction.concept"
                   matTooltip="Ver transaccion"
                   [matTooltipShowDelay]="150"
                   (click)="stopRowClick($event); openDetailDialog(transaction)"
@@ -203,7 +212,7 @@
                 <a
                   mat-icon-button
                   [routerLink]="['/financial-transactions', transaction.id, 'edit']"
-                  aria-label="Editar transaccion"
+                  [attr.aria-label]="'Editar transaccion ' + transaction.concept"
                   matTooltip="Editar transaccion"
                   [matTooltipShowDelay]="150"
                   (click)="stopRowClick($event)"
@@ -214,7 +223,7 @@
                   mat-icon-button
                   class="app-table-action--danger"
                   type="button"
-                  aria-label="Eliminar transaccion"
+                  [attr.aria-label]="'Eliminar transaccion ' + transaction.concept"
                   matTooltip="Eliminar transaccion"
                   [matTooltipShowDelay]="150"
                   (click)="stopRowClick($event); openDeleteDialog(transaction)"
@@ -232,6 +241,7 @@
             class="app-clickable-table-row"
             tabindex="0"
             role="button"
+            [attr.aria-label]="'Ver detalle de ' + row.concept"
             matTooltip="Ver detalle"
             [matTooltipShowDelay]="150"
             (click)="openDetailDialog(row)"

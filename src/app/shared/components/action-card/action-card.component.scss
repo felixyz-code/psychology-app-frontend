@@ -10,10 +10,28 @@
   min-height: 3.15rem;
   padding-inline: 0.95rem;
   border-radius: 16px !important;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.action-card:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0.9rem 1.8rem rgba(15, 23, 42, 0.08);
+}
+
+.action-card:disabled {
+  box-shadow: none;
 }
 
 .action-card--primary {
   background: var(--app-color-primary) !important;
   color: var(--app-color-text-inverse) !important;
   box-shadow: 0 0.9rem 1.8rem rgba(59, 130, 246, 0.22);
+}
+
+.action-card--primary:hover:not(:disabled) {
+  box-shadow: 0 1rem 2rem rgba(59, 130, 246, 0.24);
 }

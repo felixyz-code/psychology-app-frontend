@@ -38,10 +38,12 @@
 .section-card__heading h2 {
   color: var(--app-color-heading);
   font-size: 1.08rem;
+  line-height: 1.3;
 }
 
 .section-card__heading p {
   color: var(--app-color-text-secondary);
+  line-height: 1.5;
 }
 
 .section-card__actions:empty,

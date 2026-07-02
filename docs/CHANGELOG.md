@@ -8,6 +8,25 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 11
 
+## Sprint 11.8 - Final UX Micro Polish & Accessibility Basics
+
+### Changed
+
+* Se reforzaron estados `hover`, `focus-visible` y `disabled` en botones, icon buttons, menus, toggles y filas interactivas para dar una respuesta visual mas consistente y accesible.
+* `Dashboard`, `Patients`, `Case Files`, `Appointments`, `Documents`, `Financial Transactions` y `Clinical Workspace` alinean mejor truncado de textos largos, line-height y jerarquia tipografica en cards, tablas y superficies de lectura rapida.
+* Los icon buttons de acciones ahora describen mejor su destino mediante `aria-label` contextual en listados de pacientes, citas, expedientes, documentos y finanzas.
+* Se redujeron tooltips redundantes en botones con texto visible dentro del Clinical Workspace, manteniendolos principalmente donde realmente aportan contexto adicional.
+* `MetricCard`, `ActionCard`, `SectionCard` y otras primitivas compartidas afinan microinteracciones, espaciado y legibilidad sin redisenar componentes ni alterar layouts base.
+
+### Technical
+
+* La mayor parte del polish se centralizo en `styles.scss` y componentes shared para propagar consistencia cross-module sin tocar servicios ni logica de negocio.
+* No hubo cambios de backend.
+* No hubo cambios de endpoints.
+* No hubo cambios de contratos.
+* No hubo cambios de payloads.
+* No hubo cambios de servicios.
+
 ## Sprint 11.6B - Forms Layout Polish + Dialog Height Hotfixes
 
 ### Changed

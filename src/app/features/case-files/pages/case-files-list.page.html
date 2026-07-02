@@ -118,7 +118,7 @@
                   <button
                     mat-icon-button
                     type="button"
-                    aria-label="Abrir paciente"
+                    [attr.aria-label]="'Abrir paciente ' + getPatientName(caseFile)"
                     [disabled]="!getPatient(caseFile)"
                     matTooltip="Abrir paciente"
                     [matTooltipShowDelay]="150"
@@ -129,7 +129,7 @@
                   <button
                     mat-icon-button
                     type="button"
-                    aria-label="Editar expediente"
+                    [attr.aria-label]="'Editar expediente de ' + getPatientName(caseFile)"
                     matTooltip="Editar expediente"
                     [matTooltipShowDelay]="150"
                     (click)="stopRowClick($event); openEditCaseFileDialog(caseFile)"
@@ -147,6 +147,7 @@
               class="app-clickable-table-row"
               tabindex="0"
               role="button"
+              [attr.aria-label]="'Abrir paciente ' + getPatientName(row)"
               matTooltip="Abrir paciente"
               [matTooltipShowDelay]="150"
               (click)="openPatientDetailDialog(row)"

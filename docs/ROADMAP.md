@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 11.6B - Forms Layout Polish
+Sprint 11.8 - Final UX Micro Polish & Accessibility Basics
 ```
 
 ---
@@ -197,6 +197,7 @@ Current development efforts include:
 * Cross-module action language consistency
 * Shared dialog framework consolidation
 * Shared form layout consolidation through `app-form` and `app-dialog` patterns
+* Final UX micro polish and basic accessibility consistency pass
 * Final manual validation of the Clinical Workspace checklist in a browser-capable environment
 * Incremental consolidation of shared table/list visual primitives
 

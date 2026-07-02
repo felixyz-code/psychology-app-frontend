@@ -22,12 +22,16 @@
       class="appointments-view-toggle"
       [value]="viewMode()"
       aria-label="Selector de vista de citas"
+      [attr.aria-describedby]="'appointments-view-toggle-help'"
       (valueChange)="updateViewMode($event)"
     >
       <mat-button-toggle value="table">Tabla</mat-button-toggle>
       <mat-button-toggle value="calendar">Calendario</mat-button-toggle>
       <mat-button-toggle value="agenda">Agenda</mat-button-toggle>
     </mat-button-toggle-group>
+    <span id="appointments-view-toggle-help" class="app-visually-hidden">
+      Usa las flechas del teclado para cambiar entre tabla, calendario y agenda.
+    </span>
 
     @if (isLoading()) {
       <div class="appointments-state app-table-loading-state">
@@ -192,15 +196,15 @@
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let appointment">
                   <div class="appointments-actions app-table-actions" aria-label="Acciones disponibles">
-                    <button mat-icon-button type="button" matTooltip="Ver cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openAppointmentDetailDialog(appointment)" aria-label="Ver cita">
+                    <button mat-icon-button type="button" matTooltip="Ver cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openAppointmentDetailDialog(appointment)" [attr.aria-label]="'Ver cita de ' + getPatientName(appointment.patientId)">
                       <mat-icon>visibility</mat-icon>
                     </button>
-                    <button mat-icon-button type="button" matTooltip="Editar cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openEditAppointmentDialog(appointment)" aria-label="Editar cita">
+                    <button mat-icon-button type="button" matTooltip="Editar cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openEditAppointmentDialog(appointment)" [attr.aria-label]="'Editar cita de ' + getPatientName(appointment.patientId)">
                       <mat-icon>edit</mat-icon>
                     </button>
 
                     @if (appointment.status !== 'CANCELLED') {
-                      <button mat-icon-button type="button" matTooltip="Cancelar cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); cancelAppointment(appointment)" aria-label="Cancelar cita">
+                      <button mat-icon-button type="button" matTooltip="Cancelar cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); cancelAppointment(appointment)" [attr.aria-label]="'Cancelar cita de ' + getPatientName(appointment.patientId)">
                         @if (cancellingAppointmentId() === appointment.id) {
                           <mat-spinner diameter="20" />
                         } @else {
@@ -209,7 +213,7 @@
                       </button>
                     }
 
-                    <button mat-icon-button type="button" class="app-table-action--danger" matTooltip="Eliminar cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openDeleteAppointmentDialog(appointment)" aria-label="Eliminar cita">
+                    <button mat-icon-button type="button" class="app-table-action--danger" matTooltip="Eliminar cita" [matTooltipShowDelay]="150" [disabled]="cancellingAppointmentId() !== null" (click)="stopRowClick($event); openDeleteAppointmentDialog(appointment)" [attr.aria-label]="'Eliminar cita de ' + getPatientName(appointment.patientId)">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </div>
@@ -223,6 +227,7 @@
                 class="app-clickable-table-row"
                 tabindex="0"
                 role="button"
+                [attr.aria-label]="'Ver detalle de la cita de ' + getPatientName(row.patientId)"
                 matTooltip="Ver detalle"
                 [matTooltipShowDelay]="150"
                 (click)="openAppointmentDetailDialog(row)"

@@ -45,22 +45,26 @@
         <div class="patient-detail-dialog__summary-grid">
           <article class="patient-detail-dialog__summary-panel">
             <span class="patient-detail-dialog__label">Proxima cita</span>
-            <p>{{ getNextAppointmentLabel() }}</p>
+            <p class="app-truncate-3" [title]="getNextAppointmentLabel()">{{ getNextAppointmentLabel() }}</p>
           </article>
 
           <article class="patient-detail-dialog__summary-panel">
             <span class="patient-detail-dialog__label">Ultima cita</span>
-            <p>{{ getLastAppointmentLabel() }}</p>
+            <p class="app-truncate-3" [title]="getLastAppointmentLabel()">{{ getLastAppointmentLabel() }}</p>
           </article>
 
           <article class="patient-detail-dialog__summary-panel">
             <span class="patient-detail-dialog__label">Diagnostico</span>
-            <p>{{ caseFile() ? getDisplayValue(caseFile()?.diagnosis) : 'Pendiente' }}</p>
+            <p class="app-truncate-3" [title]="caseFile() ? getDisplayValue(caseFile()?.diagnosis) : 'Pendiente'">
+              {{ caseFile() ? getDisplayValue(caseFile()?.diagnosis) : 'Pendiente' }}
+            </p>
           </article>
 
           <article class="patient-detail-dialog__summary-panel">
             <span class="patient-detail-dialog__label">Plan de tratamiento</span>
-            <p>{{ caseFile() ? getDisplayValue(caseFile()?.treatmentPlan) : 'Pendiente' }}</p>
+            <p class="app-truncate-3" [title]="caseFile() ? getDisplayValue(caseFile()?.treatmentPlan) : 'Pendiente'">
+              {{ caseFile() ? getDisplayValue(caseFile()?.treatmentPlan) : 'Pendiente' }}
+            </p>
           </article>
         </div>
       </app-section-card>
@@ -137,22 +141,13 @@
                   </div>
 
                   <div class="patient-detail-dialog__appointment-actions">
-                    <button
-                      mat-button
-                      type="button"
-                      matTooltip="Editar cita"
-                      [matTooltipShowDelay]="150"
-                      [disabled]="cancellingAppointmentId() !== null"
-                      (click)="openEditAppointmentDialog(appointment)"
-                    >
+                    <button mat-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openEditAppointmentDialog(appointment)">
                       Editar
                     </button>
                     @if (appointment.status !== 'CANCELLED') {
                       <button
                         mat-button
                         type="button"
-                        matTooltip="Cancelar cita"
-                        [matTooltipShowDelay]="150"
                         [disabled]="cancellingAppointmentId() !== null"
                         (click)="cancelAppointment(appointment)"
                       >
@@ -167,8 +162,6 @@
                     <button
                       mat-button
                       type="button"
-                      matTooltip="Eliminar cita"
-                      [matTooltipShowDelay]="150"
                       [disabled]="cancellingAppointmentId() !== null"
                       (click)="openDeleteAppointmentDialog(appointment)"
                     >
@@ -178,7 +171,7 @@
                 </div>
 
                 @if (appointment.notes) {
-                  <p class="patient-detail-dialog__appointment-notes">{{ appointment.notes }}</p>
+                  <p class="patient-detail-dialog__appointment-notes app-truncate-3" [title]="appointment.notes">{{ appointment.notes }}</p>
                 }
               </article>
             }
@@ -290,13 +283,13 @@
                   </div>
 
                   <div class="patient-detail-dialog__note-actions">
-                    <button mat-button type="button" matTooltip="Abrir nota" [matTooltipShowDelay]="150" (click)="openSessionNoteDetailDialog(note)">Ver</button>
-                    <button mat-button type="button" matTooltip="Editar nota" [matTooltipShowDelay]="150" (click)="openEditSessionNoteDialog(note)">Editar</button>
-                    <button mat-button type="button" matTooltip="Eliminar nota" [matTooltipShowDelay]="150" (click)="openDeleteSessionNoteDialog(note)">Eliminar</button>
+                    <button mat-button type="button" (click)="openSessionNoteDetailDialog(note)">Ver</button>
+                    <button mat-button type="button" (click)="openEditSessionNoteDialog(note)">Editar</button>
+                    <button mat-button type="button" (click)="openDeleteSessionNoteDialog(note)">Eliminar</button>
                   </div>
                 </div>
 
-                <p class="patient-detail-dialog__note-content">{{ note.content }}</p>
+                <p class="patient-detail-dialog__note-content" [title]="note.content">{{ note.content }}</p>
               </article>
             }
           </div>
@@ -394,7 +387,7 @@
   </div>
 
   <div class="patient-detail-dialog__actions">
-    <button mat-button class="app-secondary-button" type="button" matTooltip="Cerrar workspace" [matTooltipShowDelay]="150" (click)="close()">Cerrar</button>
-    <button mat-flat-button type="button" matTooltip="Actualizar datos del paciente" [matTooltipShowDelay]="150" (click)="openEditPatientDialog()">Editar paciente</button>
+    <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
+    <button mat-flat-button type="button" (click)="openEditPatientDialog()">Editar paciente</button>
   </div>
 </div>
