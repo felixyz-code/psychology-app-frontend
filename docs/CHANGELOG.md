@@ -8,6 +8,33 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 11
 
+## Sprint 11.6B - Forms Layout Polish + Dialog Height Hotfixes
+
+### Changed
+
+* Se homologo el layout visual interno de formularios principales usando una capa compartida de clases como `app-form`, `app-form-grid`, `app-form-section` y variantes de campos full-width/compactos.
+* `Patient Form`, `Appointment Form`, `Case File Form`, `Session Note Form`, `Document Upload Form`, `Document Metadata Form` y `Financial Transaction Form` ahora comparten mejor ritmo vertical, agrupacion, espaciado y jerarquia visual.
+* `Financial Transaction Form` conserva su flujo basado en pagina, pero ahora se siente alineado con el mismo lenguaje visual de formularios usado por los dialogs.
+* El `Clinical Workspace` corrige la accion contextual del expediente: ahora muestra `Crear expediente` cuando el paciente aun no tiene expediente y `Editar expediente` cuando si existe.
+* `Case File Form Dialog` y `Appointment Form Dialog` recibieron hotfixes de altura para mantener footer visible y accesible, con body scrollable interno cuando el viewport no alcanza.
+* `Appointment Form Dialog` ajusta su estructura para dejar el footer fuera del area scrollable y evitar que `Notas` empuje las acciones fuera de vista.
+* `Case File Form Dialog` compacta `Diagnostico`, reduce la altura inicial de `Plan de tratamiento` y bloquea el resize manual del textarea para proteger el layout vertical.
+
+### Technical
+
+* Se extendio `styles.scss` con una base compartida de formularios reutilizable para dialogs y formularios de pagina.
+* Los hotfixes de altura y scroll de `Case File Form Dialog` y `Appointment Form Dialog` se resolvieron localmente en sus respectivos componentes para no afectar otros dialogs.
+* No hubo cambios de backend.
+* No hubo cambios de contratos.
+* No hubo cambios de payloads.
+* No hubo cambios de servicios.
+* `npm.cmd run build` finalizo correctamente.
+
+### Notes
+
+* Se mantienen los warnings de budget SCSS ya conocidos en `dashboard.page.scss`, `patient-detail-dialog.component.scss` y `appointments-calendar.component.scss`.
+* Sigue siendo recomendable una validacion visual final cross-device para confirmar altura optima en dialogs CRUD densos despues de la consolidacion de `app-dialog` y `app-form`.
+
 ## Sprint 11.6A - Dialog Framework Polish
 
 ### Changed

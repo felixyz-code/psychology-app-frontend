@@ -52,6 +52,8 @@
 .appointments-calendar__scroll {
   overflow-x: auto;
   min-width: 0;
+  padding-bottom: 0.15rem;
+  overscroll-behavior-x: contain;
 }
 
 .appointments-calendar__weekdays,
@@ -59,7 +61,7 @@
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.6rem;
-  min-width: 760px;
+  min-width: 700px;
 }
 
 .appointments-calendar__weekdays span {
@@ -146,6 +148,7 @@
   background: var(--app-color-surface, #fff);
   box-sizing: border-box;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .appointments-calendar__appointment-main {
@@ -177,8 +180,10 @@
 }
 
 .appointments-calendar__appointment-badge {
+  width: 100%;
   max-width: 100%;
   min-width: 0;
+  overflow: hidden;
   justify-self: start;
 }
 
@@ -193,6 +198,9 @@
   display: inline-flex;
   min-height: 1.35rem;
   padding: 0.08rem 0.45rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   font-size: 0.72rem;
@@ -236,6 +244,35 @@
 
   .appointments-calendar__weekdays,
   .appointments-calendar__grid {
-    min-width: 720px;
+    gap: 0.5rem;
+    min-width: 760px;
+  }
+
+  .appointments-calendar__day {
+    min-height: 140px;
+    padding: 0.45rem;
+  }
+
+  .appointments-calendar__appointment {
+    gap: 0.22rem;
+    padding: 0.38rem 0.42rem;
+    border-radius: 9px;
+  }
+
+  .appointments-calendar__appointment-time {
+    font-size: 0.7rem;
+  }
+
+  .appointments-calendar__appointment-patient {
+    font-size: 0.71rem;
+  }
+
+  .appointments-calendar__appointment-badge ::ng-deep .app-status-badge {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 1.25rem;
+    padding-inline: 0.4rem;
+    font-size: 0.68rem;
   }
 }

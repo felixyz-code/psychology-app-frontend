@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 11.6A - Dialog Framework Polish
+Sprint 11.6B - Forms Layout Polish
 ```
 
 ---
@@ -81,6 +81,7 @@ Sprint 11.6A - Dialog Framework Polish
 * Sprint 11.2 completed - Header, summary spacing and main content rhythm aligned with the shared page baseline
 * Sprint 11.3 completed - Secondary header action and case-file iconography aligned with the common action language
 * Sprint 11.4 completed - Table actions, loading/empty states and list density refined to match the shared data-table baseline
+* Sprint 11.6B completed - Case file form now follows the shared form rhythm more closely and the create/edit workspace action now reflects case-file availability correctly
 * Clinical Workspace documentation delivered - patient-centered cross-feature workflow is now documented as part of the technical source of truth
 
 ### Session Notes
@@ -91,6 +92,7 @@ Sprint 11.6A - Dialog Framework Polish
 * Detail
 * Delete
 * Sprint 7.4 completed - Data table pattern applied to the Session Notes block inside patient detail dialog
+* Sprint 11.6B completed - Session note dialog now aligns more closely with the shared form spacing and long-form reading rhythm
 
 ### Documents
 
@@ -106,6 +108,7 @@ Sprint 11.6A - Dialog Framework Polish
 * Sprint 11.3 completed - Global upload CTA moved to the page header and document row actions now follow a clearer action order and icon semantics
 * Sprint 11.4 completed - Document row actions, tooltips and table states now follow the same action hierarchy and visual density as the other operational lists
 * Sprint 11.6A completed - Document modal wrappers now align more closely with the shared dialog header/footer baseline without changing embedded form internals
+* Sprint 11.6B completed - Embedded upload and metadata forms now share a more consistent internal form spacing baseline with the rest of the product
 
 ### Appointments
 
@@ -130,6 +133,7 @@ Sprint 11.6A - Dialog Framework Polish
 * Sprint 11.3 completed - Primary CTA moved to the page header and the toolbar action hierarchy was normalized without changing the manual multi-view workflow
 * Sprint 11.4 completed - Table and agenda actions now follow the shared action order, icon-button tooltips and more homogeneous loading and empty states
 * Sprint 11.6A completed - Appointment dialog structure now follows the shared dialog header/footer and action hierarchy baseline
+* Sprint 11.6B completed - Appointment form layout now follows the shared form spacing baseline and its dialog now uses a scrollable body with a persistently visible footer
 * The module now provides a stable foundation for future additions such as working hours, availability, drag & drop, reminders and notification integration without requiring major refactors
 
 ### Dashboard
@@ -151,6 +155,7 @@ Sprint 11.6A - Dialog Framework Polish
 * Sprint 11.2 completed - Summary cards, page spacing and primary content rhythm aligned with the shared page baseline
 * Sprint 11.3 completed - Primary movement CTA moved to the page header and finance filters now share a stronger visual action hierarchy
 * Sprint 11.4 completed - Manual toolbar, row actions and table feedback states aligned more closely with the shared data-table language
+* Sprint 11.6B completed - Financial transaction form now shares the same grouped form rhythm and spacing language as the modal CRUD flows while remaining page-based
 * Financial Transactions mantiene formularios basados en pagina; no participaron en Sprint 11.6A al no existir aun un dialog equivalente dentro del flujo actual
 
 ### Sprint 7
@@ -191,6 +196,7 @@ Current development efforts include:
 * Cross-module visual consistency baseline
 * Cross-module action language consistency
 * Shared dialog framework consolidation
+* Shared form layout consolidation through `app-form` and `app-dialog` patterns
 * Final manual validation of the Clinical Workspace checklist in a browser-capable environment
 * Incremental consolidation of shared table/list visual primitives
 
@@ -263,6 +269,7 @@ Current technical debt includes:
 
 * Secondary UI consistency refinements after the new shared page baseline
 * Remaining dialog/form layout inconsistencies inside embedded document forms and some workspace sections after the dialog framework baseline
+* Remaining fine-grained cross-device validation for modal form heights, especially in dense CRUD dialogs such as Appointments and Case Files
 * Shared component extraction
 * Design system consolidation
 * Automated frontend testing

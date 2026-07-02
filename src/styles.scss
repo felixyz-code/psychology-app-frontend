@@ -445,6 +445,10 @@ body.dark-theme .app-status-badge--no-show {
   padding: 0.5rem;
 }
 
+.cdk-overlay-pane:not(.app-document-preview-panel) {
+  max-width: min(95vw, calc(100vw - 1rem)) !important;
+}
+
 .app-detail-dialog-panel {
   max-height: 85vh !important;
 }
@@ -922,6 +926,16 @@ body.dark-theme .app-status-badge--no-show {
   .app-form-actions button,
   .app-form-actions .app-form-actions__group button {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .mat-mdc-dialog-container .mat-mdc-dialog-inner-container {
+    padding: 0.25rem;
+  }
+
+  .mat-mdc-dialog-container [class$='-dialog'] {
+    padding: 0.9rem;
   }
 }
 

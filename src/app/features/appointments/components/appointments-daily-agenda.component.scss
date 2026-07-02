@@ -125,6 +125,7 @@
   font-size: 0.9rem;
   gap: 0.45rem;
   grid-column: 2;
+  flex-wrap: wrap;
   min-width: 0;
 }
 
@@ -137,6 +138,7 @@
 }
 
 .appointments-agenda__note {
+  flex: 1 1 12rem;
   min-width: 0;
   color: var(--app-color-text-secondary);
   overflow: hidden;
@@ -145,10 +147,13 @@
 }
 
 .appointments-agenda__item-actions {
+  display: flex;
+  flex-wrap: wrap;
   align-self: center;
+  gap: 0.15rem;
   justify-content: flex-end;
   grid-column: 3;
-  white-space: nowrap;
+  min-width: 0;
 }
 
 @media (max-width: 900px) {
@@ -170,13 +175,18 @@
 
   .appointments-agenda__actions {
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
+    grid-template-columns: 1fr;
     gap: 0.6rem;
   }
 
   .appointments-agenda__create,
-  .appointments-agenda__today {
+  .appointments-agenda__today,
+  .appointments-agenda__nav {
     width: 100%;
+  }
+
+  .appointments-agenda__nav {
+    justify-content: space-between;
   }
 
   .appointments-agenda__top-row,
@@ -192,6 +202,7 @@
 
   .appointments-agenda__top-row {
     grid-template-columns: 4.5rem minmax(0, 1fr);
+    align-items: start;
   }
 
   .appointments-agenda__status {
@@ -202,13 +213,31 @@
     grid-template-columns: 1fr;
   }
 
+  .appointments-agenda__meta {
+    grid-column: 1;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .appointments-agenda__separator {
+    display: none;
+  }
+
+  .appointments-agenda__note {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
   .appointments-agenda__item-actions {
+    width: 100%;
     justify-content: flex-start;
     grid-column: 1;
   }
 
   .appointments-agenda__patient h3 {
-    white-space: nowrap;
+    white-space: normal;
   }
 }
 

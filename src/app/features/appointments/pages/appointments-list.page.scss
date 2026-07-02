@@ -63,7 +63,7 @@
 }
 
 .appointments-table {
-  min-width: 760px;
+  min-width: 700px;
 }
 
 .appointments-actions {
@@ -83,6 +83,22 @@
 
   .appointments-date-range-filter {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .appointments-toolbar__filters,
+  .appointments-toolbar__filters--with-date-range {
+    grid-template-columns: 1fr;
+  }
+
+  .appointments-date-range-filter {
+    grid-column: auto;
+  }
+
+  .appointments-toolbar__meta {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 

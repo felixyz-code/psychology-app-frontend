@@ -287,6 +287,39 @@ Future product review should decide:
 
 ---
 
+# ADR-014 - Shared Dialog And Form Layout Pattern
+
+## Decision
+
+Dialogs and dense CRUD forms use a shared visual layout pattern based on reusable CSS classes such as:
+
+- `app-dialog`
+- `app-dialog__header`
+- `app-dialog__actions`
+- `app-form`
+- `app-form-grid`
+- `app-form-section`
+
+When a dialog can become vertically dense, the preferred structure is:
+
+- header visually anchored at the top
+- scrollable form body when needed
+- footer actions kept outside the scrollable region whenever possible
+
+## Rationale
+
+This rule reduces repeated one-off spacing fixes across Patients, Appointments, Case Files, Session Notes, Documents and Finance.
+
+It also creates a safer baseline for modal usability on constrained heights by keeping primary actions visible or predictably reachable.
+
+## Implications
+
+- New CRUD dialogs should start from the shared `app-dialog` and `app-form` vocabulary before introducing local layout rules.
+- Local overrides remain acceptable for especially dense dialogs such as Appointments and Case Files, but should preserve the shared action hierarchy and visual rhythm.
+- Cross-device dialog validation remains important because compact desktop dialogs and short mobile viewports can still require component-level height tuning.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:
