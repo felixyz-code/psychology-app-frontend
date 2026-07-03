@@ -8,6 +8,32 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 12
 
+## Sprint 12.4 - Resumen Clinico
+
+### Added
+
+* Nuevo `Resumen Clinico` dentro de `Reports` con ruta dedicada `/reports/clinical-summary`.
+* Nueva vista previa clinica orientada a lectura profesional con secciones de paciente, contexto clinico general, evolucion, timeline, notas resumidas y documentos relacionados.
+* Exportacion principal a `PDF` para el resumen clinico dentro de la infraestructura compartida de `Reports`.
+
+### Changed
+
+* `Reports` ahora registra explicitamente `Resumen Clinico` como su tercer reporte soportado junto con `Financial Report` y `Agenda Report`.
+* El reporte clinico queda centrado en paciente y requiere seleccion obligatoria de paciente para ejecutarse.
+* El flujo reutiliza el `Clinical Workspace` como fuente de contexto clinico visible en frontend sin crear endpoints nuevos de reportes.
+* La vista previa documental del resumen clinico ahora expone timeline en espanol, notas clinicas resumidas y documentos relacionados del periodo.
+* Los documentos relacionados muestran nombre de archivo, tipo legible y fecha cuando existen registros en el periodo seleccionado.
+* El KPI de sesiones del reporte clinico queda presentado como `Sesiones completadas`, manteniendo el conteo de citas `COMPLETED` dentro del periodo.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* El reporte reutiliza `PatientsService` y `CaseFilesService.getWorkspace(...)` para construir su salida.
+* La salida principal para uso documental es `PDF`; `CSV` no se prioriza para este reporte por bajo valor clinico.
+* Sprint 12.4 queda validado e implementado.
+
 ## Sprint 12.3A - Documents Global Patient Context
 
 ### Changed

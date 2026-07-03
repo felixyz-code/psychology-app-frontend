@@ -177,11 +177,27 @@ Current integration rules:
 - `ReportsRunnerService` orchestrates report loading without bypassing feature ownership
 - the financial report uses `FinancialTransactionsService.findSummary(...)` and `FinancialTransactionsService.findAll(...)`
 - the agenda report uses `AppointmentsService.getAppointments()` and `PatientsService.getPatients()` with client-side orchestration only
-- the current reports engine supports `Financial Report` and `Agenda Report`
+- the clinical summary report uses `PatientsService.getPatientById(...)` and `CaseFilesService.getWorkspace(caseFileId)` with a patient-centered orchestration flow
+- the current reports engine supports `Financial Report`, `Agenda Report` and `Clinical Summary`
 - date-only filters are parsed locally and applied with inclusive user semantics when the report flow requires client-side range orchestration
 - export generation is currently client-side for `PDF` print output and `CSV` download output
 
 This allows the frontend to deliver a first reporting layer without creating new contracts or duplicating backend rules.
+
+## Clinical Summary Report Integration
+
+The `Clinical Summary` report reuses existing clinical services and does not introduce a report-specific backend contract.
+
+Current integration rules:
+
+- the report requires a selected patient as its primary entry context
+- `PatientsService.getPatientById(patientId)` resolves the anchor patient shown in the report
+- `CaseFilesService.getCaseFileByPatientId(patientId)` resolves the related case file when available
+- `CaseFilesService.getWorkspace(caseFileId)` provides the aggregated clinical source for summary, appointments, session notes, documents and timeline
+- frontend mapping remains presentational only for KPI copy, timeline labels, summarized notes and document display labels
+- `PDF` is the primary export surface for this clinical document flow
+
+This keeps the report aligned with the patient-centered clinical workspace and avoids duplicating backend clinical logic.
 
 ## Clinical Workspace Aggregated Endpoint
 

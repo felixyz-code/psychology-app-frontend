@@ -171,8 +171,9 @@ Current characteristics:
 * individual business features remain owners of their own data services
 * `reports` does not own financial business logic, appointments business logic or dedicated backend reporting rules
 * report execution is orchestrated through feature-owned services instead of direct `HttpClient` calls
-* current delivered reports are `Financial Report` and `Agenda Report`
-* `ReportPreviewShell` supports both tabular and grouped preview strategies
+* current delivered reports are `Financial Report`, `Agenda Report` and `Clinical Summary`
+* `ReportPreviewShell` supports tabular, grouped and `clinical` preview strategies
+* `previewMode: clinical` is used for patient-centered clinical documents with narrative sections, timeline, summarized notes and related documents
 * export infrastructure is centralized in the `reports` feature while data ownership remains in the source feature
 
 This keeps the architecture aligned with the backend-first principle and avoids creating a parallel business domain for reporting.

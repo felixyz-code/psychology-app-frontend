@@ -92,6 +92,18 @@
           </mat-form-field>
         }
 
+        @if (isClinicalSummaryReport()) {
+          <mat-form-field filterToolbarPrimary appearance="outline">
+            <mat-label>Paciente</mat-label>
+            <mat-select formControlName="patientId">
+              <mat-option value="">Selecciona un paciente</mat-option>
+              @for (patient of availablePatients(); track patient.id) {
+                <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+
         <mat-form-field filterToolbarSecondary appearance="outline">
           <mat-label>Fecha desde</mat-label>
           <input matInput type="date" formControlName="from" />
@@ -155,8 +167,9 @@
     [isLoading]="isLoading()"
     [errorMessage]="errorMessage()"
     [contextItems]="reportResult()?.contextItems || []"
-    [emptyTitle]="reportResult()?.emptyTitle || 'No hay datos para mostrar'"
-    [emptyMessage]="reportResult()?.emptyMessage || 'Ajusta los filtros para generar una vista previa.'"
+    [clinicalContent]="reportResult()?.clinicalContent || null"
+    [emptyTitle]="reportResult()?.emptyTitle || guidedEmptyTitle()"
+    [emptyMessage]="reportResult()?.emptyMessage || guidedEmptyMessage()"
     [generatedAt]="reportResult()?.generatedAt || ''"
   />
 </section>

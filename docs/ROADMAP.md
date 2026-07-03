@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 12.3A - Documents Global Patient Context
+Sprint 12.4 - Resumen Clinico
 ```
 
 Phase 3 progress:
@@ -173,12 +173,13 @@ Completed - Reports foundation generalized for multiple professional reports
 * Reports catalog foundation
 * Financial Report pilot
 * Agenda Report
+* Clinical Summary
 * Centralized export infrastructure with conservative `PDF` print and `CSV` download strategy
 * Sprint 12.1 completed - Reports feature introduced as a lazy orchestration layer without new backend contracts and with a first professional financial reporting surface
 * Sprint 12.2 completed - Financial Report polished with a more document-like preview, stronger export presentation, accessibility refinements and final QA technical validation
 * Sprint 12.3 completed - Agenda Report delivered with reusable report orchestration, grouped preview by day, KPI summary, inclusive date ranges and frontend-only export flow
-* Next planned sprint: Sprint 12.4 - Reporte Historial Clinico
-* Reporte Expediente Clinico remains pending after Sprint 12.4
+* Sprint 12.4 completed - Resumen Clinico delivered with patient-required execution, clinical preview, workspace-based orchestration, summarized notes, related documents and PDF-first export
+* Next planned sprint: Sprint 12.5 - Reporte Expediente Clinico
 
 ### Sprint 11
 
@@ -212,7 +213,7 @@ Completed - Reports foundation generalized for multiple professional reports
 Next planned sprint:
 
 ```text
-Sprint 12.4 - Reporte Historial Clinico
+Sprint 12.5 - Reporte Expediente Clinico
 ```
 
 ---
@@ -221,8 +222,8 @@ Sprint 12.4 - Reporte Historial Clinico
 
 Current development efforts include:
 
-* Reports module hardening after Sprint 12.3 closure
-* Reporte Historial Clinico planning as the next reporting increment
+* Reports module hardening after Sprint 12.4 closure
+* Reporte Expediente Clinico planning as the next reporting increment
 * Final backend integration verification
 * Manual browser validation of dense clinical workflows
 * Incremental technical debt reduction after release-candidate closure

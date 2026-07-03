@@ -452,6 +452,37 @@ It also reduces duplicated logic and lowers the risk of regressions when date ra
 
 ---
 
+# ADR-019 - Patient-Centered Clinical Reports And PDF-First Output
+
+## Decision
+
+Clinical reporting in `Reports` remains patient-centered.
+
+Current rules:
+
+- the clinical report entry point requires a selected patient
+- the current delivered clinical report is `Clinical Summary`
+- the report reuses clinical workspace data instead of introducing a dedicated backend report endpoint
+- `PDF` is the primary output for clinical report reading and sharing
+- `CSV` is not prioritized for `Clinical Summary`
+
+## Rationale
+
+Clinical summaries are read primarily as narrative and documentary outputs rather than spreadsheet datasets.
+
+Using the patient as the anchor entity keeps the report aligned with the broader clinical workflow already established by the frontend and backend.
+
+Reusing the aggregated workspace contract also avoids duplicating orchestration logic or inventing frontend-owned clinical rules.
+
+## Implications
+
+- Clinical reports should prefer `PatientsService` and `CaseFilesService.getWorkspace(...)` before requesting new contracts.
+- Preview surfaces for clinical reports may use a dedicated `previewMode: clinical` when the output behaves more like a document than a table.
+- Timeline labels, summarized notes and related documents may be normalized in the frontend as presentation concerns only.
+- If a future clinical report needs spreadsheet semantics, that export decision should be evaluated separately instead of assuming `CSV` by default.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

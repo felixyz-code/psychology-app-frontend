@@ -1293,3 +1293,377 @@ body.dark-theme .patient-detail-dialog__empty {
   color: var(--app-color-success-text);
   font-weight: 600;
 }
+
+app-report-preview-shell {
+  .report-preview-shell__document-meta,
+  .report-preview-shell__clinical-kpis,
+  .report-preview-shell__clinical-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .report-preview-shell__document-meta,
+  .report-preview-shell__group,
+  .report-preview-shell__table-wrapper,
+  .report-preview-shell__clinical-hero,
+  .report-preview-shell__clinical-section {
+    border: 1px solid color-mix(in srgb, var(--app-color-card-border) 82%, transparent);
+    background: var(--app-color-card-bg);
+  }
+
+  .report-preview-shell__document-meta,
+  .report-preview-shell__group,
+  .report-preview-shell__table-wrapper {
+    border-radius: 18px;
+  }
+
+  .report-preview-shell__document-meta,
+  .report-preview-shell__agenda-item,
+  .report-preview-shell__clinical-kpi,
+  .report-preview-shell__clinical-data-card,
+  .report-preview-shell__clinical-list-item {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--app-color-card-soft-bg) 88%, transparent) 0%, transparent 100%),
+      var(--app-color-card-bg);
+  }
+
+  .report-preview-shell__document-meta {
+    padding: 0.95rem 1rem;
+  }
+
+  .report-preview-shell__meta-item,
+  .report-preview-shell__agenda-main,
+  .report-preview-shell__clinical-document,
+  .report-preview-shell__clinical-patient-copy,
+  .report-preview-shell__clinical-section,
+  .report-preview-shell__clinical-section-header,
+  .report-preview-shell__clinical-timeline-body,
+  .report-preview-shell__clinical-narrative,
+  .report-preview-shell__group,
+  .report-preview-shell__group-items,
+  .report-preview-shell__groups {
+    display: grid;
+  }
+
+  .report-preview-shell__meta-item {
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .report-preview-shell__meta-label,
+  .report-preview-shell__clinical-eyebrow,
+  .report-preview-shell__clinical-kpi-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .report-preview-shell__meta-label {
+    color: var(--app-color-text-secondary);
+    letter-spacing: 0.04em;
+  }
+
+  .report-preview-shell__meta-value {
+    color: var(--app-color-heading);
+    font-size: 0.96rem;
+    line-height: 1.4;
+  }
+
+  .report-preview-shell__groups,
+  .report-preview-shell__clinical-document {
+    gap: 1rem;
+  }
+
+  .report-preview-shell__clinical-hero,
+  .report-preview-shell__clinical-section {
+    border-radius: 22px;
+  }
+
+  .report-preview-shell__clinical-hero {
+    display: grid;
+    gap: 1rem;
+    padding: 1.15rem;
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--app-color-primary-soft) 26%, transparent) 0%, transparent 42%),
+      linear-gradient(180deg, color-mix(in srgb, var(--app-color-card-soft-bg) 82%, transparent) 0%, transparent 100%),
+      var(--app-color-card-bg);
+  }
+
+  .report-preview-shell__clinical-patient,
+  .report-preview-shell__clinical-timeline-row,
+  .report-preview-shell__clinical-list-header,
+  .report-preview-shell__agenda-title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .report-preview-shell__clinical-patient {
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .report-preview-shell__clinical-avatar,
+  .report-preview-shell__agenda-leading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--app-color-primary-strong);
+    font-weight: 700;
+  }
+
+  .report-preview-shell__clinical-avatar {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--app-color-primary-soft) 48%, var(--app-color-card-bg) 52%);
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .report-preview-shell__clinical-section-header,
+  .report-preview-shell__clinical-timeline-body,
+  .report-preview-shell__clinical-narrative {
+    gap: 0.75rem;
+  }
+
+  .report-preview-shell__clinical-patient-copy,
+  .report-preview-shell__clinical-kpi,
+  .report-preview-shell__clinical-data-card,
+  .report-preview-shell__clinical-list-item,
+  .report-preview-shell__agenda-main {
+    gap: 0.45rem;
+  }
+
+  .report-preview-shell__clinical-patient-copy :is(h3, p),
+  .report-preview-shell__clinical-section-header :is(h4, p),
+  .report-preview-shell__group-header :is(h3, p),
+  .report-preview-shell__agenda-title-row h4,
+  .report-preview-shell__agenda-supporting,
+  .report-preview-shell__clinical-list-item :is(p, strong),
+  .report-preview-shell__clinical-timeline-body :is(p, strong),
+  .report-preview-shell__clinical-narrative p {
+    margin: 0;
+  }
+
+  .report-preview-shell__clinical-patient-copy p,
+  .report-preview-shell__clinical-section-header p,
+  .report-preview-shell__group-header p,
+  .report-preview-shell__agenda-supporting,
+  .report-preview-shell__clinical-list-item p,
+  .report-preview-shell__clinical-timeline-body p,
+  .report-preview-shell__clinical-footnote,
+  .report-preview-shell__clinical-timeline-row span,
+  .report-preview-shell__clinical-list-header span,
+  .report-preview-shell__agenda-meta-item {
+    color: var(--app-color-text-secondary);
+  }
+
+  .report-preview-shell__clinical-data-label,
+  .report-preview-shell__clinical-kpi-label {
+    display: block;
+    margin-bottom: 0.15rem;
+    color: var(--app-color-text-secondary);
+    line-height: 1.2;
+  }
+
+  .report-preview-shell__clinical-data-value,
+  .report-preview-shell__clinical-kpi-value,
+  .report-preview-shell__clinical-list-title {
+    display: block;
+    color: var(--app-color-heading);
+    font-size: 0.98rem;
+    font-weight: 600;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .report-preview-shell__clinical-kpi-value {
+    font-size: 1.05rem;
+  }
+
+  .report-preview-shell__clinical-kpi-supporting,
+  .report-preview-shell__clinical-list-body {
+    display: block;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .report-preview-shell__clinical-list-date {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--app-color-text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.35;
+  }
+
+  .report-preview-shell__clinical-eyebrow,
+  .report-preview-shell__clinical-kpi-label {
+    color: var(--app-color-primary-strong);
+    letter-spacing: 0.06em;
+  }
+
+  .report-preview-shell__clinical-kpi,
+  .report-preview-shell__clinical-data-card,
+  .report-preview-shell__clinical-list-item,
+  .report-preview-shell__agenda-item {
+    padding: 0.95rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--app-color-card-border) 76%, transparent);
+    border-radius: 16px;
+  }
+
+  .report-preview-shell__clinical-kpi strong,
+  .report-preview-shell__clinical-data-card strong {
+    color: var(--app-color-heading);
+    font-size: 1rem;
+  }
+
+  .report-preview-shell__clinical-data-card {
+    align-content: start;
+  }
+
+  .report-preview-shell__clinical-section {
+    gap: 1rem;
+    padding: 1.1rem;
+  }
+
+  .report-preview-shell__clinical-narrative {
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--app-color-card-soft-bg) 88%, var(--app-color-card-bg) 12%);
+  }
+
+  .report-preview-shell__clinical-narrative p {
+    color: var(--app-color-heading);
+    line-height: 1.7;
+  }
+
+  .report-preview-shell__clinical-timeline,
+  .report-preview-shell__clinical-list {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .report-preview-shell__clinical-timeline-item,
+  .report-preview-shell__agenda-item {
+    display: grid;
+    align-items: start;
+    gap: 0.9rem;
+  }
+
+  .report-preview-shell__clinical-timeline-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .report-preview-shell__clinical-timeline-marker {
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-top: 0.4rem;
+    border-radius: 999px;
+    background: var(--app-color-primary-strong);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--app-color-primary-soft) 44%, transparent);
+  }
+
+  .report-preview-shell__group {
+    gap: 0.9rem;
+    padding: 1rem;
+  }
+
+  .report-preview-shell__group-items {
+    gap: 0.8rem;
+  }
+
+  .report-preview-shell__agenda-item {
+    grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+  }
+
+  .report-preview-shell__agenda-leading {
+    min-height: 3rem;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--app-color-primary-soft) 42%, var(--app-color-card-bg) 58%);
+    font-size: 1rem;
+  }
+
+  .report-preview-shell__agenda-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .report-preview-shell__agenda-meta-item {
+    display: inline-flex;
+    gap: 0.3rem;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+
+  .report-preview-shell__table-wrapper {
+    min-width: 0;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--app-color-text-inverse) 45%, transparent);
+  }
+
+  .report-preview-shell__table {
+    min-width: 920px;
+  }
+
+  .report-preview-shell__cell--end {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .report-preview-shell__footer {
+    color: var(--app-color-text-secondary);
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 720px) {
+  app-report-preview-shell {
+    .report-preview-shell__state {
+      min-height: 13rem;
+    }
+
+    .report-preview-shell__document-meta,
+    .report-preview-shell__clinical-kpis,
+    .report-preview-shell__clinical-grid,
+    .report-preview-shell__clinical-patient,
+    .report-preview-shell__clinical-timeline-item,
+    .report-preview-shell__agenda-item {
+      grid-template-columns: 1fr;
+    }
+
+    .report-preview-shell__document-meta,
+    .report-preview-shell__clinical-hero,
+    .report-preview-shell__clinical-section,
+    .report-preview-shell__group,
+    .report-preview-shell__agenda-item {
+      padding: 0.85rem;
+    }
+
+    .report-preview-shell__clinical-patient {
+      display: grid;
+      justify-items: start;
+    }
+
+    .report-preview-shell__clinical-list-header,
+    .report-preview-shell__clinical-timeline-row {
+      align-items: flex-start;
+    }
+
+    .report-preview-shell__clinical-timeline-marker {
+      display: none;
+    }
+
+    .report-preview-shell__agenda-leading {
+      justify-content: flex-start;
+      min-height: auto;
+      padding: 0.75rem 0.9rem;
+    }
+  }
+}

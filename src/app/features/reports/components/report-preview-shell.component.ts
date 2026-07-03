@@ -6,6 +6,7 @@ import { MatTableModule } from '@angular/material/table';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { ClinicalSummaryContent } from '../models/clinical-summary-report.model';
 import {
   ReportContextItem,
   ReportPreviewGroup,
@@ -34,7 +35,8 @@ export class ReportPreviewShellComponent {
   readonly rows = input<ReportTableRow[]>([]);
   readonly displayedColumns = input<string[]>([]);
   readonly groups = input<ReportPreviewGroup[]>([]);
-  readonly previewMode = input<'table' | 'grouped'>('table');
+  readonly clinicalContent = input<ClinicalSummaryContent | null>(null);
+  readonly previewMode = input<'table' | 'grouped' | 'clinical'>('table');
   readonly isLoading = input(false);
   readonly errorMessage = input('');
   readonly contextItems = input<ReportContextItem[]>([]);
@@ -64,5 +66,9 @@ export class ReportPreviewShellComponent {
 
   isColumnEndAligned(columnKey: string): boolean {
     return this.columns().find((column) => column.key === columnKey)?.align === 'end';
+  }
+
+  trackByLabel(_index: number, item: { label: string }): string {
+    return item.label;
   }
 }

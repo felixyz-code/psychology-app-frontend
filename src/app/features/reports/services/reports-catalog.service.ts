@@ -25,6 +25,16 @@ export class ReportsCatalogService {
       route: '/reports/agenda',
       supportedExports: ['pdf', 'csv'],
     },
+    {
+      key: 'clinical-summary',
+      title: 'Resumen Clinico',
+      description:
+        'Construye un documento clinico profesional centrado en paciente con resumen, evolucion y cronologia.',
+      category: 'Operacion clinica',
+      icon: 'description',
+      route: '/reports/clinical-summary',
+      supportedExports: ['pdf'],
+    },
   ];
 
   getReports(): ReportDefinition[] {

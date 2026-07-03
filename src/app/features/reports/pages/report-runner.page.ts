@@ -38,6 +38,7 @@ import {
 } from '../../financial-transactions/utils/financial-transaction-presenters';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
+import { ClinicalSummaryReportFilters } from '../models/clinical-summary-report.model';
 import { ReportExportMenuComponent } from '../components/report-export-menu.component';
 import { ReportFiltersPanelComponent } from '../components/report-filters-panel.component';
 import { ReportPreviewShellComponent } from '../components/report-preview-shell.component';
@@ -109,22 +110,48 @@ export class ReportRunnerPage {
   readonly displayedColumns = computed(() => this.reportResult()?.columns.map((column) => column.key) ?? []);
   readonly resultsLabel = computed(() => {
     const rowCount = this.reportResult()?.rows.length ?? 0;
+
+    if (this.isClinicalSummaryReport()) {
+      const hasDocument = Boolean(this.reportResult()?.clinicalContent);
+      return hasDocument ? 'Documento clinico listo para revision' : 'Selecciona un paciente para generar el documento';
+    }
+
     const noun = this.isAgendaReport() ? 'cita' : 'movimiento';
     return rowCount === 1 ? `1 ${noun} en la vista previa` : `${rowCount} ${noun}s en la vista previa`;
   });
   readonly filtersPanelSubtitle = computed(() =>
     this.isAgendaReport()
       ? 'Refina el periodo, el estado y el paciente antes de generar la agenda profesional.'
-      : 'Refina el periodo y los criterios financieros antes de generar la vista previa.'
+      : this.isClinicalSummaryReport()
+        ? 'Selecciona un paciente y define el periodo para construir un documento clinico profesional.'
+        : 'Refina el periodo y los criterios financieros antes de generar la vista previa.'
   );
   readonly previewSubtitle = computed(() =>
     this.isAgendaReport()
       ? 'Agenda profesional agrupada por dia con citas ordenadas cronologicamente.'
-      : 'Resumen tabular de movimientos incluidos en el reporte financiero actual.'
+      : this.isClinicalSummaryReport()
+        ? 'Documento clinico centrado en paciente con resumen, evolucion y cronologia visible.'
+        : 'Resumen tabular de movimientos incluidos en el reporte financiero actual.'
+  );
+  readonly guidedEmptyTitle = computed(() =>
+    this.isClinicalSummaryReport()
+      ? 'Selecciona un paciente para generar el resumen'
+      : 'No hay datos para mostrar'
+  );
+  readonly guidedEmptyMessage = computed(() =>
+    this.isClinicalSummaryReport()
+      ? 'El Resumen Clinico se construye desde el expediente del paciente y su actividad visible en el periodo.'
+      : 'Ajusta los filtros para generar una vista previa.'
   );
 
   constructor() {
     this.loadPatientsIfNeeded();
+
+    if (this.isClinicalSummaryReport()) {
+      this.isLoading.set(false);
+      return;
+    }
+
     this.loadReport();
   }
 
@@ -141,11 +168,29 @@ export class ReportRunnerPage {
       category: '',
       paymentMethod: '',
       patientId: '',
-      from: '',
-      to: '',
+      from: this.defaultDateRange.from,
+      to: this.defaultDateRange.to,
     });
-    this.appliedFilters.set({});
-    this.loadReport({});
+
+    if (this.isClinicalSummaryReport()) {
+      this.reportResult.set(null);
+      this.appliedFilters.set({
+        from: this.defaultDateRange.from,
+        to: this.defaultDateRange.to,
+      });
+      this.errorMessage.set('');
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.appliedFilters.set({
+      from: this.defaultDateRange.from,
+      to: this.defaultDateRange.to,
+    });
+    this.loadReport({
+      from: this.defaultDateRange.from,
+      to: this.defaultDateRange.to,
+    });
   }
 
   retry(): void {
@@ -179,6 +224,10 @@ export class ReportRunnerPage {
     return this.reportKey === 'agenda';
   }
 
+  isClinicalSummaryReport(): boolean {
+    return this.reportKey === 'clinical-summary';
+  }
+
   getTypeLabel(type: FinancialTransactionType): string {
     return getFinancialTransactionTypeLabel(type);
   }
@@ -201,6 +250,14 @@ export class ReportRunnerPage {
 
   private loadReport(filters: ReportFilters = this.appliedFilters()): void {
     this.reportLoadSubscription?.unsubscribe();
+
+    if (this.isClinicalSummaryReport() && !(filters as ClinicalSummaryReportFilters).patientId) {
+      this.reportResult.set(null);
+      this.errorMessage.set('');
+      this.isLoading.set(false);
+      return;
+    }
+
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -238,13 +295,31 @@ export class ReportRunnerPage {
       return;
     }
 
+    if (this.isClinicalSummaryReport()) {
+      this.reportLoadSubscription = this.reportsRunnerService
+        .runClinicalSummaryReport(filters as ClinicalSummaryReportFilters)
+        .subscribe({
+          next: (result) => {
+            this.reportResult.set(result);
+            this.isLoading.set(false);
+          },
+          error: () => {
+            this.reportResult.set(null);
+            this.errorMessage.set('No fue posible generar el resumen clinico.');
+            this.isLoading.set(false);
+          },
+        });
+
+      return;
+    }
+
     this.reportResult.set(null);
     this.errorMessage.set('El reporte solicitado no esta disponible.');
     this.isLoading.set(false);
   }
 
   private loadPatientsIfNeeded(): void {
-    if (!this.isAgendaReport()) {
+    if (!this.isAgendaReport() && !this.isClinicalSummaryReport()) {
       return;
     }
 
@@ -272,6 +347,14 @@ export class ReportRunnerPage {
         from: rawValue.from || undefined,
         to: rawValue.to || undefined,
       } satisfies FinancialReportFilters;
+    }
+
+    if (this.isClinicalSummaryReport()) {
+      return {
+        patientId: rawValue.patientId || '',
+        from: rawValue.from || undefined,
+        to: rawValue.to || undefined,
+      } satisfies ClinicalSummaryReportFilters;
     }
 
     return {
