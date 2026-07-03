@@ -1,0 +1,16 @@
+<section class="reports-home-page app-page">
+  <app-page-header
+    heading="Reportes"
+    subtitle="Consulta reportes profesionales preparados para analitica, vista previa y exportacion controlada."
+    [breadcrumbs]="[
+      { label: 'Dashboard', url: '/dashboard' },
+      { label: 'Reportes' },
+    ]"
+  />
+
+  <section class="reports-home-page__grid" aria-label="Catalogo inicial de reportes">
+    @for (report of reports; track report.key) {
+      <app-report-catalog-card [definition]="report" />
+    }
+  </section>
+</section>

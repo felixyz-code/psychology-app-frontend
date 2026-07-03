@@ -1,0 +1,19 @@
+<button
+  mat-stroked-button
+  type="button"
+  [matMenuTriggerFor]="exportMenu"
+  [disabled]="disabled()"
+  class="report-export-menu__trigger"
+>
+  <mat-icon>download</mat-icon>
+  <span>Exportar</span>
+</button>
+
+<mat-menu #exportMenu="matMenu">
+  @for (format of formats(); track format) {
+    <button mat-menu-item type="button" (click)="exportSelected.emit(format)">
+      <mat-icon>{{ getIcon(format) }}</mat-icon>
+      <span>{{ getLabel(format) }}</span>
+    </button>
+  }
+</mat-menu>

@@ -1,0 +1,128 @@
+<section class="report-runner-page app-page">
+  <app-page-header
+    [heading]="definition()?.title || 'Reporte'"
+    subtitle="Genera una vista previa profesional con indicadores, filtros y exportacion centralizada."
+    [breadcrumbs]="[
+      { label: 'Dashboard', url: '/dashboard' },
+      { label: 'Reportes', url: '/reports' },
+      { label: definition()?.title || 'Reporte' },
+    ]"
+  >
+    <app-report-export-menu
+      [formats]="reportResult()?.supportedExports || []"
+      [disabled]="isLoading() || !reportResult() || !!errorMessage()"
+      (exportSelected)="export($event)"
+    />
+  </app-page-header>
+
+  <app-report-filters-panel
+    title="Filtros del reporte"
+    subtitle="Refina el periodo y los criterios financieros antes de generar la vista previa."
+  >
+    <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+      <app-filter-toolbar>
+        <mat-form-field filterToolbarPrimary appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="">Todos</mat-option>
+            @for (type of transactionTypes; track type) {
+              <mat-option [value]="type">{{ getTypeLabel(type) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field filterToolbarPrimary appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">Todos</mat-option>
+            @for (status of transactionStatuses; track status) {
+              <mat-option [value]="status">{{ getStatusLabel(status) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field filterToolbarPrimary appearance="outline">
+          <mat-label>Categoria</mat-label>
+          <mat-select formControlName="category">
+            <mat-option value="">Todas</mat-option>
+            @for (category of transactionCategories; track category) {
+              <mat-option [value]="category">{{ getCategoryLabel(category) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field filterToolbarPrimary appearance="outline">
+          <mat-label>Metodo de pago</mat-label>
+          <mat-select formControlName="paymentMethod">
+            <mat-option value="">Todos</mat-option>
+            @for (paymentMethod of paymentMethods; track paymentMethod) {
+              <mat-option [value]="paymentMethod">{{ getPaymentMethodLabel(paymentMethod) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field filterToolbarSecondary appearance="outline">
+          <mat-label>Fecha desde</mat-label>
+          <input matInput type="date" formControlName="from" />
+        </mat-form-field>
+
+        <mat-form-field filterToolbarSecondary appearance="outline">
+          <mat-label>Fecha hasta</mat-label>
+          <input matInput type="date" formControlName="to" />
+        </mat-form-field>
+
+        <div filterToolbarActions class="report-runner-page__filter-actions">
+          <button mat-flat-button type="submit" class="app-toolbar-meta-button" [disabled]="isLoading()">
+            <mat-icon>filter_alt</mat-icon>
+            <span>Generar reporte</span>
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            class="app-toolbar-meta-button"
+            [disabled]="isLoading() || !hasActiveFilters()"
+            (click)="clearFilters()"
+          >
+            <mat-icon>filter_alt_off</mat-icon>
+            <span>Limpiar filtros</span>
+          </button>
+          <span class="app-table-toolbar-counter">{{ resultsLabel() }}</span>
+        </div>
+      </app-filter-toolbar>
+    </form>
+  </app-report-filters-panel>
+
+  <section class="report-runner-page__metrics app-page__metrics" aria-label="Indicadores del reporte">
+    @for (metric of metrics(); track metric.label) {
+      <app-metric-card
+        [icon]="metric.icon"
+        [title]="metric.label"
+        [value]="metric.value"
+        [supportingText]="metric.supportingText"
+        [variant]="metric.variant"
+        [loading]="isLoading()"
+        [compact]="true"
+      />
+    }
+  </section>
+
+  @if (errorMessage()) {
+    <div class="report-runner-page__error" role="status">
+      <p>{{ errorMessage() }}</p>
+      <button mat-stroked-button type="button" (click)="retry()">Reintentar</button>
+    </div>
+  }
+
+  <app-report-preview-shell
+    title="Vista previa"
+    subtitle="Resumen tabular de movimientos incluidos en el reporte financiero actual."
+    [columns]="reportResult()?.columns || []"
+    [rows]="reportResult()?.rows || []"
+    [displayedColumns]="displayedColumns()"
+    [isLoading]="isLoading()"
+    [errorMessage]="errorMessage()"
+    [emptyTitle]="reportResult()?.emptyTitle || 'No hay movimientos para mostrar'"
+    [emptyMessage]="reportResult()?.emptyMessage || 'Ajusta los filtros para generar una vista previa.'"
+    [generatedAt]="reportResult()?.generatedAt || ''"
+  />
+</section>

@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 11.9 - Release Candidate
+Sprint 12.1 - Professional Reports & Analytics - Financial Report Pilot
 ```
 
 ---
@@ -159,6 +159,14 @@ Sprint 11.9 - Release Candidate
 * Sprint 11.6B completed - Financial transaction form now shares the same grouped form rhythm and spacing language as the modal CRUD flows while remaining page-based
 * Financial Transactions mantiene formularios basados en pagina; no participaron en Sprint 11.6A al no existir aun un dialog equivalente dentro del flujo actual
 
+### Reports
+
+* Lazy route `/reports`
+* Reports catalog foundation
+* Financial Report pilot
+* Centralized export infrastructure with conservative `PDF` print and `CSV` download strategy
+* Sprint 12.1 completed - Reports feature introduced as a lazy orchestration layer without new backend contracts and with a first professional financial reporting surface
+
 ### Sprint 11
 
 * Sprint 11.1 completed - Baseline visual consistency established across the application shell and shared surfaces
@@ -200,7 +208,7 @@ To be defined after RC1 validation and backlog reprioritization
 
 Current development efforts include:
 
-* RC1 validation
+* Reports module hardening
 * Final backend integration verification
 * Manual browser validation of dense clinical workflows
 * Incremental technical debt reduction after release-candidate closure
@@ -244,7 +252,6 @@ Potential additions after MVP completion:
 
 * Dashboard improvements
 * Search and filtering
-* Reports
 * User profile
 * Accessibility improvements
 

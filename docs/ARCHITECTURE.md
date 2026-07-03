@@ -142,6 +142,8 @@ case-files/
 session-notes/
 documents/
 appointments/
+financial-transactions/
+reports/
 ```
 
 Each feature owns:
@@ -156,6 +158,20 @@ Each feature owns:
 Dependencies between features should be minimized.
 
 Cross-feature workflows should be composed from existing feature ownership boundaries instead of creating a parallel domain layer.
+
+## Reports Module
+
+The frontend now includes a lazy-loaded `reports` feature.
+
+Current characteristics:
+
+* `reports` owns report navigation, catalog, filters, preview and export UX
+* individual business features remain owners of their own data services
+* report execution is orchestrated through feature-owned services instead of direct `HttpClient` calls
+* the first delivered pilot is the `Financial Report`
+* export infrastructure is centralized in the `reports` feature while data ownership remains in the source feature
+
+This keeps the architecture aligned with the backend-first principle and avoids creating a parallel business domain for reporting.
 
 ---
 

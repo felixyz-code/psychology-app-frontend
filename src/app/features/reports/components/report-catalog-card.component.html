@@ -1,0 +1,18 @@
+<mat-card class="report-catalog-card">
+  <div class="report-catalog-card__icon">
+    <mat-icon>{{ definition().icon }}</mat-icon>
+  </div>
+
+  <div class="report-catalog-card__copy">
+    <p class="report-catalog-card__category">{{ definition().category }}</p>
+    <h2>{{ definition().title }}</h2>
+    <p class="report-catalog-card__description">{{ definition().description }}</p>
+  </div>
+
+  <div class="report-catalog-card__actions">
+    <a mat-flat-button [routerLink]="definition().route" class="app-page-header-action">
+      <mat-icon>arrow_forward</mat-icon>
+      <span>Abrir reporte</span>
+    </a>
+  </div>
+</mat-card>

@@ -320,6 +320,49 @@ It also creates a safer baseline for modal usability on constrained heights by k
 
 ---
 
+# ADR-015 - Reports Module As Orchestration Layer
+
+## Decision
+
+The new `reports` feature is implemented as a lazy-loaded orchestration module.
+
+It owns:
+
+- report catalog
+- report filters
+- preview surfaces
+- export actions
+
+It does not own:
+
+- financial business logic
+- report-specific backend rules
+- direct HTTP contracts outside the owning feature service
+
+## Rationale
+
+This keeps the application aligned with the feature-based and backend-first architecture.
+
+It also allows the product to introduce professional reporting UX without creating a parallel business layer or moving logic away from the modules that already own it.
+
+## Initial Scope
+
+The first delivered pilot is `Financial Report`.
+
+Current orchestration:
+
+- `ReportsRunnerService` calls `FinancialTransactionsService.findSummary(...)`
+- `ReportsRunnerService` calls `FinancialTransactionsService.findAll(...)`
+- `ReportsExportService` centralizes conservative export strategies using controlled print for `PDF` and `CSV` download for spreadsheet workflows
+
+## Implications
+
+- New reports should prefer consuming existing feature-owned services before requesting new backend contracts.
+- If a future report becomes too expensive or too fragmented to compose in the frontend, a dedicated backend aggregate contract should be evaluated.
+- Export UX can remain centralized in `reports` even when the data source belongs to another feature.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

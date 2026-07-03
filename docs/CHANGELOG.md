@@ -6,6 +6,30 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# Sprint 12
+
+## Sprint 12.1 - Professional Reports & Analytics - Financial Report Pilot
+
+### Added
+
+* Nuevo feature lazy `Reports` con ruta base `/reports` y entrada dedicada en el sidebar principal.
+* Catalogo inicial de reportes con tarjeta operativa para `Reporte Financiero`.
+* Nueva ruta `/reports/financial` con runner profesional para filtros, KPIs, vista previa tabular, estados de carga/vacio y exportaciones centralizadas.
+* `ReportsRunnerService` para orquestar el piloto financiero consumiendo `FinancialTransactionsService.findSummary(...)` y `FinancialTransactionsService.findAll(...)`.
+* `ReportsExportService` como infraestructura centralizada para exportacion conservadora mediante impresion controlada para `PDF` y descarga `CSV` para hojas de calculo.
+
+### Changed
+
+* La arquitectura ahora reconoce `reports` como un feature de orquestacion lazy que no absorbe logica de negocio de `financial-transactions`.
+* Se reutiliza el Design System existente con `PageHeader`, `SectionCard`, `MetricCard`, `FilterToolbar`, estados de tabla y patrones responsive ya validados en RC1.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP financieros.
+* La exportacion `.xlsx` queda diferida; el soporte inicial de hoja de calculo es `CSV`.
+
 # Sprint 11
 
 ## Sprint 11.9 - Release Candidate
