@@ -483,6 +483,40 @@ Reusing the aggregated workspace contract also avoids duplicating orchestration 
 
 ---
 
+# ADR-020 - Clinical Record As Structured Clinical Document And Descriptive PDF Filenames
+
+## Decision
+
+`Reports` now supports a second clinical document beyond `Clinical Summary`: `Clinical Record`.
+
+Current rules:
+
+- `Clinical Summary` remains a brief, executive and synthetic document
+- `Clinical Record` is a complete, structured and printable clinical document
+- both reports remain patient-centered and reuse existing clinical services
+- both clinical reports stay `PDF`-first and do not prioritize `CSV`
+- `ReportResult` now exposes `pdfFileName` so each report can provide a descriptive filename for print-based `PDF` export
+
+## Rationale
+
+The product needs two distinct clinical reading surfaces:
+
+- one optimized for quick professional review
+- one optimized for formal recordkeeping and printable clinical context
+
+At the same time, generic filenames such as `Expediente Clinico.pdf` create friction when several reports are generated in the same session.
+
+Adding a descriptive `pdfFileName` at the report-result level keeps filename ownership close to the report orchestration flow without changing the backend contract or the shared print-based export strategy.
+
+## Implications
+
+- `Clinical Record` should remain a separate report and not a mode flag of `Clinical Summary`
+- clinical report filenames should include report type, patient when applicable and date range when available
+- when the browser does not fully honor the filename during `window.print()`, the document title and print window title should still use the same descriptive name
+- descriptive filenames are a presentation concern and must not require new backend metadata or new endpoints
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

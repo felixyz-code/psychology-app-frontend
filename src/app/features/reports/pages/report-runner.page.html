@@ -92,7 +92,7 @@
           </mat-form-field>
         }
 
-        @if (isClinicalSummaryReport()) {
+        @if (isClinicalSummaryReport() || isClinicalRecordReport()) {
           <mat-form-field filterToolbarPrimary appearance="outline">
             <mat-label>Paciente</mat-label>
             <mat-select formControlName="patientId">

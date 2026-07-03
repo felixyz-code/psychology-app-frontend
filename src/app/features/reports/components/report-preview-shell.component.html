@@ -28,170 +28,386 @@
     </div>
   } @else if (previewMode() === 'clinical' && clinicalContent()) {
     @let content = clinicalContent()!;
-    <article class="report-preview-shell__clinical-document" aria-label="Resumen clinico profesional">
-      <section class="report-preview-shell__clinical-hero">
-        <div class="report-preview-shell__clinical-patient">
-          <div class="report-preview-shell__clinical-avatar" aria-hidden="true">{{ content.patientInitials }}</div>
-          <div class="report-preview-shell__clinical-patient-copy">
-            <span class="report-preview-shell__clinical-eyebrow">{{ content.patientSection.title }}</span>
-            <h3>{{ content.patientFullName }}</h3>
+    <article
+      class="report-preview-shell__clinical-document"
+      [attr.aria-label]="isClinicalRecordContent(content) ? 'Expediente clinico profesional' : 'Resumen clinico profesional'"
+    >
+      @if (isClinicalRecordContent(content)) {
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <span class="report-preview-shell__clinical-eyebrow">Documento clinico</span>
+            <h4>{{ content.documentTitle }}</h4>
+            <p>Paciente: {{ content.patientFullName }} | Periodo: {{ content.periodLabel }} | Generado: {{ content.generatedAtLabel }}</p>
+          </header>
+        </section>
+
+        <section class="report-preview-shell__clinical-hero">
+          <div class="report-preview-shell__clinical-patient">
+            <div class="report-preview-shell__clinical-avatar" aria-hidden="true">{{ content.patientInitials }}</div>
+            <div class="report-preview-shell__clinical-patient-copy">
+              <span class="report-preview-shell__clinical-eyebrow">Expediente Clinico</span>
+              <h3>{{ content.patientFullName }}</h3>
+              <p>Documento estructurado e imprimible del expediente clinico visible en el sistema.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.patientSection.title }}</h4>
             <p>{{ content.patientSection.subtitle }}</p>
+          </header>
+
+          <div class="report-preview-shell__clinical-grid">
+            @for (detail of content.patientDetails; track trackByLabel($index, detail)) {
+              <article class="report-preview-shell__clinical-data-card">
+                <span class="report-preview-shell__clinical-data-label">{{ detail.label }}</span>
+                <strong class="report-preview-shell__clinical-data-value">{{ detail.value }}</strong>
+              </article>
+            }
           </div>
-        </div>
+        </section>
 
-        <div class="report-preview-shell__clinical-kpis">
-          @for (metric of content.kpis; track metric.label) {
-            <article class="report-preview-shell__clinical-kpi">
-              <span class="report-preview-shell__clinical-kpi-label">{{ metric.label }}</span>
-              <strong class="report-preview-shell__clinical-kpi-value">{{ metric.value }}</strong>
-              <p class="report-preview-shell__clinical-kpi-supporting">{{ metric.supportingText }}</p>
-            </article>
-          }
-        </div>
-      </section>
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.recordSection.title }}</h4>
+            <p>{{ content.recordSection.subtitle }}</p>
+          </header>
 
-      <section class="report-preview-shell__clinical-section">
-        <header class="report-preview-shell__clinical-section-header">
-          <h4>{{ content.patientSection.title }}</h4>
-          <p>{{ content.patientSection.subtitle }}</p>
-        </header>
+          <div class="report-preview-shell__clinical-grid">
+            @for (detail of content.recordDetails; track trackByLabel($index, detail)) {
+              <article class="report-preview-shell__clinical-data-card">
+                <span class="report-preview-shell__clinical-data-label">{{ detail.label }}</span>
+                <strong class="report-preview-shell__clinical-data-value">{{ detail.value }}</strong>
+              </article>
+            }
+          </div>
+        </section>
 
-        <div class="report-preview-shell__clinical-grid">
-          @for (detail of content.patientDetails; track trackByLabel($index, detail)) {
-            <article class="report-preview-shell__clinical-data-card">
-              <span class="report-preview-shell__clinical-data-label">{{ detail.label }}</span>
-              <strong class="report-preview-shell__clinical-data-value">{{ detail.value }}</strong>
-            </article>
-          }
-        </div>
-      </section>
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.diagnosisSection.title }}</h4>
+            <p>{{ content.diagnosisSection.subtitle }}</p>
+          </header>
 
-      <section class="report-preview-shell__clinical-section">
-        <header class="report-preview-shell__clinical-section-header">
-          <h4>{{ content.generalInfoSection.title }}</h4>
-          <p>{{ content.generalInfoSection.subtitle }}</p>
-        </header>
-
-        <div class="report-preview-shell__clinical-grid">
-          @for (item of content.generalInfo; track trackByLabel($index, item)) {
-            <article class="report-preview-shell__clinical-data-card">
-              <span class="report-preview-shell__clinical-data-label">{{ item.label }}</span>
-              <strong class="report-preview-shell__clinical-data-value">{{ item.value }}</strong>
-            </article>
-          }
-        </div>
-      </section>
-
-      <section class="report-preview-shell__clinical-section">
-        <header class="report-preview-shell__clinical-section-header">
-          <h4>{{ content.evolutionSection.title }}</h4>
-          <p>{{ content.evolutionSection.subtitle }}</p>
-        </header>
-
-        @if (content.evolutionSummary.length) {
           <div class="report-preview-shell__clinical-narrative">
-            @for (paragraph of content.evolutionSummary; track paragraph) {
-              <p>{{ paragraph }}</p>
-            }
+            <p>{{ content.diagnosis }}</p>
           </div>
-        } @else {
-          <app-data-table-empty-state
-            icon="description"
-            [title]="content.evolutionSection.emptyTitle || emptyTitle()"
-            [message]="content.evolutionSection.emptyMessage || emptyMessage()"
-          />
-        }
-      </section>
+        </section>
 
-      <section class="report-preview-shell__clinical-section">
-        <header class="report-preview-shell__clinical-section-header">
-          <h4>{{ content.timelineSection.title }}</h4>
-          <p>{{ content.timelineSection.subtitle }}</p>
-        </header>
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.treatmentPlanSection.title }}</h4>
+            <p>{{ content.treatmentPlanSection.subtitle }}</p>
+          </header>
 
-        @if (content.timelineItems.length) {
-          <div class="report-preview-shell__clinical-timeline">
-            @for (item of content.timelineItems; track item.id) {
-              <article class="report-preview-shell__clinical-timeline-item">
-                <div class="report-preview-shell__clinical-timeline-marker" aria-hidden="true"></div>
-                <div class="report-preview-shell__clinical-timeline-body">
-                  <div class="report-preview-shell__clinical-timeline-row">
-                    <strong class="report-preview-shell__clinical-list-title">{{ item.title }}</strong>
-                    <span class="report-preview-shell__clinical-list-date">{{ item.occurredAtLabel }}</span>
+          <div class="report-preview-shell__clinical-narrative">
+            <p>{{ content.treatmentPlan }}</p>
+          </div>
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.appointmentsSection.title }}</h4>
+            <p>{{ content.appointmentsSection.subtitle }}</p>
+          </header>
+
+          @if (content.appointments.length) {
+            <div class="report-preview-shell__clinical-list">
+              @for (appointment of content.appointments; track appointment.id) {
+                <article class="report-preview-shell__clinical-list-item">
+                  <div class="report-preview-shell__clinical-list-header">
+                    <strong class="report-preview-shell__clinical-list-title">{{ appointment.scheduledAtLabel }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{ appointment.statusLabel }}</span>
                   </div>
-                  <p class="report-preview-shell__clinical-list-body">{{ item.description }}</p>
-                </div>
-              </article>
-            }
-          </div>
-        } @else {
-          <app-data-table-empty-state
-            icon="timeline"
-            [title]="content.timelineSection.emptyTitle || emptyTitle()"
-            [message]="content.timelineSection.emptyMessage || emptyMessage()"
-          />
-        }
-      </section>
-
-      <section class="report-preview-shell__clinical-section">
-        <header class="report-preview-shell__clinical-section-header">
-          <h4>{{ content.notesSection.title }}</h4>
-          <p>{{ content.notesSection.subtitle }}</p>
-        </header>
-
-        @if (content.notes.length) {
-          <div class="report-preview-shell__clinical-list">
-            @for (note of content.notes; track note.id) {
-              <article class="report-preview-shell__clinical-list-item">
-                <div class="report-preview-shell__clinical-list-header">
-                  <strong class="report-preview-shell__clinical-list-title">{{ note.title }}</strong>
-                  <span class="report-preview-shell__clinical-list-date">{{ note.sessionDateLabel }}</span>
-                </div>
-                <p class="report-preview-shell__clinical-list-body">{{ note.excerpt }}</p>
-              </article>
-            }
-          </div>
-
-          @if (content.hiddenNotesCount > 0) {
-            <p class="report-preview-shell__clinical-footnote">
-              Se omitieron visualmente {{ content.hiddenNotesCount }} notas adicionales para mantener una lectura ejecutiva.
-            </p>
+                  <p class="report-preview-shell__clinical-list-body">Duracion: {{ appointment.durationLabel }}</p>
+                  <p class="report-preview-shell__clinical-list-body">{{ appointment.notes }}</p>
+                </article>
+              }
+            </div>
+          } @else {
+            <app-data-table-empty-state
+              icon="event_note"
+              [title]="content.appointmentsSection.emptyTitle || emptyTitle()"
+              [message]="content.appointmentsSection.emptyMessage || emptyMessage()"
+            />
           }
-        } @else {
-          <app-data-table-empty-state
-            icon="notes"
-            [title]="content.notesSection.emptyTitle || emptyTitle()"
-            [message]="content.notesSection.emptyMessage || emptyMessage()"
-          />
-        }
-      </section>
+        </section>
 
-      <section class="report-preview-shell__clinical-section">
-        <header class="report-preview-shell__clinical-section-header">
-          <h4>{{ content.documentsSection.title }}</h4>
-          <p>{{ content.documentsSection.subtitle }}</p>
-        </header>
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.notesSection.title }}</h4>
+            <p>{{ content.notesSection.subtitle }}</p>
+          </header>
 
-        @if (content.documents.length) {
-          <div class="report-preview-shell__clinical-list">
-            @for (document of content.documents; track document.id) {
-              <article class="report-preview-shell__clinical-list-item">
-                <div class="report-preview-shell__clinical-list-header">
-                  <strong class="report-preview-shell__clinical-list-title">{{ document.fileName }}</strong>
-                  <span class="report-preview-shell__clinical-list-date">{{ document.uploadedAtLabel }}</span>
-                </div>
-                <p class="report-preview-shell__clinical-list-body">{{ document.typeLabel }}</p>
+          @if (content.notes.length) {
+            <div class="report-preview-shell__clinical-list">
+              @for (note of content.notes; track note.id) {
+                <article class="report-preview-shell__clinical-list-item">
+                  <div class="report-preview-shell__clinical-list-header">
+                    <strong class="report-preview-shell__clinical-list-title">{{ note.title }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{ note.sessionDateLabel }}</span>
+                  </div>
+                  <p class="report-preview-shell__clinical-list-body report-preview-shell__clinical-list-body--preserve">
+                    {{ note.content }}
+                  </p>
+                </article>
+              }
+            </div>
+          } @else {
+            <app-data-table-empty-state
+              icon="notes"
+              [title]="content.notesSection.emptyTitle || emptyTitle()"
+              [message]="content.notesSection.emptyMessage || emptyMessage()"
+            />
+          }
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.documentsSection.title }}</h4>
+            <p>{{ content.documentsSection.subtitle }}</p>
+          </header>
+
+          @if (content.documents.length) {
+            <div class="report-preview-shell__clinical-list">
+              @for (document of content.documents; track document.id) {
+                <article class="report-preview-shell__clinical-list-item">
+                  <div class="report-preview-shell__clinical-list-header">
+                    <strong class="report-preview-shell__clinical-list-title">{{ document.fileName }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{ document.uploadedAtLabel }}</span>
+                  </div>
+                  <p class="report-preview-shell__clinical-list-body">{{ document.typeLabel }}</p>
+                </article>
+              }
+            </div>
+          } @else {
+            <app-data-table-empty-state
+              icon="description"
+              [title]="content.documentsSection.emptyTitle || emptyTitle()"
+              [message]="content.documentsSection.emptyMessage || emptyMessage()"
+            />
+          }
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.timelineSection.title }}</h4>
+            <p>{{ content.timelineSection.subtitle }}</p>
+          </header>
+
+          @if (content.timelineItems.length) {
+            <div class="report-preview-shell__clinical-timeline">
+              @for (item of content.timelineItems; track item.id) {
+                <article class="report-preview-shell__clinical-timeline-item">
+                  <div class="report-preview-shell__clinical-timeline-marker" aria-hidden="true"></div>
+                  <div class="report-preview-shell__clinical-timeline-body">
+                    <div class="report-preview-shell__clinical-timeline-row">
+                      <strong class="report-preview-shell__clinical-list-title">{{ item.title }}</strong>
+                      <span class="report-preview-shell__clinical-list-date">{{ item.occurredAtLabel }}</span>
+                    </div>
+                    <p class="report-preview-shell__clinical-list-body">{{ item.description }}</p>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <app-data-table-empty-state
+              icon="timeline"
+              [title]="content.timelineSection.emptyTitle || emptyTitle()"
+              [message]="content.timelineSection.emptyMessage || emptyMessage()"
+            />
+          }
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.referencesSection.title }}</h4>
+            <p>{{ content.referencesSection.subtitle }}</p>
+          </header>
+
+          @if (content.references.length) {
+            <div class="report-preview-shell__clinical-grid">
+              @for (reference of content.references; track trackByLabel($index, reference)) {
+                <article class="report-preview-shell__clinical-data-card">
+                  <span class="report-preview-shell__clinical-data-label">{{ reference.label }}</span>
+                  <strong class="report-preview-shell__clinical-data-value">{{ reference.value }}</strong>
+                </article>
+              }
+            </div>
+          } @else {
+            <app-data-table-empty-state
+              icon="attach_file"
+              [title]="content.referencesSection.emptyTitle || emptyTitle()"
+              [message]="content.referencesSection.emptyMessage || emptyMessage()"
+            />
+          }
+        </section>
+      } @else {
+        <section class="report-preview-shell__clinical-hero">
+          <div class="report-preview-shell__clinical-patient">
+            <div class="report-preview-shell__clinical-avatar" aria-hidden="true">{{ content.patientInitials }}</div>
+            <div class="report-preview-shell__clinical-patient-copy">
+              <span class="report-preview-shell__clinical-eyebrow">{{ content.patientSection.title }}</span>
+              <h3>{{ content.patientFullName }}</h3>
+              <p>{{ content.patientSection.subtitle }}</p>
+            </div>
+          </div>
+
+          <div class="report-preview-shell__clinical-kpis">
+            @for (metric of content.kpis; track metric.label) {
+              <article class="report-preview-shell__clinical-kpi">
+                <span class="report-preview-shell__clinical-kpi-label">{{ metric.label }}</span>
+                <strong class="report-preview-shell__clinical-kpi-value">{{ metric.value }}</strong>
+                <p class="report-preview-shell__clinical-kpi-supporting">{{ metric.supportingText }}</p>
               </article>
             }
           </div>
-        } @else {
-          <app-data-table-empty-state
-            icon="description"
-            [title]="content.documentsSection.emptyTitle || emptyTitle()"
-            [message]="content.documentsSection.emptyMessage || emptyMessage()"
-          />
-        }
-      </section>
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.patientSection.title }}</h4>
+            <p>{{ content.patientSection.subtitle }}</p>
+          </header>
+
+          <div class="report-preview-shell__clinical-grid">
+            @for (detail of content.patientDetails; track trackByLabel($index, detail)) {
+              <article class="report-preview-shell__clinical-data-card">
+                <span class="report-preview-shell__clinical-data-label">{{ detail.label }}</span>
+                <strong class="report-preview-shell__clinical-data-value">{{ detail.value }}</strong>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.generalInfoSection.title }}</h4>
+            <p>{{ content.generalInfoSection.subtitle }}</p>
+          </header>
+
+          <div class="report-preview-shell__clinical-grid">
+            @for (item of content.generalInfo; track trackByLabel($index, item)) {
+              <article class="report-preview-shell__clinical-data-card">
+                <span class="report-preview-shell__clinical-data-label">{{ item.label }}</span>
+                <strong class="report-preview-shell__clinical-data-value">{{ item.value }}</strong>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.evolutionSection.title }}</h4>
+            <p>{{ content.evolutionSection.subtitle }}</p>
+          </header>
+
+          @if (content.evolutionSummary.length) {
+            <div class="report-preview-shell__clinical-narrative">
+              @for (paragraph of content.evolutionSummary; track paragraph) {
+                <p>{{ paragraph }}</p>
+              }
+            </div>
+          } @else {
+            <app-data-table-empty-state
+              icon="description"
+              [title]="content.evolutionSection.emptyTitle || emptyTitle()"
+              [message]="content.evolutionSection.emptyMessage || emptyMessage()"
+            />
+          }
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.timelineSection.title }}</h4>
+            <p>{{ content.timelineSection.subtitle }}</p>
+          </header>
+
+          @if (content.timelineItems.length) {
+            <div class="report-preview-shell__clinical-timeline">
+              @for (item of content.timelineItems; track item.id) {
+                <article class="report-preview-shell__clinical-timeline-item">
+                  <div class="report-preview-shell__clinical-timeline-marker" aria-hidden="true"></div>
+                  <div class="report-preview-shell__clinical-timeline-body">
+                    <div class="report-preview-shell__clinical-timeline-row">
+                      <strong class="report-preview-shell__clinical-list-title">{{ item.title }}</strong>
+                      <span class="report-preview-shell__clinical-list-date">{{ item.occurredAtLabel }}</span>
+                    </div>
+                    <p class="report-preview-shell__clinical-list-body">{{ item.description }}</p>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <app-data-table-empty-state
+              icon="timeline"
+              [title]="content.timelineSection.emptyTitle || emptyTitle()"
+              [message]="content.timelineSection.emptyMessage || emptyMessage()"
+            />
+          }
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.notesSection.title }}</h4>
+            <p>{{ content.notesSection.subtitle }}</p>
+          </header>
+
+          @if (content.notes.length) {
+            <div class="report-preview-shell__clinical-list">
+              @for (note of content.notes; track note.id) {
+                <article class="report-preview-shell__clinical-list-item">
+                  <div class="report-preview-shell__clinical-list-header">
+                    <strong class="report-preview-shell__clinical-list-title">{{ note.title }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{ note.sessionDateLabel }}</span>
+                  </div>
+                  <p class="report-preview-shell__clinical-list-body">{{ note.excerpt }}</p>
+                </article>
+              }
+            </div>
+
+            @if (content.hiddenNotesCount > 0) {
+              <p class="report-preview-shell__clinical-footnote">
+                Se omitieron visualmente {{ content.hiddenNotesCount }} notas adicionales para mantener una lectura ejecutiva.
+              </p>
+            }
+          } @else {
+            <app-data-table-empty-state
+              icon="notes"
+              [title]="content.notesSection.emptyTitle || emptyTitle()"
+              [message]="content.notesSection.emptyMessage || emptyMessage()"
+            />
+          }
+        </section>
+
+        <section class="report-preview-shell__clinical-section">
+          <header class="report-preview-shell__clinical-section-header">
+            <h4>{{ content.documentsSection.title }}</h4>
+            <p>{{ content.documentsSection.subtitle }}</p>
+          </header>
+
+          @if (content.documents.length) {
+            <div class="report-preview-shell__clinical-list">
+              @for (document of content.documents; track document.id) {
+                <article class="report-preview-shell__clinical-list-item">
+                  <div class="report-preview-shell__clinical-list-header">
+                    <strong class="report-preview-shell__clinical-list-title">{{ document.fileName }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{ document.uploadedAtLabel }}</span>
+                  </div>
+                  <p class="report-preview-shell__clinical-list-body">{{ document.typeLabel }}</p>
+                </article>
+              }
+            </div>
+          } @else {
+            <app-data-table-empty-state
+              icon="description"
+              [title]="content.documentsSection.emptyTitle || emptyTitle()"
+              [message]="content.documentsSection.emptyMessage || emptyMessage()"
+            />
+          }
+        </section>
+      }
     </article>
   } @else if (previewMode() === 'grouped' && groups().length) {
     <div class="report-preview-shell__groups" aria-label="Vista previa agrupada por dia">

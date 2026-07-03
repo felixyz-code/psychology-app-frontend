@@ -1,3 +1,4 @@
+import { ClinicalRecordContent } from './clinical-record-report.model';
 import { MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
 import { ClinicalSummaryContent } from './clinical-summary-report.model';
 import { ReportExportFormat, ReportKey } from './report-definition.model';
@@ -56,6 +57,7 @@ export interface ReportResult<TFilters> {
   reportKey: ReportKey;
   title: string;
   generatedAt: string;
+  pdfFileName: string;
   appliedFilters: TFilters;
   contextItems: ReportContextItem[];
   metrics: ReportMetric[];
@@ -63,7 +65,7 @@ export interface ReportResult<TFilters> {
   rows: ReportTableRow[];
   previewMode: 'table' | 'grouped' | 'clinical';
   groups: ReportPreviewGroup[];
-  clinicalContent?: ClinicalSummaryContent | null;
+  clinicalContent?: ClinicalSummaryContent | ClinicalRecordContent | null;
   csvFileName: string;
   supportedExports: ReportExportFormat[];
   emptyTitle: string;

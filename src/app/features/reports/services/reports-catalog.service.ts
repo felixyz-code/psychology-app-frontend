@@ -35,6 +35,16 @@ export class ReportsCatalogService {
       route: '/reports/clinical-summary',
       supportedExports: ['pdf'],
     },
+    {
+      key: 'clinical-record',
+      title: 'Expediente Clinico',
+      description:
+        'Genera un expediente clinico estructurado e imprimible con datos del paciente, citas, notas, documentos y timeline.',
+      category: 'Operacion clinica',
+      icon: 'folder_shared',
+      route: '/reports/clinical-record',
+      supportedExports: ['pdf'],
+    },
   ];
 
   getReports(): ReportDefinition[] {

@@ -8,6 +8,31 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 12
 
+## Sprint 12.5 - Expediente Clinico
+
+### Added
+
+* Nuevo `Expediente Clinico` dentro de `Reports` con ruta dedicada `/reports/clinical-record`.
+* Nuevo documento clinico completo, estructurado e imprimible con secciones de identificacion del paciente, datos del expediente, diagnostico, plan terapeutico, historial de citas, notas clinicas completas, documentos relacionados, timeline clinico y referencias.
+* Exportacion principal a `PDF` para el expediente clinico dentro de la infraestructura compartida de `Reports`.
+
+### Changed
+
+* `Reports` ahora registra explicitamente `Expediente Clinico` como su cuarto reporte soportado junto con `Financial Report`, `Agenda Report` y `Clinical Summary`.
+* La salida clinica documental ahora distingue dos productos diferentes: `Resumen Clinico` como documento ejecutivo, breve y sintetico, y `Expediente Clinico` como documento completo y estructurado.
+* El nuevo reporte clinico reutiliza el mismo anclaje centrado en paciente y exige seleccion obligatoria de paciente antes de ejecutarse.
+* Los reportes clinicos mantienen `PDF` como salida principal y `CSV` no se expone para `Resumen Clinico` ni para `Expediente Clinico`.
+* La exportacion `PDF` de `Reports` ahora usa nombres descriptivos por reporte, paciente y periodo cuando aplica para mejorar la identificacion de documentos generados.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* `Expediente Clinico` reutiliza `PatientsService`, `CaseFilesService.getCaseFileByPatientId(...)` y `CaseFilesService.getWorkspace(...)`.
+* `Reports` ahora construye `pdfFileName` como parte del resultado del reporte para mantener nombres descriptivos de exportacion sin alterar el contenido del documento.
+* `npm.cmd run build` finalizo correctamente.
+
 ## Sprint 12.4 - Resumen Clinico
 
 ### Added

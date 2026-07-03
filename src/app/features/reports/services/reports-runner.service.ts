@@ -42,6 +42,15 @@ import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { SessionNote } from '../../session-notes/models/session-note.models';
 import {
+  ClinicalRecordAppointmentItem,
+  ClinicalRecordContent,
+  ClinicalRecordDocumentItem,
+  ClinicalRecordField,
+  ClinicalRecordNoteItem,
+  ClinicalRecordReportFilters,
+  ClinicalRecordTimelineItem,
+} from '../models/clinical-record-report.model';
+import {
   ClinicalSummaryContent,
   ClinicalSummaryDocument,
   ClinicalSummaryMetric,
@@ -114,16 +123,48 @@ export class ReportsRunnerService {
     );
   }
 
+  runClinicalRecordReport(
+    filters: ClinicalRecordReportFilters
+  ): Observable<ReportResult<ClinicalRecordReportFilters>> {
+    const definition = this.getDefinition('clinical-record');
+
+    return this.patientsService.getPatientById(filters.patientId).pipe(
+      switchMap((patient) =>
+        this.caseFilesService.getCaseFileByPatientId(filters.patientId).pipe(
+          switchMap((caseFile) =>
+            this.caseFilesService
+              .getWorkspace(caseFile.id)
+              .pipe(map((workspace) => this.buildClinicalRecordResult(definition, filters, patient, caseFile, workspace)))
+          ),
+          catchError((error: { status?: number }) => {
+            if (error?.status === 404) {
+              return of(this.buildClinicalRecordResult(definition, filters, patient, null, null));
+            }
+
+            return throwError(() => error);
+          })
+        )
+      )
+    );
+  }
+
   private buildFinancialResult(
     definition: ReportDefinition,
     filters: FinancialReportFilters,
     summary: FinancialTransactionSummaryDto,
     transactions: FinancialTransactionResponse[]
   ): ReportResult<FinancialReportFilters> {
+    const generatedAt = new Date().toISOString();
+
     return {
       reportKey: definition.key,
       title: definition.title,
-      generatedAt: new Date().toISOString(),
+      generatedAt,
+      pdfFileName: this.buildPdfFileName('Reporte Financiero', {
+        from: filters.from,
+        to: filters.to,
+        generatedAt,
+      }),
       appliedFilters: filters,
       contextItems: this.buildFinancialContextItems(filters),
       metrics: [
@@ -199,11 +240,17 @@ export class ReportsRunnerService {
     const filteredAppointments = this.filterAgendaAppointments(appointments, filters);
     const sortedAppointments = sortAppointmentsByScheduledAt(filteredAppointments);
     const rows = this.buildAgendaRows(sortedAppointments, patientNames);
+    const generatedAt = new Date().toISOString();
 
     return {
       reportKey: definition.key,
       title: definition.title,
-      generatedAt: new Date().toISOString(),
+      generatedAt,
+      pdfFileName: this.buildPdfFileName('Reporte Agenda', {
+        from: filters.from,
+        to: filters.to,
+        generatedAt,
+      }),
       appliedFilters: filters,
       contextItems: this.buildAgendaContextItems(filters, patientNames),
       metrics: this.buildAgendaMetrics(sortedAppointments),
@@ -250,10 +297,18 @@ export class ReportsRunnerService {
       workspace?.summary.lastActivityAt ?? null
     );
 
+    const generatedAt = new Date().toISOString();
+
     return {
       reportKey: definition.key,
       title: definition.title,
-      generatedAt: new Date().toISOString(),
+      generatedAt,
+      pdfFileName: this.buildPdfFileName('Resumen Clinico', {
+        patientName: `${patient.firstName} ${patient.lastName}`.trim(),
+        from: filters.from,
+        to: filters.to,
+        generatedAt,
+      }),
       appliedFilters: filters,
       contextItems: this.buildClinicalSummaryContextItems(filters, patient, caseFile ?? workspace?.caseFile ?? null),
       metrics: this.buildClinicalSummaryMetricCards(clinicalContent.kpis),
@@ -266,6 +321,62 @@ export class ReportsRunnerService {
       supportedExports: definition.supportedExports,
       emptyTitle: 'Selecciona un paciente para generar el resumen',
       emptyMessage: 'El reporte clinico se construye a partir del paciente y su expediente disponible.',
+    };
+  }
+
+  private buildClinicalRecordResult(
+    definition: ReportDefinition,
+    filters: ClinicalRecordReportFilters,
+    patient: Patient,
+    caseFile: CaseFile | null,
+    workspace: CaseFileWorkspaceResponse | null
+  ): ReportResult<ClinicalRecordReportFilters> {
+    const filteredAppointments = this.getFilteredAppointments(workspace?.appointments ?? [], filters);
+    const filteredNotes = this.getFilteredNotes(workspace?.sessionNotes ?? [], filters);
+    const filteredDocuments = this.getFilteredDocuments(workspace?.documents ?? [], filters);
+    const filteredTimeline = this.getFilteredTimeline(workspace?.timeline ?? [], filters);
+    const resolvedCaseFile = caseFile ?? workspace?.caseFile ?? null;
+    const clinicalContent = this.buildClinicalRecordContent(
+      patient,
+      resolvedCaseFile,
+      filteredAppointments,
+      filteredNotes,
+      filteredDocuments,
+      filteredTimeline,
+      workspace?.summary.lastActivityAt ?? null,
+      this.buildDateRangeLabel(filters)
+    );
+
+    const generatedAt = new Date().toISOString();
+
+    return {
+      reportKey: definition.key,
+      title: definition.title,
+      generatedAt,
+      pdfFileName: this.buildPdfFileName('Expediente Clinico', {
+        patientName: `${patient.firstName} ${patient.lastName}`.trim(),
+        from: filters.from,
+        to: filters.to,
+        generatedAt,
+      }),
+      appliedFilters: filters,
+      contextItems: this.buildClinicalRecordContextItems(filters, patient, resolvedCaseFile),
+      metrics: this.buildClinicalRecordMetricCards(
+        resolvedCaseFile,
+        filteredAppointments,
+        filteredNotes,
+        filteredDocuments,
+        workspace?.summary.lastActivityAt ?? null
+      ),
+      columns: [],
+      rows: [],
+      previewMode: 'clinical',
+      groups: [],
+      clinicalContent,
+      csvFileName: `expediente-clinico-${filters.patientId}-${filters.from ?? 'sin-desde'}-${filters.to ?? 'sin-hasta'}.csv`,
+      supportedExports: definition.supportedExports,
+      emptyTitle: 'Selecciona un paciente para generar el expediente',
+      emptyMessage: 'El expediente clinico se construye a partir del paciente y su expediente disponible.',
     };
   }
 
@@ -417,6 +528,61 @@ export class ReportsRunnerService {
     return `reporte-agenda-${from}-${to}.csv`;
   }
 
+  private buildPdfFileName(
+    reportLabel: string,
+    options: {
+      patientName?: string;
+      from?: string;
+      to?: string;
+      generatedAt: string;
+    }
+  ): string {
+    const dateRangeSegment = this.buildFileDateRangeSegment(options.from, options.to);
+    const parts = [
+      reportLabel,
+      options.patientName?.trim() || undefined,
+      dateRangeSegment,
+      dateRangeSegment === 'Historico_Completo' ? this.buildGeneratedAtSegment(options.generatedAt) : undefined,
+    ].filter((value): value is string => Boolean(value));
+
+    return `${parts.map((part) => this.sanitizeFileNamePart(part)).join('_')}.pdf`;
+  }
+
+  private buildFileDateRangeSegment(from?: string, to?: string): string {
+    if (from && to) {
+      return `${from}_a_${to}`;
+    }
+
+    if (from) {
+      return `${from}_en_adelante`;
+    }
+
+    if (to) {
+      return `hasta_${to}`;
+    }
+
+    return 'Historico_Completo';
+  }
+
+  private buildGeneratedAtSegment(generatedAt: string): string {
+    const parsed = new Date(generatedAt);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return '';
+    }
+
+    return parsed.toISOString().slice(0, 10);
+  }
+
+  private sanitizeFileNamePart(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^A-Za-z0-9_-]+/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_+|_+$/g, '') || 'Sin_Paciente';
+  }
+
   private buildFinancialContextItems(filters: FinancialReportFilters): ReportContextItem[] {
     return [
       {
@@ -479,6 +645,27 @@ export class ReportsRunnerService {
       {
         label: 'Expediente',
         value: caseFile ? 'Disponible' : 'Pendiente',
+      },
+    ];
+  }
+
+  private buildClinicalRecordContextItems(
+    filters: ClinicalRecordReportFilters,
+    patient: Patient,
+    caseFile: CaseFile | null
+  ): ReportContextItem[] {
+    return [
+      {
+        label: 'Paciente',
+        value: `${patient.firstName} ${patient.lastName}`.trim(),
+      },
+      {
+        label: 'Periodo',
+        value: this.buildDateRangeLabel(filters),
+      },
+      {
+        label: 'Estado del expediente',
+        value: this.getCaseFileAvailabilityLabel(caseFile),
       },
     ];
   }
@@ -606,6 +793,7 @@ export class ReportsRunnerService {
     const hiddenNotesCount = Math.max(filteredNotes.length - notesPreview.length, 0);
 
     return {
+      kind: 'summary',
       patientSection: {
         title: 'Paciente',
         subtitle: 'Datos de identificacion y contacto disponibles en el frontend actual.',
@@ -699,6 +887,128 @@ export class ReportsRunnerService {
     };
   }
 
+  private buildClinicalRecordContent(
+    patient: Patient,
+    caseFile: CaseFile | null,
+    appointments: Appointment[],
+    notes: SessionNote[],
+    documents: Document[],
+    timeline: ClinicalTimelineEvent[],
+    lastActivityAt: string | null,
+    periodLabel: string
+  ): ClinicalRecordContent {
+    const sortedDocuments = [...documents].sort((left, right) => right.uploadedAt.localeCompare(left.uploadedAt));
+    const sortedTimeline = [...timeline].sort((left, right) => right.occurredAt.localeCompare(left.occurredAt));
+    const mappedDocuments = sortedDocuments.map((document) => this.mapClinicalRecordDocument(document));
+
+    return {
+      kind: 'record',
+      documentTitle: 'Expediente Clinico',
+      patientFullName: `${patient.firstName} ${patient.lastName}`.trim(),
+      patientInitials: this.buildPatientInitials(patient),
+      generatedAtLabel: this.formatDateTime(new Date().toISOString()),
+      periodLabel,
+      patientSection: {
+        title: 'Identificacion del paciente',
+        subtitle: 'Datos generales y de contacto disponibles para este expediente.',
+      },
+      recordSection: {
+        title: 'Datos del expediente',
+        subtitle: 'Estado documental del expediente y referencias de seguimiento visibles en el frontend.',
+      },
+      diagnosisSection: {
+        title: 'Diagnostico',
+        subtitle: 'Diagnostico clinico registrado en el expediente.',
+        emptyTitle: 'Diagnostico no disponible',
+        emptyMessage: 'No existe diagnostico clinico registrado en el expediente actual.',
+      },
+      treatmentPlanSection: {
+        title: 'Plan terapeutico',
+        subtitle: 'Plan de abordaje registrado para el seguimiento del paciente.',
+        emptyTitle: 'Plan terapeutico no disponible',
+        emptyMessage: 'No existe plan terapeutico registrado en el expediente actual.',
+      },
+      appointmentsSection: {
+        title: 'Historial de citas',
+        subtitle: 'Citas visibles dentro del rango solicitado con estado, duracion y notas asociadas.',
+        emptyTitle: 'Sin citas en el periodo',
+        emptyMessage: 'No se encontraron citas visibles para el rango seleccionado.',
+      },
+      notesSection: {
+        title: 'Notas clinicas',
+        subtitle: 'Registro narrativo completo de notas clinicas visibles en el periodo consultado.',
+        emptyTitle: 'Sin notas clinicas en el periodo',
+        emptyMessage: 'No se encontraron notas clinicas dentro del rango seleccionado.',
+      },
+      documentsSection: {
+        title: 'Documentos relacionados',
+        subtitle: 'Listado documental referencial con nombre, tipo y fecha de carga.',
+        emptyTitle: 'Sin documentos en el periodo',
+        emptyMessage: 'No se encontraron documentos relacionados dentro del rango seleccionado.',
+      },
+      timelineSection: {
+        title: 'Timeline clinico',
+        subtitle: 'Secuencia cronologica de eventos clinicos relevantes dentro del periodo.',
+        emptyTitle: 'Sin eventos clinicos en el periodo',
+        emptyMessage: 'No se identificaron eventos clinicos visibles para el rango seleccionado.',
+      },
+      referencesSection: {
+        title: 'Referencias y anexos',
+        subtitle: 'Indice referencial de documentos asociados. No se embeben archivos reales en este reporte.',
+        emptyTitle: 'Sin referencias documentales',
+        emptyMessage: 'No hay documentos disponibles para anexar como referencia en el periodo consultado.',
+      },
+      patientDetails: [
+        {
+          label: 'Nombre completo',
+          value: `${patient.firstName} ${patient.lastName}`.trim(),
+        },
+        {
+          label: 'Telefono',
+          value: this.formatOptionalText(patient.phoneNumber),
+        },
+        {
+          label: 'Correo',
+          value: this.formatOptionalText(patient.email),
+        },
+        {
+          label: 'Fecha de nacimiento',
+          value: this.formatBirthDate(patient.birthDate),
+        },
+        {
+          label: 'Edad',
+          value: this.formatPatientAge(patient.birthDate),
+        },
+      ],
+      recordDetails: [
+        {
+          label: 'Estado derivado',
+          value: this.getCaseFileAvailabilityLabel(caseFile),
+        },
+        {
+          label: 'Fecha de apertura',
+          value: caseFile ? this.formatDateTime(caseFile.createdAt) : 'Pendiente',
+        },
+        {
+          label: 'Ultima actividad',
+          value: lastActivityAt ? this.formatDateTime(lastActivityAt) : 'Sin actividad visible',
+        },
+        {
+          label: 'Periodo consultado',
+          value: periodLabel,
+        },
+      ],
+      diagnosis: caseFile?.diagnosis?.trim() || 'No existe diagnostico clinico registrado en el expediente actual.',
+      treatmentPlan:
+        caseFile?.treatmentPlan?.trim() || 'No existe plan terapeutico registrado en el expediente actual.',
+      appointments: appointments.map((appointment) => this.mapClinicalRecordAppointment(appointment)),
+      notes: notes.map((note) => this.mapClinicalRecordNote(note)),
+      documents: mappedDocuments,
+      timelineItems: sortedTimeline.map((event) => this.mapClinicalRecordTimelineItem(event)),
+      references: mappedDocuments.map((document, index) => this.buildClinicalRecordReference(document, index)),
+    };
+  }
+
   private buildClinicalSummaryMetricCards(kpis: ClinicalSummaryMetric[]) {
     const variants: Array<'blue' | 'green' | 'amber' | 'violet'> = ['blue', 'green', 'amber', 'violet', 'blue'];
 
@@ -709,6 +1019,54 @@ export class ReportsRunnerService {
       supportingText: metric.supportingText,
       variant: variants[index] ?? 'blue',
     }));
+  }
+
+  private buildClinicalRecordMetricCards(
+    caseFile: CaseFile | null,
+    appointments: Appointment[],
+    notes: SessionNote[],
+    documents: Document[],
+    lastActivityAt: string | null
+  ) {
+    const latestAppointment = appointments[0] ?? null;
+
+    return [
+      {
+        icon: 'folder_shared',
+        label: 'Estado del expediente',
+        value: this.getCaseFileAvailabilityLabel(caseFile),
+        supportingText: 'Condicion derivada de diagnostico y plan terapeutico visibles en el expediente.',
+        variant: 'blue' as const,
+      },
+      {
+        icon: 'event_note',
+        label: 'Citas visibles',
+        value: this.formatAppointmentMetricCount(appointments.length),
+        supportingText: 'Citas identificadas dentro del rango inclusivo solicitado.',
+        variant: 'green' as const,
+      },
+      {
+        icon: 'notes',
+        label: 'Notas clinicas',
+        value: this.formatCount(notes.length, 'nota', 'notas'),
+        supportingText: 'Notas clinicas completas visibles para el mismo periodo.',
+        variant: 'violet' as const,
+      },
+      {
+        icon: 'description',
+        label: 'Documentos relacionados',
+        value: this.formatCount(documents.length, 'documento', 'documentos'),
+        supportingText: 'Documentos referenciales visibles dentro del periodo consultado.',
+        variant: 'amber' as const,
+      },
+      {
+        icon: 'history',
+        label: 'Ultima actividad',
+        value: lastActivityAt ? this.formatDateTime(lastActivityAt) : latestAppointment ? this.formatDateTime(latestAppointment.scheduledAt) : 'Sin actividad visible',
+        supportingText: 'Referencia temporal mas reciente encontrada en el expediente visible.',
+        variant: 'blue' as const,
+      },
+    ];
   }
 
   private buildClinicalSummaryKpis(
@@ -801,17 +1159,34 @@ export class ReportsRunnerService {
     ).reverse();
   }
 
-  private getFilteredNotes(notes: SessionNote[], filters: ClinicalSummaryReportFilters): SessionNote[] {
-    return notes.filter((note) => this.matchesInclusiveRange(note.sessionDate, filters));
+  private getFilteredAppointments(
+    appointments: Appointment[],
+    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters
+  ): Appointment[] {
+    return sortAppointmentsByScheduledAt(
+      appointments.filter((appointment) => this.matchesInclusiveRange(appointment.scheduledAt, filters))
+    ).reverse();
   }
 
-  private getFilteredDocuments(documents: Document[], filters: ClinicalSummaryReportFilters): Document[] {
+  private getFilteredNotes(
+    notes: SessionNote[],
+    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters
+  ): SessionNote[] {
+    return [...notes]
+      .filter((note) => this.matchesInclusiveRange(note.sessionDate, filters))
+      .sort((left, right) => right.sessionDate.localeCompare(left.sessionDate));
+  }
+
+  private getFilteredDocuments(
+    documents: Document[],
+    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters
+  ): Document[] {
     return documents.filter((document) => this.matchesInclusiveRange(document.uploadedAt, filters));
   }
 
   private getFilteredTimeline(
     timeline: ClinicalTimelineEvent[],
-    filters: ClinicalSummaryReportFilters
+    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters
   ): ClinicalTimelineEvent[] {
     return timeline.filter((event) => this.matchesInclusiveRange(event.occurredAt, filters));
   }
@@ -858,6 +1233,57 @@ export class ReportsRunnerService {
       typeLabel: this.getDocumentTypeLabel(document.mimeType),
       uploadedAt: document.uploadedAt,
       uploadedAtLabel: this.formatDateTime(document.uploadedAt),
+    };
+  }
+
+  private mapClinicalRecordAppointment(appointment: Appointment): ClinicalRecordAppointmentItem {
+    return {
+      id: appointment.id,
+      scheduledAt: appointment.scheduledAt,
+      scheduledAtLabel: this.formatDateTime(appointment.scheduledAt),
+      statusLabel: getAppointmentStatusLabel(appointment.status),
+      durationLabel: `${appointment.durationMinutes} min`,
+      notes: appointment.notes?.trim() || 'Sin notas de cita registradas.',
+    };
+  }
+
+  private mapClinicalRecordNote(note: SessionNote): ClinicalRecordNoteItem {
+    return {
+      id: note.id,
+      sessionDate: note.sessionDate,
+      sessionDateLabel: this.formatDateTime(note.sessionDate),
+      title: note.title?.trim() || 'Sesion sin titulo',
+      content: note.content.trim() || 'Sin contenido narrativo registrado.',
+    };
+  }
+
+  private mapClinicalRecordDocument(document: Document): ClinicalRecordDocumentItem {
+    return {
+      id: document.id,
+      fileName: document.fileName,
+      typeLabel: this.getDocumentTypeLabel(document.mimeType),
+      uploadedAt: document.uploadedAt,
+      uploadedAtLabel: this.formatDateTime(document.uploadedAt),
+    };
+  }
+
+  private mapClinicalRecordTimelineItem(event: ClinicalTimelineEvent): ClinicalRecordTimelineItem {
+    return {
+      id: event.id,
+      title: this.getClinicalTimelineTitle(event),
+      description: event.description?.trim() || event.title?.trim() || 'Evento clinico registrado en el expediente.',
+      occurredAt: event.occurredAt,
+      occurredAtLabel: this.formatDateTime(event.occurredAt),
+    };
+  }
+
+  private buildClinicalRecordReference(
+    document: ClinicalRecordDocumentItem,
+    index: number
+  ): ClinicalRecordField {
+    return {
+      label: `Anexo ${index + 1}`,
+      value: `${document.fileName} | ${document.typeLabel} | ${document.uploadedAtLabel}`,
     };
   }
 

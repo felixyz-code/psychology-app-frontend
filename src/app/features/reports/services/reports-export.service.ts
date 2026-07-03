@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 
+import { ClinicalRecordContent } from '../models/clinical-record-report.model';
 import { ClinicalSummaryContent } from '../models/clinical-summary-report.model';
 import { ReportResult } from '../models/report-result.model';
 
@@ -107,12 +108,15 @@ export class ReportsExportService {
       )
       .join('');
 
+    const descriptivePdfName = this.ensurePdfExtension(this.sanitizePrintableFileName(result.pdfFileName));
+    const printableDocumentTitle = descriptivePdfName.replace(/\.pdf$/i, '');
+
     const html = `
       <!doctype html>
       <html lang="es">
         <head>
           <meta charset="utf-8" />
-          <title>${this.escapeHtml(result.title)}</title>
+          <title>${this.escapeHtml(printableDocumentTitle)}</title>
           <style>
             body {
               font-family: "Segoe UI", Arial, sans-serif;
@@ -529,6 +533,8 @@ export class ReportsExportService {
     printWindow.document.open();
     printWindow.document.write(html);
     printWindow.document.close();
+    printWindow.document.title = printableDocumentTitle;
+    printWindow.name = printableDocumentTitle;
     printWindow.focus();
     printWindow.onload = null;
     printWindow.setTimeout(() => {
@@ -570,6 +576,22 @@ export class ReportsExportService {
       .replaceAll("'", '&#39;');
   }
 
+  private sanitizePrintableFileName(value: string): string {
+    const trimmed = value.trim() || 'Reporte';
+
+    return trimmed
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_')
+      .replace(/\s+/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_+|_+$/g, '');
+  }
+
+  private ensurePdfExtension(value: string): string {
+    return value.toLowerCase().endsWith('.pdf') ? value : `${value}.pdf`;
+  }
+
   private formatDateTime(value: string): string {
     const parsedDate = new Date(value);
 
@@ -586,7 +608,15 @@ export class ReportsExportService {
     });
   }
 
-  private buildClinicalPdfHtml(content: ClinicalSummaryContent): string {
+  private buildClinicalPdfHtml(content: ClinicalSummaryContent | ClinicalRecordContent): string {
+    if (content.kind === 'record') {
+      return this.buildClinicalRecordPdfHtml(content);
+    }
+
+    return this.buildClinicalSummaryPdfHtml(content);
+  }
+
+  private buildClinicalSummaryPdfHtml(content: ClinicalSummaryContent): string {
     const renderEmpty = (title: string | undefined, message: string | undefined, fallbackTitle: string, fallbackMessage: string) => `
       <section class="clinical-empty">
         <strong>${this.escapeHtml(title || fallbackTitle)}</strong>
@@ -746,6 +776,225 @@ export class ReportsExportService {
                 content.documentsSection.emptyMessage,
                 'Sin documentos relacionados en el periodo',
                 'No hay documentos visibles en el rango actual.'
+              )
+        }
+      </section>
+    `;
+  }
+
+  private buildClinicalRecordPdfHtml(content: ClinicalRecordContent): string {
+    const renderEmpty = (title: string | undefined, message: string | undefined, fallbackTitle: string, fallbackMessage: string) => `
+      <section class="clinical-empty">
+        <strong>${this.escapeHtml(title || fallbackTitle)}</strong>
+        <p>${this.escapeHtml(message || fallbackMessage)}</p>
+      </section>
+    `;
+
+    return `
+      <section class="clinical-section">
+        <header class="clinical-section__header">
+          <span class="eyebrow">Documento clinico</span>
+          <h3>${this.escapeHtml(content.documentTitle)}</h3>
+          <p>Paciente: ${this.escapeHtml(content.patientFullName)} | Periodo: ${this.escapeHtml(content.periodLabel)} | Generado: ${this.escapeHtml(content.generatedAtLabel)}</p>
+        </header>
+      </section>
+
+      <section class="clinical-hero">
+        <div class="clinical-hero__identity">
+          <div class="clinical-hero__avatar">${this.escapeHtml(content.patientInitials)}</div>
+          <div class="clinical-hero__copy">
+            <span class="eyebrow">Expediente Clinico</span>
+            <h2>${this.escapeHtml(content.patientFullName)}</h2>
+            <p>Documento estructurado e imprimible del expediente clinico visible en el sistema.</p>
+          </div>
+        </div>
+      </section>
+
+      ${this.buildClinicalGridSection(content.patientSection.title, content.patientSection.subtitle, content.patientDetails)}
+      ${this.buildClinicalGridSection(content.recordSection.title, content.recordSection.subtitle, content.recordDetails)}
+
+      <section class="clinical-section">
+        <header class="clinical-section__header">
+          <h3>${this.escapeHtml(content.diagnosisSection.title)}</h3>
+          <p>${this.escapeHtml(content.diagnosisSection.subtitle)}</p>
+        </header>
+        <div class="clinical-narrative">
+          <p>${this.escapeHtml(content.diagnosis)}</p>
+        </div>
+      </section>
+
+      <section class="clinical-section">
+        <header class="clinical-section__header">
+          <h3>${this.escapeHtml(content.treatmentPlanSection.title)}</h3>
+          <p>${this.escapeHtml(content.treatmentPlanSection.subtitle)}</p>
+        </header>
+        <div class="clinical-narrative">
+          <p>${this.escapeHtml(content.treatmentPlan)}</p>
+        </div>
+      </section>
+
+      <section class="clinical-section">
+        <header class="clinical-section__header">
+          <h3>${this.escapeHtml(content.appointmentsSection.title)}</h3>
+          <p>${this.escapeHtml(content.appointmentsSection.subtitle)}</p>
+        </header>
+        ${
+          content.appointments.length
+            ? `
+              <div class="clinical-list">
+                ${content.appointments
+                  .map(
+                    (appointment) => `
+                      <article class="clinical-list__item">
+                        <div class="clinical-list__header">
+                          <strong>${this.escapeHtml(appointment.scheduledAtLabel)}</strong>
+                          <span>${this.escapeHtml(appointment.statusLabel)}</span>
+                        </div>
+                        <p>Duracion: ${this.escapeHtml(appointment.durationLabel)}</p>
+                        <p>${this.escapeHtml(appointment.notes)}</p>
+                      </article>
+                    `
+                  )
+                  .join('')}
+              </div>
+            `
+            : renderEmpty(
+                content.appointmentsSection.emptyTitle,
+                content.appointmentsSection.emptyMessage,
+                'Sin citas en el periodo',
+                'No se encontraron citas visibles para el rango seleccionado.'
+              )
+        }
+      </section>
+
+      <section class="clinical-section">
+        <header class="clinical-section__header">
+          <h3>${this.escapeHtml(content.notesSection.title)}</h3>
+          <p>${this.escapeHtml(content.notesSection.subtitle)}</p>
+        </header>
+        ${
+          content.notes.length
+            ? `
+              <div class="clinical-list">
+                ${content.notes
+                  .map(
+                    (note) => `
+                      <article class="clinical-list__item">
+                        <div class="clinical-list__header">
+                          <strong>${this.escapeHtml(note.title)}</strong>
+                          <span>${this.escapeHtml(note.sessionDateLabel)}</span>
+                        </div>
+                        <p style="white-space: pre-wrap;">${this.escapeHtml(note.content)}</p>
+                      </article>
+                    `
+                  )
+                  .join('')}
+              </div>
+            `
+            : renderEmpty(
+                content.notesSection.emptyTitle,
+                content.notesSection.emptyMessage,
+                'Sin notas clinicas en el periodo',
+                'No se encontraron notas clinicas dentro del rango seleccionado.'
+              )
+        }
+      </section>
+
+      <section class="clinical-section">
+        <header class="clinical-section__header">
+          <h3>${this.escapeHtml(content.documentsSection.title)}</h3>
+          <p>${this.escapeHtml(content.documentsSection.subtitle)}</p>
+        </header>
+        ${
+          content.documents.length
+            ? `
+              <div class="clinical-list">
+                ${content.documents
+                  .map(
+                    (document) => `
+                      <article class="clinical-list__item">
+                        <div class="clinical-list__header">
+                          <strong>${this.escapeHtml(document.fileName)}</strong>
+                          <span>${this.escapeHtml(document.uploadedAtLabel)}</span>
+                        </div>
+                        <p>${this.escapeHtml(document.typeLabel)}</p>
+                      </article>
+                    `
+                  )
+                  .join('')}
+              </div>
+            `
+            : renderEmpty(
+                content.documentsSection.emptyTitle,
+                content.documentsSection.emptyMessage,
+                'Sin documentos en el periodo',
+                'No se encontraron documentos relacionados dentro del rango seleccionado.'
+              )
+        }
+      </section>
+
+      <section class="clinical-section">
+        <header class="clinical-section__header">
+          <h3>${this.escapeHtml(content.timelineSection.title)}</h3>
+          <p>${this.escapeHtml(content.timelineSection.subtitle)}</p>
+        </header>
+        ${
+          content.timelineItems.length
+            ? `
+              <div class="clinical-timeline">
+                ${content.timelineItems
+                  .map(
+                    (item) => `
+                      <article class="clinical-timeline__item">
+                        <div class="clinical-timeline__marker"></div>
+                        <div class="clinical-timeline__body">
+                          <div class="clinical-timeline__row">
+                            <strong>${this.escapeHtml(item.title)}</strong>
+                            <span>${this.escapeHtml(item.occurredAtLabel)}</span>
+                          </div>
+                          <p>${this.escapeHtml(item.description)}</p>
+                        </div>
+                      </article>
+                    `
+                  )
+                  .join('')}
+              </div>
+            `
+            : renderEmpty(
+                content.timelineSection.emptyTitle,
+                content.timelineSection.emptyMessage,
+                'Sin eventos clinicos en el periodo',
+                'No se identificaron eventos clinicos visibles para el rango seleccionado.'
+              )
+        }
+      </section>
+
+      <section class="clinical-section">
+        <header class="clinical-section__header">
+          <h3>${this.escapeHtml(content.referencesSection.title)}</h3>
+          <p>${this.escapeHtml(content.referencesSection.subtitle)}</p>
+        </header>
+        ${
+          content.references.length
+            ? `
+              <div class="clinical-grid">
+                ${content.references
+                  .map(
+                    (reference) => `
+                      <article class="clinical-data-card">
+                        <span>${this.escapeHtml(reference.label)}</span>
+                        <strong>${this.escapeHtml(reference.value)}</strong>
+                      </article>
+                    `
+                  )
+                  .join('')}
+              </div>
+            `
+            : renderEmpty(
+                content.referencesSection.emptyTitle,
+                content.referencesSection.emptyMessage,
+                'Sin referencias documentales',
+                'No hay documentos disponibles para anexar como referencia en el periodo consultado.'
               )
         }
       </section>

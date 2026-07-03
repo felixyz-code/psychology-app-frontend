@@ -38,6 +38,7 @@ import {
 } from '../../financial-transactions/utils/financial-transaction-presenters';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
+import { ClinicalRecordReportFilters } from '../models/clinical-record-report.model';
 import { ClinicalSummaryReportFilters } from '../models/clinical-summary-report.model';
 import { ReportExportMenuComponent } from '../components/report-export-menu.component';
 import { ReportFiltersPanelComponent } from '../components/report-filters-panel.component';
@@ -116,6 +117,11 @@ export class ReportRunnerPage {
       return hasDocument ? 'Documento clinico listo para revision' : 'Selecciona un paciente para generar el documento';
     }
 
+    if (this.isClinicalRecordReport()) {
+      const hasDocument = Boolean(this.reportResult()?.clinicalContent);
+      return hasDocument ? 'Expediente clinico listo para revision' : 'Selecciona un paciente para generar el expediente';
+    }
+
     const noun = this.isAgendaReport() ? 'cita' : 'movimiento';
     return rowCount === 1 ? `1 ${noun} en la vista previa` : `${rowCount} ${noun}s en la vista previa`;
   });
@@ -124,6 +130,8 @@ export class ReportRunnerPage {
       ? 'Refina el periodo, el estado y el paciente antes de generar la agenda profesional.'
       : this.isClinicalSummaryReport()
         ? 'Selecciona un paciente y define el periodo para construir un documento clinico profesional.'
+        : this.isClinicalRecordReport()
+          ? 'Selecciona un paciente y define el periodo para construir un expediente clinico estructurado.'
         : 'Refina el periodo y los criterios financieros antes de generar la vista previa.'
   );
   readonly previewSubtitle = computed(() =>
@@ -131,23 +139,29 @@ export class ReportRunnerPage {
       ? 'Agenda profesional agrupada por dia con citas ordenadas cronologicamente.'
       : this.isClinicalSummaryReport()
         ? 'Documento clinico centrado en paciente con resumen, evolucion y cronologia visible.'
+        : this.isClinicalRecordReport()
+          ? 'Expediente clinico documental con estructura completa, detalle y lectura imprimible.'
         : 'Resumen tabular de movimientos incluidos en el reporte financiero actual.'
   );
   readonly guidedEmptyTitle = computed(() =>
-    this.isClinicalSummaryReport()
-      ? 'Selecciona un paciente para generar el resumen'
+    this.isClinicalSummaryReport() || this.isClinicalRecordReport()
+      ? this.isClinicalRecordReport()
+        ? 'Selecciona un paciente para generar el expediente'
+        : 'Selecciona un paciente para generar el resumen'
       : 'No hay datos para mostrar'
   );
   readonly guidedEmptyMessage = computed(() =>
-    this.isClinicalSummaryReport()
-      ? 'El Resumen Clinico se construye desde el expediente del paciente y su actividad visible en el periodo.'
+    this.isClinicalSummaryReport() || this.isClinicalRecordReport()
+      ? this.isClinicalRecordReport()
+        ? 'El Expediente Clinico se construye desde el expediente del paciente y su actividad visible en el periodo.'
+        : 'El Resumen Clinico se construye desde el expediente del paciente y su actividad visible en el periodo.'
       : 'Ajusta los filtros para generar una vista previa.'
   );
 
   constructor() {
     this.loadPatientsIfNeeded();
 
-    if (this.isClinicalSummaryReport()) {
+    if (this.isClinicalSummaryReport() || this.isClinicalRecordReport()) {
       this.isLoading.set(false);
       return;
     }
@@ -172,7 +186,7 @@ export class ReportRunnerPage {
       to: this.defaultDateRange.to,
     });
 
-    if (this.isClinicalSummaryReport()) {
+    if (this.isClinicalSummaryReport() || this.isClinicalRecordReport()) {
       this.reportResult.set(null);
       this.appliedFilters.set({
         from: this.defaultDateRange.from,
@@ -228,6 +242,10 @@ export class ReportRunnerPage {
     return this.reportKey === 'clinical-summary';
   }
 
+  isClinicalRecordReport(): boolean {
+    return this.reportKey === 'clinical-record';
+  }
+
   getTypeLabel(type: FinancialTransactionType): string {
     return getFinancialTransactionTypeLabel(type);
   }
@@ -251,7 +269,10 @@ export class ReportRunnerPage {
   private loadReport(filters: ReportFilters = this.appliedFilters()): void {
     this.reportLoadSubscription?.unsubscribe();
 
-    if (this.isClinicalSummaryReport() && !(filters as ClinicalSummaryReportFilters).patientId) {
+    if (
+      (this.isClinicalSummaryReport() || this.isClinicalRecordReport()) &&
+      !(filters as ClinicalSummaryReportFilters | ClinicalRecordReportFilters).patientId
+    ) {
       this.reportResult.set(null);
       this.errorMessage.set('');
       this.isLoading.set(false);
@@ -313,13 +334,31 @@ export class ReportRunnerPage {
       return;
     }
 
+    if (this.isClinicalRecordReport()) {
+      this.reportLoadSubscription = this.reportsRunnerService
+        .runClinicalRecordReport(filters as ClinicalRecordReportFilters)
+        .subscribe({
+          next: (result) => {
+            this.reportResult.set(result);
+            this.isLoading.set(false);
+          },
+          error: () => {
+            this.reportResult.set(null);
+            this.errorMessage.set('No fue posible generar el expediente clinico.');
+            this.isLoading.set(false);
+          },
+        });
+
+      return;
+    }
+
     this.reportResult.set(null);
     this.errorMessage.set('El reporte solicitado no esta disponible.');
     this.isLoading.set(false);
   }
 
   private loadPatientsIfNeeded(): void {
-    if (!this.isAgendaReport() && !this.isClinicalSummaryReport()) {
+    if (!this.isAgendaReport() && !this.isClinicalSummaryReport() && !this.isClinicalRecordReport()) {
       return;
     }
 
@@ -355,6 +394,14 @@ export class ReportRunnerPage {
         from: rawValue.from || undefined,
         to: rawValue.to || undefined,
       } satisfies ClinicalSummaryReportFilters;
+    }
+
+    if (this.isClinicalRecordReport()) {
+      return {
+        patientId: rawValue.patientId || '',
+        from: rawValue.from || undefined,
+        to: rawValue.to || undefined,
+      } satisfies ClinicalRecordReportFilters;
     }
 
     return {

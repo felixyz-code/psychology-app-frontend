@@ -43,6 +43,7 @@ export interface ClinicalSummaryMetric {
 }
 
 export interface ClinicalSummaryContent {
+  kind: 'summary';
   patientSection: ClinicalSummaryReportSection;
   generalInfoSection: ClinicalSummaryReportSection;
   evolutionSection: ClinicalSummaryReportSection;
