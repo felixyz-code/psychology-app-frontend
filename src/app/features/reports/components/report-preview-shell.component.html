@@ -1,0 +1,105 @@
+<app-section-card [title]="title()" [subtitle]="subtitle()">
+  @if (contextItems().length || generatedAt()) {
+    <section class="report-preview-shell__document-meta" aria-label="Contexto del reporte">
+      @for (item of contextItems(); track item.label) {
+        <div class="report-preview-shell__meta-item">
+          <span class="report-preview-shell__meta-label">{{ item.label }}</span>
+          <strong class="report-preview-shell__meta-value">{{ item.value }}</strong>
+        </div>
+      }
+
+      @if (generatedAt()) {
+        <div class="report-preview-shell__meta-item">
+          <span class="report-preview-shell__meta-label">Generado</span>
+          <strong class="report-preview-shell__meta-value">{{ formatGeneratedAt(generatedAt()) }}</strong>
+        </div>
+      }
+    </section>
+  }
+
+  @if (isLoading()) {
+    <div class="report-preview-shell__state app-table-loading-state" aria-live="polite">
+      <mat-spinner diameter="40" />
+      <p>Generando vista previa...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="report-preview-shell__state app-table-feedback-state app-table-feedback-state--error" role="alert">
+      <p>{{ errorMessage() }}</p>
+    </div>
+  } @else if (previewMode() === 'grouped' && groups().length) {
+    <div class="report-preview-shell__groups" aria-label="Vista previa agrupada por dia">
+      @for (group of groups(); track group.id) {
+        <section class="report-preview-shell__group">
+          <header class="report-preview-shell__group-header">
+            <div>
+              <h3>{{ group.title }}</h3>
+              <p>{{ group.supportingText }}</p>
+            </div>
+          </header>
+
+          <div class="report-preview-shell__group-items">
+            @for (item of group.items; track item.id) {
+              <article class="report-preview-shell__agenda-item">
+                <div class="report-preview-shell__agenda-leading">
+                  <span>{{ item.leadingText }}</span>
+                </div>
+
+                <div class="report-preview-shell__agenda-main">
+                  <div class="report-preview-shell__agenda-title-row">
+                    <h4>{{ item.title }}</h4>
+
+                    @if (item.badge) {
+                      <app-status-badge [label]="item.badge.label" [variant]="item.badge.variant" />
+                    }
+                  </div>
+
+                  <p class="report-preview-shell__agenda-supporting">{{ item.supportingText }}</p>
+
+                  @if (item.metaItems.length) {
+                    <div class="report-preview-shell__agenda-meta">
+                      @for (metaItem of item.metaItems; track metaItem.label) {
+                        <span class="report-preview-shell__agenda-meta-item">
+                          <strong>{{ metaItem.label }}:</strong>
+                          <span>{{ metaItem.value }}</span>
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  } @else if (rows().length) {
+    <div
+      class="report-preview-shell__table-wrapper app-table-wrapper"
+      [attr.aria-label]="title()"
+      [attr.aria-busy]="isLoading()"
+      tabindex="0"
+    >
+      <table mat-table [dataSource]="rows()" class="report-preview-shell__table app-data-table">
+        @for (columnKey of displayedColumns(); track columnKey) {
+          <ng-container [matColumnDef]="columnKey">
+            <th mat-header-cell *matHeaderCellDef [class.report-preview-shell__cell--end]="isColumnEndAligned(columnKey)">
+              {{ getColumnLabel(columnKey) }}
+            </th>
+            <td mat-cell *matCellDef="let row" [class.report-preview-shell__cell--end]="isColumnEndAligned(columnKey)">
+              {{ row.values[columnKey] }}
+            </td>
+          </ng-container>
+        }
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+      </table>
+    </div>
+  } @else {
+    <app-data-table-empty-state icon="analytics" [title]="emptyTitle()" [message]="emptyMessage()" />
+  }
+
+  <div sectionCardFooter class="report-preview-shell__footer">
+    <span>Documento de referencia para exportacion y revision interna.</span>
+  </div>
+</app-section-card>

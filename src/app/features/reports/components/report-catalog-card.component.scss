@@ -1,0 +1,77 @@
+.report-catalog-card {
+  display: grid;
+  gap: 1rem;
+  min-height: 100%;
+  padding: 1.25rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--app-color-primary-soft) 45%, transparent) 0, transparent 34%),
+    var(--app-color-card-bg);
+  box-shadow: var(--app-shadow-card);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.report-catalog-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--app-color-card-border) 62%, var(--app-color-primary) 38%);
+  box-shadow: 0 1rem 2rem rgba(15, 23, 42, 0.1);
+}
+
+.report-catalog-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 16px;
+  background: var(--app-color-primary-soft);
+  color: var(--app-color-primary);
+}
+
+.report-catalog-card__icon .mat-icon {
+  font-size: 1.6rem;
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.report-catalog-card__copy {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.report-catalog-card__copy h2,
+.report-catalog-card__copy p {
+  margin: 0;
+}
+
+.report-catalog-card__category {
+  color: var(--app-color-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.report-catalog-card__description {
+  color: var(--app-color-text-secondary);
+  line-height: 1.55;
+}
+
+.report-catalog-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: auto;
+}
+
+@media (max-width: 720px) {
+  .report-catalog-card {
+    padding: 1rem;
+  }
+
+  .report-catalog-card__actions,
+  .report-catalog-card__actions a {
+    width: 100%;
+  }
+}

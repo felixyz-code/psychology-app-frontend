@@ -1,0 +1,27 @@
+<div class="financial-transaction-delete-dialog">
+  <h2>Eliminar transaccion financiera</h2>
+
+  <p>Esta accion eliminara de forma permanente el movimiento seleccionado. Confirme solo si desea continuar.</p>
+
+  <div class="financial-transaction-delete-dialog__summary">
+    <p class="financial-transaction-delete-dialog__title">"{{ transaction.concept }}"</p>
+    <p>{{ formatAmount(transaction.amount, transaction.currency) }} {{ transaction.currency }}</p>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="financial-transaction-delete-dialog__error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <div class="financial-transaction-delete-dialog__actions">
+    <button mat-button type="button" [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+
+    <button mat-flat-button type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+      @if (isDeleting()) {
+        <mat-spinner diameter="20" />
+        <span>Eliminando...</span>
+      } @else {
+        <span>Eliminar</span>
+      }
+    </button>
+  </div>
+</div>

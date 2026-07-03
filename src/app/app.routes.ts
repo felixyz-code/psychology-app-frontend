@@ -30,6 +30,25 @@ export const routes: Routes = [
           import('./features/appointments/pages/appointments-list.page').then((m) => m.AppointmentsListPage),
       },
       {
+        path: 'financial-transactions',
+        loadChildren: () =>
+          import('./features/financial-transactions/financial-transactions.routes').then(
+            (m) => m.financialTransactionsRoutes
+          ),
+      },
+      {
+        path: 'case-files',
+        loadChildren: () => import('./features/case-files/case-files.routes').then((m) => m.caseFilesRoutes),
+      },
+      {
+        path: 'documents',
+        loadChildren: () => import('./features/documents/documents.routes').then((m) => m.documentsRoutes),
+      },
+      {
+        path: 'reports',
+        loadChildren: () => import('./features/reports/reports.routes').then((m) => m.reportsRoutes),
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',

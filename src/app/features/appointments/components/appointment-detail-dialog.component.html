@@ -1,0 +1,65 @@
+<div class="detail-dialog-shell">
+  <header class="detail-dialog-header">
+    <div>
+      <span class="detail-dialog-eyebrow">Detalle de cita</span>
+      <h2>Detalle de la cita</h2>
+      <p>{{ patientName }}</p>
+    </div>
+
+    <button mat-icon-button type="button" aria-label="Cerrar detalle de la cita" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="detail-dialog-body">
+    <div class="detail-dialog-grid">
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Paciente</span>
+        <p class="detail-dialog-value">{{ patientName }}</p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Estado</span>
+        <app-status-badge
+          [label]="getAppointmentStatusLabel(appointment.status)"
+          [variant]="getAppointmentStatusClass(appointment.status)"
+        />
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Fecha y hora</span>
+        <p class="detail-dialog-value">{{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Duracion</span>
+        <p class="detail-dialog-value">{{ appointment.durationMinutes }} min</p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Psicologo</span>
+        <p class="detail-dialog-value">{{ getPsychologistDisplayName() }}</p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Creada</span>
+        <p class="detail-dialog-value">{{ appointment.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+
+      <div class="detail-dialog-item">
+        <span class="detail-dialog-label">Ultima actualizacion</span>
+        <p class="detail-dialog-value">{{ appointment.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+
+      <div class="detail-dialog-item detail-dialog-item--full">
+        <span class="detail-dialog-label">Notas</span>
+        <p class="detail-dialog-value">{{ getDisplayValue(appointment.notes) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="detail-dialog-footer">
+    <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
+    <button mat-flat-button type="button" (click)="edit()">Editar</button>
+  </footer>
+</div>

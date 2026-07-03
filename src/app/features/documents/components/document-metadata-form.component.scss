@@ -1,0 +1,16 @@
+.document-metadata-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.document-metadata-form {
+  gap: 1.25rem;
+}
+
+.document-metadata-form__grid {
+  gap: 1rem;
+}
+
+.document-metadata-form__saving {
+  color: var(--app-color-text-secondary);
+}

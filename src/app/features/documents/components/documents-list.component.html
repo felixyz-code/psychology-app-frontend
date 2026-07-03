@@ -1,0 +1,138 @@
+<app-section-card [title]="cardTitle()" [subtitle]="cardSubtitle()">
+  @if (showUploadAction()) {
+    <div sectionCardActions class="documents-card__header-actions">
+      <button mat-flat-button class="documents-card__create-button" type="button" (click)="openUploadDialog()">
+        <mat-icon>upload_file</mat-icon>
+        <span>{{ uploadButtonLabel() }}</span>
+      </button>
+    </div>
+  }
+
+  @if (isLoading()) {
+      <div class="documents-state app-table-loading-state">
+        <mat-spinner diameter="40" />
+        <p>Cargando documentos...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="documents-state documents-state--error app-table-feedback-state app-table-feedback-state--error">
+        <p>{{ errorMessage() }}</p>
+        <button mat-stroked-button type="button" (click)="loadDocuments()">Reintentar</button>
+      </div>
+  } @else if (documents().length) {
+    @if (actionErrorMessage()) {
+      <div class="documents-inline-error" role="status">
+        <p>{{ actionErrorMessage() }}</p>
+      </div>
+    }
+
+    <div class="documents-table-wrapper app-table-wrapper">
+      <table mat-table [dataSource]="documents()" class="documents-table app-data-table">
+        <ng-container matColumnDef="fileName">
+          <th mat-header-cell *matHeaderCellDef>Archivo</th>
+          <td mat-cell *matCellDef="let document">
+            <div class="documents-file-cell">
+              <div class="documents-file-cell__icon" aria-hidden="true">
+                <mat-icon>{{ getDocumentIcon(document) }}</mat-icon>
+              </div>
+
+              <div class="documents-file-cell__content">
+                <strong class="app-truncate-2" [title]="document.fileName">{{ document.fileName }}</strong>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="patient">
+          <th mat-header-cell *matHeaderCellDef>Paciente</th>
+          <td mat-cell *matCellDef="let document">
+            <div class="documents-patient-cell">
+              <span class="documents-patient-cell__name app-truncate-2" [title]="getPatientName(document)">
+                {{ getPatientName(document) }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let document">
+            {{ getDocumentTypeLabel(document) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="uploadedAt">
+          <th mat-header-cell *matHeaderCellDef>Fecha</th>
+          <td mat-cell *matCellDef="let document">
+            {{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let document">
+            <div class="documents-actions app-table-actions" aria-label="Acciones disponibles">
+              <button
+                mat-icon-button
+                type="button"
+                [attr.aria-label]="'Ver documento ' + document.fileName"
+                matTooltip="Ver documento"
+                [matTooltipShowDelay]="150"
+                (click)="stopRowClick($event); viewDocument(document)"
+              >
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                [attr.aria-label]="'Editar metadata de ' + document.fileName"
+                matTooltip="Editar metadata"
+                [matTooltipShowDelay]="150"
+                (click)="stopRowClick($event); openEditDialog(document)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                [attr.aria-label]="'Descargar documento ' + document.fileName"
+                matTooltip="Descargar"
+                [matTooltipShowDelay]="150"
+                (click)="stopRowClick($event); downloadDocument(document)"
+              >
+                <mat-icon>download</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                class="app-table-action--danger"
+                type="button"
+                [attr.aria-label]="'Eliminar documento ' + document.fileName"
+                matTooltip="Eliminar"
+                [matTooltipShowDelay]="150"
+                (click)="stopRowClick($event); openDeleteDialog(document)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns()"
+          class="app-clickable-table-row"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'Ver documento ' + row.fileName"
+          matTooltip="Ver documento"
+          [matTooltipShowDelay]="150"
+          (click)="viewDocument(row)"
+          (keydown.enter)="viewDocument(row)"
+          (keydown.space)="stopRowClick($event); $event.preventDefault(); viewDocument(row)"
+        ></tr>
+      </table>
+    </div>
+  } @else {
+    <app-data-table-empty-state icon="description" [title]="emptyTitle()" [message]="emptyMessage()" />
+  }
+</app-section-card>

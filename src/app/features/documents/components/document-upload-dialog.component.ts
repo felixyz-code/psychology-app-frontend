@@ -4,7 +4,6 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 
-import { AuthStore } from '../../../core/auth/auth.store';
 import { DocumentsService } from '../services/documents.service';
 
 interface DocumentUploadDialogData {
@@ -24,7 +23,6 @@ const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
 })
 export class DocumentUploadDialogComponent {
   private readonly data = inject<DocumentUploadDialogData>(MAT_DIALOG_DATA);
-  private readonly authStore = inject(AuthStore);
   private readonly documentsService = inject(DocumentsService);
   private readonly dialogRef = inject(MatDialogRef<DocumentUploadDialogComponent, boolean>);
 
@@ -53,18 +51,11 @@ export class DocumentUploadDialogComponent {
       return;
     }
 
-    const uploadedById = this.authStore.user()?.id;
-
-    if (!uploadedById) {
-      this.errorMessage.set('No fue posible identificar al usuario autenticado.');
-      return;
-    }
-
     this.isSaving.set(true);
     this.errorMessage.set('');
 
     this.documentsService
-      .upload(this.data.caseFileId, uploadedById, file as File)
+      .upload(this.data.caseFileId, file as File)
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
         next: () => {

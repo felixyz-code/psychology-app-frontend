@@ -1,0 +1,20 @@
+.financial-transaction-form-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.financial-transaction-form {
+  gap: 1.25rem;
+}
+
+.financial-transaction-form__grid {
+  gap: 1rem;
+}
+
+.financial-transaction-form__full {
+  grid-column: 1 / -1;
+}
+
+.financial-transaction-form__saving {
+  color: var(--app-color-text-secondary);
+}

@@ -1,0 +1,53 @@
+<section class="financial-transaction-detail-page">
+  <app-page-header
+    heading="Detalle de transaccion financiera"
+    subtitle="Consulta el movimiento financiero registrado en el sistema."
+    [breadcrumbs]="[
+      { label: 'Dashboard', url: '/dashboard' },
+      { label: 'Finanzas', url: '/financial-transactions' },
+      { label: 'Detalle' },
+    ]"
+  />
+
+  @if (isLoading()) {
+    <app-section-card title="Detalle de transaccion" subtitle="Cargando informacion del movimiento financiero.">
+      <div class="financial-transaction-detail-state" aria-live="polite">
+        <mat-spinner diameter="40" />
+        <p>Cargando transaccion...</p>
+      </div>
+    </app-section-card>
+  } @else if (errorMessage()) {
+    <app-section-card title="Detalle de transaccion" subtitle="No fue posible obtener la informacion solicitada.">
+      <div class="financial-transaction-detail-state financial-transaction-detail-state--error" role="alert">
+        <p>{{ errorMessage() }}</p>
+        <div class="financial-transaction-detail-actions">
+          <a mat-button routerLink="/financial-transactions">
+            <mat-icon>arrow_back</mat-icon>
+            <span>Volver al listado</span>
+          </a>
+          <button mat-stroked-button type="button" (click)="retryLoad()">
+            <mat-icon>refresh</mat-icon>
+            <span>Reintentar</span>
+          </button>
+        </div>
+      </div>
+    </app-section-card>
+  } @else if (transaction(); as transaction) {
+    <div class="financial-transaction-detail-header-actions">
+      <a mat-button routerLink="/financial-transactions">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Volver al listado</span>
+      </a>
+      <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']">
+        <mat-icon>edit</mat-icon>
+        <span>Editar transaccion</span>
+      </a>
+      <button mat-stroked-button type="button" (click)="openDeleteDialog()">
+        <mat-icon>delete</mat-icon>
+        <span>Eliminar transaccion</span>
+      </button>
+    </div>
+
+    <app-financial-transaction-detail-content [transaction]="transaction" />
+  }
+</section>

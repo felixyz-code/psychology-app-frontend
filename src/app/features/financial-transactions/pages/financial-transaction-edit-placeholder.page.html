@@ -1,0 +1,25 @@
+<section class="financial-transaction-edit-page">
+  @if (isLoading()) {
+    <div class="financial-transaction-edit-state" aria-live="polite">
+      <mat-spinner diameter="28" />
+      <p>Cargando transaccion...</p>
+    </div>
+  } @else if (loadErrorMessage()) {
+    <div class="financial-transaction-edit-state financial-transaction-edit-state--error" role="alert">
+      <p>{{ loadErrorMessage() }}</p>
+      <div class="financial-transaction-edit-state__actions">
+        <button mat-stroked-button type="button" (click)="retryLoad()">Reintentar</button>
+        <button mat-button type="button" (click)="cancel()">Volver al listado</button>
+      </div>
+    </div>
+  } @else if (transaction(); as transaction) {
+    <app-financial-transaction-form
+      mode="edit"
+      [initialValue]="transaction"
+      [isSaving]="isSaving()"
+      [errorMessage]="saveErrorMessage()"
+      (formSubmitted)="submit($event)"
+      (cancelled)="cancel()"
+    />
+  }
+</section>

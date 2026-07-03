@@ -1,0 +1,14 @@
+<section class="documents-page app-page">
+  <app-page-header
+    heading="Documentos"
+    subtitle="Listado global de documentos registrados en el sistema."
+    [breadcrumbs]="[{ label: 'Dashboard', url: '/dashboard' }, { label: 'Documentos' }]"
+  >
+    <button mat-flat-button type="button" class="app-page-header-action" (click)="documentsList.openUploadDialog()">
+      <mat-icon>upload_file</mat-icon>
+      <span>Subir documento</span>
+    </button>
+  </app-page-header>
+
+  <app-documents-list #documentsList [showUploadAction]="false" />
+</section>

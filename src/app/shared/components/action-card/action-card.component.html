@@ -4,6 +4,7 @@
     type="button"
     class="action-card action-card--primary"
     [disabled]="disabled()"
+    [attr.aria-label]="label()"
     (click)="handleClick()"
   >
     <mat-icon>{{ icon() }}</mat-icon>
@@ -15,6 +16,7 @@
     type="button"
     class="action-card"
     [disabled]="disabled()"
+    [attr.aria-label]="label()"
     (click)="handleClick()"
   >
     <mat-icon>{{ icon() }}</mat-icon>

@@ -1,0 +1,33 @@
+<div class="document-form-dialog app-dialog">
+  <div class="document-form-dialog__header app-dialog__header">
+    <div>
+      <h2>Cambiar nombre</h2>
+      <p>Actualiza el nombre visible del documento.</p>
+    </div>
+  </div>
+
+  @if (flow.isLoading()) {
+    <div class="document-form-dialog__state">
+      <mat-spinner diameter="40" />
+      <p>Cargando documento...</p>
+    </div>
+  } @else if (flow.loadErrorMessage()) {
+    <div class="document-form-dialog__state document-form-dialog__state--error" role="alert">
+      <p>{{ flow.loadErrorMessage() }}</p>
+      <div class="document-form-dialog__state-actions">
+        <button mat-stroked-button type="button" (click)="retryLoad()">Reintentar</button>
+        <button mat-button class="app-secondary-button" type="button" (click)="cancel()">Cerrar</button>
+      </div>
+    </div>
+  } @else if (flow.document(); as document) {
+    <app-document-metadata-form
+      layout="dialog"
+      mode="edit"
+      [initialValue]="document"
+      [isSaving]="flow.isSaving()"
+      [errorMessage]="flow.saveErrorMessage()"
+      (formSubmitted)="submit($event)"
+      (cancelled)="cancel()"
+    />
+  }
+</div>

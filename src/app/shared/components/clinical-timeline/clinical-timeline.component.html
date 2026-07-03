@@ -1,0 +1,54 @@
+@if (loading()) {
+  <div class="clinical-timeline__loading" aria-live="polite">
+    <mat-spinner diameter="22" />
+    <span>Cargando actividad clinica...</span>
+  </div>
+} @else if (errorMessage()) {
+  <p class="clinical-timeline__message clinical-timeline__message--error" role="alert">
+    {{ errorMessage() }}
+  </p>
+} @else if (groupedEvents().length) {
+  <div class="clinical-timeline">
+    @for (group of groupedEvents(); track group.label) {
+      <section class="clinical-timeline__group" [attr.aria-label]="'Actividad del ' + group.label">
+        <div class="clinical-timeline__group-label">{{ group.label }}</div>
+
+        <div class="clinical-timeline__group-items">
+          @for (event of group.items; track event.id) {
+            <article
+              class="clinical-timeline__item"
+              [class.clinical-timeline__item--interactive]="isInteractive(event)"
+              [attr.role]="isInteractive(event) ? 'button' : null"
+              [attr.tabindex]="isInteractive(event) ? 0 : null"
+              (click)="selectEvent(event)"
+              (keydown.enter)="selectEvent(event)"
+              (keydown.space)="$event.preventDefault(); selectEvent(event)"
+            >
+              <div class="clinical-timeline__rail" aria-hidden="true">
+                <span class="clinical-timeline__icon">
+                  <mat-icon>{{ event.icon }}</mat-icon>
+                </span>
+              </div>
+
+              <div class="clinical-timeline__content">
+                <div class="clinical-timeline__topline">
+                  <h3>{{ event.title }}</h3>
+
+                  @if (event.timeLabel) {
+                    <span>{{ event.timeLabel }}</span>
+                  }
+                </div>
+
+                @if (event.description) {
+                  <p>{{ event.description }}</p>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
+  </div>
+} @else {
+  <app-data-table-empty-state [icon]="'timeline'" [title]="emptyTitle()" [message]="emptyMessage()" />
+}

@@ -1,0 +1,122 @@
+.case-files-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.case-files-summary__item {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 18px;
+  background: var(--app-color-card-bg);
+  box-shadow: var(--app-shadow-surface);
+}
+
+.case-files-summary__label {
+  color: var(--app-color-text-secondary);
+  font-size: 0.86rem;
+}
+
+.case-files-summary__item strong {
+  color: var(--app-color-heading);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.case-files-data-toolbar {
+  --data-table-toolbar-padding: 0.35rem 0 0;
+  --data-table-toolbar-search-width: 26rem;
+}
+
+.case-files-inline-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.15rem 0 0;
+  color: var(--app-color-text-secondary);
+}
+
+.case-files-inline-warning p {
+  margin: 0;
+}
+
+.case-files-inline-warning mat-icon {
+  color: var(--app-color-warning-text);
+}
+
+.case-files-table-wrapper {
+  min-width: 0;
+}
+
+.case-files-table {
+  min-width: 780px;
+}
+
+.case-files-patient-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.case-files-patient-cell__icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 14px;
+  background: var(--app-color-surface-muted);
+  color: var(--app-color-heading);
+  flex-shrink: 0;
+}
+
+.case-files-patient-cell__content {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.case-files-patient-cell__content strong,
+.case-files-patient-cell__content span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.case-files-patient-cell__content strong {
+  color: var(--app-color-heading);
+  font-weight: 650;
+}
+
+.case-files-patient-cell__content span {
+  color: var(--app-color-text-secondary);
+  font-size: 0.86rem;
+}
+
+.case-files-status-cell {
+  display: grid;
+  gap: 0.45rem;
+  align-items: start;
+}
+
+.case-files-status-cell span:last-child {
+  color: var(--app-color-text-secondary);
+  font-size: 0.86rem;
+}
+
+.case-files-actions {
+  justify-content: flex-end;
+}
+
+.case-files-paginator {
+  border-top: 1px solid var(--app-color-border);
+  background: transparent;
+  color: var(--app-color-heading);
+}
+
+@media (max-width: 860px) {
+  .case-files-summary {
+    grid-template-columns: 1fr;
+  }
+}

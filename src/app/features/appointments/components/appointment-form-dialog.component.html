@@ -1,73 +1,77 @@
-<div class="appointment-dialog">
-  <div class="appointment-dialog__header">
+<div class="appointment-dialog app-dialog">
+  <div class="appointment-dialog__header app-dialog__header">
     <h2>{{ getTitle() }}</h2>
     <p>Completa los datos de la cita y el paciente asociado.</p>
   </div>
 
-  <form class="appointment-dialog__form" [formGroup]="appointmentForm" (ngSubmit)="submit()">
-    <div class="appointment-dialog__grid">
-      <mat-form-field appearance="outline" class="appointment-dialog__full">
-        <mat-label>Paciente</mat-label>
-        <mat-select formControlName="patientId" [disabled]="isLoadingPatients()">
-          @for (patient of availablePatients(); track patient.id) {
-            <mat-option [value]="patient.id">{{ getPatientLabel(patient) }}</mat-option>
+  <form class="appointment-dialog__form app-dialog__form app-form" [formGroup]="appointmentForm" (ngSubmit)="submit()">
+    <div class="appointment-dialog__body">
+      <div class="appointment-dialog__grid app-dialog__grid app-form-grid">
+        <mat-form-field appearance="outline" class="appointment-dialog__full app-form-field--full">
+          <mat-label>Paciente</mat-label>
+          <mat-select formControlName="patientId" [disabled]="isLoadingPatients()">
+            @for (patient of availablePatients(); track patient.id) {
+              <mat-option [value]="patient.id">{{ getPatientLabel(patient) }}</mat-option>
+            }
+          </mat-select>
+          @if (hasRequiredError('patientId')) {
+            <mat-error>El paciente es obligatorio.</mat-error>
           }
-        </mat-select>
-        @if (hasRequiredError('patientId')) {
-          <mat-error>El paciente es obligatorio.</mat-error>
-        }
-      </mat-form-field>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha y hora</mat-label>
-        <input matInput type="datetime-local" formControlName="scheduledAt" />
-        @if (hasRequiredError('scheduledAt')) {
-          <mat-error>La fecha y hora son obligatorias.</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Duración en minutos</mat-label>
-        <input matInput type="number" min="1" formControlName="durationMinutes" />
-        @if (hasRequiredError('durationMinutes')) {
-          <mat-error>La duración es obligatoria.</mat-error>
-        } @else if (hasMinError()) {
-          <mat-error>La duración debe ser mayor a 0.</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="appointment-dialog__full">
-        <mat-label>Estado</mat-label>
-        <mat-select formControlName="status">
-          @for (status of statuses; track status) {
-            <mat-option [value]="status">{{ getStatusLabel(status) }}</mat-option>
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha y hora</mat-label>
+          <input matInput type="datetime-local" formControlName="scheduledAt" />
+          @if (hasRequiredError('scheduledAt')) {
+            <mat-error>La fecha y hora son obligatorias.</mat-error>
           }
-        </mat-select>
-        @if (hasRequiredError('status')) {
-          <mat-error>El estado es obligatorio.</mat-error>
-        }
-      </mat-form-field>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="appointment-dialog__full">
-        <mat-label>Notas</mat-label>
-        <textarea matInput formControlName="notes" rows="4"></textarea>
-      </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Duracion en minutos</mat-label>
+          <input matInput type="number" min="1" formControlName="durationMinutes" />
+          @if (hasRequiredError('durationMinutes')) {
+            <mat-error>La duracion es obligatoria.</mat-error>
+          } @else if (hasMinError()) {
+            <mat-error>La duracion debe ser mayor a 0.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="appointment-dialog__full app-form-field--full">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            @for (status of statuses; track status) {
+              <mat-option [value]="status">{{ getStatusLabel(status) }}</mat-option>
+            }
+          </mat-select>
+          @if (hasRequiredError('status')) {
+            <mat-error>El estado es obligatorio.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="appointment-dialog__full app-form-field--full">
+          <mat-label>Notas</mat-label>
+          <textarea matInput formControlName="notes" rows="3"></textarea>
+        </mat-form-field>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="appointment-dialog__error app-dialog__error app-form-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      @if (isSaving()) {
+        <div class="appointment-dialog__saving app-dialog__saving app-form-saving" aria-live="polite">
+          <mat-spinner diameter="20" />
+          <span>Guardando...</span>
+        </div>
+      }
     </div>
 
-    @if (errorMessage()) {
-      <p class="appointment-dialog__error" role="alert">{{ errorMessage() }}</p>
-    }
-
-    @if (isSaving()) {
-      <div class="appointment-dialog__saving" aria-live="polite">
-        <mat-spinner diameter="20" />
-        <span>Guardando...</span>
-      </div>
-    }
-
-    <div class="appointment-dialog__actions">
+  <div class="appointment-dialog__actions app-dialog__actions" role="group" aria-label="Acciones del formulario">
       <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>
-      <button mat-flat-button type="submit" [disabled]="isSaving()">{{ getSubmitLabel() }}</button>
+      <div class="app-dialog__actions-group app-form-actions__group">
+        <button mat-flat-button type="submit" [disabled]="isSaving()">{{ getSubmitLabel() }}</button>
+      </div>
     </div>
   </form>
 </div>

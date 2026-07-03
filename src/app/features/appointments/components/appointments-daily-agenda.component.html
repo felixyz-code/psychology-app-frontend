@@ -7,8 +7,8 @@
 
     <div class="appointments-agenda__actions">
       <button mat-flat-button type="button" class="appointments-agenda__create" (click)="openCreateAppointment()">
-        <mat-icon>event_available</mat-icon>
-        <span>Agregar cita</span>
+        <mat-icon>event</mat-icon>
+        <span>Nueva cita</span>
       </button>
 
       <button mat-stroked-button type="button" class="appointments-agenda__today" (click)="openToday()">
@@ -66,8 +66,11 @@
               }
             </div>
 
-            <div class="appointments-agenda__item-actions" aria-label="Acciones disponibles">
-              <button mat-icon-button type="button" aria-label="Editar cita" (click)="openAppointment(appointment); $event.stopPropagation()">
+            <div class="appointments-agenda__item-actions app-table-actions" aria-label="Acciones disponibles">
+              <button mat-icon-button type="button" aria-label="Ver cita" matTooltip="Ver cita" [matTooltipShowDelay]="150" (click)="openAppointment(appointment); $event.stopPropagation()">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button type="button" aria-label="Editar cita" matTooltip="Editar cita" [matTooltipShowDelay]="150" (click)="openAppointment(appointment); $event.stopPropagation()">
                 <mat-icon>edit</mat-icon>
               </button>
 
@@ -76,6 +79,8 @@
                   mat-icon-button
                   type="button"
                   aria-label="Cancelar cita"
+                  matTooltip="Cancelar cita"
+                  [matTooltipShowDelay]="150"
                   [disabled]="cancellingAppointmentId() !== null"
                   (click)="requestCancelAppointment(appointment, $event)"
                 >
@@ -89,8 +94,11 @@
 
               <button
                 mat-icon-button
+                class="app-table-action--danger"
                 type="button"
                 aria-label="Eliminar cita"
+                matTooltip="Eliminar cita"
+                [matTooltipShowDelay]="150"
                 [disabled]="cancellingAppointmentId() !== null"
                 (click)="requestDeleteAppointment(appointment, $event)"
               >
@@ -102,13 +110,10 @@
       }
     </div>
   } @else {
-    <div class="appointments-agenda__empty">
-      <h3>No hay citas para este d&iacute;a</h3>
-      <p>Puedes agregar una nueva cita para esta fecha.</p>
-      <button mat-stroked-button type="button" (click)="openCreateAppointment()">
-        <mat-icon>add</mat-icon>
-        <span>Agregar cita</span>
-      </button>
-    </div>
+    <app-data-table-empty-state
+      icon="event_busy"
+      title="No hay citas para este d&iacute;a"
+      message="Puedes registrar una nueva cita para esta fecha."
+    />
   }
 </section>

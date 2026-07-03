@@ -6,9 +6,11 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
 import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems, sortItems } from '../../../shared/utils/data-table';
@@ -28,8 +30,10 @@ import { PatientsService } from '../services/patients.service';
     MatProgressSpinnerModule,
     MatSortModule,
     MatTableModule,
+    MatTooltipModule,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
+    PageHeaderComponent,
     SectionCardComponent,
   ],
   templateUrl: './patients-list.page.html',
@@ -248,6 +252,10 @@ export class PatientsListPage {
         this.loadPatients();
       }
     });
+  }
+
+  stopRowClick(event: Event): void {
+    event.stopPropagation();
   }
 
   private getPatientSortValue(patient: Patient, sortBy: string): string | number | Date | null | undefined {

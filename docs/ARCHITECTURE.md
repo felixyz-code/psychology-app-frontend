@@ -142,6 +142,8 @@ case-files/
 session-notes/
 documents/
 appointments/
+financial-transactions/
+reports/
 ```
 
 Each feature owns:
@@ -154,6 +156,46 @@ Each feature owns:
 * Feature-specific logic
 
 Dependencies between features should be minimized.
+
+Cross-feature workflows should be composed from existing feature ownership boundaries instead of creating a parallel domain layer.
+
+## Reports Module
+
+The frontend now includes a lazy-loaded `reports` feature.
+
+Current characteristics:
+
+* `reports` now works as a reusable reporting engine for the frontend
+* current internal layers are `Catalog`, `Runner`, `Preview` and `Export`
+* `reports` owns report navigation, catalog, filters, preview and export UX
+* individual business features remain owners of their own data services
+* `reports` does not own financial business logic, appointments business logic or dedicated backend reporting rules
+* report execution is orchestrated through feature-owned services instead of direct `HttpClient` calls
+* current delivered reports are `Financial Report` and `Agenda Report`
+* `ReportPreviewShell` supports both tabular and grouped preview strategies
+* export infrastructure is centralized in the `reports` feature while data ownership remains in the source feature
+
+This keeps the architecture aligned with the backend-first principle and avoids creating a parallel business domain for reporting.
+
+---
+
+# Clinical Workspace Composition
+
+The current frontend includes a patient-centered `Clinical Workspace`.
+
+This workspace is implemented as a composed detail surface that orchestrates existing features around one patient context.
+
+Current characteristics:
+
+* Implemented through `PatientDetailDialogComponent`
+* Reached from both `patients` and `case-files`
+* Uses shared presentational components from `shared/components`
+* Reuses existing feature dialogs for create, edit and delete flows
+* Loads feature data through feature-owned services only
+
+This is intentionally an orchestration pattern and not a new business module.
+
+Detailed behavior is documented in `CLINICAL_WORKSPACE.md`.
 
 ---
 
@@ -299,6 +341,7 @@ Related documentation:
 
 * PROJECT.md
 * STANDARDS.md
+* CLINICAL_WORKSPACE.md
 * API_INTEGRATION.md
 * DECISION_LOG.md
 * ROADMAP.md

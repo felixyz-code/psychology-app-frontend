@@ -235,15 +235,17 @@ The UI follows the same clinical workflow implemented by the backend.
 
 ---
 
-# ADR-012 â€” Responsive Table Toolbar Layout
+# ADR-012 - Responsive Filter Toolbar Layout
 
 ## Decision
 
-Table toolbars use a shared responsive layout pattern.
+Dense filter toolbars use a shared responsive layout pattern.
 
 Desktop:
 
-- Filters align horizontally in a single row whenever space allows.
+- Primary filters align in a first row with comfortable control widths.
+- Secondary filters and action buttons align in a second row.
+- Action buttons remain naturally aligned at the end of the toolbar.
 
 Mobile:
 
@@ -251,9 +253,202 @@ Mobile:
 
 ## Rationale
 
-This rule improves consistency across table experiences and prevents staggered filter layouts.
+This rule improves consistency across data-heavy experiences and avoids compressed controls, truncated labels and poor readability.
 
-It also establishes a reusable UX baseline for future views such as Calendar View, Finance and Reports.
+It establishes a reusable UX baseline for future views such as Patients, Appointments, Finance, Documents, Recruitment and Reports.
+
+---
+
+# ADR-013 - Clinical Timeline Scope
+
+## Decision
+
+The Clinical Workspace timeline represents clinical history and does not include appointments in `SCHEDULED` status.
+
+Scheduled appointments remain visible through:
+
+- summary and next appointment indicators
+- the workspace appointments section
+- calendar and agenda views
+
+## Rationale
+
+The timeline is intended to highlight completed or clinically meaningful records instead of duplicating scheduling views.
+
+This keeps the workspace easier to scan and avoids mixing future agenda items with historical events.
+
+## Pending Evaluation
+
+Future product review should decide:
+
+- whether `CANCELLED` appointments belong in the timeline
+- whether `NO_SHOW` appointments belong in the timeline
+- whether a full appointment status-history timeline is needed
+
+---
+
+# ADR-014 - Shared Dialog And Form Layout Pattern
+
+## Decision
+
+Dialogs and dense CRUD forms use a shared visual layout pattern based on reusable CSS classes such as:
+
+- `app-dialog`
+- `app-dialog__header`
+- `app-dialog__actions`
+- `app-form`
+- `app-form-grid`
+- `app-form-section`
+
+When a dialog can become vertically dense, the preferred structure is:
+
+- header visually anchored at the top
+- scrollable form body when needed
+- footer actions kept outside the scrollable region whenever possible
+
+## Rationale
+
+This rule reduces repeated one-off spacing fixes across Patients, Appointments, Case Files, Session Notes, Documents and Finance.
+
+It also creates a safer baseline for modal usability on constrained heights by keeping primary actions visible or predictably reachable.
+
+## Implications
+
+- New CRUD dialogs should start from the shared `app-dialog` and `app-form` vocabulary before introducing local layout rules.
+- Local overrides remain acceptable for especially dense dialogs such as Appointments and Case Files, but should preserve the shared action hierarchy and visual rhythm.
+- Cross-device dialog validation remains important because compact desktop dialogs and short mobile viewports can still require component-level height tuning.
+
+---
+
+# ADR-015 - Reports Module As Orchestration Layer
+
+## Decision
+
+The new `reports` feature is implemented as a lazy-loaded orchestration module.
+
+It owns:
+
+- report catalog
+- report filters
+- preview surfaces
+- export actions
+
+It does not own:
+
+- financial business logic
+- report-specific backend rules
+- direct HTTP contracts outside the owning feature service
+
+## Rationale
+
+This keeps the application aligned with the feature-based and backend-first architecture.
+
+It also allows the product to introduce professional reporting UX without creating a parallel business layer or moving logic away from the modules that already own it.
+
+## Initial Scope
+
+The first delivered pilot was `Financial Report`.
+
+Current orchestration:
+
+- `ReportsRunnerService` calls `FinancialTransactionsService.findSummary(...)`
+- `ReportsRunnerService` calls `FinancialTransactionsService.findAll(...)`
+- `ReportsExportService` centralizes conservative export strategies using controlled print for `PDF` and `CSV` download for spreadsheet workflows
+
+## Implications
+
+- New reports should prefer consuming existing feature-owned services before requesting new backend contracts.
+- If a future report becomes too expensive or too fragmented to compose in the frontend, a dedicated backend aggregate contract should be evaluated.
+- Export UX can remain centralized in `reports` even when the data source belongs to another feature.
+
+## Operational Notes After Sprint 12.2
+
+- The Financial Report pilot completed technical validation and was approved with partial visual QA still blocked in local environments that require authentication and do not expose a ready browser session.
+- The current `PDF` export strategy remains intentionally conservative: if the browser blocks the popup used for controlled print, the app fails safely without crashing, but it does not yet surface explicit user feedback for that condition.
+
+## Operational Notes After Sprint 12.3
+
+- `Reports` now proves its reusable scope beyond the initial pilot by delivering a second professional surface: `Agenda Report`.
+- The frontend continues to avoid dedicated report endpoints; the agenda report is composed from `AppointmentsService` and `PatientsService` without moving business ownership away from `appointments`.
+
+## Operational Notes After Sprint 12.3.1
+
+- `Reports` is now treated as reusable multi-report infrastructure with stable internal layers for catalog, runner, preview and export.
+- `ReportKey` now formally supports `Financial` and `Agenda`.
+- The report preview shell now supports tabular and grouped surfaces without introducing report-owned business rules.
+
+---
+
+# ADR-016 - Inclusive Local Date Semantics For Reports
+
+## Decision
+
+Report date ranges use inclusive semantics from the user perspective.
+
+Current rule:
+
+- `from` means start of the selected local day
+- `to` means the end of the selected day through an exclusive comparison against the start of the next local day
+- `date-only` values must be parsed locally and never through `new Date('YYYY-MM-DD')`
+
+## Rationale
+
+This avoids timezone drift, keeps the visible range aligned with the filter inputs and ensures that preview, `PDF` and `CSV` operate over the same effective dataset.
+
+## Implications
+
+- Reports must prefer local date parsing helpers for `date-only` values.
+- Inclusive range behavior should remain centralized in report orchestration utilities instead of being reimplemented ad hoc in each report.
+
+---
+
+# ADR-017 - Full-Month Default Range For Reports
+
+## Decision
+
+The default reporting range covers the full current month:
+
+- first day of the current month
+- last day of the current month
+
+## Rationale
+
+This better matches the expected behavior of professional monthly reporting and creates a more representative default preview when the user first opens a report.
+
+## Implications
+
+- The default visible inputs, preview context and exported dataset should all reflect the same complete monthly window.
+- Future reports should preserve this monthly default unless a report-specific reason requires a different baseline.
+
+---
+
+# ADR-018 - Shared Inclusive Date Range Helper
+
+## Decision
+
+The logic for interpreting `date-only` values and building inclusive local date ranges is centralized in:
+
+```text
+shared/utils/local-date-range.ts
+```
+
+All modules that filter by dates should reuse this helper instead of implementing local parsing or relying on:
+
+```ts
+new Date('YYYY-MM-DD')
+```
+
+## Rationale
+
+This guarantees consistent behavior across modules that filter by dates and avoids timezone-related issues caused by UTC parsing of `date-only` strings.
+
+It also reduces duplicated logic and lowers the risk of regressions when date range semantics evolve.
+
+## Implications
+
+- Reports and Financial Transactions now share the same local inclusive range construction.
+- Future modules with date filters should depend on the shared helper to preserve functional consistency.
+- The frontend should continue treating `from` as the local start of the selected day and `to` as the exclusive start of the next local day.
 
 ---
 

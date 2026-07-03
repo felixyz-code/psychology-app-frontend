@@ -1,37 +1,5 @@
-.appointments-list-page {
-  padding: 0;
-}
-
-.appointments-card__create-button {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.appointments-state {
-  display: grid;
-  justify-items: center;
-  gap: 1rem;
-  padding: 3rem 1.5rem;
-  text-align: center;
-  color: var(--app-color-text-secondary);
-}
-
-.appointments-state h2,
-.appointments-state p {
-  margin: 0;
-}
-
-.appointments-state h2 {
-  color: var(--app-color-heading);
-  font-size: 1.1rem;
-}
-
-.appointments-state--error {
-  color: var(--app-color-danger-text);
-}
-
 .appointments-message {
-  margin-top: 1rem;
+  margin: 0;
 }
 
 .appointments-message--success {
@@ -46,15 +14,6 @@
 .appointments-toolbar {
   display: grid;
   gap: 0.75rem;
-  padding-top: 1rem;
-}
-
-.appointments-toolbar__actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
-  flex-wrap: wrap;
 }
 
 .appointments-toolbar__filters {
@@ -65,7 +24,6 @@
 }
 
 .appointments-view-toggle {
-  align-self: start;
   flex-shrink: 0;
 }
 
@@ -97,49 +55,19 @@
 }
 
 .appointments-toolbar-panel__counter {
-  color: var(--app-color-text-secondary);
-  font-size: 0.92rem;
-  font-weight: 600;
-  line-height: 1.2;
   white-space: normal;
 }
 
 .appointments-table-wrapper {
-  overflow-x: auto;
-  padding-top: 1rem;
+  min-width: 0;
 }
 
 .appointments-table {
-  width: 100%;
-  min-width: 760px;
-  background: transparent;
-}
-
-.appointments-table .mat-mdc-header-cell {
-  color: var(--app-color-muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.appointments-table .mat-mdc-cell,
-.appointments-table .mat-mdc-header-cell {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.appointments-table .mat-mdc-row:hover {
-  background: var(--app-color-table-hover);
+  min-width: 700px;
 }
 
 .appointments-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.appointments-actions button:last-child {
-  color: var(--app-color-danger-text);
+  justify-content: flex-end;
 }
 
 .appointments-paginator {
@@ -149,10 +77,6 @@
 }
 
 @media (max-width: 1120px) {
-  .appointments-toolbar__actions {
-    align-items: stretch;
-  }
-
   .appointments-toolbar__filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -162,18 +86,25 @@
   }
 }
 
-@media (max-width: 720px) {
-  .appointments-card__create-button {
-    width: 100%;
-  }
-
-  .appointments-toolbar__filters {
+@media (max-width: 900px) {
+  .appointments-toolbar__filters,
+  .appointments-toolbar__filters--with-date-range {
     grid-template-columns: 1fr;
   }
 
-  .appointments-toolbar__actions {
+  .appointments-date-range-filter {
+    grid-column: auto;
+  }
+
+  .appointments-toolbar__meta {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+@media (max-width: 720px) {
+  .appointments-toolbar__filters {
+    grid-template-columns: 1fr;
   }
 
   .appointments-view-toggle {

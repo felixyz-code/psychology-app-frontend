@@ -1,0 +1,7 @@
+<app-financial-transaction-form
+  mode="create"
+  [isSaving]="isSaving()"
+  [errorMessage]="errorMessage()"
+  (formSubmitted)="submit($event)"
+  (cancelled)="cancel()"
+/>

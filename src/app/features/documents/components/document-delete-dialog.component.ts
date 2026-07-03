@@ -50,7 +50,7 @@ export class DocumentDeleteDialogComponent {
           }
 
           if (error?.status === 404) {
-            this.errorMessage.set('El documento ya no está disponible.');
+            this.errorMessage.set('El documento ya no esta disponible.');
             return;
           }
 

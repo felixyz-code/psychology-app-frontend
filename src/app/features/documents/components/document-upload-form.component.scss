@@ -1,0 +1,105 @@
+.document-upload-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.document-upload-form {
+  gap: 1.25rem;
+}
+
+.document-upload-form__grid {
+  gap: 1rem;
+}
+
+.document-upload-form__file-block {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--app-color-border, rgba(15, 23, 42, 0.12));
+  border-radius: 1rem;
+  background: var(--app-color-surface-muted, rgba(148, 163, 184, 0.08));
+}
+
+.document-upload-form__file-input {
+  display: none;
+}
+
+.document-upload-form__file-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.document-upload-form__file-header h3,
+.document-upload-form__file-header p,
+.document-upload-form__file-summary p,
+.document-upload-form__error {
+  margin: 0;
+}
+
+.document-upload-form__file-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.document-upload-form__file-header p,
+.document-upload-form__file-summary p,
+.document-upload-form__saving {
+  color: var(--app-color-text-secondary);
+}
+
+.document-upload-form__file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.document-upload-form__file-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.9rem;
+  background: var(--app-color-surface, #fff);
+}
+
+.document-upload-form__file-summary mat-icon {
+  width: 2rem;
+  height: 2rem;
+  font-size: 2rem;
+  color: var(--app-color-primary, #2563eb);
+}
+
+.document-upload-form__file-summary strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.document-upload-form__file-summary--empty mat-icon {
+  color: var(--app-color-muted);
+}
+
+.document-upload-form__inline-state {
+  color: var(--app-color-text-secondary);
+}
+
+.document-upload-form__empty-message {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .document-upload-form__file-header {
+    flex-direction: column;
+  }
+
+  .document-upload-form__file-actions {
+    justify-content: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .document-upload-form__file-actions button {
+    width: 100%;
+  }
+}

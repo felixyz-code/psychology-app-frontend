@@ -1,13 +1,79 @@
 .session-note-dialog {
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  max-height: min(85vh, calc(100dvh - 2rem));
+  height: min(85vh, calc(100dvh - 2rem));
+  min-height: 0;
+  gap: 0.4rem;
+  overflow: hidden;
 }
 
-.session-note-dialog__form,
+.session-note-dialog__form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.session-note-dialog__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 0;
+}
+
+.session-note-dialog__section {
+  flex: 0 0 auto;
+}
+
 .session-note-dialog__grid {
-  display: grid;
-  gap: 1rem;
+  flex: 0 0 auto;
+  gap: 0.4rem 0.75rem;
 }
 
 .session-note-dialog__full {
   grid-column: 1 / -1;
+}
+
+.session-note-dialog__error,
+.session-note-dialog__saving {
+  margin-top: 0.3rem;
+}
+
+.session-note-dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 0.4rem;
+  background: var(--app-color-dialog-bg);
+}
+
+.session-note-dialog__grid .mat-mdc-form-field {
+  --mat-form-field-container-height: 52px;
+  --mat-form-field-container-vertical-padding: 14px;
+}
+
+.session-note-dialog__grid .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 0.05rem;
+}
+
+.session-note-dialog__grid textarea.mat-mdc-input-element {
+  min-height: 2.9rem;
+  line-height: 1.4;
+  overflow-y: auto;
+  resize: none;
+}
+
+@media (max-width: 720px) {
+  .session-note-dialog {
+    max-height: calc(100dvh - 1.25rem);
+    height: calc(100dvh - 1.25rem);
+  }
 }

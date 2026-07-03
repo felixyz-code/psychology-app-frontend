@@ -1,0 +1,213 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.document-preview-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  gap: 1.25rem;
+  overflow: hidden;
+  padding: 1.25rem;
+  background: transparent;
+  color: var(--app-color-heading);
+}
+
+:host .document-preview-dialog {
+  display: flex;
+}
+
+.document-preview-dialog__title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.document-preview-dialog__file-type {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.9rem;
+  background: var(--app-color-surface-muted);
+  color: var(--app-color-heading);
+  flex-shrink: 0;
+}
+
+.document-preview-dialog__file-type .mat-icon {
+  font-size: 1.4rem;
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.document-preview-dialog__title-block h2,
+.document-preview-dialog__title-block p {
+  margin: 0;
+}
+
+.document-preview-dialog__title-block p {
+  margin-top: 0.35rem;
+  color: var(--app-color-text-secondary);
+  word-break: break-word;
+}
+
+.detail-dialog-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 0;
+  padding-bottom: 0.25rem;
+}
+
+.preview-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.document-preview-dialog__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.25rem;
+  min-height: 0;
+  max-height: none;
+}
+
+.document-preview-dialog--pdf {
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.document-preview-dialog--pdf .document-preview-dialog__content {
+  flex: 1 1 0;
+  gap: 0.5rem;
+  padding: 0;
+}
+
+.document-preview-dialog__viewer-shell {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  padding: 1rem;
+  box-sizing: border-box;
+  border: 1px solid var(--app-color-border-subtle);
+  border-radius: 1rem;
+  background: var(--app-color-surface-muted);
+}
+
+.document-preview-dialog__viewer-shell--pdf {
+  flex: 1 1 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.document-preview-dialog--pdf .document-preview-dialog__viewer-shell--pdf {
+  height: auto;
+  padding: 0;
+}
+
+.document-preview-dialog--pdf .detail-dialog-footer {
+  padding: 0.625rem 0.25rem 0;
+}
+
+.document-preview-dialog__viewer-shell--image {
+  height: 100%;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: auto;
+  padding: 1.5rem;
+}
+
+.document-preview-dialog__state {
+  display: grid;
+  flex: 1 1 auto;
+  justify-items: center;
+  gap: 1rem;
+  min-height: 0;
+  padding: 2rem;
+  border: 1px solid var(--app-color-border-subtle);
+  border-radius: 1rem;
+  background: var(--app-color-surface-muted);
+  text-align: center;
+  color: var(--app-color-text-secondary);
+  align-content: center;
+}
+
+.document-preview-dialog__state--error,
+.document-preview-dialog__inline-error {
+  color: var(--app-color-danger-text);
+}
+
+.document-preview-dialog__state p,
+.document-preview-dialog__inline-error {
+  margin: 0;
+}
+
+.document-preview-dialog__frame,
+.document-preview-dialog__image-wrapper {
+  width: 100%;
+  border: 1px solid var(--app-color-border-subtle);
+  border-radius: 0.85rem;
+  background: var(--app-color-surface);
+}
+
+.document-preview-dialog__frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+}
+
+.document-preview-dialog__image-wrapper {
+  display: flex;
+  min-height: 0;
+  width: auto;
+  max-width: 100%;
+  justify-content: center;
+  align-items: flex-start;
+  border: 0;
+  background: transparent;
+}
+
+.document-preview-dialog__image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.detail-dialog-footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 0.75rem 0.5rem 0.25rem;
+  border-top: 1px solid var(--app-color-card-border);
+  background: var(--app-color-dialog-bg);
+}
+
+@media (max-width: 768px) {
+  .document-preview-dialog__title-row {
+    align-items: center;
+  }
+
+  .document-preview-dialog__viewer-shell {
+    padding: 0.75rem;
+  }
+
+  .document-preview-dialog__viewer-shell--image,
+  .document-preview-dialog__state {
+    padding: 1rem;
+  }
+}

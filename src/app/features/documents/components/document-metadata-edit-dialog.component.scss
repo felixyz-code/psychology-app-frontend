@@ -1,0 +1,35 @@
+.document-form-dialog {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.document-form-dialog__header h2,
+.document-form-dialog__header p,
+.document-form-dialog__state p {
+  margin: 0;
+}
+
+.document-form-dialog__header p {
+  margin-top: 0.35rem;
+  color: var(--app-color-text-secondary);
+}
+
+.document-form-dialog__state {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem 0.5rem;
+  text-align: center;
+  color: var(--app-color-text-secondary);
+}
+
+.document-form-dialog__state--error {
+  color: var(--app-color-danger-text);
+}
+
+.document-form-dialog__state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}

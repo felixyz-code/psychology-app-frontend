@@ -1,4 +1,4 @@
-<section class="dashboard-page">
+<section class="dashboard-page app-page">
   @if (isLoading()) {
     <section class="dashboard-skeleton" aria-label="Cargando dashboard clinico" aria-busy="true">
       <mat-card class="dashboard-hero dashboard-hero--skeleton">
@@ -9,7 +9,7 @@
         </div>
       </mat-card>
 
-      <div class="dashboard-metrics">
+      <div class="dashboard-metrics app-page__metrics">
         @for (item of dashboardSkeletonKpis; track $index) {
           <app-metric-card icon="hourglass_top" title="Cargando" value="--" [loading]="true" />
         }
@@ -99,7 +99,7 @@
       <p class="dashboard-warning" role="status">{{ failedSourcesMessage() }}</p>
     }
 
-    <section class="dashboard-metrics" aria-label="Metricas principales">
+    <section class="dashboard-metrics app-page__metrics" aria-label="Metricas principales">
       @for (metric of dashboardMetrics(); track metric.label) {
         <app-metric-card
           [icon]="metric.icon"
@@ -113,12 +113,12 @@
 
     <div class="dashboard-content-grid">
       <app-section-card
-        title="Proximas citas"
-        subtitle="Atenciones programadas para hoy con acceso rapido al detalle."
+        title="Citas de hoy"
+        subtitle="Atenciones programadas para la jornada."
       >
-        @if (upcomingAppointmentsPreview().length) {
+        @if (todayAppointmentsPreview().length) {
           <div class="dashboard-list">
-            @for (appointment of upcomingAppointmentsPreview(); track appointment.id) {
+            @for (appointment of todayAppointmentsPreview(); track appointment.id) {
               <article
                 class="dashboard-list-item dashboard-list-item--interactive"
                 tabindex="0"
@@ -171,7 +171,7 @@
               (triggered)="openCreatePatientDialog()"
             />
             <app-action-card
-              icon="event_available"
+              icon="event"
               label="Nueva cita"
               (triggered)="openCreateAppointmentDialog()"
             />

@@ -37,7 +37,7 @@ export class PatientFormDialogComponent {
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly patientsService = inject(PatientsService);
-  private readonly dialogRef = inject(MatDialogRef<PatientFormDialogComponent, boolean>);
+  private readonly dialogRef = inject(MatDialogRef<PatientFormDialogComponent, boolean | Patient>);
 
   readonly isSaving = signal(false);
   readonly errorMessage = signal('');
@@ -92,8 +92,8 @@ export class PatientFormDialogComponent {
         .updatePatient(this.data.patient.id, payload)
         .pipe(finalize(() => this.isSaving.set(false)))
         .subscribe({
-          next: () => {
-            this.dialogRef.close(true);
+          next: (patient) => {
+            this.dialogRef.close(patient);
           },
           error: (error) => {
             console.error('PATCH /patients/:id failed', {

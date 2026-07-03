@@ -1,0 +1,75 @@
+.documents-card__header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.documents-card__create-button {
+  width: fit-content;
+  white-space: nowrap;
+}
+
+.documents-inline-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.15rem 0 0;
+  color: var(--app-color-danger-text);
+}
+
+.documents-inline-error p {
+  margin: 0;
+}
+
+.documents-table-wrapper {
+  min-width: 0;
+}
+
+.documents-table {
+  min-width: 640px;
+}
+
+.documents-patient-cell {
+  min-width: 0;
+}
+
+.documents-patient-cell__name {
+  display: block;
+  color: var(--app-color-heading);
+  font-weight: 500;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.documents-actions {
+  justify-content: flex-end;
+}
+
+.documents-file-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.documents-file-cell__icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  background: var(--app-color-surface-muted);
+  color: var(--app-color-heading);
+  flex-shrink: 0;
+}
+
+.documents-file-cell__content {
+  min-width: 0;
+}
+
+.documents-file-cell__content strong {
+  display: block;
+  color: var(--app-color-heading);
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: break-word;
+}

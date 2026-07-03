@@ -161,10 +161,69 @@ Current services include:
 - SessionNotesService
 - DocumentsService
 - AppointmentsService
+- FinancialTransactionsService
 
 Services encapsulate HTTP communication.
 
 Components should never call HttpClient directly.
+
+## Reports Integration
+
+The `reports` feature does not introduce dedicated backend report endpoints.
+
+Current integration rules:
+
+- reports consume existing feature-owned services only
+- `ReportsRunnerService` orchestrates report loading without bypassing feature ownership
+- the financial report uses `FinancialTransactionsService.findSummary(...)` and `FinancialTransactionsService.findAll(...)`
+- the agenda report uses `AppointmentsService.getAppointments()` and `PatientsService.getPatients()` with client-side orchestration only
+- the current reports engine supports `Financial Report` and `Agenda Report`
+- date-only filters are parsed locally and applied with inclusive user semantics when the report flow requires client-side range orchestration
+- export generation is currently client-side for `PDF` print output and `CSV` download output
+
+This allows the frontend to deliver a first reporting layer without creating new contracts or duplicating backend rules.
+
+## Clinical Workspace Aggregated Endpoint
+
+The Clinical Workspace now prefers a single aggregated backend contract whenever a `caseFileId` is available.
+
+Primary endpoint:
+
+```text
+GET /case-files/:id/workspace
+```
+
+This endpoint replaces the previous frontend-first manual composition of:
+
+- appointments
+- sessionNotes
+- documents
+- caseFile
+- patient
+- timeline
+
+Current integration rules:
+
+- `CaseFilesService.getWorkspace(caseFileId)` is the primary entry point for the workspace
+- backend-provided `summary` is consumed directly when available
+- backend-provided `timeline` is consumed directly when available
+- manual orchestration remains only as a fallback when the UI still starts from patient context without a resolved `caseFileId`
+
+This keeps the frontend aligned with the backend-first architecture and avoids reconstructing clinical state in the client.
+
+## Documents Global List Patient Resolution
+
+The global `/documents` list keeps `DocumentsService.getAll()` as its primary source.
+
+Current integration rules:
+
+- the frontend does not require a new backend endpoint to show the document owner patient in the global list
+- when the document payload already includes `patient`, `caseFile.patient` or `patientId`, the UI reuses that data directly
+- when the global list only includes `caseFileId`, the UI resolves the patient name by combining existing `CaseFilesService.getCaseFiles()` and `PatientsService.getPatients()` data
+- this resolution is presentational only and does not introduce ownership rules, new persistence logic or backend contract changes
+- documents without a resolvable patient relation must show a clear fallback label in the UI
+
+This keeps the Documents module aligned with the backend-first architecture while still surfacing the patient context needed by the global operational list.
 
 ---
 
@@ -179,6 +238,8 @@ POST /documents/upload
 Current implementation:
 
 - multipart/form-data
+- `file`
+- `caseFileId`
 - FormData
 - Blob downloads
 - Blob previews

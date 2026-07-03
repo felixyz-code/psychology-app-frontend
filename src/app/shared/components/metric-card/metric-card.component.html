@@ -1,4 +1,4 @@
-<mat-card class="metric-card" [class]="'metric-card metric-card--' + variant()">
+<mat-card class="metric-card" [class]="'metric-card metric-card--' + variant()" [class.metric-card--compact]="compact()">
   @if (loading()) {
     <span class="app-skeleton metric-card__icon-skeleton" aria-hidden="true"></span>
     <span class="app-skeleton-line metric-card__line metric-card__line--label" aria-hidden="true"></span>
@@ -8,8 +8,8 @@
     <div class="metric-card__icon">
       <mat-icon>{{ icon() }}</mat-icon>
     </div>
-    <span class="metric-card__label">{{ title() }}</span>
-    <strong class="metric-card__value">{{ value() }}</strong>
-    <p class="metric-card__supporting">{{ supportingText() }}</p>
+    <span class="metric-card__label app-truncate-2">{{ title() }}</span>
+    <strong class="metric-card__value app-truncate-1" [title]="value()">{{ value() }}</strong>
+    <p class="metric-card__supporting app-truncate-3" [title]="supportingText()">{{ supportingText() }}</p>
   }
 </mat-card>

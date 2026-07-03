@@ -1,0 +1,22 @@
+<div class="detail-dialog-shell">
+  <header class="detail-dialog-header">
+    <div>
+      <span class="detail-dialog-eyebrow">Detalle financiero</span>
+      <h2>Detalle de transaccion</h2>
+      <p>{{ transaction.concept }}</p>
+    </div>
+
+    <button mat-icon-button type="button" aria-label="Cerrar detalle financiero" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="detail-dialog-body">
+    <app-financial-transaction-detail-content [transaction]="transaction" />
+  </div>
+
+  <footer class="detail-dialog-footer">
+    <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
+    <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']" (click)="close()">Editar</a>
+  </footer>
+</div>

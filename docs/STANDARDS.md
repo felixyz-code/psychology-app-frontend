@@ -179,6 +179,26 @@ Examples:
 
 Dialogs should preserve navigation context.
 
+Cross-feature detail workspaces may use dialogs when they consolidate an existing workflow without requiring a dedicated route.
+
+The current reference example is documented in `CLINICAL_WORKSPACE.md`.
+
+---
+
+# Clinical Workspace Pattern
+
+When a feature contributes to the Clinical Workspace:
+
+* Keep the patient context as the top-level anchor
+* Load related data through the owning feature service
+* Treat missing optional data as an empty state when the backend contract allows it
+* Reuse shared cards, badges, timelines and empty states before creating new primitives
+* Reuse existing create, edit and delete dialogs instead of embedding full forms into the workspace shell
+
+The Clinical Workspace should remain an orchestration layer.
+
+It must not become a place for frontend-owned business logic.
+
 ---
 
 # Styling
@@ -281,6 +301,7 @@ Related documentation:
 
 * PROJECT.md
 * ARCHITECTURE.md
+* CLINICAL_WORKSPACE.md
 * API_INTEGRATION.md
 * DECISION_LOG.md
 * ROADMAP.md

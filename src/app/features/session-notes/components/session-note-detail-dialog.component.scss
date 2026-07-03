@@ -1,81 +1,113 @@
-.session-note-detail-dialog {
-  display: flex;
-  flex-direction: column;
-  max-height: 85vh;
-  overflow: hidden;
-}
-
-.session-note-detail-dialog__content {
-  display: grid;
-  gap: 1.25rem;
-  overflow-y: auto;
-  overflow-x: hidden;
+:host {
+  display: block;
+  height: 100%;
   min-height: 0;
 }
 
-.session-note-detail-dialog__section h3,
-.session-note-detail-dialog__grid p,
-.session-note-detail-dialog__content-text {
-  margin: 0;
-}
-
-.session-note-detail-dialog__section {
-  display: grid;
-  gap: 1rem;
+.session-note-detail-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-height: 85vh;
+  overflow: hidden;
+  min-height: 0;
+  box-sizing: border-box;
+  gap: 1.5rem;
   padding: 1.25rem;
-  border: 1px solid var(--app-color-card-border);
-  border-radius: 16px;
-  background: var(--app-color-card-soft-bg);
-}
-
-.session-note-detail-dialog__section h3 {
+  background: transparent;
   color: var(--app-color-heading);
-  font-size: 1.1rem;
 }
 
-.session-note-detail-dialog__content-text {
-  color: var(--app-color-heading);
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-
-.session-note-detail-dialog__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.session-note-detail-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 1rem;
+  flex: 0 0 auto;
+  min-height: 0;
+  padding-bottom: 0.25rem;
 }
 
-.session-note-detail-dialog__label {
-  display: block;
-  margin-bottom: 0.35rem;
-  color: var(--app-color-muted);
-  font-size: 0.82rem;
+.session-note-detail-dialog__header-copy {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.session-note-detail-dialog__eyebrow {
+  display: inline-block;
+  color: var(--app-color-text-secondary);
+  font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.session-note-detail-dialog__full {
-  grid-column: 1 / -1;
+.session-note-detail-dialog__header-copy :is(h2, p),
+.session-note-detail-dialog__meta {
+  margin: 0;
 }
 
-.session-note-detail-dialog__full p {
+.session-note-detail-dialog__header-copy h2 {
+  color: var(--app-color-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.session-note-detail-dialog__header-copy p {
+  color: var(--app-color-text-secondary);
+  line-height: 1.5;
+}
+
+.session-note-detail-dialog__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  color: var(--app-color-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.session-note-detail-dialog__meta span {
   overflow-wrap: anywhere;
 }
 
-.session-note-detail-dialog__actions {
+.session-note-detail-dialog__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(85vh - 10rem);
+  padding: 0.25rem;
+}
+
+.session-note-detail-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  flex: 0 0 auto;
   flex-shrink: 0;
+  padding: 0.75rem 0.5rem 0.25rem;
   border-top: 1px solid var(--app-color-card-border);
   background: var(--app-color-dialog-bg);
 }
 
 @media (max-width: 720px) {
-  .session-note-detail-dialog__section {
+  .session-note-detail-dialog {
     padding: 1rem;
   }
 
-  .session-note-detail-dialog__grid {
-    grid-template-columns: 1fr;
+  .session-note-detail-dialog__body {
+    max-height: calc(85vh - 12rem);
+    padding: 0;
+  }
+
+  .session-note-detail-dialog__footer {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem 0 0;
   }
 }

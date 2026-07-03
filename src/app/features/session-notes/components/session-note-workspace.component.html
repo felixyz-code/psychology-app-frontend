@@ -1,0 +1,67 @@
+<div class="session-note-workspace">
+  @if (showHero()) {
+    <section class="session-note-workspace__hero" aria-label="Resumen principal de la nota">
+      <div class="session-note-workspace__hero-main">
+        <span class="session-note-workspace__eyebrow">Historia clinica</span>
+        <h2>{{ title() }}</h2>
+        <p>Lectura clinica construida unicamente con la informacion disponible en el contrato actual de Session Notes.</p>
+      </div>
+
+      <div class="session-note-workspace__hero-side">
+        @for (item of sessionSummary(); track item.label) {
+          <article class="session-note-workspace__summary-item">
+            <span class="session-note-workspace__label">{{ item.label }}</span>
+            <strong>{{ item.value }}</strong>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  <app-section-card
+    title="Registro de la sesion"
+    subtitle="Narrativa clinica disponible en el contrato actual."
+  >
+    <div class="session-note-workspace__narrative">
+      {{ sessionNote().content }}
+    </div>
+  </app-section-card>
+
+  <app-section-card
+    title="Trazabilidad del registro"
+    subtitle="Metadatos disponibles para identificar y auditar la nota."
+  >
+    <div class="session-note-workspace__record-grid">
+      @for (item of recordSummary(); track item.label) {
+        <article class="session-note-workspace__record-item">
+          <span class="session-note-workspace__label">{{ item.label }}</span>
+          <p>{{ item.value }}</p>
+        </article>
+      }
+    </div>
+  </app-section-card>
+
+  @if (showActions()) {
+    <div class="session-note-workspace__actions">
+      @if (canEdit()) {
+        <button mat-button type="button" (click)="requestEdit()">
+          <mat-icon>edit</mat-icon>
+          <span>Editar</span>
+        </button>
+      }
+
+      @if (canDelete()) {
+        <button mat-button type="button" (click)="requestDelete()">
+          <mat-icon>delete</mat-icon>
+          <span>Eliminar</span>
+        </button>
+      }
+
+      @if (canClose()) {
+        <button mat-flat-button type="button" (click)="requestClose()">
+          {{ closeLabel() }}
+        </button>
+      }
+    </div>
+  }
+</div>

@@ -1,39 +1,31 @@
 <div class="session-note-detail-dialog">
-  <div class="session-note-detail-dialog__content">
-    <div class="session-note-detail-dialog__header">
-      <h2>{{ sessionNote.title || 'Sesión sin título' }}</h2>
-      <p>{{ sessionNote.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+  <header class="session-note-detail-dialog__header">
+    <div class="session-note-detail-dialog__header-copy">
+      <span class="session-note-detail-dialog__eyebrow">Nota de sesion</span>
+      <h2>{{ getTitle() }}</h2>
+      <p>Lectura clinica construida con el contrato actual disponible para Session Notes.</p>
+
+      <div class="session-note-detail-dialog__meta">
+        <span>{{ sessionNote.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+        <span>Registrada en el sistema</span>
+        <span>Seguimiento clinico asociado al expediente actual</span>
+      </div>
     </div>
 
-    <section class="session-note-detail-dialog__section">
-      <h3>Contenido</h3>
-      <p class="session-note-detail-dialog__content-text">{{ sessionNote.content }}</p>
-    </section>
+    <button mat-icon-button type="button" aria-label="Cerrar nota de sesion" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
 
-    <section class="session-note-detail-dialog__section">
-      <h3>Datos de la nota</h3>
-
-      <div class="session-note-detail-dialog__grid">
-        <div>
-          <span class="session-note-detail-dialog__label">Fecha de creación</span>
-          <p>{{ sessionNote.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
-        </div>
-
-        <div>
-          <span class="session-note-detail-dialog__label">Fecha de actualización</span>
-          <p>{{ sessionNote.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
-        </div>
-
-        <div class="session-note-detail-dialog__full">
-          <span class="session-note-detail-dialog__label">ID de la nota</span>
-          <p>{{ sessionNote.id }}</p>
-        </div>
-      </div>
-    </section>
+  <div class="session-note-detail-dialog__body">
+    <app-session-note-workspace
+      [sessionNote]="sessionNote"
+      [showActions]="false"
+    />
   </div>
 
-  <div class="session-note-detail-dialog__actions">
-    <button mat-button type="button" (click)="close()">Cerrar</button>
+  <footer class="session-note-detail-dialog__footer">
+    <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
     <button mat-flat-button type="button" (click)="edit()">Editar</button>
-  </div>
+  </footer>
 </div>

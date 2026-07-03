@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   CaseFile,
+  CaseFileWorkspaceResponse,
   CreateCaseFileRequest,
   UpdateCaseFileRequest,
 } from '../models/case-file.models';
@@ -20,6 +21,10 @@ export class CaseFilesService {
 
   getCaseFileById(id: string): Observable<CaseFile> {
     return this.http.get<CaseFile>(`${this.apiUrl}/case-files/${id}`);
+  }
+
+  getWorkspace(caseFileId: string): Observable<CaseFileWorkspaceResponse> {
+    return this.http.get<CaseFileWorkspaceResponse>(`${this.apiUrl}/case-files/${caseFileId}/workspace`);
   }
 
   getCaseFileByPatientId(patientId: string): Observable<CaseFile> {

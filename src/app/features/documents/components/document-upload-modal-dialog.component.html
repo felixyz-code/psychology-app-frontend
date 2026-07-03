@@ -1,0 +1,26 @@
+<div class="document-form-dialog app-dialog">
+  <div class="document-form-dialog__header app-dialog__header">
+    <div>
+      <h2>Nuevo documento</h2>
+      <p>
+        @if (isCaseFileFixed()) {
+          Carga un documento para este expediente sin solicitar una seleccion adicional.
+        } @else {
+          Carga un documento sin salir del listado global.
+        }
+      </p>
+    </div>
+  </div>
+
+  <app-document-upload-form
+    layout="dialog"
+    [isSaving]="flow.isSaving()"
+    [errorMessage]="flow.errorMessage()"
+    [isCaseFilesLoading]="flow.isCaseFilesLoading()"
+    [caseFilesLoadErrorMessage]="flow.caseFilesLoadErrorMessage()"
+    [caseFileOptions]="flow.caseFileOptions()"
+    [fixedCaseFileId]="flow.fixedCaseFileId()"
+    (formSubmitted)="submit($event)"
+    (cancelled)="cancel()"
+  />
+</div>

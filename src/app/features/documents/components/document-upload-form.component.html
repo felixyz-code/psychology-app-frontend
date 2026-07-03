@@ -1,0 +1,119 @@
+@if (!isDialogLayout()) {
+  <section class="document-upload-page">
+    <app-page-header
+      heading="Nuevo documento"
+      subtitle="Carga un documento consumiendo el contrato actual del backend mediante multipart/form-data."
+      [breadcrumbs]="[
+        { label: 'Dashboard', url: '/dashboard' },
+        { label: 'Documentos', url: '/documents' },
+        { label: 'Nuevo' },
+      ]"
+    />
+
+    <app-section-card
+      title="Carga de documento"
+      subtitle="Completa los metadatos requeridos y selecciona un unico archivo permitido antes de enviarlo."
+    >
+      <ng-container *ngTemplateOutlet="uploadFormContent" />
+    </app-section-card>
+  </section>
+} @else {
+  <ng-container *ngTemplateOutlet="uploadFormContent" />
+}
+
+<ng-template #uploadFormContent>
+  <form class="document-upload-form app-form" [formGroup]="uploadForm" (ngSubmit)="submit()">
+    @if (!isCaseFileSelectionHidden()) {
+      <div class="document-upload-form__grid app-form-grid">
+        <mat-form-field appearance="outline" class="app-form-field--compact">
+          <mat-label>Expediente</mat-label>
+          <mat-select formControlName="caseFileId" [disabled]="isCaseFilesLoading() || !caseFileOptions().length">
+            @for (option of caseFileOptions(); track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+          @if (hasRequiredError('caseFileId')) {
+            <mat-error>Selecciona un expediente valido.</mat-error>
+          } @else if (hasMaxLengthError('caseFileId')) {
+            <mat-error>El identificador del expediente no es valido.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      @if (isCaseFilesLoading()) {
+        <div class="document-upload-form__inline-state app-form-inline-state" aria-live="polite">
+          <mat-spinner diameter="20" />
+          <span>Cargando expedientes disponibles...</span>
+        </div>
+      } @else if (caseFilesLoadErrorMessage()) {
+        <p class="document-upload-form__error app-form-error" role="alert">{{ caseFilesLoadErrorMessage() }}</p>
+      } @else if (!caseFileOptions().length) {
+        <p class="document-upload-form__empty-message app-form-help">No hay expedientes disponibles para seleccionar.</p>
+      }
+    }
+
+    <div class="document-upload-form__file-block">
+      <input
+        #fileInput
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+        class="document-upload-form__file-input"
+        (change)="handleFileSelection($event)"
+      />
+
+      <div class="document-upload-form__file-header">
+        <div>
+          <h3>Archivo</h3>
+          <p>Selecciona un PDF o una imagen de hasta 10 MB.</p>
+        </div>
+
+        @if (!selectedFile()) {
+          <button mat-stroked-button type="button" (click)="openFilePicker()">
+            <mat-icon>upload_file</mat-icon>
+            <span>Seleccionar archivo</span>
+          </button>
+        } @else {
+          <div class="document-upload-form__file-actions">
+            <button mat-stroked-button type="button" (click)="replaceFile()">
+              <mat-icon>sync</mat-icon>
+              <span>Reemplazar archivo</span>
+            </button>
+            <button mat-button type="button" (click)="removeFile()">Quitar</button>
+          </div>
+        }
+      </div>
+
+      <div class="document-upload-form__file-summary" [class.document-upload-form__file-summary--empty]="!selectedFile()">
+        <mat-icon>{{ getSelectedFileIcon() }}</mat-icon>
+
+        <div>
+          <strong>{{ getFileName() }}</strong>
+          <p>{{ getFileSizeLabel() }}</p>
+        </div>
+      </div>
+
+      @if (fileErrorMessage()) {
+        <p class="document-upload-form__error app-form-error" role="alert">{{ fileErrorMessage() }}</p>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <p class="document-upload-form__error app-form-error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    @if (isSaving()) {
+      <div class="document-upload-form__saving app-form-saving" aria-live="polite">
+        <mat-spinner diameter="20" />
+        <span>{{ getSavingLabel() }}</span>
+      </div>
+    }
+
+    <div class="document-upload-form__actions app-form-actions">
+      <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">Cancelar</button>
+      <button mat-flat-button type="submit" [disabled]="isSubmitDisabled()">
+        <mat-icon>save</mat-icon>
+        <span>Subir documento</span>
+      </button>
+    </div>
+  </form>
+</ng-template>
