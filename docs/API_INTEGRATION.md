@@ -211,6 +211,20 @@ Current integration rules:
 
 This keeps the frontend aligned with the backend-first architecture and avoids reconstructing clinical state in the client.
 
+## Documents Global List Patient Resolution
+
+The global `/documents` list keeps `DocumentsService.getAll()` as its primary source.
+
+Current integration rules:
+
+- the frontend does not require a new backend endpoint to show the document owner patient in the global list
+- when the document payload already includes `patient`, `caseFile.patient` or `patientId`, the UI reuses that data directly
+- when the global list only includes `caseFileId`, the UI resolves the patient name by combining existing `CaseFilesService.getCaseFiles()` and `PatientsService.getPatients()` data
+- this resolution is presentational only and does not introduce ownership rules, new persistence logic or backend contract changes
+- documents without a resolvable patient relation must show a clear fallback label in the UI
+
+This keeps the Documents module aligned with the backend-first architecture while still surfacing the patient context needed by the global operational list.
+
 ---
 
 # File Upload Strategy

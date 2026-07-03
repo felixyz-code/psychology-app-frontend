@@ -28,6 +28,18 @@
   min-width: 640px;
 }
 
+.documents-patient-cell {
+  min-width: 0;
+}
+
+.documents-patient-cell__name {
+  display: block;
+  color: var(--app-color-heading);
+  font-weight: 500;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
 .documents-actions {
   justify-content: flex-end;
 }

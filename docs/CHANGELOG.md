@@ -8,6 +8,22 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 12
 
+## Sprint 12.3A - Documents Global Patient Context
+
+### Changed
+
+* El listado global `/documents` ahora muestra la columna `Paciente` entre `Archivo` y `Tipo` para identificar con claridad a quien pertenece cada documento.
+* La UI reutiliza `patient`, `caseFile.patient` o `patientId` cuando el contrato ya los entrega y solo recurre a composicion frontend con servicios existentes cuando el documento trae unicamente `caseFileId`.
+* Los documentos sin relacion resoluble de paciente ahora muestran un fallback visible y consistente sin alterar acciones existentes de ver, editar, descargar o eliminar.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios obligatorios de contrato HTTP.
+* La resolucion auxiliar del paciente en `/documents` reutiliza `DocumentsService.getAll()`, `CaseFilesService.getCaseFiles()` y `PatientsService.getPatients()` solo con fines de presentacion.
+* `npm.cmd run build` finalizo correctamente.
+
 ## Sprint 12.3 - Reporte Agenda
 
 ### Added

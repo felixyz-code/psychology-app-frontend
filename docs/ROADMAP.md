@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 12.3 - Reporte Agenda
+Sprint 12.3A - Documents Global Patient Context
 ```
 
 Phase 3 progress:
@@ -115,6 +115,7 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 11.4 completed - Document row actions, tooltips and table states now follow the same action hierarchy and visual density as the other operational lists
 * Sprint 11.6A completed - Document modal wrappers now align more closely with the shared dialog header/footer baseline without changing embedded form internals
 * Sprint 11.6B completed - Embedded upload and metadata forms now share a more consistent internal form spacing baseline with the rest of the product
+* Sprint 12.3A completed - Global documents list now surfaces the owner patient between `Archivo` and `Tipo` by reusing existing document relations when available and resolving `caseFileId -> patientId -> patient` with existing services otherwise
 
 ### Appointments
 
