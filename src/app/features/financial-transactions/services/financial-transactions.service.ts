@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { isDateOnlyValue, nextLocalDayStart, startOfLocalDateOnly } from '../../../shared/utils/local-date-range';
 import {
   CreateFinancialTransactionDto,
   FindFinancialTransactionsQueryDto,
@@ -50,14 +51,31 @@ export class FinancialTransactionsService {
       return undefined;
     }
 
+    const normalizedQuery = this.normalizeDateRangeQuery(query);
     let params = new HttpParams();
 
-    for (const [key, value] of Object.entries(query)) {
+    for (const [key, value] of Object.entries(normalizedQuery)) {
       if (value !== undefined && value !== null && value !== '') {
         params = params.set(key, value);
       }
     }
 
     return params;
+  }
+
+  private normalizeDateRangeQuery(query: FindFinancialTransactionsQueryDto): FindFinancialTransactionsQueryDto {
+    return {
+      ...query,
+      from: this.toIsoBoundary(startOfLocalDateOnly(query.from), query.from),
+      to: this.toIsoBoundary(nextLocalDayStart(query.to), query.to),
+    };
+  }
+
+  private toIsoBoundary(value: Date | null, fallback?: string): string | undefined {
+    if (value) {
+      return value.toISOString();
+    }
+
+    return isDateOnlyValue(fallback) ? undefined : fallback;
   }
 }

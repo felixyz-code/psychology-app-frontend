@@ -1,4 +1,5 @@
 import { StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import { parseLocalDateOnly, toDateInputValue } from '../../../shared/utils/local-date-range';
 import {
   FinancialTransactionCategory,
   FinancialTransactionStatus,
@@ -23,6 +24,8 @@ export const FINANCIAL_TRANSACTION_CATEGORIES: FinancialTransactionCategory[] = 
 ];
 
 export const PAYMENT_METHODS: PaymentMethod[] = ['CASH', 'CARD', 'TRANSFER', 'CHECK', 'OTHER'];
+
+export { parseLocalDateOnly, toDateInputValue } from '../../../shared/utils/local-date-range';
 
 export function getFinancialTransactionTypeLabel(type: FinancialTransactionType): string {
   const labels: Record<FinancialTransactionType, string> = {
@@ -134,21 +137,10 @@ export function formatFinancialCount(value: number | undefined): string {
   }).format(value);
 }
 
-export function parseLocalDateOnly(value: string): Date {
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-
-  if (!match) {
-    return new Date(Number.NaN);
-  }
-
-  const [, year, month, day] = match;
-  return new Date(Number(year), Number(month) - 1, Number(day));
-}
-
 export function formatFinancialDate(value: string): string {
   const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(value) ? parseLocalDateOnly(value) : new Date(value);
 
-  if (Number.isNaN(parsedDate.getTime())) {
+  if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
     return '-';
   }
 
@@ -173,14 +165,6 @@ export function formatFinancialDateTime(value: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
-}
-
-export function toDateInputValue(value: Date): string {
-  const year = value.getFullYear();
-  const month = String(value.getMonth() + 1).padStart(2, '0');
-  const day = String(value.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
 }
 
 export function buildCurrentMonthDateRange(): { from: string; to: string } {

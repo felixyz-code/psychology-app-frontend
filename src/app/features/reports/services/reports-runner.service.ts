@@ -403,7 +403,7 @@ export class ReportsRunnerService {
   private formatDateOnlyFilterLabel(value: string): string {
     const parsedDate = parseLocalDateOnly(value);
 
-    if (Number.isNaN(parsedDate.getTime())) {
+    if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
       return formatFinancialDate(value);
     }
 

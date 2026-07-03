@@ -422,6 +422,36 @@ This better matches the expected behavior of professional monthly reporting and 
 
 ---
 
+# ADR-018 - Shared Inclusive Date Range Helper
+
+## Decision
+
+The logic for interpreting `date-only` values and building inclusive local date ranges is centralized in:
+
+```text
+shared/utils/local-date-range.ts
+```
+
+All modules that filter by dates should reuse this helper instead of implementing local parsing or relying on:
+
+```ts
+new Date('YYYY-MM-DD')
+```
+
+## Rationale
+
+This guarantees consistent behavior across modules that filter by dates and avoids timezone-related issues caused by UTC parsing of `date-only` strings.
+
+It also reduces duplicated logic and lowers the risk of regressions when date range semantics evolve.
+
+## Implications
+
+- Reports and Financial Transactions now share the same local inclusive range construction.
+- Future modules with date filters should depend on the shared helper to preserve functional consistency.
+- The frontend should continue treating `from` as the local start of the selected day and `to` as the exclusive start of the next local day.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:
