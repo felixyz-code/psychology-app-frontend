@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 
@@ -20,6 +21,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    MatButtonModule,
     MatProgressSpinnerModule,
     MatTableModule,
     DataTableEmptyStateComponent,
@@ -44,6 +46,7 @@ export class ReportPreviewShellComponent {
   readonly emptyTitle = input('No hay datos para mostrar');
   readonly emptyMessage = input('Ajusta los filtros para generar una vista previa.');
   readonly generatedAt = input('');
+  readonly retryRequested = output<void>();
 
   formatGeneratedAt(value: string): string {
     const parsedDate = new Date(value);
@@ -83,5 +86,9 @@ export class ReportPreviewShellComponent {
     content: ClinicalSummaryContent | ClinicalRecordContent | null
   ): content is ClinicalRecordContent {
     return content?.kind === 'record';
+  }
+
+  requestRetry(): void {
+    this.retryRequested.emit();
   }
 }

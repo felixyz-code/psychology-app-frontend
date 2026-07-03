@@ -114,12 +114,12 @@ export class ReportRunnerPage {
 
     if (this.isClinicalSummaryReport()) {
       const hasDocument = Boolean(this.reportResult()?.clinicalContent);
-      return hasDocument ? 'Documento clinico listo para revision' : 'Selecciona un paciente para generar el documento';
+      return hasDocument ? 'Documento clínico listo para revisión' : 'Selecciona un paciente para generar el documento';
     }
 
     if (this.isClinicalRecordReport()) {
       const hasDocument = Boolean(this.reportResult()?.clinicalContent);
-      return hasDocument ? 'Expediente clinico listo para revision' : 'Selecciona un paciente para generar el expediente';
+      return hasDocument ? 'Expediente clínico listo para revisión' : 'Selecciona un paciente para generar el expediente';
     }
 
     const noun = this.isAgendaReport() ? 'cita' : 'movimiento';
@@ -127,20 +127,20 @@ export class ReportRunnerPage {
   });
   readonly filtersPanelSubtitle = computed(() =>
     this.isAgendaReport()
-      ? 'Refina el periodo, el estado y el paciente antes de generar la agenda profesional.'
+      ? 'Refina el período, el estado y el paciente antes de generar la agenda profesional.'
       : this.isClinicalSummaryReport()
-        ? 'Selecciona un paciente y define el periodo para construir un documento clinico profesional.'
+        ? 'Selecciona un paciente y define el período para construir un documento clínico profesional.'
         : this.isClinicalRecordReport()
-          ? 'Selecciona un paciente y define el periodo para construir un expediente clinico estructurado.'
-        : 'Refina el periodo y los criterios financieros antes de generar la vista previa.'
+          ? 'Selecciona un paciente y define el período para construir un expediente clínico estructurado.'
+        : 'Refina el período y los criterios financieros antes de generar la vista previa.'
   );
   readonly previewSubtitle = computed(() =>
     this.isAgendaReport()
-      ? 'Agenda profesional agrupada por dia con citas ordenadas cronologicamente.'
+      ? 'Agenda profesional agrupada por día con citas ordenadas cronológicamente.'
       : this.isClinicalSummaryReport()
-        ? 'Documento clinico centrado en paciente con resumen, evolucion y cronologia visible.'
+        ? 'Documento clínico centrado en el paciente con resumen, evolución y cronología visible.'
         : this.isClinicalRecordReport()
-          ? 'Expediente clinico documental con estructura completa, detalle y lectura imprimible.'
+          ? 'Expediente clínico documental con estructura completa, detalle y lectura imprimible.'
         : 'Resumen tabular de movimientos incluidos en el reporte financiero actual.'
   );
   readonly guidedEmptyTitle = computed(() =>
@@ -153,8 +153,8 @@ export class ReportRunnerPage {
   readonly guidedEmptyMessage = computed(() =>
     this.isClinicalSummaryReport() || this.isClinicalRecordReport()
       ? this.isClinicalRecordReport()
-        ? 'El Expediente Clinico se construye desde el expediente del paciente y su actividad visible en el periodo.'
-        : 'El Resumen Clinico se construye desde el expediente del paciente y su actividad visible en el periodo.'
+        ? 'El expediente clínico se construye desde el expediente del paciente y su actividad visible en el período.'
+        : 'El resumen clínico se construye desde el expediente del paciente y su actividad visible en el período.'
       : 'Ajusta los filtros para generar una vista previa.'
   );
 
@@ -219,7 +219,14 @@ export class ReportRunnerPage {
     }
 
     if (format === 'pdf') {
-      this.reportsExportService.exportAsPdf(result);
+      const exported = this.reportsExportService.exportAsPdf(result);
+
+      if (!exported) {
+        this.errorMessage.set(
+          'No fue posible abrir la vista de impresión. Verifica que el navegador no esté bloqueando ventanas emergentes.'
+        );
+      }
+
       return;
     }
 
@@ -326,7 +333,7 @@ export class ReportRunnerPage {
           },
           error: () => {
             this.reportResult.set(null);
-            this.errorMessage.set('No fue posible generar el resumen clinico.');
+            this.errorMessage.set('No fue posible generar el resumen clínico.');
             this.isLoading.set(false);
           },
         });
@@ -344,7 +351,7 @@ export class ReportRunnerPage {
           },
           error: () => {
             this.reportResult.set(null);
-            this.errorMessage.set('No fue posible generar el expediente clinico.');
+            this.errorMessage.set('No fue posible generar el expediente clínico.');
             this.isLoading.set(false);
           },
         });
@@ -353,7 +360,7 @@ export class ReportRunnerPage {
     }
 
     this.reportResult.set(null);
-    this.errorMessage.set('El reporte solicitado no esta disponible.');
+    this.errorMessage.set('El reporte solicitado no está disponible.');
     this.isLoading.set(false);
   }
 

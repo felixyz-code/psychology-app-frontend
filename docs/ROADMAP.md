@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 12.5 - Expediente Clinico
+Sprint 12.6 - Reports QA Hardening
 ```
 
 Phase 3 progress:
@@ -181,6 +181,7 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 12.3 completed - Agenda Report delivered with reusable report orchestration, grouped preview by day, KPI summary, inclusive date ranges and frontend-only export flow
 * Sprint 12.4 completed - Resumen Clinico delivered with patient-required execution, clinical preview, workspace-based orchestration, summarized notes, related documents and PDF-first export
 * Sprint 12.5 completed - Expediente Clinico delivered as a second patient-centered clinical document with full structured content, PDF-only export and descriptive PDF filenames
+* Sprint 12.6 completed - Reports QA hardening delivered with mojibake correction, single error surface in preview, blocked-popup PDF feedback, nomenclatura visible en español consistente y helper compartido para MIME labels
 
 ### Sprint 11
 
@@ -214,7 +215,7 @@ Completed - Reports foundation generalized for multiple professional reports
 Next planned sprint:
 
 ```text
-Sprint 12.6 - Reports QA Hardening & Documentation Closure
+Sprint 13 - Dashboard Analytics
 ```
 
 ---
@@ -223,8 +224,8 @@ Sprint 12.6 - Reports QA Hardening & Documentation Closure
 
 Current development efforts include:
 
-* Reports module hardening after Sprint 12.5 closure
-* Reports QA hardening and final documentation closure
+* Transition planning after Reports stabilization
+* Preparacion de Sprint 13 - Dashboard Analytics
 * Final backend integration verification
 * Manual browser validation of dense clinical workflows
 * Incremental technical debt reduction after release-candidate closure

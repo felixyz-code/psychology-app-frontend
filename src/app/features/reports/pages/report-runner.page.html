@@ -1,7 +1,7 @@
 <section class="report-runner-page app-page">
   <app-page-header
     [heading]="definition()?.title || 'Reporte'"
-    subtitle="Genera una vista previa profesional con indicadores, filtros y exportacion centralizada."
+    subtitle="Genera una vista previa profesional con indicadores, filtros y exportación centralizada."
     [breadcrumbs]="[
       { label: 'Dashboard', url: '/dashboard' },
       { label: 'Reportes', url: '/reports' },
@@ -46,7 +46,7 @@
 
         @if (isFinancialReport()) {
           <mat-form-field filterToolbarPrimary appearance="outline">
-            <mat-label>Categoria</mat-label>
+            <mat-label>Categoría</mat-label>
             <mat-select formControlName="category">
               <mat-option value="">Todas</mat-option>
               @for (category of transactionCategories; track category) {
@@ -58,7 +58,7 @@
 
         @if (isFinancialReport()) {
           <mat-form-field filterToolbarPrimary appearance="outline">
-            <mat-label>Metodo de pago</mat-label>
+            <mat-label>Método de pago</mat-label>
             <mat-select formControlName="paymentMethod">
               <mat-option value="">Todos</mat-option>
               @for (paymentMethod of paymentMethods; track paymentMethod) {
@@ -105,12 +105,12 @@
         }
 
         <mat-form-field filterToolbarSecondary appearance="outline">
-          <mat-label>Fecha desde</mat-label>
+          <mat-label>Fecha de inicio</mat-label>
           <input matInput type="date" formControlName="from" />
         </mat-form-field>
 
         <mat-form-field filterToolbarSecondary appearance="outline">
-          <mat-label>Fecha hasta</mat-label>
+          <mat-label>Fecha de fin</mat-label>
           <input matInput type="date" formControlName="to" />
         </mat-form-field>
 
@@ -149,13 +149,6 @@
     }
   </section>
 
-  @if (errorMessage()) {
-    <div class="report-runner-page__error" role="status">
-      <p>{{ errorMessage() }}</p>
-      <button mat-stroked-button type="button" (click)="retry()">Reintentar</button>
-    </div>
-  }
-
   <app-report-preview-shell
     title="Vista previa"
     [subtitle]="previewSubtitle()"
@@ -171,5 +164,6 @@
     [emptyTitle]="reportResult()?.emptyTitle || guidedEmptyTitle()"
     [emptyMessage]="reportResult()?.emptyMessage || guidedEmptyMessage()"
     [generatedAt]="reportResult()?.generatedAt || ''"
+    (retryRequested)="retry()"
   />
 </section>

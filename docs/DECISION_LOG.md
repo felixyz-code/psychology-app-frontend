@@ -517,6 +517,36 @@ Adding a descriptive `pdfFileName` at the report-result level keeps filename own
 
 ---
 
+# ADR-021 - Reports Stabilization Before Dashboard Analytics
+
+## Decision
+
+Antes de iniciar una nueva fase funcional orientada a `Dashboard Analytics`, el modulo `Reports` se considera estabilizado mediante una pasada especifica de hardening y cierre tecnico.
+
+El alcance de esta estabilizacion incluye:
+
+- correccion de copy y mojibake visible
+- consolidacion de una unica superficie de error en preview
+- feedback explicito cuando el popup de `PDF` es bloqueado
+- consistencia de nomenclatura visible en espanol
+- pequena utilidad compartida para labels legibles de MIME types
+
+## Rationale
+
+`Reports` ya actua como infraestructura reutilizable para multiples documentos y vistas profesionales.
+
+Dejar inconsistencias de copy, errores duplicados o fallas silenciosas en exportacion antes de abrir una nueva fase de producto aumentaria deuda tecnica en una superficie transversal.
+
+La estabilizacion previa reduce riesgo y deja una base mas segura para futuras capacidades analiticas.
+
+## Operational Notes
+
+- La QA navegada completa siguio condicionada por la disponibilidad de una sesion autenticada local reutilizable.
+- Aun con esa limitacion, la QA tecnica por codigo y `npm.cmd run build` si pudo completarse satisfactoriamente durante Sprint 12.6.
+- La falta de sesion local no invalida el cierre tecnico del sprint, pero si queda registrada como restriccion operativa para validacion UI end-to-end futura.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

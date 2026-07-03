@@ -25,19 +25,20 @@
   } @else if (errorMessage()) {
     <div class="report-preview-shell__state app-table-feedback-state app-table-feedback-state--error" role="alert">
       <p>{{ errorMessage() }}</p>
+      <button mat-stroked-button type="button" (click)="requestRetry()">Reintentar</button>
     </div>
   } @else if (previewMode() === 'clinical' && clinicalContent()) {
     @let content = clinicalContent()!;
     <article
       class="report-preview-shell__clinical-document"
-      [attr.aria-label]="isClinicalRecordContent(content) ? 'Expediente clinico profesional' : 'Resumen clinico profesional'"
+      [attr.aria-label]="isClinicalRecordContent(content) ? 'Expediente clínico profesional' : 'Resumen clínico profesional'"
     >
       @if (isClinicalRecordContent(content)) {
         <section class="report-preview-shell__clinical-section">
           <header class="report-preview-shell__clinical-section-header">
-            <span class="report-preview-shell__clinical-eyebrow">Documento clinico</span>
+            <span class="report-preview-shell__clinical-eyebrow">Documento clínico</span>
             <h4>{{ content.documentTitle }}</h4>
-            <p>Paciente: {{ content.patientFullName }} | Periodo: {{ content.periodLabel }} | Generado: {{ content.generatedAtLabel }}</p>
+            <p>Paciente: {{ content.patientFullName }} | Período: {{ content.periodLabel }} | Generado: {{ content.generatedAtLabel }}</p>
           </header>
         </section>
 
@@ -45,9 +46,9 @@
           <div class="report-preview-shell__clinical-patient">
             <div class="report-preview-shell__clinical-avatar" aria-hidden="true">{{ content.patientInitials }}</div>
             <div class="report-preview-shell__clinical-patient-copy">
-              <span class="report-preview-shell__clinical-eyebrow">Expediente Clinico</span>
+              <span class="report-preview-shell__clinical-eyebrow">Expediente clínico</span>
               <h3>{{ content.patientFullName }}</h3>
-              <p>Documento estructurado e imprimible del expediente clinico visible en el sistema.</p>
+              <p>Documento estructurado e imprimible del expediente clínico visible en el sistema.</p>
             </div>
           </div>
         </section>
@@ -120,7 +121,7 @@
                     <strong class="report-preview-shell__clinical-list-title">{{ appointment.scheduledAtLabel }}</strong>
                     <span class="report-preview-shell__clinical-list-date">{{ appointment.statusLabel }}</span>
                   </div>
-                  <p class="report-preview-shell__clinical-list-body">Duracion: {{ appointment.durationLabel }}</p>
+                  <p class="report-preview-shell__clinical-list-body">Duración: {{ appointment.durationLabel }}</p>
                   <p class="report-preview-shell__clinical-list-body">{{ appointment.notes }}</p>
                 </article>
               }
@@ -410,7 +411,7 @@
       }
     </article>
   } @else if (previewMode() === 'grouped' && groups().length) {
-    <div class="report-preview-shell__groups" aria-label="Vista previa agrupada por dia">
+      <div class="report-preview-shell__groups" aria-label="Vista previa agrupada por día">
       @for (group of groups(); track group.id) {
         <section class="report-preview-shell__group">
           <header class="report-preview-shell__group-header">
@@ -483,6 +484,6 @@
   }
 
   <div sectionCardFooter class="report-preview-shell__footer">
-    <span>Documento de referencia para exportacion y revision interna.</span>
+    <span>Documento de referencia para exportación y revisión interna.</span>
   </div>
 </app-section-card>

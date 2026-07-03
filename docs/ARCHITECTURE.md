@@ -176,6 +176,8 @@ Current characteristics:
 * `previewMode: clinical` is used for patient-centered clinical documents with narrative sections, timeline, summarized notes, complete notes and related documents
 * export infrastructure is centralized in the `reports` feature while data ownership remains in the source feature
 * `ReportResult` now includes `pdfFileName` so each report can provide a descriptive export filename without changing the shared print-based `PDF` flow
+* a small `report-formatters` utility now centralizes presentational helpers such as readable MIME labels for report-owned clinical document surfaces
+* recent hardening keeps error presentation centralized in `ReportPreviewShell` and preserves explicit frontend feedback when `PDF` popup opening is blocked by the browser
 
 This keeps the architecture aligned with the backend-first principle and avoids creating a parallel business domain for reporting.
 

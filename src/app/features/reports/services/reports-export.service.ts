@@ -667,8 +667,8 @@ export class ReportsExportService {
             : renderEmpty(
                 content.evolutionSection.emptyTitle,
                 content.evolutionSection.emptyMessage,
-                'Sin narrativa clinica suficiente',
-                'Todavia no hay suficiente informacion estructurada para redactar un resumen de evolucion.'
+                'Sin narrativa clínica suficiente',
+                'Todavía no hay suficiente información estructurada para redactar un resumen de evolución.'
               )
         }
       </section>
@@ -703,8 +703,8 @@ export class ReportsExportService {
             : renderEmpty(
                 content.timelineSection.emptyTitle,
                 content.timelineSection.emptyMessage,
-                'Sin eventos clinicos en el periodo',
-                'Ajusta el rango de fechas para revisar actividad clinica visible en el workspace.'
+                'Sin eventos clínicos en el período',
+                'Ajusta el rango de fechas para revisar actividad clínica visible en el workspace.'
               )
         }
       </section>
@@ -741,8 +741,8 @@ export class ReportsExportService {
             : renderEmpty(
                 content.notesSection.emptyTitle,
                 content.notesSection.emptyMessage,
-                'Sin notas clinicas en el periodo',
-                'No se encontraron notas de sesion dentro del rango seleccionado.'
+                'Sin notas clínicas en el período',
+                'No se encontraron notas de sesión dentro del rango seleccionado.'
               )
         }
       </section>
@@ -774,7 +774,7 @@ export class ReportsExportService {
             : renderEmpty(
                 content.documentsSection.emptyTitle,
                 content.documentsSection.emptyMessage,
-                'Sin documentos relacionados en el periodo',
+                'Sin documentos relacionados en el período',
                 'No hay documentos visibles en el rango actual.'
               )
         }
@@ -793,7 +793,7 @@ export class ReportsExportService {
     return `
       <section class="clinical-section">
         <header class="clinical-section__header">
-          <span class="eyebrow">Documento clinico</span>
+          <span class="eyebrow">Documento clínico</span>
           <h3>${this.escapeHtml(content.documentTitle)}</h3>
           <p>Paciente: ${this.escapeHtml(content.patientFullName)} | Periodo: ${this.escapeHtml(content.periodLabel)} | Generado: ${this.escapeHtml(content.generatedAtLabel)}</p>
         </header>
@@ -805,7 +805,7 @@ export class ReportsExportService {
           <div class="clinical-hero__copy">
             <span class="eyebrow">Expediente Clinico</span>
             <h2>${this.escapeHtml(content.patientFullName)}</h2>
-            <p>Documento estructurado e imprimible del expediente clinico visible en el sistema.</p>
+            <p>Documento estructurado e imprimible del expediente clínico visible en el sistema.</p>
           </div>
         </div>
       </section>
@@ -850,7 +850,7 @@ export class ReportsExportService {
                           <strong>${this.escapeHtml(appointment.scheduledAtLabel)}</strong>
                           <span>${this.escapeHtml(appointment.statusLabel)}</span>
                         </div>
-                        <p>Duracion: ${this.escapeHtml(appointment.durationLabel)}</p>
+                        <p>Duración: ${this.escapeHtml(appointment.durationLabel)}</p>
                         <p>${this.escapeHtml(appointment.notes)}</p>
                       </article>
                     `
@@ -861,7 +861,7 @@ export class ReportsExportService {
             : renderEmpty(
                 content.appointmentsSection.emptyTitle,
                 content.appointmentsSection.emptyMessage,
-                'Sin citas en el periodo',
+                'Sin citas en el período',
                 'No se encontraron citas visibles para el rango seleccionado.'
               )
         }
@@ -894,8 +894,8 @@ export class ReportsExportService {
             : renderEmpty(
                 content.notesSection.emptyTitle,
                 content.notesSection.emptyMessage,
-                'Sin notas clinicas en el periodo',
-                'No se encontraron notas clinicas dentro del rango seleccionado.'
+                'Sin notas clínicas en el período',
+                'No se encontraron notas clínicas dentro del rango seleccionado.'
               )
         }
       </section>
@@ -927,7 +927,7 @@ export class ReportsExportService {
             : renderEmpty(
                 content.documentsSection.emptyTitle,
                 content.documentsSection.emptyMessage,
-                'Sin documentos en el periodo',
+                'Sin documentos en el período',
                 'No se encontraron documentos relacionados dentro del rango seleccionado.'
               )
         }
@@ -963,8 +963,8 @@ export class ReportsExportService {
             : renderEmpty(
                 content.timelineSection.emptyTitle,
                 content.timelineSection.emptyMessage,
-                'Sin eventos clinicos en el periodo',
-                'No se identificaron eventos clinicos visibles para el rango seleccionado.'
+                'Sin eventos clínicos en el período',
+                'No se identificaron eventos clínicos visibles para el rango seleccionado.'
               )
         }
       </section>
@@ -994,7 +994,7 @@ export class ReportsExportService {
                 content.referencesSection.emptyTitle,
                 content.referencesSection.emptyMessage,
                 'Sin referencias documentales',
-                'No hay documentos disponibles para anexar como referencia en el periodo consultado.'
+                'No hay documentos disponibles para anexar como referencia en el período consultado.'
               )
         }
       </section>

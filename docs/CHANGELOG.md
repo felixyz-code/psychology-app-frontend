@@ -8,6 +8,32 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 12
 
+## Sprint 12.6 - Reports QA Hardening
+
+### Changed
+
+* `Reports` recibe una pasada de hardening enfocada en estabilidad, consistencia de copy y cierre de QA tecnica sin agregar nuevas funcionalidades ni cambiar contratos backend.
+* El catalogo de reportes y los textos visibles del modulo quedan alineados en espanol consistente para `Reporte Financiero`, `Reporte Agenda`, `Resumen Clinico` y `Expediente Clinico`.
+* Se corrige mojibake visible en labels y superficies clinicas, incluyendo casos como `SesiÃ³n` -> `Sesión` y `clÃ­nica` -> `clínica`.
+* La experiencia de error en preview ahora se consolida en una sola superficie accesible dentro de `ReportPreviewShell`, eliminando duplicidad con la pagina runner.
+* La exportacion `PDF` ahora muestra feedback explicito cuando el navegador bloquea la ventana emergente de impresion.
+* Los textos de timeline clinico, preview, titulos `PDF`, labels internos visibles y mensajes vacios/error quedan homologados bajo una nomenclatura clinica consistente en espanol.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* `ReportsExportService.exportAsPdf(...)` mantiene su estrategia actual, pero `ReportRunnerPage` ahora maneja el caso en que la apertura de la ventana de impresion falla.
+* Se incorpora un helper minimo compartido para labels legibles de MIME types usado por reportes clinicos.
+* `Reports` queda estabilizado tecnicamente antes de iniciar la siguiente fase funcional.
+* `npm.cmd run build` finalizo correctamente.
+
+### Notes
+
+* La QA navegada completa de `/reports` quedo condicionada por la disponibilidad de una sesion autenticada local reutilizable.
+* La validacion tecnica por codigo, estados y build si pudo completarse dentro del alcance del sprint.
+
 ## Sprint 12.5 - Expediente Clinico
 
 ### Added

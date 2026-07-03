@@ -30,8 +30,8 @@ export class ClinicalTimelineComponent {
   readonly events = input<ClinicalTimelineItem[]>([]);
   readonly loading = input(false);
   readonly errorMessage = input('');
-  readonly emptyTitle = input('Sin actividad clinica');
-  readonly emptyMessage = input('No existe actividad clinica registrada para este expediente.');
+  readonly emptyTitle = input('Sin actividad clínica');
+  readonly emptyMessage = input('No existe actividad clínica registrada para este expediente.');
   readonly eventSelected = output<ClinicalTimelineItem>();
 
   readonly groupedEvents = computed<ClinicalTimelineGroup[]>(() => {

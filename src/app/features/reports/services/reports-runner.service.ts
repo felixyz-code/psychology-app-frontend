@@ -62,6 +62,7 @@ import { ReportDefinition, ReportKey } from '../models/report-definition.model';
 import { AgendaReportFilters, FinancialReportFilters } from '../models/report-filters.model';
 import { ReportContextItem, ReportPreviewGroup, ReportResult, ReportTableRow } from '../models/report-result.model';
 import { ReportsCatalogService } from './reports-catalog.service';
+import { getReportMimeTypeLabel } from '../utils/report-formatters';
 import {
   nextLocalDayStart,
   startOfLocalDateOnly,
@@ -170,14 +171,14 @@ export class ReportsRunnerService {
       metrics: [
         {
           icon: 'trending_up',
-          label: 'Ingresos del periodo',
+          label: 'Ingresos del período',
           value: formatFinancialCurrency(summary.incomeTotal),
           supportingText: 'Monto acumulado de ingresos dentro del filtro activo.',
           variant: 'green',
         },
         {
           icon: 'trending_down',
-          label: 'Egresos del periodo',
+          label: 'Egresos del período',
           value: formatFinancialCurrency(summary.expenseTotal),
           supportingText: 'Monto acumulado de egresos para el mismo rango.',
           variant: 'amber',
@@ -200,11 +201,11 @@ export class ReportsRunnerService {
       columns: [
         { key: 'concept', label: 'Concepto' },
         { key: 'type', label: 'Tipo' },
-        { key: 'category', label: 'Categoria' },
+        { key: 'category', label: 'Categoría' },
         { key: 'status', label: 'Estado' },
         { key: 'amount', label: 'Monto', align: 'end' },
         { key: 'currency', label: 'Moneda' },
-        { key: 'paymentMethod', label: 'Metodo de pago' },
+        { key: 'paymentMethod', label: 'Método de pago' },
         { key: 'occurredAt', label: 'Fecha' },
       ],
       rows: transactions.map((transaction) => ({
@@ -259,7 +260,7 @@ export class ReportsRunnerService {
         { key: 'time', label: 'Hora' },
         { key: 'patient', label: 'Paciente' },
         { key: 'status', label: 'Estado' },
-        { key: 'duration', label: 'Duracion', align: 'end' },
+        { key: 'duration', label: 'Duración', align: 'end' },
         { key: 'notes', label: 'Notas' },
       ],
       rows,
@@ -268,7 +269,7 @@ export class ReportsRunnerService {
       csvFileName: this.buildAgendaCsvFileName(filters),
       supportedExports: definition.supportedExports,
       emptyTitle: 'No hay citas para este reporte',
-      emptyMessage: 'Ajusta el rango, el estado o el paciente para visualizar la agenda del periodo seleccionado.',
+      emptyMessage: 'Ajusta el rango, el estado o el paciente para visualizar la agenda del período seleccionado.',
     };
   }
 
@@ -303,7 +304,7 @@ export class ReportsRunnerService {
       reportKey: definition.key,
       title: definition.title,
       generatedAt,
-      pdfFileName: this.buildPdfFileName('Resumen Clinico', {
+      pdfFileName: this.buildPdfFileName('Resumen Clínico', {
         patientName: `${patient.firstName} ${patient.lastName}`.trim(),
         from: filters.from,
         to: filters.to,
@@ -320,7 +321,7 @@ export class ReportsRunnerService {
       csvFileName: `resumen-clinico-${filters.patientId}-${filters.from ?? 'sin-desde'}-${filters.to ?? 'sin-hasta'}.csv`,
       supportedExports: definition.supportedExports,
       emptyTitle: 'Selecciona un paciente para generar el resumen',
-      emptyMessage: 'El reporte clinico se construye a partir del paciente y su expediente disponible.',
+      emptyMessage: 'El reporte clínico se construye a partir del paciente y su expediente disponible.',
     };
   }
 
@@ -353,7 +354,7 @@ export class ReportsRunnerService {
       reportKey: definition.key,
       title: definition.title,
       generatedAt,
-      pdfFileName: this.buildPdfFileName('Expediente Clinico', {
+      pdfFileName: this.buildPdfFileName('Expediente Clínico', {
         patientName: `${patient.firstName} ${patient.lastName}`.trim(),
         from: filters.from,
         to: filters.to,
@@ -376,7 +377,7 @@ export class ReportsRunnerService {
       csvFileName: `expediente-clinico-${filters.patientId}-${filters.from ?? 'sin-desde'}-${filters.to ?? 'sin-hasta'}.csv`,
       supportedExports: definition.supportedExports,
       emptyTitle: 'Selecciona un paciente para generar el expediente',
-      emptyMessage: 'El expediente clinico se construye a partir del paciente y su expediente disponible.',
+      emptyMessage: 'El expediente clínico se construye a partir del paciente y su expediente disponible.',
     };
   }
 
@@ -437,7 +438,7 @@ export class ReportsRunnerService {
         },
         metaItems: [
           {
-            label: 'Duracion',
+            label: 'Duración',
             value: `${appointment.durationMinutes} min`,
           },
         ],
@@ -470,7 +471,7 @@ export class ReportsRunnerService {
         icon: 'event_available',
         label: 'Programadas',
         value: this.formatAppointmentMetricCount(scheduledCount),
-        supportingText: 'Citas pendientes o futuras dentro del periodo consultado.',
+        supportingText: 'Citas pendientes o futuras dentro del período consultado.',
         variant: 'green' as const,
       },
       {
@@ -482,7 +483,7 @@ export class ReportsRunnerService {
       },
       {
         icon: 'schedule',
-        label: 'Duracion total',
+        label: 'Duración total',
         value: this.formatDurationMetric(totalDurationMinutes),
         supportingText: 'Tiempo total reservado entre todas las citas del reporte.',
         variant: 'amber' as const,
@@ -598,11 +599,11 @@ export class ReportsRunnerService {
         value: filters.status ? getFinancialTransactionStatusLabel(filters.status) : 'Todos los estados',
       },
       {
-        label: 'Categoria',
+        label: 'Categoría',
         value: filters.category ? getFinancialTransactionCategoryLabel(filters.category) : 'Todas las categorias',
       },
       {
-        label: 'Metodo de pago',
+        label: 'Método de pago',
         value: filters.paymentMethod ? getPaymentMethodLabel(filters.paymentMethod) : 'Todos los metodos',
       },
     ];
@@ -796,41 +797,41 @@ export class ReportsRunnerService {
       kind: 'summary',
       patientSection: {
         title: 'Paciente',
-        subtitle: 'Datos de identificacion y contacto disponibles en el frontend actual.',
+        subtitle: 'Datos de identificación y contacto disponibles en el frontend actual.',
       },
       generalInfoSection: {
-        title: 'Informacion clinica general',
-        subtitle: 'Resumen base del expediente y su apertura clinica.',
+        title: 'Información clínica general',
+        subtitle: 'Resumen base del expediente y su apertura clínica.',
       },
       evolutionSection: {
-        title: 'Resumen de evolucion',
-        subtitle: 'Sintesis narrativa construida unicamente con datos existentes en el contrato actual.',
-        emptyTitle: 'Sin narrativa clinica suficiente',
-        emptyMessage: 'Todavia no hay suficiente informacion estructurada para redactar un resumen de evolucion.',
+        title: 'Resumen de evolución',
+        subtitle: 'Síntesis narrativa construida únicamente con datos existentes en el contrato actual.',
+        emptyTitle: 'Sin narrativa clínica suficiente',
+        emptyMessage: 'Todavía no hay suficiente información estructurada para redactar un resumen de evolución.',
       },
       timelineSection: {
-        title: 'Cronologia resumida',
-        subtitle: 'Eventos clinicos visibles dentro del rango solicitado.',
-        emptyTitle: 'Sin eventos clinicos en el periodo',
-        emptyMessage: 'Ajusta el rango de fechas para revisar actividad clinica visible en el workspace.',
+        title: 'Cronología resumida',
+        subtitle: 'Eventos clínicos visibles dentro del rango solicitado.',
+        emptyTitle: 'Sin eventos clínicos en el período',
+        emptyMessage: 'Ajusta el rango de fechas para revisar actividad clínica visible en el workspace.',
       },
       notesSection: {
         title: 'Sesiones relevantes',
         subtitle: 'Notas resumidas para lectura ejecutiva sin imprimir bloques narrativos extensos.',
-        emptyTitle: 'Sin notas clinicas en el periodo',
-        emptyMessage: 'No se encontraron notas de sesion dentro del rango seleccionado.',
+        emptyTitle: 'Sin notas clínicas en el período',
+        emptyMessage: 'No se encontraron notas de sesión dentro del rango seleccionado.',
       },
       documentsSection: {
         title: 'Documentos relacionados',
-        subtitle: 'Indice de documentos visibles para este expediente en el periodo consultado.',
-        emptyTitle: 'Sin documentos relacionados en el periodo',
+        subtitle: 'Índice de documentos visibles para este expediente en el período consultado.',
+        emptyTitle: 'Sin documentos relacionados en el período',
         emptyMessage: 'No hay documentos visibles en el rango actual.',
       },
       patientFullName: `${patient.firstName} ${patient.lastName}`.trim(),
       patientInitials: this.buildPatientInitials(patient),
       patientDetails: [
         {
-          label: 'Telefono',
+          label: 'Teléfono',
           value: this.formatOptionalText(patient.phoneNumber),
         },
         {
@@ -856,11 +857,11 @@ export class ReportsRunnerService {
           value: caseFile ? this.formatDateTime(caseFile.createdAt) : 'Pendiente',
         },
         {
-          label: 'Diagnostico',
+          label: 'Diagnóstico',
           value: this.formatOptionalText(caseFile?.diagnosis),
         },
         {
-          label: 'Plan terapeutico',
+          label: 'Plan terapéutico',
           value: this.formatOptionalText(caseFile?.treatmentPlan),
         },
       ],
@@ -903,13 +904,13 @@ export class ReportsRunnerService {
 
     return {
       kind: 'record',
-      documentTitle: 'Expediente Clinico',
+      documentTitle: 'Expediente Clínico',
       patientFullName: `${patient.firstName} ${patient.lastName}`.trim(),
       patientInitials: this.buildPatientInitials(patient),
       generatedAtLabel: this.formatDateTime(new Date().toISOString()),
       periodLabel,
       patientSection: {
-        title: 'Identificacion del paciente',
+        title: 'Identificación del paciente',
         subtitle: 'Datos generales y de contacto disponibles para este expediente.',
       },
       recordSection: {
@@ -917,46 +918,46 @@ export class ReportsRunnerService {
         subtitle: 'Estado documental del expediente y referencias de seguimiento visibles en el frontend.',
       },
       diagnosisSection: {
-        title: 'Diagnostico',
-        subtitle: 'Diagnostico clinico registrado en el expediente.',
-        emptyTitle: 'Diagnostico no disponible',
-        emptyMessage: 'No existe diagnostico clinico registrado en el expediente actual.',
+        title: 'Diagnóstico',
+        subtitle: 'Diagnóstico clínico registrado en el expediente.',
+        emptyTitle: 'Diagnóstico no disponible',
+        emptyMessage: 'No existe diagnóstico clínico registrado en el expediente actual.',
       },
       treatmentPlanSection: {
-        title: 'Plan terapeutico',
+        title: 'Plan terapéutico',
         subtitle: 'Plan de abordaje registrado para el seguimiento del paciente.',
-        emptyTitle: 'Plan terapeutico no disponible',
-        emptyMessage: 'No existe plan terapeutico registrado en el expediente actual.',
+        emptyTitle: 'Plan terapéutico no disponible',
+        emptyMessage: 'No existe plan terapéutico registrado en el expediente actual.',
       },
       appointmentsSection: {
         title: 'Historial de citas',
-        subtitle: 'Citas visibles dentro del rango solicitado con estado, duracion y notas asociadas.',
-        emptyTitle: 'Sin citas en el periodo',
+        subtitle: 'Citas visibles dentro del rango solicitado con estado, duración y notas asociadas.',
+        emptyTitle: 'Sin citas en el período',
         emptyMessage: 'No se encontraron citas visibles para el rango seleccionado.',
       },
       notesSection: {
-        title: 'Notas clinicas',
-        subtitle: 'Registro narrativo completo de notas clinicas visibles en el periodo consultado.',
-        emptyTitle: 'Sin notas clinicas en el periodo',
-        emptyMessage: 'No se encontraron notas clinicas dentro del rango seleccionado.',
+        title: 'Notas clínicas',
+        subtitle: 'Registro narrativo completo de notas clínicas visibles en el período consultado.',
+        emptyTitle: 'Sin notas clínicas en el período',
+        emptyMessage: 'No se encontraron notas clínicas dentro del rango seleccionado.',
       },
       documentsSection: {
         title: 'Documentos relacionados',
         subtitle: 'Listado documental referencial con nombre, tipo y fecha de carga.',
-        emptyTitle: 'Sin documentos en el periodo',
+        emptyTitle: 'Sin documentos en el período',
         emptyMessage: 'No se encontraron documentos relacionados dentro del rango seleccionado.',
       },
       timelineSection: {
-        title: 'Timeline clinico',
-        subtitle: 'Secuencia cronologica de eventos clinicos relevantes dentro del periodo.',
-        emptyTitle: 'Sin eventos clinicos en el periodo',
-        emptyMessage: 'No se identificaron eventos clinicos visibles para el rango seleccionado.',
+        title: 'Línea de tiempo clínica',
+        subtitle: 'Secuencia cronológica de eventos clínicos relevantes dentro del período.',
+        emptyTitle: 'Sin eventos clínicos en el período',
+        emptyMessage: 'No se identificaron eventos clínicos visibles para el rango seleccionado.',
       },
       referencesSection: {
         title: 'Referencias y anexos',
-        subtitle: 'Indice referencial de documentos asociados. No se embeben archivos reales en este reporte.',
+        subtitle: 'Índice referencial de documentos asociados. No se incluyen archivos reales en este reporte.',
         emptyTitle: 'Sin referencias documentales',
-        emptyMessage: 'No hay documentos disponibles para anexar como referencia en el periodo consultado.',
+        emptyMessage: 'No hay documentos disponibles para anexar como referencia en el período consultado.',
       },
       patientDetails: [
         {
@@ -964,7 +965,7 @@ export class ReportsRunnerService {
           value: `${patient.firstName} ${patient.lastName}`.trim(),
         },
         {
-          label: 'Telefono',
+          label: 'Teléfono',
           value: this.formatOptionalText(patient.phoneNumber),
         },
         {
@@ -990,17 +991,17 @@ export class ReportsRunnerService {
           value: caseFile ? this.formatDateTime(caseFile.createdAt) : 'Pendiente',
         },
         {
-          label: 'Ultima actividad',
+          label: 'Última actividad',
           value: lastActivityAt ? this.formatDateTime(lastActivityAt) : 'Sin actividad visible',
         },
         {
-          label: 'Periodo consultado',
+          label: 'Período consultado',
           value: periodLabel,
         },
       ],
-      diagnosis: caseFile?.diagnosis?.trim() || 'No existe diagnostico clinico registrado en el expediente actual.',
+      diagnosis: caseFile?.diagnosis?.trim() || 'No existe diagnóstico clínico registrado en el expediente actual.',
       treatmentPlan:
-        caseFile?.treatmentPlan?.trim() || 'No existe plan terapeutico registrado en el expediente actual.',
+        caseFile?.treatmentPlan?.trim() || 'No existe plan terapéutico registrado en el expediente actual.',
       appointments: appointments.map((appointment) => this.mapClinicalRecordAppointment(appointment)),
       notes: notes.map((note) => this.mapClinicalRecordNote(note)),
       documents: mappedDocuments,
@@ -1035,7 +1036,7 @@ export class ReportsRunnerService {
         icon: 'folder_shared',
         label: 'Estado del expediente',
         value: this.getCaseFileAvailabilityLabel(caseFile),
-        supportingText: 'Condicion derivada de diagnostico y plan terapeutico visibles en el expediente.',
+        supportingText: 'Condición derivada del diagnóstico y plan terapéutico visibles en el expediente.',
         variant: 'blue' as const,
       },
       {
@@ -1047,23 +1048,23 @@ export class ReportsRunnerService {
       },
       {
         icon: 'notes',
-        label: 'Notas clinicas',
+        label: 'Notas clínicas',
         value: this.formatCount(notes.length, 'nota', 'notas'),
-        supportingText: 'Notas clinicas completas visibles para el mismo periodo.',
+        supportingText: 'Notas clínicas completas visibles para el mismo período.',
         variant: 'violet' as const,
       },
       {
         icon: 'description',
         label: 'Documentos relacionados',
         value: this.formatCount(documents.length, 'documento', 'documentos'),
-        supportingText: 'Documentos referenciales visibles dentro del periodo consultado.',
+        supportingText: 'Documentos referenciales visibles dentro del período consultado.',
         variant: 'amber' as const,
       },
       {
         icon: 'history',
-        label: 'Ultima actividad',
+        label: 'Última actividad',
         value: lastActivityAt ? this.formatDateTime(lastActivityAt) : latestAppointment ? this.formatDateTime(latestAppointment.scheduledAt) : 'Sin actividad visible',
-        supportingText: 'Referencia temporal mas reciente encontrada en el expediente visible.',
+        supportingText: 'Referencia temporal más reciente encontrada en el expediente visible.',
         variant: 'blue' as const,
       },
     ];
@@ -1081,12 +1082,12 @@ export class ReportsRunnerService {
       {
         label: 'Sesiones completadas',
         value: this.formatAppointmentMetricCount(completedAppointments.length),
-        supportingText: 'Citas completadas dentro del periodo.',
+        supportingText: 'Citas completadas dentro del período.',
       },
       {
-        label: 'Notas clinicas',
+        label: 'Notas clínicas',
         value: this.formatCount(notes.length, 'nota', 'notas'),
-        supportingText: 'Notas de sesion registradas para el mismo periodo.',
+        supportingText: 'Notas de sesión registradas para el mismo período.',
       },
       {
         label: 'Documentos relacionados',
@@ -1096,12 +1097,12 @@ export class ReportsRunnerService {
       {
         label: 'Tiempo en seguimiento',
         value: caseFile ? this.formatFollowUpDuration(caseFile.createdAt, lastActivityAt) : 'Pendiente',
-        supportingText: 'Tiempo transcurrido desde la apertura del expediente hasta la ultima actividad visible.',
+        supportingText: 'Tiempo transcurrido desde la apertura del expediente hasta la última actividad visible.',
       },
       {
-        label: 'Ultima sesion',
+        label: 'Última sesión',
         value: latestCompletedAppointment ? this.formatDateTime(latestCompletedAppointment.scheduledAt) : 'Sin sesiones',
-        supportingText: 'Ultima cita completada identificada dentro del periodo filtrado.',
+        supportingText: 'Última cita completada identificada dentro del período filtrado.',
       },
     ];
   }
@@ -1118,33 +1119,33 @@ export class ReportsRunnerService {
     const patientName = `${patient.firstName} ${patient.lastName}`.trim();
 
     if (caseFile) {
-      summary.push(`El expediente clinico de ${patientName} fue abierto el ${this.formatDateTime(caseFile.createdAt)}.`);
+      summary.push(`El expediente clínico de ${patientName} fue abierto el ${this.formatDateTime(caseFile.createdAt)}.`);
     }
 
     if (caseFile?.diagnosis?.trim()) {
-      summary.push(`Diagnostico disponible: ${caseFile.diagnosis.trim()}.`);
+      summary.push(`Diagnóstico disponible: ${caseFile.diagnosis.trim()}.`);
     }
 
     if (caseFile?.treatmentPlan?.trim()) {
-      summary.push(`Plan terapeutico registrado: ${caseFile.treatmentPlan.trim()}.`);
+      summary.push(`Plan terapéutico registrado: ${caseFile.treatmentPlan.trim()}.`);
     }
 
     if (completedAppointments.length) {
       summary.push(
-        `Durante el periodo filtrado se identifican ${this.formatCount(completedAppointments.length, 'sesion completada', 'sesiones completadas')}.`
+        `Durante el período filtrado se identifican ${this.formatCount(completedAppointments.length, 'sesión completada', 'sesiones completadas')}.`
       );
     }
 
     if (latestCompletedAppointment) {
-      summary.push(`La ultima sesion visible en el periodo fue el ${this.formatDateTime(latestCompletedAppointment.scheduledAt)}.`);
+      summary.push(`La última sesión visible en el período fue el ${this.formatDateTime(latestCompletedAppointment.scheduledAt)}.`);
     }
 
     if (notes.length) {
-      summary.push(`Se registran ${this.formatCount(notes.length, 'nota clinica', 'notas clinicas')} asociadas al expediente en el rango consultado.`);
+      summary.push(`Se registran ${this.formatCount(notes.length, 'nota clínica', 'notas clínicas')} asociadas al expediente en el rango consultado.`);
     }
 
     if (documents.length) {
-      summary.push(`El expediente muestra ${this.formatCount(documents.length, 'documento relacionado', 'documentos relacionados')} en el periodo.`);
+      summary.push(`El expediente muestra ${this.formatCount(documents.length, 'documento relacionado', 'documentos relacionados')} en el período.`);
     }
 
     return summary;
@@ -1209,7 +1210,7 @@ export class ReportsRunnerService {
     return {
       id: event.id,
       title: this.getClinicalTimelineTitle(event),
-      description: event.description?.trim() || event.title?.trim() || 'Evento clinico registrado en el expediente.',
+      description: event.description?.trim() || event.title?.trim() || 'Evento clínico registrado en el expediente.',
       occurredAt: event.occurredAt,
       occurredAtLabel: this.formatDateTime(event.occurredAt),
       sourceType: event.sourceType,
@@ -1221,7 +1222,7 @@ export class ReportsRunnerService {
       id: note.id,
       sessionDate: note.sessionDate,
       sessionDateLabel: this.formatDateTime(note.sessionDate),
-      title: note.title?.trim() || 'Sesion sin titulo',
+      title: note.title?.trim() || 'Sesión sin título',
       excerpt: this.buildExcerpt(note.content),
     };
   }
@@ -1252,7 +1253,7 @@ export class ReportsRunnerService {
       id: note.id,
       sessionDate: note.sessionDate,
       sessionDateLabel: this.formatDateTime(note.sessionDate),
-      title: note.title?.trim() || 'Sesion sin titulo',
+      title: note.title?.trim() || 'Sesión sin título',
       content: note.content.trim() || 'Sin contenido narrativo registrado.',
     };
   }
@@ -1271,7 +1272,7 @@ export class ReportsRunnerService {
     return {
       id: event.id,
       title: this.getClinicalTimelineTitle(event),
-      description: event.description?.trim() || event.title?.trim() || 'Evento clinico registrado en el expediente.',
+      description: event.description?.trim() || event.title?.trim() || 'Evento clínico registrado en el expediente.',
       occurredAt: event.occurredAt,
       occurredAtLabel: this.formatDateTime(event.occurredAt),
     };
@@ -1311,10 +1312,10 @@ export class ReportsRunnerService {
     const hasTreatmentPlan = Boolean(caseFile.treatmentPlan?.trim());
 
     if (hasDiagnosis && hasTreatmentPlan) {
-      return 'Base clinica completa';
+      return 'Base clínica completa';
     }
 
-    return 'Base clinica parcial';
+    return 'Base clínica parcial';
   }
 
   private formatOptionalText(value?: string | null): string {
@@ -1348,7 +1349,7 @@ export class ReportsRunnerService {
       age -= 1;
     }
 
-    return age >= 0 ? `${age} ${age === 1 ? 'ano' : 'anos'}` : 'No disponible';
+    return age >= 0 ? `${age} ${age === 1 ? 'año' : 'años'}` : 'No disponible';
   }
 
   private formatFollowUpDuration(start: string, end?: string | null): string {
@@ -1364,14 +1365,14 @@ export class ReportsRunnerService {
     const days = totalDays % 30;
 
     if (!months) {
-      return `${days || 1} ${days === 1 ? 'dia' : 'dias'}`;
+      return `${days || 1} ${days === 1 ? 'día' : 'días'}`;
     }
 
     if (!days) {
       return `${months} ${months === 1 ? 'mes' : 'meses'}`;
     }
 
-    return `${months} ${months === 1 ? 'mes' : 'meses'} y ${days} ${days === 1 ? 'dia' : 'dias'}`;
+    return `${months} ${months === 1 ? 'mes' : 'meses'} y ${days} ${days === 1 ? 'día' : 'días'}`;
   }
 
   private formatDateTime(value: string): string {
@@ -1397,49 +1398,7 @@ export class ReportsRunnerService {
   }
 
   private getDocumentTypeLabel(mimeType?: string | null): string {
-    const normalized = mimeType?.trim().toLowerCase() ?? '';
-
-    if (normalized === 'application/pdf') {
-      return 'PDF';
-    }
-
-    if (normalized === 'image/png') {
-      return 'Imagen PNG';
-    }
-
-    if (normalized === 'image/jpeg' || normalized === 'image/jpg') {
-      return 'Imagen JPG';
-    }
-
-    if (normalized === 'image/webp') {
-      return 'Imagen WEBP';
-    }
-
-    if (normalized.startsWith('image/')) {
-      return `Imagen ${normalized.slice('image/'.length).toUpperCase()}`;
-    }
-
-    if (normalized.startsWith('text/')) {
-      return `Texto ${normalized.slice('text/'.length).toUpperCase()}`;
-    }
-
-    if (normalized === 'application/msword') {
-      return 'Documento Word';
-    }
-
-    if (normalized === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      return 'Documento Word (DOCX)';
-    }
-
-    if (normalized === 'application/vnd.ms-excel') {
-      return 'Hoja de calculo Excel';
-    }
-
-    if (normalized === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-      return 'Hoja de calculo Excel (XLSX)';
-    }
-
-    return mimeType?.trim() || 'No disponible';
+    return getReportMimeTypeLabel(mimeType);
   }
 
   private parseReportDateValue(value: string): Date | null {
