@@ -134,8 +134,19 @@ export function formatFinancialCount(value: number | undefined): string {
   }).format(value);
 }
 
+export function parseLocalDateOnly(value: string): Date {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (!match) {
+    return new Date(Number.NaN);
+  }
+
+  const [, year, month, day] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day));
+}
+
 export function formatFinancialDate(value: string): string {
-  const parsedDate = new Date(value);
+  const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(value) ? parseLocalDateOnly(value) : new Date(value);
 
   if (Number.isNaN(parsedDate.getTime())) {
     return '-';

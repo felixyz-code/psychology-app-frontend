@@ -147,7 +147,7 @@ export class DashboardPage {
     )
   );
 
-  readonly upcomingAppointmentsPreview = computed(() =>
+  readonly todayAppointmentsPreview = computed(() =>
     this.todayAppointments().slice(0, this.DASHBOARD_UPCOMING_LIMIT)
   );
 

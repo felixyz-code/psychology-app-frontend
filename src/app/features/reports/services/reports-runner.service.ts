@@ -9,12 +9,12 @@ import {
   getAppointmentStatusVariant,
 } from '../../appointments/utils/appointment-presenters';
 import {
-  isWithinLocalDateRange,
   parseAppointmentDate,
   sortAppointmentsByScheduledAt,
   startOfLocalDay,
 } from '../../appointments/utils/appointment-datetime';
 import {
+  FindFinancialTransactionsQueryDto,
   FinancialTransactionResponse,
   FinancialTransactionSummaryDto,
 } from '../../financial-transactions/models/financial-transaction.models';
@@ -24,6 +24,7 @@ import {
   formatFinancialCount,
   formatFinancialCurrency,
   formatFinancialDate,
+  parseLocalDateOnly,
   getFinancialTransactionCategoryLabel,
   getFinancialTransactionStatusLabel,
   getFinancialTransactionTypeLabel,
@@ -35,7 +36,10 @@ import { ReportDefinition, ReportKey } from '../models/report-definition.model';
 import { AgendaReportFilters, FinancialReportFilters } from '../models/report-filters.model';
 import { ReportContextItem, ReportPreviewGroup, ReportResult, ReportTableRow } from '../models/report-result.model';
 import { ReportsCatalogService } from './reports-catalog.service';
-import { parseDateInputToLocalDate } from '../utils/report-date-range';
+import {
+  nextLocalDayStart,
+  startOfLocalDateOnly,
+} from '../utils/report-date-range';
 
 @Injectable({ providedIn: 'root' })
 export class ReportsRunnerService {
@@ -46,10 +50,11 @@ export class ReportsRunnerService {
 
   runFinancialReport(filters: FinancialReportFilters): Observable<ReportResult<FinancialReportFilters>> {
     const definition = this.getDefinition('financial');
+    const query = this.buildInclusiveFinancialQuery(filters);
 
     return forkJoin({
-      summary: this.financialTransactionsService.findSummary(filters),
-      transactions: this.financialTransactionsService.findAll(filters),
+      summary: this.financialTransactionsService.findSummary(query),
+      transactions: this.financialTransactionsService.findAll(query),
     }).pipe(
       map(({ summary, transactions }) => this.buildFinancialResult(definition, filters, summary, transactions))
     );
@@ -176,13 +181,16 @@ export class ReportsRunnerService {
   }
 
   private filterAgendaAppointments(appointments: Appointment[], filters: AgendaReportFilters): Appointment[] {
-    const startDate = parseDateInputToLocalDate(filters.from);
-    const endDate = parseDateInputToLocalDate(filters.to);
+    const rangeStart = startOfLocalDateOnly(filters.from)?.getTime() ?? Number.NEGATIVE_INFINITY;
+    const rangeEndExclusive = nextLocalDayStart(filters.to)?.getTime() ?? Number.POSITIVE_INFINITY;
 
     return appointments
       .filter((appointment) => (filters.status ? appointment.status === filters.status : true))
       .filter((appointment) => (filters.patientId ? appointment.patientId === filters.patientId : true))
-      .filter((appointment) => isWithinLocalDateRange(appointment.scheduledAt, startDate, endDate));
+      .filter((appointment) => {
+        const appointmentTime = parseAppointmentDate(appointment.scheduledAt).getTime();
+        return appointmentTime >= rangeStart && appointmentTime < rangeEndExclusive;
+      });
   }
 
   private buildAgendaRows(appointments: Appointment[], patientNames: Record<string, string>): ReportTableRow[] {
@@ -366,8 +374,8 @@ export class ReportsRunnerService {
   }
 
   private buildDateRangeLabel(filters: { from?: string; to?: string }): string {
-    const from = filters.from ? formatFinancialDate(filters.from) : null;
-    const to = filters.to ? formatFinancialDate(filters.to) : null;
+    const from = filters.from ? this.formatDateOnlyFilterLabel(filters.from) : null;
+    const to = filters.to ? this.formatDateOnlyFilterLabel(filters.to) : null;
 
     if (from && to) {
       return `${from} al ${to}`;
@@ -382,6 +390,32 @@ export class ReportsRunnerService {
     }
 
     return 'Historico completo';
+  }
+
+  private buildInclusiveFinancialQuery(filters: FinancialReportFilters): FindFinancialTransactionsQueryDto {
+    return {
+      ...filters,
+      from: this.toIsoBoundary(startOfLocalDateOnly(filters.from)),
+      to: this.toIsoBoundary(nextLocalDayStart(filters.to)),
+    };
+  }
+
+  private formatDateOnlyFilterLabel(value: string): string {
+    const parsedDate = parseLocalDateOnly(value);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return formatFinancialDate(value);
+    }
+
+    return parsedDate.toLocaleDateString('es-MX', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  }
+
+  private toIsoBoundary(value: Date | null): string | undefined {
+    return value ? value.toISOString() : undefined;
   }
 
   private formatMetricCount(value: number): string {

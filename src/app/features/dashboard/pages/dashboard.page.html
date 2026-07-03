@@ -113,12 +113,12 @@
 
     <div class="dashboard-content-grid">
       <app-section-card
-        title="Proximas citas"
-        subtitle="Atenciones programadas para hoy con acceso rapido al detalle."
+        title="Citas de hoy"
+        subtitle="Atenciones programadas para la jornada."
       >
-        @if (upcomingAppointmentsPreview().length) {
+        @if (todayAppointmentsPreview().length) {
           <div class="dashboard-list">
-            @for (appointment of upcomingAppointmentsPreview(); track appointment.id) {
+            @for (appointment of todayAppointmentsPreview(); track appointment.id) {
               <article
                 class="dashboard-list-item dashboard-list-item--interactive"
                 tabindex="0"

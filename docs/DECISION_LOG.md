@@ -371,6 +371,55 @@ Current orchestration:
 - `Reports` now proves its reusable scope beyond the initial pilot by delivering a second professional surface: `Agenda Report`.
 - The frontend continues to avoid dedicated report endpoints; the agenda report is composed from `AppointmentsService` and `PatientsService` without moving business ownership away from `appointments`.
 
+## Operational Notes After Sprint 12.3.1
+
+- `Reports` is now treated as reusable multi-report infrastructure with stable internal layers for catalog, runner, preview and export.
+- `ReportKey` now formally supports `Financial` and `Agenda`.
+- The report preview shell now supports tabular and grouped surfaces without introducing report-owned business rules.
+
+---
+
+# ADR-016 - Inclusive Local Date Semantics For Reports
+
+## Decision
+
+Report date ranges use inclusive semantics from the user perspective.
+
+Current rule:
+
+- `from` means start of the selected local day
+- `to` means the end of the selected day through an exclusive comparison against the start of the next local day
+- `date-only` values must be parsed locally and never through `new Date('YYYY-MM-DD')`
+
+## Rationale
+
+This avoids timezone drift, keeps the visible range aligned with the filter inputs and ensures that preview, `PDF` and `CSV` operate over the same effective dataset.
+
+## Implications
+
+- Reports must prefer local date parsing helpers for `date-only` values.
+- Inclusive range behavior should remain centralized in report orchestration utilities instead of being reimplemented ad hoc in each report.
+
+---
+
+# ADR-017 - Full-Month Default Range For Reports
+
+## Decision
+
+The default reporting range covers the full current month:
+
+- first day of the current month
+- last day of the current month
+
+## Rationale
+
+This better matches the expected behavior of professional monthly reporting and creates a more representative default preview when the user first opens a report.
+
+## Implications
+
+- The default visible inputs, preview context and exported dataset should all reflect the same complete monthly window.
+- Future reports should preserve this monthly default unless a report-specific reason requires a different baseline.
+
 ---
 
 # Future Decisions

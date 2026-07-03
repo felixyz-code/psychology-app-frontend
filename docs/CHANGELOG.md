@@ -16,19 +16,30 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 * Filtros por rango de fechas, estado y paciente reutilizando servicios existentes del producto sin nuevos contratos backend.
 * Nueva vista previa profesional agrupada por dia con citas ordenadas cronologicamente, estado visible, paciente, duracion y contexto de reporte.
 * Nuevos KPIs operativos para citas encontradas, programadas, completadas, incidencias y duracion total.
+* Soporte explicito de `ReportKey` para `Financial` y `Agenda`.
+* Rango mensual por defecto para `Reports` definido desde el primer dia hasta el ultimo dia del mes actual.
 
 ### Changed
 
-* `Reports` deja de estar acoplado solo al piloto financiero y ahora soporta mas de un tipo de reporte dentro de la misma infraestructura de catalogo, runner, preview y exportacion.
+* `Reports` deja de estar acoplado solo al piloto financiero y ahora funciona como una infraestructura reutilizable de catalogo, runner, preview y exportacion para multiples reportes.
+* `ReportsRunnerService` deja de estar acoplado al dominio financiero y ahora orquesta `Financial Report` y `Agenda Report` manteniendo la propiedad del negocio en cada feature origen.
+* `ReportPreviewShell` ahora soporta vista previa tabular y vista previa agrupada dentro de la misma superficie reutilizable.
 * `ReportsExportService` se vuelve generico para `PDF` y `CSV`, manteniendo impresion controlada y salida tabular sin dependencias nuevas.
+* La exportacion reutilizable de `PDF` y `CSV` ahora opera sobre el resultado generico del reporte en lugar de un flujo exclusivo del piloto financiero.
+* Los rangos de fechas de `Reports` ahora usan semantica inclusiva desde la perspectiva del usuario.
+* Se corrige el parseo seguro de fechas `date-only` para evitar desplazamientos por zona horaria.
+* Dashboard ajusta la semantica de agenda diaria y ahora presenta la seccion como `Citas de hoy`.
+* Finanzas ahora ajusta dinamicamente el copy de KPIs entre contexto mensual, total y periodo personalizado segun los filtros activos.
 * Se incorpora una utilidad minima compartida para labels y variantes de estatus de citas, reduciendo la necesidad de seguir duplicando este mapeo en nuevos flujos.
 
 ### Technical
 
 * No hubo cambios de backend.
 * No hubo nuevos endpoints.
-* No hubo filtrado server-side.
-* El reporte agenda se compone en frontend mediante `AppointmentsService`, `PatientsService` y utilidades de fecha ya existentes en `appointments`.
+* No hubo filtrado server-side especifico para agenda.
+* El `Financial Report` sigue reutilizando `FinancialTransactionsService.findAll(...)` y `FinancialTransactionsService.findSummary(...)`.
+* El `Agenda Report` se compone en frontend mediante `AppointmentsService`, `PatientsService` y utilidades de fecha locales.
+* El rango inclusivo de `Reports` se implementa con parseo local de fechas `date-only`, inicio local del dia para `from` e inicio local del dia siguiente como limite exclusivo para `to`.
 * `npm.cmd run build` finalizo correctamente.
 
 ## Sprint 12.2 - Financial Report QA & Polish

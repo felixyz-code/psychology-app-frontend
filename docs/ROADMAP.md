@@ -34,6 +34,12 @@ Latest completed sprint:
 Sprint 12.3 - Reporte Agenda
 ```
 
+Phase 3 progress:
+
+```text
+Completed - Reports foundation generalized for multiple professional reports
+```
+
 ---
 
 # Completed Milestones
@@ -169,8 +175,9 @@ Sprint 12.3 - Reporte Agenda
 * Centralized export infrastructure with conservative `PDF` print and `CSV` download strategy
 * Sprint 12.1 completed - Reports feature introduced as a lazy orchestration layer without new backend contracts and with a first professional financial reporting surface
 * Sprint 12.2 completed - Financial Report polished with a more document-like preview, stronger export presentation, accessibility refinements and final QA technical validation
-* Sprint 12.3 completed - Agenda Report delivered with reusable report orchestration, grouped preview by day, KPI summary and frontend-only export flow
-* Future report expansion remains planned for Historial Clinico y Expediente Clinico
+* Sprint 12.3 completed - Agenda Report delivered with reusable report orchestration, grouped preview by day, KPI summary, inclusive date ranges and frontend-only export flow
+* Next planned sprint: Sprint 12.4 - Reporte Historial Clinico
+* Reporte Expediente Clinico remains pending after Sprint 12.4
 
 ### Sprint 11
 
@@ -201,7 +208,11 @@ Sprint 12.3 - Reporte Agenda
 * Sprint 8.4 completed - Dashboard delivered as a SaaS-style home screen with primary metrics, upcoming appointments, quick actions, recent activity, responsive behavior and final grid/spacing polish
 * Sprint 8.5 completed - Design System foundation extracted from the SaaS Dashboard into reusable shared UI components
 
-Next planned sprint remains pending definition in the current roadmap snapshot.
+Next planned sprint:
+
+```text
+Sprint 12.4 - Reporte Historial Clinico
+```
 
 ---
 
@@ -209,8 +220,8 @@ Next planned sprint remains pending definition in the current roadmap snapshot.
 
 Current development efforts include:
 
-* Reports module hardening
-* Agenda report planning after Financial Report pilot stabilization
+* Reports module hardening after Sprint 12.3 closure
+* Reporte Historial Clinico planning as the next reporting increment
 * Final backend integration verification
 * Manual browser validation of dense clinical workflows
 * Incremental technical debt reduction after release-candidate closure

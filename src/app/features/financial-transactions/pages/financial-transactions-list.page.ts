@@ -104,34 +104,35 @@ export class FinancialTransactionsListPage {
   });
   readonly summaryCards = computed(() => {
     const summary = this.summary();
+    const labels = this.getSummaryCopy();
 
     return [
       {
         icon: 'trending_up',
-        label: 'Ingresos del mes',
+        label: labels.incomeLabel,
         value: formatFinancialCurrency(summary?.incomeTotal),
-        supportingText: 'Ingresos registrados desde el primer dia del mes hasta hoy.',
+        supportingText: labels.incomeSupportingText,
         tone: 'green' as MetricCardVariant,
       },
       {
         icon: 'trending_down',
-        label: 'Egresos del mes',
+        label: labels.expenseLabel,
         value: formatFinancialCurrency(summary?.expenseTotal),
-        supportingText: 'Egresos registrados dentro del rango mensual activo.',
+        supportingText: labels.expenseSupportingText,
         tone: 'amber' as MetricCardVariant,
       },
       {
         icon: 'account_balance_wallet',
-        label: 'Balance del mes',
+        label: labels.balanceLabel,
         value: formatFinancialCurrency(summary?.netTotal),
-        supportingText: 'Diferencia neta entre ingresos y egresos del mes en curso.',
+        supportingText: labels.balanceSupportingText,
         tone: 'blue' as MetricCardVariant,
       },
       {
         icon: 'receipt_long',
-        label: 'Movimientos del mes',
+        label: labels.transactionsLabel,
         value: formatFinancialCount(summary?.transactionCount),
-        supportingText: 'Cantidad de transacciones encontradas para el rango mensual activo.',
+        supportingText: labels.transactionsSupportingText,
         tone: 'violet' as MetricCardVariant,
       },
     ];
@@ -267,6 +268,61 @@ export class FinancialTransactionsListPage {
 
   formatDate(value: string): string {
     return formatFinancialDate(value);
+  }
+
+  private getSummaryCopy() {
+    const rangeContext = this.getDateRangeContext();
+
+    if (rangeContext === 'total') {
+      return {
+        incomeLabel: 'Ingresos totales',
+        incomeSupportingText: 'Ingresos acumulados sin restriccion de rango.',
+        expenseLabel: 'Egresos totales',
+        expenseSupportingText: 'Egresos acumulados sin restriccion de rango.',
+        balanceLabel: 'Balance total',
+        balanceSupportingText: 'Diferencia neta entre ingresos y egresos de todas las transacciones.',
+        transactionsLabel: 'Movimientos totales',
+        transactionsSupportingText: 'Cantidad total de transacciones encontradas sin filtro de fechas.',
+      };
+    }
+
+    if (rangeContext === 'custom') {
+      return {
+        incomeLabel: 'Ingresos del periodo',
+        incomeSupportingText: 'Ingresos registrados dentro del rango seleccionado.',
+        expenseLabel: 'Egresos del periodo',
+        expenseSupportingText: 'Egresos registrados dentro del rango seleccionado.',
+        balanceLabel: 'Balance del periodo',
+        balanceSupportingText: 'Diferencia neta entre ingresos y egresos del rango seleccionado.',
+        transactionsLabel: 'Movimientos del periodo',
+        transactionsSupportingText: 'Cantidad de transacciones encontradas para el rango aplicado.',
+      };
+    }
+
+    return {
+      incomeLabel: 'Ingresos del mes',
+      incomeSupportingText: 'Ingresos registrados desde el primer dia del mes hasta hoy.',
+      expenseLabel: 'Egresos del mes',
+      expenseSupportingText: 'Egresos registrados dentro del rango mensual activo.',
+      balanceLabel: 'Balance del mes',
+      balanceSupportingText: 'Diferencia neta entre ingresos y egresos del mes en curso.',
+      transactionsLabel: 'Movimientos del mes',
+      transactionsSupportingText: 'Cantidad de transacciones encontradas para el rango mensual activo.',
+    };
+  }
+
+  private getDateRangeContext(): 'default-month' | 'custom' | 'total' {
+    const { from, to } = this.appliedFilters();
+
+    if (!from && !to) {
+      return 'total';
+    }
+
+    if (from === this.defaultDateRange.from && to === this.defaultDateRange.to) {
+      return 'default-month';
+    }
+
+    return 'custom';
   }
 
   private buildFiltersQuery(): FindFinancialTransactionsQueryDto {

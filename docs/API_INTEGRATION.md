@@ -169,7 +169,7 @@ Components should never call HttpClient directly.
 
 ## Reports Integration
 
-The `reports` feature does not introduce dedicated backend report endpoints in the current RC1 phase.
+The `reports` feature does not introduce dedicated backend report endpoints.
 
 Current integration rules:
 
@@ -177,6 +177,8 @@ Current integration rules:
 - `ReportsRunnerService` orchestrates report loading without bypassing feature ownership
 - the financial report uses `FinancialTransactionsService.findSummary(...)` and `FinancialTransactionsService.findAll(...)`
 - the agenda report uses `AppointmentsService.getAppointments()` and `PatientsService.getPatients()` with client-side orchestration only
+- the current reports engine supports `Financial Report` and `Agenda Report`
+- date-only filters are parsed locally and applied with inclusive user semantics when the report flow requires client-side range orchestration
 - export generation is currently client-side for `PDF` print output and `CSV` download output
 
 This allows the frontend to deliver a first reporting layer without creating new contracts or duplicating backend rules.
