@@ -166,6 +166,7 @@ Sprint 12.1 - Professional Reports & Analytics - Financial Report Pilot
 * Financial Report pilot
 * Centralized export infrastructure with conservative `PDF` print and `CSV` download strategy
 * Sprint 12.1 completed - Reports feature introduced as a lazy orchestration layer without new backend contracts and with a first professional financial reporting surface
+* Future report expansion remains planned for Agenda, Historial Clinico y Expediente Clinico
 
 ### Sprint 11
 
