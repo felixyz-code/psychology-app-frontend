@@ -1,6 +1,6 @@
 .report-runner-page__metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
 .report-runner-page__filter-actions {
@@ -28,17 +28,7 @@
   margin: 0;
 }
 
-@media (max-width: 1120px) {
-  .report-runner-page__metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 720px) {
-  .report-runner-page__metrics {
-    grid-template-columns: 1fr;
-  }
-
   .report-runner-page__error {
     align-items: stretch;
   }

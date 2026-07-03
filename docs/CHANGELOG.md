@@ -8,6 +8,29 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 12
 
+## Sprint 12.3 - Reporte Agenda
+
+### Added
+
+* Nuevo `Reporte Agenda` dentro del catalogo de `Reports` con ruta dedicada `/reports/agenda`.
+* Filtros por rango de fechas, estado y paciente reutilizando servicios existentes del producto sin nuevos contratos backend.
+* Nueva vista previa profesional agrupada por dia con citas ordenadas cronologicamente, estado visible, paciente, duracion y contexto de reporte.
+* Nuevos KPIs operativos para citas encontradas, programadas, completadas, incidencias y duracion total.
+
+### Changed
+
+* `Reports` deja de estar acoplado solo al piloto financiero y ahora soporta mas de un tipo de reporte dentro de la misma infraestructura de catalogo, runner, preview y exportacion.
+* `ReportsExportService` se vuelve generico para `PDF` y `CSV`, manteniendo impresion controlada y salida tabular sin dependencias nuevas.
+* Se incorpora una utilidad minima compartida para labels y variantes de estatus de citas, reduciendo la necesidad de seguir duplicando este mapeo en nuevos flujos.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo filtrado server-side.
+* El reporte agenda se compone en frontend mediante `AppointmentsService`, `PatientsService` y utilidades de fecha ya existentes en `appointments`.
+* `npm.cmd run build` finalizo correctamente.
+
 ## Sprint 12.2 - Financial Report QA & Polish
 
 ### Changed

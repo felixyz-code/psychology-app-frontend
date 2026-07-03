@@ -26,6 +26,52 @@
     <div class="report-preview-shell__state app-table-feedback-state app-table-feedback-state--error" role="alert">
       <p>{{ errorMessage() }}</p>
     </div>
+  } @else if (previewMode() === 'grouped' && groups().length) {
+    <div class="report-preview-shell__groups" aria-label="Vista previa agrupada por dia">
+      @for (group of groups(); track group.id) {
+        <section class="report-preview-shell__group">
+          <header class="report-preview-shell__group-header">
+            <div>
+              <h3>{{ group.title }}</h3>
+              <p>{{ group.supportingText }}</p>
+            </div>
+          </header>
+
+          <div class="report-preview-shell__group-items">
+            @for (item of group.items; track item.id) {
+              <article class="report-preview-shell__agenda-item">
+                <div class="report-preview-shell__agenda-leading">
+                  <span>{{ item.leadingText }}</span>
+                </div>
+
+                <div class="report-preview-shell__agenda-main">
+                  <div class="report-preview-shell__agenda-title-row">
+                    <h4>{{ item.title }}</h4>
+
+                    @if (item.badge) {
+                      <app-status-badge [label]="item.badge.label" [variant]="item.badge.variant" />
+                    }
+                  </div>
+
+                  <p class="report-preview-shell__agenda-supporting">{{ item.supportingText }}</p>
+
+                  @if (item.metaItems.length) {
+                    <div class="report-preview-shell__agenda-meta">
+                      @for (metaItem of item.metaItems; track metaItem.label) {
+                        <span class="report-preview-shell__agenda-meta-item">
+                          <strong>{{ metaItem.label }}:</strong>
+                          <span>{{ metaItem.value }}</span>
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    </div>
   } @else if (rows().length) {
     <div
       class="report-preview-shell__table-wrapper app-table-wrapper"
@@ -50,12 +96,9 @@
       </table>
     </div>
   } @else {
-    <app-data-table-empty-state
-      icon="analytics"
-      [title]="emptyTitle()"
-      [message]="emptyMessage()"
-    />
+    <app-data-table-empty-state icon="analytics" [title]="emptyTitle()" [message]="emptyMessage()" />
   }
+
   <div sectionCardFooter class="report-preview-shell__footer">
     <span>Documento de referencia para exportacion y revision interna.</span>
   </div>

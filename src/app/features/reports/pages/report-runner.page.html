@@ -17,51 +17,80 @@
     />
   </app-page-header>
 
-  <app-report-filters-panel
-    title="Filtros del reporte"
-    subtitle="Refina el periodo y los criterios financieros antes de generar la vista previa."
-  >
+  <app-report-filters-panel title="Filtros del reporte" [subtitle]="filtersPanelSubtitle()">
     <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
       <app-filter-toolbar>
-        <mat-form-field filterToolbarPrimary appearance="outline">
-          <mat-label>Tipo</mat-label>
-          <mat-select formControlName="type">
-            <mat-option value="">Todos</mat-option>
-            @for (type of transactionTypes; track type) {
-              <mat-option [value]="type">{{ getTypeLabel(type) }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        @if (isFinancialReport()) {
+          <mat-form-field filterToolbarPrimary appearance="outline">
+            <mat-label>Tipo</mat-label>
+            <mat-select formControlName="type">
+              <mat-option value="">Todos</mat-option>
+              @for (type of transactionTypes; track type) {
+                <mat-option [value]="type">{{ getTypeLabel(type) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
 
-        <mat-form-field filterToolbarPrimary appearance="outline">
-          <mat-label>Estado</mat-label>
-          <mat-select formControlName="status">
-            <mat-option value="">Todos</mat-option>
-            @for (status of transactionStatuses; track status) {
-              <mat-option [value]="status">{{ getStatusLabel(status) }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        @if (isFinancialReport()) {
+          <mat-form-field filterToolbarPrimary appearance="outline">
+            <mat-label>Estado</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="">Todos</mat-option>
+              @for (status of transactionStatuses; track status) {
+                <mat-option [value]="status">{{ getStatusLabel(status) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
 
-        <mat-form-field filterToolbarPrimary appearance="outline">
-          <mat-label>Categoria</mat-label>
-          <mat-select formControlName="category">
-            <mat-option value="">Todas</mat-option>
-            @for (category of transactionCategories; track category) {
-              <mat-option [value]="category">{{ getCategoryLabel(category) }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        @if (isFinancialReport()) {
+          <mat-form-field filterToolbarPrimary appearance="outline">
+            <mat-label>Categoria</mat-label>
+            <mat-select formControlName="category">
+              <mat-option value="">Todas</mat-option>
+              @for (category of transactionCategories; track category) {
+                <mat-option [value]="category">{{ getCategoryLabel(category) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
 
-        <mat-form-field filterToolbarPrimary appearance="outline">
-          <mat-label>Metodo de pago</mat-label>
-          <mat-select formControlName="paymentMethod">
-            <mat-option value="">Todos</mat-option>
-            @for (paymentMethod of paymentMethods; track paymentMethod) {
-              <mat-option [value]="paymentMethod">{{ getPaymentMethodLabel(paymentMethod) }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        @if (isFinancialReport()) {
+          <mat-form-field filterToolbarPrimary appearance="outline">
+            <mat-label>Metodo de pago</mat-label>
+            <mat-select formControlName="paymentMethod">
+              <mat-option value="">Todos</mat-option>
+              @for (paymentMethod of paymentMethods; track paymentMethod) {
+                <mat-option [value]="paymentMethod">{{ getPaymentMethodLabel(paymentMethod) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+
+        @if (isAgendaReport()) {
+          <mat-form-field filterToolbarPrimary appearance="outline">
+            <mat-label>Estado</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="">Todos</mat-option>
+              @for (status of appointmentStatuses; track status) {
+                <mat-option [value]="status">{{ getAgendaStatusLabel(status) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+
+        @if (isAgendaReport()) {
+          <mat-form-field filterToolbarPrimary appearance="outline">
+            <mat-label>Paciente</mat-label>
+            <mat-select formControlName="patientId">
+              <mat-option value="">Todos</mat-option>
+              @for (patient of availablePatients(); track patient.id) {
+                <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
 
         <mat-form-field filterToolbarSecondary appearance="outline">
           <mat-label>Fecha desde</mat-label>
@@ -117,14 +146,16 @@
 
   <app-report-preview-shell
     title="Vista previa"
-    subtitle="Resumen tabular de movimientos incluidos en el reporte financiero actual."
+    [subtitle]="previewSubtitle()"
     [columns]="reportResult()?.columns || []"
     [rows]="reportResult()?.rows || []"
     [displayedColumns]="displayedColumns()"
+    [groups]="reportResult()?.groups || []"
+    [previewMode]="reportResult()?.previewMode || 'table'"
     [isLoading]="isLoading()"
     [errorMessage]="errorMessage()"
     [contextItems]="reportResult()?.contextItems || []"
-    [emptyTitle]="reportResult()?.emptyTitle || 'No hay movimientos para mostrar'"
+    [emptyTitle]="reportResult()?.emptyTitle || 'No hay datos para mostrar'"
     [emptyMessage]="reportResult()?.emptyMessage || 'Ajusta los filtros para generar una vista previa.'"
     [generatedAt]="reportResult()?.generatedAt || ''"
   />

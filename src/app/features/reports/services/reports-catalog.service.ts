@@ -15,6 +15,16 @@ export class ReportsCatalogService {
       route: '/reports/financial',
       supportedExports: ['pdf', 'csv'],
     },
+    {
+      key: 'agenda',
+      title: 'Reporte Agenda',
+      description:
+        'Consulta citas por rango, estado y paciente con una vista agrupada por dia y exportacion profesional.',
+      category: 'Operacion clinica',
+      icon: 'event_note',
+      route: '/reports/agenda',
+      supportedExports: ['pdf', 'csv'],
+    },
   ];
 
   getReports(): ReportDefinition[] {

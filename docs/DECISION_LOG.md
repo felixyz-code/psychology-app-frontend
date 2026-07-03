@@ -347,7 +347,7 @@ It also allows the product to introduce professional reporting UX without creati
 
 ## Initial Scope
 
-The first delivered pilot is `Financial Report`.
+The first delivered pilot was `Financial Report`.
 
 Current orchestration:
 
@@ -365,6 +365,11 @@ Current orchestration:
 
 - The Financial Report pilot completed technical validation and was approved with partial visual QA still blocked in local environments that require authentication and do not expose a ready browser session.
 - The current `PDF` export strategy remains intentionally conservative: if the browser blocks the popup used for controlled print, the app fails safely without crashing, but it does not yet surface explicit user feedback for that condition.
+
+## Operational Notes After Sprint 12.3
+
+- `Reports` now proves its reusable scope beyond the initial pilot by delivering a second professional surface: `Agenda Report`.
+- The frontend continues to avoid dedicated report endpoints; the agenda report is composed from `AppointmentsService` and `PatientsService` without moving business ownership away from `appointments`.
 
 ---
 

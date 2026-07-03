@@ -1,25 +1,28 @@
 import { CommonModule } from '@angular/common';
 import { Component, input } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
-import { ReportContextItem, ReportTableColumn, ReportTableRow } from '../models/report-result.model';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  ReportContextItem,
+  ReportPreviewGroup,
+  ReportTableColumn,
+  ReportTableRow,
+} from '../models/report-result.model';
 
 @Component({
   selector: 'app-report-preview-shell',
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
-    MatIconModule,
     MatProgressSpinnerModule,
     MatTableModule,
     DataTableEmptyStateComponent,
     SectionCardComponent,
+    StatusBadgeComponent,
   ],
   templateUrl: './report-preview-shell.component.html',
   styleUrl: './report-preview-shell.component.scss',
@@ -30,6 +33,8 @@ export class ReportPreviewShellComponent {
   readonly columns = input<ReportTableColumn[]>([]);
   readonly rows = input<ReportTableRow[]>([]);
   readonly displayedColumns = input<string[]>([]);
+  readonly groups = input<ReportPreviewGroup[]>([]);
+  readonly previewMode = input<'table' | 'grouped'>('table');
   readonly isLoading = input(false);
   readonly errorMessage = input('');
   readonly contextItems = input<ReportContextItem[]>([]);

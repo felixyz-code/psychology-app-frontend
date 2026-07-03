@@ -169,7 +169,7 @@ Current characteristics:
 * individual business features remain owners of their own data services
 * `reports` does not own financial business logic or financial backend rules
 * report execution is orchestrated through feature-owned services instead of direct `HttpClient` calls
-* the first delivered pilot is the `Financial Report`
+* current delivered reports are `Financial Report` and `Agenda Report`
 * export infrastructure is centralized in the `reports` feature while data ownership remains in the source feature
 
 This keeps the architecture aligned with the backend-first principle and avoids creating a parallel business domain for reporting.

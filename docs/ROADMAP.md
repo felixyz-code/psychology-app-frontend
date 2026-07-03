@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 12.2 - QA & Polish del Reporte Financiero
+Sprint 12.3 - Reporte Agenda
 ```
 
 ---
@@ -165,10 +165,12 @@ Sprint 12.2 - QA & Polish del Reporte Financiero
 * Lazy route `/reports`
 * Reports catalog foundation
 * Financial Report pilot
+* Agenda Report
 * Centralized export infrastructure with conservative `PDF` print and `CSV` download strategy
 * Sprint 12.1 completed - Reports feature introduced as a lazy orchestration layer without new backend contracts and with a first professional financial reporting surface
 * Sprint 12.2 completed - Financial Report polished with a more document-like preview, stronger export presentation, accessibility refinements and final QA technical validation
-* Future report expansion remains planned for Agenda, Historial Clinico y Expediente Clinico
+* Sprint 12.3 completed - Agenda Report delivered with reusable report orchestration, grouped preview by day, KPI summary and frontend-only export flow
+* Future report expansion remains planned for Historial Clinico y Expediente Clinico
 
 ### Sprint 11
 
@@ -199,11 +201,7 @@ Sprint 12.2 - QA & Polish del Reporte Financiero
 * Sprint 8.4 completed - Dashboard delivered as a SaaS-style home screen with primary metrics, upcoming appointments, quick actions, recent activity, responsive behavior and final grid/spacing polish
 * Sprint 8.5 completed - Design System foundation extracted from the SaaS Dashboard into reusable shared UI components
 
-Next planned sprint:
-
-```text
-Sprint 12.3 - Reporte Agenda
-```
+Next planned sprint remains pending definition in the current roadmap snapshot.
 
 ---
 

@@ -1,15 +1,14 @@
 import { Injectable } from '@angular/core';
 
 import { ReportResult } from '../models/report-result.model';
-import { FinancialReportFilters } from '../models/report-filters.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReportsExportService {
-  exportAsPdf(result: ReportResult<FinancialReportFilters>): void {
-    const printWindow = globalThis.open('', '_blank', 'noopener,noreferrer,width=960,height=720');
+  exportAsPdf(result: ReportResult<unknown>): boolean {
+    const printWindow = globalThis.open('about:blank', '_blank', 'width=960,height=720');
 
     if (!printWindow) {
-      return;
+      return false;
     }
 
     const metricsHtml = result.metrics
@@ -54,8 +53,60 @@ export class ReportsExportService {
       })
       .join('');
 
-    printWindow.document.open();
-    printWindow.document.write(`
+    const groupedContentHtml = result.groups
+      .map(
+        (group) => `
+          <section class="group">
+            <header class="group__header">
+              <h3>${this.escapeHtml(group.title)}</h3>
+              <p>${this.escapeHtml(group.supportingText)}</p>
+            </header>
+            <div class="group__items">
+              ${group.items
+                .map(
+                  (item) => `
+                    <article class="agenda-item">
+                      <div class="agenda-item__leading">${this.escapeHtml(item.leadingText)}</div>
+                      <div class="agenda-item__body">
+                        <div class="agenda-item__title-row">
+                          <h4>${this.escapeHtml(item.title)}</h4>
+                          ${
+                            item.badge
+                              ? `<span class="agenda-item__badge">${this.escapeHtml(item.badge.label)}</span>`
+                              : ''
+                          }
+                        </div>
+                        <p class="agenda-item__supporting">${this.escapeHtml(item.supportingText)}</p>
+                        ${
+                          item.metaItems.length
+                            ? `
+                              <div class="agenda-item__meta">
+                                ${item.metaItems
+                                  .map(
+                                    (metaItem) => `
+                                      <span class="agenda-item__meta-item">
+                                        <strong>${this.escapeHtml(metaItem.label)}:</strong>
+                                        <span>${this.escapeHtml(metaItem.value)}</span>
+                                      </span>
+                                    `
+                                  )
+                                  .join('')}
+                              </div>
+                            `
+                            : ''
+                        }
+                      </div>
+                    </article>
+                  `
+                )
+                .join('')}
+            </div>
+          </section>
+        `
+      )
+      .join('');
+
+    const html = `
       <!doctype html>
       <html lang="es">
         <head>
@@ -68,14 +119,12 @@ export class ReportsExportService {
               color: #0f172a;
               background: #ffffff;
             }
+            h1, h3, h4, p {
+              margin: 0;
+            }
             h1 {
-              margin: 0 0 8px;
               font-size: 30px;
               line-height: 1.15;
-            }
-            p {
-              margin: 0;
-              color: #475569;
             }
             .document {
               display: grid;
@@ -94,20 +143,29 @@ export class ReportsExportService {
               text-transform: uppercase;
               color: #2563eb;
             }
+            .generated-at {
+              color: #475569;
+            }
             .context {
               display: grid;
               grid-template-columns: repeat(3, minmax(0, 1fr));
               gap: 12px;
             }
-            .context-item {
-              display: grid;
-              gap: 4px;
-              padding: 12px;
+            .context-item,
+            .metric,
+            .group,
+            .table-card {
               border: 1px solid #dbe3ef;
               border-radius: 12px;
               background: #ffffff;
             }
-            .context-item__label {
+            .context-item {
+              display: grid;
+              gap: 4px;
+              padding: 12px;
+            }
+            .context-item__label,
+            .metric__label {
               font-size: 11px;
               font-weight: 700;
               letter-spacing: 0.05em;
@@ -124,24 +182,83 @@ export class ReportsExportService {
               gap: 12px;
             }
             .metric {
-              border: 1px solid #dbe3ef;
-              border-radius: 12px;
               padding: 12px;
               display: grid;
               gap: 6px;
               background: #f8fafc;
             }
-            .metric__label {
-              font-size: 12px;
-              text-transform: uppercase;
-              color: #64748b;
-            }
             .metric__value {
               font-size: 22px;
             }
-            .metric__supporting {
+            .metric__supporting,
+            .group__header p,
+            .agenda-item__supporting,
+            .agenda-item__meta-item,
+            .table-card__meta {
               font-size: 12px;
               color: #475569;
+            }
+            .groups {
+              display: grid;
+              gap: 16px;
+            }
+            .group {
+              padding: 16px;
+              display: grid;
+              gap: 12px;
+            }
+            .group__header {
+              display: grid;
+              gap: 4px;
+            }
+            .group__items {
+              display: grid;
+              gap: 10px;
+            }
+            .agenda-item {
+              display: grid;
+              grid-template-columns: 88px minmax(0, 1fr);
+              gap: 12px;
+              padding: 12px;
+              border: 1px solid #dbe3ef;
+              border-radius: 12px;
+              background: #f8fafc;
+            }
+            .agenda-item__leading {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              min-height: 44px;
+              border-radius: 10px;
+              background: #dbeafe;
+              color: #1d4ed8;
+              font-weight: 700;
+            }
+            .agenda-item__body {
+              display: grid;
+              gap: 6px;
+            }
+            .agenda-item__title-row {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 8px;
+            }
+            .agenda-item__badge {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              padding: 4px 10px;
+              border-radius: 999px;
+              background: #eff6ff;
+              color: #1e3a8a;
+              font-size: 11px;
+              font-weight: 700;
+            }
+            .agenda-item__meta {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 10px;
             }
             table {
               width: 100%;
@@ -160,9 +277,6 @@ export class ReportsExportService {
             }
             .table-card {
               padding: 16px;
-              border: 1px solid #dbe3ef;
-              border-radius: 16px;
-              background: #ffffff;
             }
             .table-card__header {
               display: flex;
@@ -172,14 +286,9 @@ export class ReportsExportService {
               margin-bottom: 12px;
             }
             .table-card__title {
-              margin: 0;
               font-size: 14px;
               font-weight: 700;
               color: #0f172a;
-            }
-            .table-card__meta {
-              font-size: 12px;
-              color: #64748b;
             }
             .align-end {
               text-align: right;
@@ -199,7 +308,8 @@ export class ReportsExportService {
             }
             @media (max-width: 900px) {
               .context,
-              .metrics {
+              .metrics,
+              .agenda-item {
                 grid-template-columns: 1fr;
               }
             }
@@ -210,47 +320,59 @@ export class ReportsExportService {
             <header class="meta">
               <span class="eyebrow">Reporte profesional</span>
               <h1>${this.escapeHtml(result.title)}</h1>
-              <p>Generado el ${this.escapeHtml(this.formatDateTime(result.generatedAt))}</p>
+              <p class="generated-at">Generado el ${this.escapeHtml(this.formatDateTime(result.generatedAt))}</p>
             </header>
             <section class="context">${contextHtml}</section>
             <section class="metrics">${metricsHtml}</section>
-            <section class="table-card">
-              <div class="table-card__header">
-                <p class="table-card__title">Vista previa tabular</p>
-                <span class="table-card__meta">${result.rows.length === 1 ? '1 registro incluido' : `${result.rows.length} registros incluidos`}</span>
-              </div>
-              ${
-                result.rows.length
-                  ? `
-                    <table>
-                      <thead>
-                        <tr>${tableHeadHtml}</tr>
-                      </thead>
-                      <tbody>
-                        ${tableRowsHtml}
-                      </tbody>
-                    </table>
-                  `
-                  : `
-                    <div class="empty">
-                      <p>No hay movimientos para exportar con los filtros actuales.</p>
+            ${
+              result.previewMode === 'grouped' && result.groups.length
+                ? `<section class="groups">${groupedContentHtml}</section>`
+                : `
+                  <section class="table-card">
+                    <div class="table-card__header">
+                      <p class="table-card__title">Vista previa tabular</p>
+                      <span class="table-card__meta">${result.rows.length === 1 ? '1 registro incluido' : `${result.rows.length} registros incluidos`}</span>
                     </div>
-                  `
-              }
-            </section>
+                    ${
+                      result.rows.length
+                        ? `
+                          <table>
+                            <thead>
+                              <tr>${tableHeadHtml}</tr>
+                            </thead>
+                            <tbody>
+                              ${tableRowsHtml}
+                            </tbody>
+                          </table>
+                        `
+                        : `
+                          <div class="empty">
+                            <p>No hay registros para exportar con los filtros actuales.</p>
+                          </div>
+                        `
+                    }
+                  </section>
+                `
+            }
           </main>
-          <script>
-            window.addEventListener('load', () => {
-              window.print();
-            });
-          </script>
         </body>
       </html>
-    `);
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
     printWindow.document.close();
+    printWindow.focus();
+    printWindow.onload = null;
+    printWindow.setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+    }, 300);
+
+    return true;
   }
 
-  exportAsCsv(result: ReportResult<FinancialReportFilters>): void {
+  exportAsCsv(result: ReportResult<unknown>): void {
     const header = result.columns.map((column) => column.label);
     const rows = result.rows.map((row) => result.columns.map((column) => row.values[column.key] ?? ''));
     const csvContent = [header, ...rows]

@@ -176,6 +176,7 @@ Current integration rules:
 - reports consume existing feature-owned services only
 - `ReportsRunnerService` orchestrates report loading without bypassing feature ownership
 - the financial report uses `FinancialTransactionsService.findSummary(...)` and `FinancialTransactionsService.findAll(...)`
+- the agenda report uses `AppointmentsService.getAppointments()` and `PatientsService.getPatients()` with client-side orchestration only
 - export generation is currently client-side for `PDF` print output and `CSV` download output
 
 This allows the frontend to deliver a first reporting layer without creating new contracts or duplicating backend rules.

@@ -32,6 +32,7 @@ import { AppointmentsDailyAgendaComponent } from '../components/appointments-dai
 import { AppointmentFormDialogComponent } from '../components/appointment-form-dialog.component';
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 import { AppointmentsService } from '../services/appointments.service';
+import { APPOINTMENT_STATUSES } from '../utils/appointment-presenters';
 import {
   endOfLocalMonth,
   isSameLocalDay,
@@ -84,7 +85,7 @@ export class AppointmentsListPage {
 
   readonly displayedColumns = ['patient', 'scheduledAt', 'durationMinutes', 'status', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
-  readonly appointmentStatuses: AppointmentStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
+  readonly appointmentStatuses: AppointmentStatus[] = APPOINTMENT_STATUSES;
   readonly viewMode = signal<'table' | 'calendar' | 'agenda'>('table');
   readonly selectedAgendaDate = signal(startOfLocalDay(new Date()));
   readonly patientNameResolver = (patientId: string) => this.getPatientName(patientId);

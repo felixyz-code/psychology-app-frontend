@@ -1,4 +1,4 @@
-export type ReportKey = 'financial';
+export type ReportKey = 'financial' | 'agenda';
 
 export type ReportExportFormat = 'pdf' | 'csv';
 

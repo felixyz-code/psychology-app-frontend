@@ -25,6 +25,32 @@ export interface ReportTableRow {
   values: Record<string, string>;
 }
 
+export interface ReportPreviewGroupItemBadge {
+  label: string;
+  variant: 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
+}
+
+export interface ReportPreviewGroupItemMeta {
+  label: string;
+  value: string;
+}
+
+export interface ReportPreviewGroupItem {
+  id: string;
+  leadingText: string;
+  title: string;
+  supportingText: string;
+  badge?: ReportPreviewGroupItemBadge;
+  metaItems: ReportPreviewGroupItemMeta[];
+}
+
+export interface ReportPreviewGroup {
+  id: string;
+  title: string;
+  supportingText: string;
+  items: ReportPreviewGroupItem[];
+}
+
 export interface ReportResult<TFilters> {
   reportKey: ReportKey;
   title: string;
@@ -34,6 +60,8 @@ export interface ReportResult<TFilters> {
   metrics: ReportMetric[];
   columns: ReportTableColumn[];
   rows: ReportTableRow[];
+  previewMode: 'table' | 'grouped';
+  groups: ReportPreviewGroup[];
   csvFileName: string;
   supportedExports: ReportExportFormat[];
   emptyTitle: string;

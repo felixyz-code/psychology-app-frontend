@@ -12,4 +12,11 @@ export const reportsRoutes: Routes = [
       reportKey: 'financial',
     },
   },
+  {
+    path: 'agenda',
+    loadComponent: () => import('./pages/report-runner.page').then((m) => m.ReportRunnerPage),
+    data: {
+      reportKey: 'agenda',
+    },
+  },
 ];
