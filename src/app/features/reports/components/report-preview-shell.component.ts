@@ -7,7 +7,7 @@ import { MatTableModule } from '@angular/material/table';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
-import { ReportTableColumn, ReportTableRow } from '../models/report-result.model';
+import { ReportContextItem, ReportTableColumn, ReportTableRow } from '../models/report-result.model';
 
 @Component({
   selector: 'app-report-preview-shell',
@@ -32,6 +32,7 @@ export class ReportPreviewShellComponent {
   readonly displayedColumns = input<string[]>([]);
   readonly isLoading = input(false);
   readonly errorMessage = input('');
+  readonly contextItems = input<ReportContextItem[]>([]);
   readonly emptyTitle = input('No hay datos para mostrar');
   readonly emptyMessage = input('Ajusta los filtros para generar una vista previa.');
   readonly generatedAt = input('');

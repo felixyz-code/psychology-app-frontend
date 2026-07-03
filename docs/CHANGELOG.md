@@ -8,6 +8,25 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 12
 
+## Sprint 12.2 - Financial Report QA & Polish
+
+### Changed
+
+* El `Reporte Financiero` recibe una pasada completa de polish visual y de experiencia para alinearlo mejor con el estandar profesional del producto sin agregar nuevas funcionalidades.
+* La vista previa del reporte evoluciona hacia una superficie mas cercana a un documento, con mejor jerarquia visual, contexto del reporte y una presentacion tabular mas sobria.
+* La exportacion conserva `PDF` y `CSV`, pero mejora su experiencia de uso: el `PDF` adopta un layout mas profesional para impresion y el `CSV` mantiene una salida mas coherente con la vista previa actual.
+* `Financial Transactions` ahora reutiliza `FilterToolbar`, reduciendo ruido visual y alineando el patron de filtros con `Reports`.
+* Se refuerzan aspectos de accesibilidad basica como labels mas claros, regiones con feedback mas predecible y mejor soporte para foco y navegacion por teclado.
+
+### Technical
+
+* Se redujo duplicacion de presentacion financiera mediante utilidades compartidas para labels, variantes y formateo.
+* Se mitigaron cargas obsoletas al cancelar suscripciones previas antes de lanzar nuevas consultas en `Reports` y `Financial Transactions`.
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* Sprint 12.2 queda validado tecnicamente y aprobado con QA visual parcial bloqueada por autenticacion local.
+
 ## Sprint 12.1 - Professional Reports & Analytics - Financial Report Pilot
 
 ### Added

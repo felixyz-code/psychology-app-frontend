@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 12.1 - Professional Reports & Analytics - Financial Report Pilot
+Sprint 12.2 - QA & Polish del Reporte Financiero
 ```
 
 ---
@@ -157,6 +157,7 @@ Sprint 12.1 - Professional Reports & Analytics - Financial Report Pilot
 * Sprint 11.3 completed - Primary movement CTA moved to the page header and finance filters now share a stronger visual action hierarchy
 * Sprint 11.4 completed - Manual toolbar, row actions and table feedback states aligned more closely with the shared data-table language
 * Sprint 11.6B completed - Financial transaction form now shares the same grouped form rhythm and spacing language as the modal CRUD flows while remaining page-based
+* Sprint 12.2 completed - Filters now reuse the shared `FilterToolbar` and the module keeps its visual baseline aligned with the polished reporting surface
 * Financial Transactions mantiene formularios basados en pagina; no participaron en Sprint 11.6A al no existir aun un dialog equivalente dentro del flujo actual
 
 ### Reports
@@ -166,6 +167,7 @@ Sprint 12.1 - Professional Reports & Analytics - Financial Report Pilot
 * Financial Report pilot
 * Centralized export infrastructure with conservative `PDF` print and `CSV` download strategy
 * Sprint 12.1 completed - Reports feature introduced as a lazy orchestration layer without new backend contracts and with a first professional financial reporting surface
+* Sprint 12.2 completed - Financial Report polished with a more document-like preview, stronger export presentation, accessibility refinements and final QA technical validation
 * Future report expansion remains planned for Agenda, Historial Clinico y Expediente Clinico
 
 ### Sprint 11
@@ -200,7 +202,7 @@ Sprint 12.1 - Professional Reports & Analytics - Financial Report Pilot
 Next planned sprint:
 
 ```text
-To be defined after RC1 validation and backlog reprioritization
+Sprint 12.3 - Reporte Agenda
 ```
 
 ---
@@ -210,6 +212,7 @@ To be defined after RC1 validation and backlog reprioritization
 Current development efforts include:
 
 * Reports module hardening
+* Agenda report planning after Financial Report pilot stabilization
 * Final backend integration verification
 * Manual browser validation of dense clinical workflows
 * Incremental technical debt reduction after release-candidate closure

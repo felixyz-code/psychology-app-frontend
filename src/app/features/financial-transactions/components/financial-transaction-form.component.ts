@@ -18,6 +18,16 @@ import {
   FinancialTransactionType,
   PaymentMethod,
 } from '../models/financial-transaction.models';
+import {
+  FINANCIAL_TRANSACTION_CATEGORIES,
+  FINANCIAL_TRANSACTION_STATUSES,
+  FINANCIAL_TRANSACTION_TYPES,
+  getFinancialTransactionCategoryLabel,
+  getFinancialTransactionStatusLabel,
+  getFinancialTransactionTypeLabel,
+  getPaymentMethodLabel,
+  PAYMENT_METHODS,
+} from '../utils/financial-transaction-presenters';
 
 type FinancialTransactionFormMode = 'create' | 'edit';
 
@@ -51,20 +61,10 @@ export class FinancialTransactionFormComponent {
   readonly formSubmitted = output<CreateFinancialTransactionDto>();
   readonly cancelled = output<void>();
 
-  readonly transactionTypes: FinancialTransactionType[] = ['INCOME', 'EXPENSE', 'ADJUSTMENT', 'REFUND'];
-  readonly transactionStatuses: FinancialTransactionStatus[] = ['PENDING', 'COMPLETED', 'CANCELLED'];
-  readonly transactionCategories: FinancialTransactionCategory[] = [
-    'SESSION',
-    'ASSESSMENT',
-    'MANUAL',
-    'RENT',
-    'UTILITIES',
-    'SUPPLIES',
-    'SOFTWARE',
-    'SALARY',
-    'OTHER',
-  ];
-  readonly paymentMethods: PaymentMethod[] = ['CASH', 'CARD', 'TRANSFER', 'CHECK', 'OTHER'];
+  readonly transactionTypes: FinancialTransactionType[] = FINANCIAL_TRANSACTION_TYPES;
+  readonly transactionStatuses: FinancialTransactionStatus[] = FINANCIAL_TRANSACTION_STATUSES;
+  readonly transactionCategories: FinancialTransactionCategory[] = FINANCIAL_TRANSACTION_CATEGORIES;
+  readonly paymentMethods: PaymentMethod[] = PAYMENT_METHODS;
 
   readonly transactionForm = this.formBuilder.group({
     type: ['INCOME' as FinancialTransactionType, [Validators.required]],
@@ -183,52 +183,19 @@ export class FinancialTransactionFormComponent {
   }
 
   getTypeLabel(type: FinancialTransactionType): string {
-    const labels: Record<FinancialTransactionType, string> = {
-      INCOME: 'Ingreso',
-      EXPENSE: 'Egreso',
-      ADJUSTMENT: 'Ajuste',
-      REFUND: 'Reembolso',
-    };
-
-    return labels[type];
+    return getFinancialTransactionTypeLabel(type);
   }
 
   getStatusLabel(status: FinancialTransactionStatus): string {
-    const labels: Record<FinancialTransactionStatus, string> = {
-      PENDING: 'Pendiente',
-      COMPLETED: 'Completada',
-      CANCELLED: 'Cancelada',
-    };
-
-    return labels[status];
+    return getFinancialTransactionStatusLabel(status);
   }
 
   getCategoryLabel(category: FinancialTransactionCategory): string {
-    const labels: Record<FinancialTransactionCategory, string> = {
-      SESSION: 'Sesion',
-      ASSESSMENT: 'Evaluacion',
-      MANUAL: 'Manual',
-      RENT: 'Renta',
-      UTILITIES: 'Servicios',
-      SUPPLIES: 'Insumos',
-      SOFTWARE: 'Software',
-      SALARY: 'Salario',
-      OTHER: 'Otro',
-    };
-
-    return labels[category];
+    return getFinancialTransactionCategoryLabel(category);
   }
 
   getPaymentMethodLabel(paymentMethod: PaymentMethod): string {
-    const labels: Record<PaymentMethod, string> = {
-      CASH: 'Efectivo',
-      CARD: 'Tarjeta',
-      TRANSFER: 'Transferencia',
-      CHECK: 'Cheque',
-      OTHER: 'Otro',
-    };
-
-    return labels[paymentMethod];
+    return getPaymentMethodLabel(paymentMethod);
   }
 
   private normalizeOptionalText(value: string): string | null {

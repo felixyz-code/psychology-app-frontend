@@ -5,7 +5,17 @@
   padding: 1.25rem;
   border: 1px solid var(--app-color-card-border);
   border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--app-color-primary-soft) 45%, transparent) 0, transparent 34%),
+    var(--app-color-card-bg);
   box-shadow: var(--app-shadow-card);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.report-catalog-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--app-color-card-border) 62%, var(--app-color-primary) 38%);
+  box-shadow: 0 1rem 2rem rgba(15, 23, 42, 0.1);
 }
 
 .report-catalog-card__icon {

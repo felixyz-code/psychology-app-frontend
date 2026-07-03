@@ -361,6 +361,11 @@ Current orchestration:
 - If a future report becomes too expensive or too fragmented to compose in the frontend, a dedicated backend aggregate contract should be evaluated.
 - Export UX can remain centralized in `reports` even when the data source belongs to another feature.
 
+## Operational Notes After Sprint 12.2
+
+- The Financial Report pilot completed technical validation and was approved with partial visual QA still blocked in local environments that require authentication and do not expose a ready browser session.
+- The current `PDF` export strategy remains intentionally conservative: if the browser blocks the popup used for controlled print, the app fails safely without crashing, but it does not yet surface explicit user feedback for that condition.
+
 ---
 
 # Future Decisions

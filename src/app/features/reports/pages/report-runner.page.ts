@@ -17,6 +17,17 @@ import {
   FinancialTransactionType,
   PaymentMethod,
 } from '../../financial-transactions/models/financial-transaction.models';
+import {
+  buildCurrentMonthDateRange,
+  FINANCIAL_TRANSACTION_CATEGORIES,
+  FINANCIAL_TRANSACTION_STATUSES,
+  FINANCIAL_TRANSACTION_TYPES,
+  getFinancialTransactionCategoryLabel,
+  getFinancialTransactionStatusLabel,
+  getFinancialTransactionTypeLabel,
+  getPaymentMethodLabel,
+  PAYMENT_METHODS,
+} from '../../financial-transactions/utils/financial-transaction-presenters';
 import { ReportExportMenuComponent } from '../components/report-export-menu.component';
 import { ReportFiltersPanelComponent } from '../components/report-filters-panel.component';
 import { ReportPreviewShellComponent } from '../components/report-preview-shell.component';
@@ -26,6 +37,7 @@ import { ReportResult } from '../models/report-result.model';
 import { ReportsCatalogService } from '../services/reports-catalog.service';
 import { ReportsExportService } from '../services/reports-export.service';
 import { ReportsRunnerService } from '../services/reports-runner.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-report-runner-page',
@@ -55,22 +67,13 @@ export class ReportRunnerPage {
   private readonly reportsExportService = inject(ReportsExportService);
   private readonly reportsRunnerService = inject(ReportsRunnerService);
   private readonly reportKey = this.activatedRoute.snapshot.data['reportKey'] as ReportKey;
-  private readonly defaultDateRange = this.buildCurrentMonthRange();
+  private readonly defaultDateRange = buildCurrentMonthDateRange();
+  private reportLoadSubscription?: Subscription;
 
-  readonly transactionTypes: FinancialTransactionType[] = ['INCOME', 'EXPENSE', 'ADJUSTMENT', 'REFUND'];
-  readonly transactionStatuses: FinancialTransactionStatus[] = ['PENDING', 'COMPLETED', 'CANCELLED'];
-  readonly transactionCategories: FinancialTransactionCategory[] = [
-    'SESSION',
-    'ASSESSMENT',
-    'MANUAL',
-    'RENT',
-    'UTILITIES',
-    'SUPPLIES',
-    'SOFTWARE',
-    'SALARY',
-    'OTHER',
-  ];
-  readonly paymentMethods: PaymentMethod[] = ['CASH', 'CARD', 'TRANSFER', 'CHECK', 'OTHER'];
+  readonly transactionTypes: FinancialTransactionType[] = FINANCIAL_TRANSACTION_TYPES;
+  readonly transactionStatuses: FinancialTransactionStatus[] = FINANCIAL_TRANSACTION_STATUSES;
+  readonly transactionCategories: FinancialTransactionCategory[] = FINANCIAL_TRANSACTION_CATEGORIES;
+  readonly paymentMethods: PaymentMethod[] = PAYMENT_METHODS;
   readonly definition = signal<ReportDefinition | null>(this.reportsCatalogService.getReportByKey(this.reportKey) ?? null);
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
@@ -138,55 +141,23 @@ export class ReportRunnerPage {
   }
 
   getTypeLabel(type: FinancialTransactionType): string {
-    const labels: Record<FinancialTransactionType, string> = {
-      INCOME: 'Ingreso',
-      EXPENSE: 'Egreso',
-      ADJUSTMENT: 'Ajuste',
-      REFUND: 'Reembolso',
-    };
-
-    return labels[type];
+    return getFinancialTransactionTypeLabel(type);
   }
 
   getStatusLabel(status: FinancialTransactionStatus): string {
-    const labels: Record<FinancialTransactionStatus, string> = {
-      PENDING: 'Pendiente',
-      COMPLETED: 'Completada',
-      CANCELLED: 'Cancelada',
-    };
-
-    return labels[status];
+    return getFinancialTransactionStatusLabel(status);
   }
 
   getCategoryLabel(category: FinancialTransactionCategory): string {
-    const labels: Record<FinancialTransactionCategory, string> = {
-      SESSION: 'Sesion',
-      ASSESSMENT: 'Evaluacion',
-      MANUAL: 'Manual',
-      RENT: 'Renta',
-      UTILITIES: 'Servicios',
-      SUPPLIES: 'Insumos',
-      SOFTWARE: 'Software',
-      SALARY: 'Salario',
-      OTHER: 'Otro',
-    };
-
-    return labels[category];
+    return getFinancialTransactionCategoryLabel(category);
   }
 
   getPaymentMethodLabel(paymentMethod: PaymentMethod): string {
-    const labels: Record<PaymentMethod, string> = {
-      CASH: 'Efectivo',
-      CARD: 'Tarjeta',
-      TRANSFER: 'Transferencia',
-      CHECK: 'Cheque',
-      OTHER: 'Otro',
-    };
-
-    return labels[paymentMethod];
+    return getPaymentMethodLabel(paymentMethod);
   }
 
   private loadReport(filters: FinancialReportFilters = this.appliedFilters()): void {
+    this.reportLoadSubscription?.unsubscribe();
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -197,7 +168,7 @@ export class ReportRunnerPage {
       return;
     }
 
-    this.reportsRunnerService.runFinancialReport(filters).subscribe({
+    this.reportLoadSubscription = this.reportsRunnerService.runFinancialReport(filters).subscribe({
       next: (result) => {
         this.reportResult.set(result);
         this.isLoading.set(false);
@@ -220,18 +191,6 @@ export class ReportRunnerPage {
       paymentMethod: (rawValue.paymentMethod || undefined) as PaymentMethod | undefined,
       from: rawValue.from || undefined,
       to: rawValue.to || undefined,
-    };
-  }
-
-  private buildCurrentMonthRange(): FinancialReportFilters {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = `${now.getMonth() + 1}`.padStart(2, '0');
-    const day = `${now.getDate()}`.padStart(2, '0');
-
-    return {
-      from: `${year}-${month}-01`,
-      to: `${year}-${month}-${day}`,
     };
   }
 }

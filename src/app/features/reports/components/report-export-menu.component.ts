@@ -15,6 +15,8 @@ import { ReportExportFormat } from '../models/report-definition.model';
 export class ReportExportMenuComponent {
   readonly formats = input<ReportExportFormat[]>([]);
   readonly disabled = input(false);
+  readonly reportTitle = input('Reporte');
+  readonly rowCount = input(0);
 
   readonly exportSelected = output<ReportExportFormat>();
 
@@ -24,5 +26,12 @@ export class ReportExportMenuComponent {
 
   getIcon(format: ReportExportFormat): string {
     return format === 'pdf' ? 'picture_as_pdf' : 'table_view';
+  }
+
+  getAriaLabel(): string {
+    const rowCount = this.rowCount();
+    const rowsLabel = rowCount === 1 ? '1 registro' : `${rowCount} registros`;
+
+    return `Exportar ${this.reportTitle()} con ${rowsLabel}`;
   }
 }

@@ -19,49 +19,17 @@
   margin: 0;
 }
 
-.financial-transactions-toolbar {
-  display: grid;
-  gap: 0.85rem 1rem;
-  padding-top: 0.15rem;
-}
-
-.financial-transactions-toolbar__row {
-  display: grid;
-  gap: 0.85rem 1rem;
-  min-width: 0;
-  align-items: start;
-}
-
-.financial-transactions-toolbar__row--primary {
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
-}
-
-.financial-transactions-toolbar__row--secondary {
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
-  align-items: start;
-}
-
-.financial-transactions-toolbar__meta {
+.financial-transactions-toolbar__actions {
   display: flex;
   align-items: center;
-  min-height: 0;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .financial-transactions-filter {
   width: 100%;
   min-width: 0;
-}
-
-.financial-transactions-toolbar__action-slot {
-  display: flex;
-  align-items: center;
-  justify-content: stretch;
-  min-height: 3.5rem;
-}
-
-.financial-transactions-toolbar__action-slot button {
-  width: 100%;
-  min-height: 3.5rem;
 }
 
 .financial-transactions-table-wrapper {
@@ -87,23 +55,8 @@
 }
 
 @media (max-width: 1280px) {
-  .financial-transactions-toolbar__meta {
-    margin-top: -0.1rem;
-  }
-}
-
-@media (max-width: 1120px) {
   .financial-transactions-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .financial-transactions-toolbar__row--primary,
-  .financial-transactions-toolbar__row--secondary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .financial-transactions-toolbar__meta {
-    margin-top: 0;
   }
 }
 
@@ -120,16 +73,13 @@
     width: 100%;
   }
 
-  .financial-transactions-toolbar__row--primary,
-  .financial-transactions-toolbar__row--secondary {
-    grid-template-columns: 1fr;
+  .financial-transactions-toolbar__actions {
+    display: grid;
+    width: 100%;
+    justify-content: stretch;
   }
 
-  .financial-transactions-filter {
-    min-width: 0;
-  }
-
-  .financial-transactions-toolbar__meta {
-    margin-top: 0;
+  .financial-transactions-toolbar__actions button {
+    width: 100%;
   }
 }

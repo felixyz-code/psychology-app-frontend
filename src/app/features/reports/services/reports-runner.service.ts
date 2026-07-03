@@ -3,16 +3,23 @@ import { forkJoin, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
-  FinancialTransactionCategory,
   FinancialTransactionResponse,
-  FinancialTransactionStatus,
   FinancialTransactionSummaryDto,
-  FinancialTransactionType,
-  PaymentMethod,
 } from '../../financial-transactions/models/financial-transaction.models';
 import { FinancialTransactionsService } from '../../financial-transactions/services/financial-transactions.service';
+import {
+  formatFinancialAmount,
+  formatFinancialCount,
+  formatFinancialDate,
+  formatFinancialCurrency,
+  getFinancialTransactionCategoryLabel,
+  getFinancialTransactionStatusLabel,
+  getFinancialTransactionTypeLabel,
+  getPaymentMethodLabel,
+} from '../../financial-transactions/utils/financial-transaction-presenters';
 import { ReportDefinition, ReportKey } from '../models/report-definition.model';
 import { FinancialReportFilters } from '../models/report-filters.model';
+import { ReportContextItem } from '../models/report-result.model';
 import { ReportResult } from '../models/report-result.model';
 import { ReportsCatalogService } from './reports-catalog.service';
 
@@ -43,32 +50,33 @@ export class ReportsRunnerService {
       title: definition.title,
       generatedAt: new Date().toISOString(),
       appliedFilters: filters,
+      contextItems: this.buildFinancialContextItems(filters),
       metrics: [
         {
           icon: 'trending_up',
           label: 'Ingresos del periodo',
-          value: this.formatCurrency(summary.incomeTotal),
+          value: formatFinancialCurrency(summary.incomeTotal),
           supportingText: 'Monto acumulado de ingresos dentro del filtro activo.',
           variant: 'green',
         },
         {
           icon: 'trending_down',
           label: 'Egresos del periodo',
-          value: this.formatCurrency(summary.expenseTotal),
+          value: formatFinancialCurrency(summary.expenseTotal),
           supportingText: 'Monto acumulado de egresos para el mismo rango.',
           variant: 'amber',
         },
         {
           icon: 'account_balance_wallet',
           label: 'Balance neto',
-          value: this.formatCurrency(summary.netTotal),
+          value: formatFinancialCurrency(summary.netTotal),
           supportingText: 'Diferencia entre ingresos y egresos del reporte.',
           variant: 'blue',
         },
         {
           icon: 'receipt_long',
           label: 'Movimientos encontrados',
-          value: this.formatCount(summary.transactionCount),
+          value: this.formatMetricCount(summary.transactionCount),
           supportingText: 'Cantidad total de transacciones incluidas en la vista previa.',
           variant: 'violet',
         },
@@ -87,13 +95,13 @@ export class ReportsRunnerService {
         id: transaction.id,
         values: {
           concept: transaction.concept,
-          type: this.getTypeLabel(transaction.type),
-          category: this.getCategoryLabel(transaction.category),
-          status: this.getStatusLabel(transaction.status),
-          amount: this.formatAmount(transaction.amount, transaction.currency),
+          type: getFinancialTransactionTypeLabel(transaction.type),
+          category: getFinancialTransactionCategoryLabel(transaction.category),
+          status: getFinancialTransactionStatusLabel(transaction.status),
+          amount: formatFinancialAmount(transaction.amount, transaction.currency),
           currency: transaction.currency,
-          paymentMethod: this.getPaymentMethodLabel(transaction.paymentMethod),
-          occurredAt: this.formatDate(transaction.occurredAt),
+          paymentMethod: getPaymentMethodLabel(transaction.paymentMethod),
+          occurredAt: formatFinancialDate(transaction.occurredAt),
         },
       })),
       csvFileName: this.buildCsvFileName(filters),
@@ -121,96 +129,52 @@ export class ReportsRunnerService {
     return `reporte-financiero-${from}-${to}.csv`;
   }
 
-  private formatCurrency(value: number): string {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+  private buildFinancialContextItems(filters: FinancialReportFilters): ReportContextItem[] {
+    return [
+      {
+        label: 'Periodo',
+        value: this.buildDateRangeLabel(filters),
+      },
+      {
+        label: 'Tipo',
+        value: filters.type ? getFinancialTransactionTypeLabel(filters.type) : 'Todos los tipos',
+      },
+      {
+        label: 'Estado',
+        value: filters.status ? getFinancialTransactionStatusLabel(filters.status) : 'Todos los estados',
+      },
+      {
+        label: 'Categoria',
+        value: filters.category ? getFinancialTransactionCategoryLabel(filters.category) : 'Todas las categorias',
+      },
+      {
+        label: 'Metodo de pago',
+        value: filters.paymentMethod ? getPaymentMethodLabel(filters.paymentMethod) : 'Todos los metodos',
+      },
+    ];
   }
 
-  private formatCount(value: number): string {
-    return `${value} ${value === 1 ? 'movimiento' : 'movimientos'}`;
-  }
+  private buildDateRangeLabel(filters: FinancialReportFilters): string {
+    const from = filters.from ? formatFinancialDate(filters.from) : null;
+    const to = filters.to ? formatFinancialDate(filters.to) : null;
 
-  private formatAmount(amount: string, currency: string): string {
-    const parsedAmount = Number(amount);
-
-    if (Number.isNaN(parsedAmount)) {
-      return `${amount} ${currency}`.trim();
+    if (from && to) {
+      return `${from} al ${to}`;
     }
 
-    return new Intl.NumberFormat('es-MX', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(parsedAmount);
-  }
-
-  private formatDate(value: string): string {
-    const parsedDate = new Date(value);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return '-';
+    if (from) {
+      return `Desde ${from}`;
     }
 
-    return parsedDate.toLocaleDateString('es-MX', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  }
-
-  private getTypeLabel(type: FinancialTransactionType): string {
-    const labels: Record<FinancialTransactionType, string> = {
-      INCOME: 'Ingreso',
-      EXPENSE: 'Egreso',
-      ADJUSTMENT: 'Ajuste',
-      REFUND: 'Reembolso',
-    };
-
-    return labels[type];
-  }
-
-  private getStatusLabel(status: FinancialTransactionStatus): string {
-    const labels: Record<FinancialTransactionStatus, string> = {
-      PENDING: 'Pendiente',
-      COMPLETED: 'Completada',
-      CANCELLED: 'Cancelada',
-    };
-
-    return labels[status];
-  }
-
-  private getCategoryLabel(category: FinancialTransactionCategory): string {
-    const labels: Record<FinancialTransactionCategory, string> = {
-      SESSION: 'Sesion',
-      ASSESSMENT: 'Evaluacion',
-      MANUAL: 'Manual',
-      RENT: 'Renta',
-      UTILITIES: 'Servicios',
-      SUPPLIES: 'Insumos',
-      SOFTWARE: 'Software',
-      SALARY: 'Salario',
-      OTHER: 'Otro',
-    };
-
-    return labels[category];
-  }
-
-  private getPaymentMethodLabel(paymentMethod: PaymentMethod | null): string {
-    if (!paymentMethod) {
-      return '-';
+    if (to) {
+      return `Hasta ${to}`;
     }
 
-    const labels: Record<PaymentMethod, string> = {
-      CASH: 'Efectivo',
-      CARD: 'Tarjeta',
-      TRANSFER: 'Transferencia',
-      CHECK: 'Cheque',
-      OTHER: 'Otro',
-    };
+    return 'Historico completo';
+  }
 
-    return labels[paymentMethod];
+  private formatMetricCount(value: number): string {
+    const count = formatFinancialCount(value);
+    return `${count} ${value === 1 ? 'movimiento' : 'movimientos'}`;
   }
 }

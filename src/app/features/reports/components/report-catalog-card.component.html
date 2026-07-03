@@ -10,7 +10,12 @@
   </div>
 
   <div class="report-catalog-card__actions">
-    <a mat-flat-button [routerLink]="definition().route" class="app-page-header-action">
+    <a
+      mat-flat-button
+      [routerLink]="definition().route"
+      class="app-page-header-action"
+      [attr.aria-label]="'Abrir ' + definition().title"
+    >
       <mat-icon>arrow_forward</mat-icon>
       <span>Abrir reporte</span>
     </a>

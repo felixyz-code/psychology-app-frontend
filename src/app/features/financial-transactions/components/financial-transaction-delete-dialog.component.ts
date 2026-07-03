@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 
 import { FinancialTransactionResponse } from '../models/financial-transaction.models';
 import { FinancialTransactionsService } from '../services/financial-transactions.service';
+import { formatFinancialAmount } from '../utils/financial-transaction-presenters';
 
 interface FinancialTransactionDeleteDialogData {
   transaction: FinancialTransactionResponse;
@@ -53,15 +54,6 @@ export class FinancialTransactionDeleteDialogComponent {
   }
 
   formatAmount(amount: string, currency: string): string {
-    const parsedAmount = Number(amount);
-
-    if (Number.isNaN(parsedAmount)) {
-      return `${amount} ${currency}`.trim();
-    }
-
-    return new Intl.NumberFormat('es-MX', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(parsedAmount);
+    return formatFinancialAmount(amount, currency);
   }
 }

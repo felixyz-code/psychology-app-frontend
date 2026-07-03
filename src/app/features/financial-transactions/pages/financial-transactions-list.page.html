@@ -38,9 +38,9 @@
     title="Listado financiero"
     subtitle="Consulta ingresos, egresos y movimientos manuales con un layout de filtros claro, amplio y reutilizable."
   >
-    <form class="financial-transactions-toolbar" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
-      <div class="financial-transactions-toolbar__row financial-transactions-toolbar__row--primary">
-        <mat-form-field appearance="outline" class="financial-transactions-filter">
+    <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+      <app-filter-toolbar>
+        <mat-form-field filterToolbarPrimary appearance="outline" class="financial-transactions-filter">
           <mat-label>Tipo</mat-label>
           <mat-select formControlName="type">
             <mat-option value="">Todos</mat-option>
@@ -50,7 +50,7 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="financial-transactions-filter">
+        <mat-form-field filterToolbarPrimary appearance="outline" class="financial-transactions-filter">
           <mat-label>Estado</mat-label>
           <mat-select formControlName="status">
             <mat-option value="">Todos</mat-option>
@@ -60,7 +60,7 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="financial-transactions-filter">
+        <mat-form-field filterToolbarPrimary appearance="outline" class="financial-transactions-filter">
           <mat-label>Categoria</mat-label>
           <mat-select formControlName="category">
             <mat-option value="">Todas</mat-option>
@@ -70,7 +70,7 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="financial-transactions-filter">
+        <mat-form-field filterToolbarPrimary appearance="outline" class="financial-transactions-filter">
           <mat-label>Metodo de pago</mat-label>
           <mat-select formControlName="paymentMethod">
             <mat-option value="">Todos</mat-option>
@@ -79,39 +79,31 @@
             }
           </mat-select>
         </mat-form-field>
-      </div>
 
-      <div class="financial-transactions-toolbar__row financial-transactions-toolbar__row--secondary">
-        <mat-form-field appearance="outline" class="financial-transactions-filter">
+        <mat-form-field filterToolbarSecondary appearance="outline" class="financial-transactions-filter">
           <mat-label>Fecha desde</mat-label>
           <input matInput type="date" formControlName="from" />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="financial-transactions-filter">
+        <mat-form-field filterToolbarSecondary appearance="outline" class="financial-transactions-filter">
           <mat-label>Fecha hasta</mat-label>
           <input matInput type="date" formControlName="to" />
         </mat-form-field>
 
-        <div class="financial-transactions-toolbar__action-slot">
+        <div filterToolbarActions class="financial-transactions-toolbar__actions">
           <button mat-flat-button type="submit" class="app-toolbar-meta-button" [disabled]="isLoading()">
             <mat-icon>filter_alt</mat-icon>
             <span>Aplicar filtros</span>
           </button>
-        </div>
-
-        <div class="financial-transactions-toolbar__action-slot">
           <button mat-stroked-button type="button" class="app-toolbar-meta-button" [disabled]="isLoading() || !hasActiveFilters()" (click)="clearFilters()">
             <mat-icon>filter_alt_off</mat-icon>
             <span>Limpiar filtros</span>
           </button>
+          <span class="app-table-toolbar-counter" aria-live="polite">
+            {{ transactions().length === 1 ? '1 transaccion' : `${transactions().length} transacciones` }}
+          </span>
         </div>
-      </div>
-
-      <div class="financial-transactions-toolbar__meta">
-        <span class="app-table-toolbar-counter" aria-live="polite">
-          {{ transactions().length === 1 ? '1 transaccion' : `${transactions().length} transacciones` }}
-        </span>
-      </div>
+      </app-filter-toolbar>
     </form>
 
     @if (isLoading()) {

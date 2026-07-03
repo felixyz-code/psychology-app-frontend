@@ -1,15 +1,38 @@
 <app-section-card [title]="title()" [subtitle]="subtitle()">
+  @if (contextItems().length || generatedAt()) {
+    <section class="report-preview-shell__document-meta" aria-label="Contexto del reporte">
+      @for (item of contextItems(); track item.label) {
+        <div class="report-preview-shell__meta-item">
+          <span class="report-preview-shell__meta-label">{{ item.label }}</span>
+          <strong class="report-preview-shell__meta-value">{{ item.value }}</strong>
+        </div>
+      }
+
+      @if (generatedAt()) {
+        <div class="report-preview-shell__meta-item">
+          <span class="report-preview-shell__meta-label">Generado</span>
+          <strong class="report-preview-shell__meta-value">{{ formatGeneratedAt(generatedAt()) }}</strong>
+        </div>
+      }
+    </section>
+  }
+
   @if (isLoading()) {
-    <div class="report-preview-shell__state app-table-loading-state">
+    <div class="report-preview-shell__state app-table-loading-state" aria-live="polite">
       <mat-spinner diameter="40" />
       <p>Generando vista previa...</p>
     </div>
   } @else if (errorMessage()) {
-    <div class="report-preview-shell__state app-table-feedback-state app-table-feedback-state--error">
+    <div class="report-preview-shell__state app-table-feedback-state app-table-feedback-state--error" role="alert">
       <p>{{ errorMessage() }}</p>
     </div>
   } @else if (rows().length) {
-    <div class="report-preview-shell__table-wrapper app-table-wrapper">
+    <div
+      class="report-preview-shell__table-wrapper app-table-wrapper"
+      [attr.aria-label]="title()"
+      [attr.aria-busy]="isLoading()"
+      tabindex="0"
+    >
       <table mat-table [dataSource]="rows()" class="report-preview-shell__table app-data-table">
         @for (columnKey of displayedColumns(); track columnKey) {
           <ng-container [matColumnDef]="columnKey">
@@ -33,10 +56,7 @@
       [message]="emptyMessage()"
     />
   }
-
-  @if (generatedAt()) {
-    <div sectionCardFooter class="report-preview-shell__footer">
-      <span>Generado el {{ formatGeneratedAt(generatedAt()) }}</span>
-    </div>
-  }
+  <div sectionCardFooter class="report-preview-shell__footer">
+    <span>Documento de referencia para exportacion y revision interna.</span>
+  </div>
 </app-section-card>

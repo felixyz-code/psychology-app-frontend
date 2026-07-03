@@ -11,6 +11,8 @@
     <app-report-export-menu
       [formats]="reportResult()?.supportedExports || []"
       [disabled]="isLoading() || !reportResult() || !!errorMessage()"
+      [reportTitle]="definition()?.title || 'Reporte'"
+      [rowCount]="reportResult()?.rows?.length || 0"
       (exportSelected)="export($event)"
     />
   </app-page-header>
@@ -86,7 +88,7 @@
             <mat-icon>filter_alt_off</mat-icon>
             <span>Limpiar filtros</span>
           </button>
-          <span class="app-table-toolbar-counter">{{ resultsLabel() }}</span>
+          <span class="app-table-toolbar-counter" aria-live="polite">{{ resultsLabel() }}</span>
         </div>
       </app-filter-toolbar>
     </form>
@@ -121,6 +123,7 @@
     [displayedColumns]="displayedColumns()"
     [isLoading]="isLoading()"
     [errorMessage]="errorMessage()"
+    [contextItems]="reportResult()?.contextItems || []"
     [emptyTitle]="reportResult()?.emptyTitle || 'No hay movimientos para mostrar'"
     [emptyMessage]="reportResult()?.emptyMessage || 'Ajusta los filtros para generar una vista previa.'"
     [generatedAt]="reportResult()?.generatedAt || ''"

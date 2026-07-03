@@ -4,9 +4,10 @@
   [matMenuTriggerFor]="exportMenu"
   [disabled]="disabled()"
   class="report-export-menu__trigger"
+  [attr.aria-label]="getAriaLabel()"
 >
   <mat-icon>download</mat-icon>
-  <span>Exportar</span>
+  <span>Exportar reporte</span>
 </button>
 
 <mat-menu #exportMenu="matMenu">

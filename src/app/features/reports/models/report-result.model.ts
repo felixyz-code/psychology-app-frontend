@@ -9,6 +9,11 @@ export interface ReportMetric {
   variant: MetricCardVariant;
 }
 
+export interface ReportContextItem {
+  label: string;
+  value: string;
+}
+
 export interface ReportTableColumn {
   key: string;
   label: string;
@@ -25,6 +30,7 @@ export interface ReportResult<TFilters> {
   title: string;
   generatedAt: string;
   appliedFilters: TFilters;
+  contextItems: ReportContextItem[];
   metrics: ReportMetric[];
   columns: ReportTableColumn[];
   rows: ReportTableRow[];
