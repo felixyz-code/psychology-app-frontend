@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 11.8 - Final UX Micro Polish & Accessibility Basics
+Sprint 11.9 - Release Candidate
 ```
 
 ---
@@ -142,6 +142,7 @@ Sprint 11.8 - Final UX Micro Polish & Accessibility Basics
 * Shared metrics, sections and quick actions foundation in production
 * Sprint 11.2 completed - Metric rhythm and lower content spacing aligned with the shared page baseline
 * Sprint 11.3 completed - Quick appointment action iconography aligned with the shared action language
+* Sprint 11.9 completed - Dashboard stabilized as part of the cross-module release candidate closure
 
 ### Financial Transactions
 
@@ -157,6 +158,19 @@ Sprint 11.8 - Final UX Micro Polish & Accessibility Basics
 * Sprint 11.4 completed - Manual toolbar, row actions and table feedback states aligned more closely with the shared data-table language
 * Sprint 11.6B completed - Financial transaction form now shares the same grouped form rhythm and spacing language as the modal CRUD flows while remaining page-based
 * Financial Transactions mantiene formularios basados en pagina; no participaron en Sprint 11.6A al no existir aun un dialog equivalente dentro del flujo actual
+
+### Sprint 11
+
+* Sprint 11.1 completed - Baseline visual consistency established across the application shell and shared surfaces
+* Sprint 11.2 completed - Layout consistency aligned across the main operational modules
+* Sprint 11.3 completed - Toolbars, CTAs and icon language normalized across pages and workflows
+* Sprint 11.4 completed - Tables, list actions and feedback states consolidated around a shared interaction model
+* Sprint 11.5 completed - Clinical Workspace visual polish refined the patient-centered detail experience
+* Sprint 11.6 completed - Dialog framework consolidated with a shared structural baseline for CRUD modals
+* Sprint 11.6B completed - Form layout rhythm unified across dialogs, embedded forms and page-based flows
+* Sprint 11.7 completed - Responsive QA stabilized the main user journeys across supported breakpoints
+* Sprint 11.8 completed - Final UX micro polish and accessibility basics pass completed
+* Sprint 11.9 completed - Frontend declared `RC1` with consistent UI, consolidated design system and stable responsive behavior
 
 ### Sprint 7
 
@@ -177,7 +191,7 @@ Sprint 11.8 - Final UX Micro Polish & Accessibility Basics
 Next planned sprint:
 
 ```text
-To be defined after Sprint 10 manual browser validation and backlog reprioritization
+To be defined after RC1 validation and backlog reprioritization
 ```
 
 ---
@@ -186,20 +200,11 @@ To be defined after Sprint 10 manual browser validation and backlog reprioritiza
 
 Current development efforts include:
 
-* UI polish
-* Reusable components
-* Data table improvements
-* User experience refinement
-* Frontend architecture stabilization
-* Case Files clinical workspace foundation
-* Clinical Workspace documentation consolidation
-* Cross-module visual consistency baseline
-* Cross-module action language consistency
-* Shared dialog framework consolidation
-* Shared form layout consolidation through `app-form` and `app-dialog` patterns
-* Final UX micro polish and basic accessibility consistency pass
-* Final manual validation of the Clinical Workspace checklist in a browser-capable environment
-* Incremental consolidation of shared table/list visual primitives
+* RC1 validation
+* Final backend integration verification
+* Manual browser validation of dense clinical workflows
+* Incremental technical debt reduction after release-candidate closure
+* Shared component consolidation where it meaningfully reduces maintenance cost
 
 ---
 
@@ -268,16 +273,12 @@ These features are intentionally outside the current MVP.
 
 Current technical debt includes:
 
-* Secondary UI consistency refinements after the new shared page baseline
-* Remaining dialog/form layout inconsistencies inside embedded document forms and some workspace sections after the dialog framework baseline
-* Remaining fine-grained cross-device validation for modal form heights, especially in dense CRUD dialogs such as Appointments and Case Files
 * Shared component extraction
 * Design system consolidation
 * Automated frontend testing
 * Minor visual flicker when closing the child `Editar paciente` dialog from Clinical Workspace
 * SCSS budget warnings in `patient-detail-dialog.component.scss`, `dashboard.page.scss` and `appointments-calendar.component.scss`
 * Potential future consolidation of duplicated page titles between `PageHeaderComponent` and some `SectionCardComponent` list shells
-* Remaining dashboard-specific hero personality versus the more neutral baseline used by the other operational modules
 * Potential future timeline/backend event coverage for `APPOINTMENT_CANCELLED`, `APPOINTMENT_NO_SHOW` and `CASE_FILE_UPDATED`
 * Potential evolution of `SessionNote` toward a more structured clinical schema including motivo, objetivos, intervenciones, observaciones, tareas and plan de siguiente sesion
 

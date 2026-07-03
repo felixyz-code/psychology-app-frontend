@@ -160,8 +160,8 @@ export class FinancialTransactionFormComponent {
 
   getSubtitle(): string {
     return this.mode() === 'edit'
-      ? 'Actualiza los campos necesarios respetando el contrato actual del backend.'
-      : 'Registra un movimiento financiero consumiendo el contrato exacto del backend.';
+      ? 'Actualiza la informacion financiera del movimiento seleccionado.'
+      : 'Registra ingresos, egresos y pagos asociados a la operacion del consultorio.';
   }
 
   getCardTitle(): string {

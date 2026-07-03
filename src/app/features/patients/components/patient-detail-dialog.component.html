@@ -5,7 +5,7 @@
         <div class="patient-detail-dialog__avatar" aria-hidden="true">{{ getPatientInitials() }}</div>
 
         <div class="patient-detail-dialog__identity">
-          <span class="patient-detail-dialog__eyebrow">Clinical Workspace</span>
+          <span class="patient-detail-dialog__eyebrow">Espacio clinico</span>
           <h2>{{ getFullName() }}</h2>
           <p>Centro clinico del paciente con contexto inmediato del expediente y accesos de trabajo.</p>
 
@@ -26,7 +26,7 @@
     <div class="patient-detail-dialog__overview-grid">
       <app-section-card
         title="Resumen clinico"
-        subtitle="Lectura ejecutiva del expediente usando exclusivamente el resumen consolidado devuelto por backend."
+        subtitle="Lectura ejecutiva del expediente con la informacion clinica disponible."
       >
         <div class="patient-detail-dialog__metrics-grid">
           @for (metric of clinicalSummaryCards(); track metric.title) {
@@ -89,8 +89,8 @@
     </div>
 
     <app-section-card
-      title="Timeline clinico"
-      subtitle="Cronologia recibida desde backend y enriquecida solo con copy, iconos y navegacion UI."
+      title="Linea de tiempo clinica"
+      subtitle="Cronologia del expediente con acceso a eventos y registros relacionados."
     >
       <app-clinical-timeline
         [events]="timelineItems()"

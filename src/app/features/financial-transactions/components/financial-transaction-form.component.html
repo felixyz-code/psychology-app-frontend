@@ -110,13 +110,15 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Patient ID</mat-label>
-            <input matInput formControlName="patientId" maxlength="64" />
+            <mat-label>Paciente</mat-label>
+            <input matInput formControlName="patientId" maxlength="64" placeholder="ID o referencia del paciente" />
+            <mat-hint>Opcional. Relaciona este movimiento con un paciente.</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Appointment ID</mat-label>
-            <input matInput formControlName="appointmentId" maxlength="64" />
+            <mat-label>Cita relacionada</mat-label>
+            <input matInput formControlName="appointmentId" maxlength="64" placeholder="ID o referencia de la cita" />
+            <mat-hint>Opcional. Relaciona este movimiento con una cita.</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="financial-transaction-form__full app-form-field--full">

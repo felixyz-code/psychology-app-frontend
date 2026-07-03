@@ -8,6 +8,17 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 11
 
+## Sprint 11.9 - Release Candidate
+
+### Changed
+
+* El frontend se declara `RC1` con una UI consistente, un design system consolidado, dialogs y formularios unificados, Clinical Workspace refinado y dashboard estabilizado.
+* Se sincroniza la documentacion del roadmap con el cierre real de Sprint 11 para distinguir el polish ya completado del trabajo de validacion y deuda tecnica posterior al release candidate.
+
+### Verified
+
+* `npm.cmd run build` finalizo correctamente durante la validacion de RC1.
+
 ## Sprint 11.8 - Final UX Micro Polish & Accessibility Basics
 
 ### Changed
