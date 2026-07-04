@@ -5,6 +5,8 @@ import {
   PaymentMethod,
 } from '../../financial-transactions/models/financial-transaction.models';
 import { AppointmentStatus } from '../../appointments/models/appointment.models';
+import { ClinicalRecordReportFilters } from './clinical-record-report.model';
+import { ClinicalSummaryReportFilters } from './clinical-summary-report.model';
 
 export interface ReportDateRangeFilters {
   from?: string;
@@ -23,4 +25,8 @@ export interface AgendaReportFilters extends ReportDateRangeFilters {
   patientId?: string;
 }
 
-export type ReportFilters = FinancialReportFilters | AgendaReportFilters;
+export type ReportFilters =
+  | FinancialReportFilters
+  | AgendaReportFilters
+  | ClinicalSummaryReportFilters
+  | ClinicalRecordReportFilters;

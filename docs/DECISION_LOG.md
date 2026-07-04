@@ -452,6 +452,101 @@ It also reduces duplicated logic and lowers the risk of regressions when date ra
 
 ---
 
+# ADR-019 - Patient-Centered Clinical Reports And PDF-First Output
+
+## Decision
+
+Clinical reporting in `Reports` remains patient-centered.
+
+Current rules:
+
+- the clinical report entry point requires a selected patient
+- the current delivered clinical report is `Clinical Summary`
+- the report reuses clinical workspace data instead of introducing a dedicated backend report endpoint
+- `PDF` is the primary output for clinical report reading and sharing
+- `CSV` is not prioritized for `Clinical Summary`
+
+## Rationale
+
+Clinical summaries are read primarily as narrative and documentary outputs rather than spreadsheet datasets.
+
+Using the patient as the anchor entity keeps the report aligned with the broader clinical workflow already established by the frontend and backend.
+
+Reusing the aggregated workspace contract also avoids duplicating orchestration logic or inventing frontend-owned clinical rules.
+
+## Implications
+
+- Clinical reports should prefer `PatientsService` and `CaseFilesService.getWorkspace(...)` before requesting new contracts.
+- Preview surfaces for clinical reports may use a dedicated `previewMode: clinical` when the output behaves more like a document than a table.
+- Timeline labels, summarized notes and related documents may be normalized in the frontend as presentation concerns only.
+- If a future clinical report needs spreadsheet semantics, that export decision should be evaluated separately instead of assuming `CSV` by default.
+
+---
+
+# ADR-020 - Clinical Record As Structured Clinical Document And Descriptive PDF Filenames
+
+## Decision
+
+`Reports` now supports a second clinical document beyond `Clinical Summary`: `Clinical Record`.
+
+Current rules:
+
+- `Clinical Summary` remains a brief, executive and synthetic document
+- `Clinical Record` is a complete, structured and printable clinical document
+- both reports remain patient-centered and reuse existing clinical services
+- both clinical reports stay `PDF`-first and do not prioritize `CSV`
+- `ReportResult` now exposes `pdfFileName` so each report can provide a descriptive filename for print-based `PDF` export
+
+## Rationale
+
+The product needs two distinct clinical reading surfaces:
+
+- one optimized for quick professional review
+- one optimized for formal recordkeeping and printable clinical context
+
+At the same time, generic filenames such as `Expediente Clinico.pdf` create friction when several reports are generated in the same session.
+
+Adding a descriptive `pdfFileName` at the report-result level keeps filename ownership close to the report orchestration flow without changing the backend contract or the shared print-based export strategy.
+
+## Implications
+
+- `Clinical Record` should remain a separate report and not a mode flag of `Clinical Summary`
+- clinical report filenames should include report type, patient when applicable and date range when available
+- when the browser does not fully honor the filename during `window.print()`, the document title and print window title should still use the same descriptive name
+- descriptive filenames are a presentation concern and must not require new backend metadata or new endpoints
+
+---
+
+# ADR-021 - Reports Stabilization Before Dashboard Analytics
+
+## Decision
+
+Antes de iniciar una nueva fase funcional orientada a `Dashboard Analytics`, el modulo `Reports` se considera estabilizado mediante una pasada especifica de hardening y cierre tecnico.
+
+El alcance de esta estabilizacion incluye:
+
+- correccion de copy y mojibake visible
+- consolidacion de una unica superficie de error en preview
+- feedback explicito cuando el popup de `PDF` es bloqueado
+- consistencia de nomenclatura visible en espanol
+- pequena utilidad compartida para labels legibles de MIME types
+
+## Rationale
+
+`Reports` ya actua como infraestructura reutilizable para multiples documentos y vistas profesionales.
+
+Dejar inconsistencias de copy, errores duplicados o fallas silenciosas en exportacion antes de abrir una nueva fase de producto aumentaria deuda tecnica en una superficie transversal.
+
+La estabilizacion previa reduce riesgo y deja una base mas segura para futuras capacidades analiticas.
+
+## Operational Notes
+
+- La QA navegada completa siguio condicionada por la disponibilidad de una sesion autenticada local reutilizable.
+- Aun con esa limitacion, la QA tecnica por codigo y `npm.cmd run build` si pudo completarse satisfactoriamente durante Sprint 12.6.
+- La falta de sesion local no invalida el cierre tecnico del sprint, pero si queda registrada como restriccion operativa para validacion UI end-to-end futura.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

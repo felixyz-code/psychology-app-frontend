@@ -19,4 +19,18 @@ export const reportsRoutes: Routes = [
       reportKey: 'agenda',
     },
   },
+  {
+    path: 'clinical-summary',
+    loadComponent: () => import('./pages/report-runner.page').then((m) => m.ReportRunnerPage),
+    data: {
+      reportKey: 'clinical-summary',
+    },
+  },
+  {
+    path: 'clinical-record',
+    loadComponent: () => import('./pages/report-runner.page').then((m) => m.ReportRunnerPage),
+    data: {
+      reportKey: 'clinical-record',
+    },
+  },
 ];

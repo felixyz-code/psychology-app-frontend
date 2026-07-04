@@ -1,4 +1,4 @@
-export type ReportKey = 'financial' | 'agenda';
+export type ReportKey = 'financial' | 'agenda' | 'clinical-summary' | 'clinical-record';
 
 export type ReportExportFormat = 'pdf' | 'csv';
 
