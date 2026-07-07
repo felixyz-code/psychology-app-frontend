@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 12.6 - Reports QA Hardening
+Sprint 13.1 - Dashboard Analytics
 ```
 
 Phase 3 progress:
@@ -150,6 +150,7 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 11.2 completed - Metric rhythm and lower content spacing aligned with the shared page baseline
 * Sprint 11.3 completed - Quick appointment action iconography aligned with the shared action language
 * Sprint 11.9 completed - Dashboard stabilized as part of the cross-module release candidate closure
+* Sprint 13.1 completed - Dashboard ahora funciona como un Executive Overview con snapshot analitico local, view model por widgets, resumen financiero mensual, proximas citas, actividad clinica reciente y alertas operativas minimas sin invadir Reports
 
 ### Financial Transactions
 
@@ -215,7 +216,7 @@ Completed - Reports foundation generalized for multiple professional reports
 Next planned sprint:
 
 ```text
-Sprint 13 - Dashboard Analytics
+Sprint 13.2 - Dashboard Analytics Hardening
 ```
 
 ---
@@ -224,8 +225,7 @@ Sprint 13 - Dashboard Analytics
 
 Current development efforts include:
 
-* Transition planning after Reports stabilization
-* Preparacion de Sprint 13 - Dashboard Analytics
+* Dashboard Analytics hardening after Sprint 13.1
 * Final backend integration verification
 * Manual browser validation of dense clinical workflows
 * Incremental technical debt reduction after release-candidate closure

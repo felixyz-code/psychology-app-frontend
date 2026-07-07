@@ -6,6 +6,36 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# Sprint 13
+
+## Sprint 13.1 - Dashboard Analytics
+
+### Added
+
+* Nuevo `DashboardAnalyticsService` dentro del feature `dashboard` para orquestar la carga ejecutiva sin crear nuevos contratos backend.
+* Nuevo `DashboardSnapshot` como capa local de datos crudos para pacientes, citas, expedientes, notas, documentos y resumen financiero mensual.
+* Nuevo `DashboardViewModel` como capa local orientada a UI con bloques de `KPIs`, `Agenda de hoy`, `Proximas citas`, `Resumen financiero`, `Actividad clinica`, `Alertas operativas` y `Acciones rapidas`.
+* Nuevo resumen financiero mensual dentro del dashboard reutilizando `FinancialTransactionsService.findSummary(...)` y el rango mensual local ya estandarizado en frontend.
+* Nueva seccion visible de `Proximas citas` para complementar la agenda del dia sin convertir el dashboard en un modulo analitico profundo.
+* Nueva seccion de `Alertas operativas` limitada a citas pasadas que aun siguen en estado `SCHEDULED`, con copy conservador y sin reglas ambiguas nuevas.
+
+### Changed
+
+* El dashboard deja de concentrar la agregacion pesada dentro de `dashboard.page.ts` y ahora consume un `ViewModel` ya preparado por servicio.
+* La pantalla principal evoluciona desde un home resumido hacia un `Executive Overview` mas claro para responder rapidamente como va el dia, el estado de la agenda, el balance mensual y la actividad clinica reciente.
+* `Agenda de hoy` se mantiene como bloque principal y ahora convive con `Proximas citas`, `Resumen financiero`, `Actividad clinica reciente` y `Acciones rapidas` de peso secundario.
+* La carga del dashboard mantiene degradacion parcial por fuente fallida para no colapsar toda la experiencia cuando un endpoint no responde.
+* Se evita introducir metricas ambiguas como pacientes activos, pacientes sin seguimiento o indicadores basados en reglas no formalizadas.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* El dashboard sigue reutilizando servicios existentes de `Patients`, `Appointments`, `Case Files`, `Session Notes`, `Documents` y `Financial Transactions`.
+* No se utiliza `getWorkspace()` en bucle ni se introduce un patron `N+1` para la carga del dashboard global.
+* La arquitectura interna del dashboard queda preparada para evolucionar a widgets con carga independiente en un sprint futuro sin requerir un rediseño mayor del feature.
+
 # Sprint 12
 
 ## Sprint 12.6 - Reports QA Hardening
