@@ -40,7 +40,7 @@
   } @else if (viewModel(); as vm) {
     <mat-card class="dashboard-hero">
       <div class="dashboard-hero__copy">
-        <span class="dashboard-hero__eyebrow">Executive overview</span>
+        <span class="dashboard-hero__eyebrow">Resumen ejecutivo</span>
         <app-page-header
           heading="Panorama del consultorio"
           subtitle="Resumen ejecutivo para entender la jornada, detectar pendientes y entrar rapido al modulo correcto."
@@ -91,17 +91,19 @@
                 (click)="openAppointmentDetails(appointment)"
                 (keydown)="handleAppointmentCardKeydown($event, appointment)"
               >
-                <div class="dashboard-list-item__time">
+                <div class="dashboard-list-item__time dashboard-list-item__time--today">
                   <span>{{ appointment.timeLabel }}</span>
                 </div>
 
                 <div class="dashboard-list-item__content">
                   <div class="dashboard-list-item__topline">
                     <h3>{{ appointment.patientName }}</h3>
-                    <app-status-badge
-                      [label]="appointment.statusLabel"
-                      [variant]="appointment.statusVariant"
-                    />
+                    <div class="dashboard-list-item__badge">
+                      <app-status-badge
+                        [label]="appointment.statusLabel"
+                        [variant]="appointment.statusVariant"
+                      />
+                    </div>
                   </div>
 
                   <p class="dashboard-list-item__meta">{{ appointment.scheduleLabel }}</p>
@@ -131,28 +133,21 @@
           <div class="dashboard-list">
             @for (appointment of vm.upcomingAppointments.items; track appointment.id) {
               <article
-                class="dashboard-list-item dashboard-list-item--interactive"
+                class="dashboard-upcoming-item dashboard-list-item--interactive"
                 tabindex="0"
                 role="button"
                 [attr.aria-label]="'Abrir detalle de la proxima cita de ' + appointment.patientName"
                 (click)="openAppointmentDetails(appointment)"
                 (keydown)="handleAppointmentCardKeydown($event, appointment)"
               >
-                <div class="dashboard-list-item__time">
+                <div class="dashboard-upcoming-item__time">
                   <span>{{ appointment.timeLabel }}</span>
                 </div>
 
-                <div class="dashboard-list-item__content">
-                  <div class="dashboard-list-item__topline">
-                    <h3>{{ appointment.patientName }}</h3>
-                    <app-status-badge
-                      [label]="appointment.statusLabel"
-                      [variant]="appointment.statusVariant"
-                    />
-                  </div>
-
-                  <p class="dashboard-list-item__meta">{{ appointment.scheduleLabel }}</p>
-                  <p class="dashboard-list-item__note">{{ appointment.notes }}</p>
+                <div class="dashboard-upcoming-item__content">
+                  <h3>{{ appointment.patientName }}</h3>
+                  <p class="dashboard-upcoming-item__schedule">{{ appointment.scheduleLabel }}</p>
+                  <p class="dashboard-upcoming-item__note">{{ appointment.notes }}</p>
                 </div>
               </article>
             }
@@ -204,54 +199,26 @@
           <span>{{ vm.financeSummary.periodLabel }}</span>
         </div>
 
-        <div class="dashboard-finance-grid">
+        <div class="dashboard-finance-list">
           @for (metric of vm.financeSummary.metrics; track metric.id) {
-            <app-metric-card
-              [icon]="metric.icon"
-              [title]="metric.label"
-              [value]="metric.value"
-              [supportingText]="metric.supportingText"
-              [variant]="metric.variant"
-              [compact]="true"
-            />
+            <article class="dashboard-finance-row" [attr.data-metric]="metric.id">
+              <div class="dashboard-finance-row__label">
+                <div class="dashboard-finance-row__labelline">
+                  <mat-icon class="dashboard-finance-row__icon">{{ metric.icon }}</mat-icon>
+                  <span class="dashboard-finance-row__name">{{ metric.label }}</span>
+                </div>
+
+                <span class="dashboard-finance-row__supporting">{{ metric.supportingText }}</span>
+              </div>
+
+              <strong class="dashboard-finance-row__value">{{ metric.value }}</strong>
+            </article>
           }
         </div>
 
         <div sectionCardFooter class="dashboard-footer-end">
           <button mat-stroked-button type="button" (click)="navigateToFinance()">Ir a finanzas</button>
         </div>
-      </app-section-card>
-
-      <app-section-card
-        class="dashboard-widget dashboard-widget--activity"
-        [title]="vm.clinicalActivity.title"
-        [subtitle]="vm.clinicalActivity.subtitle"
-      >
-        @if (vm.clinicalActivity.items.length) {
-          <div class="dashboard-activity">
-            @for (activity of vm.clinicalActivity.items; track activity.id) {
-              <article class="dashboard-activity-item">
-                <div class="dashboard-activity-item__icon">
-                  <mat-icon>{{ activity.icon }}</mat-icon>
-                </div>
-
-                <div class="dashboard-activity-item__content">
-                  <div class="dashboard-activity-item__topline">
-                    <h3>{{ activity.title }}</h3>
-                    <span>{{ activity.dateLabel }}</span>
-                  </div>
-                  <p>{{ activity.patientName }}</p>
-                  <p>{{ activity.description }}</p>
-                </div>
-              </article>
-            }
-          </div>
-        } @else {
-          <div class="dashboard-empty">
-            <h3>{{ vm.clinicalActivity.emptyTitle }}</h3>
-            <p>{{ vm.clinicalActivity.emptyMessage }}</p>
-          </div>
-        }
       </app-section-card>
 
       <app-section-card
@@ -269,6 +236,44 @@
             />
           }
         </div>
+      </app-section-card>
+
+      <app-section-card
+        class="dashboard-widget dashboard-widget--activity"
+        [title]="vm.clinicalActivity.title"
+        [subtitle]="vm.clinicalActivity.subtitle"
+      >
+        @if (vm.clinicalActivity.items.length) {
+          <div class="dashboard-activity">
+            @for (activity of vm.clinicalActivity.items; track activity.id) {
+              <article
+                class="dashboard-activity-item"
+                [attr.aria-label]="getActivityAriaLabel(activity)"
+              >
+                <div class="dashboard-activity-item__marker">
+                  <mat-icon>{{ activity.icon }}</mat-icon>
+                </div>
+
+                <div class="dashboard-activity-item__body">
+                  <h3>{{ activity.title }}</h3>
+
+                  <div class="dashboard-activity-item__meta">
+                    <p class="dashboard-activity-item__patient">{{ activity.patientName }}</p>
+                    <span class="dashboard-activity-item__type">{{ activity.typeLabel }}</span>
+                  </div>
+
+                  <p class="dashboard-activity-item__description">{{ activity.description }}</p>
+                  <span class="dashboard-activity-item__date">{{ activity.dateLabel }}</span>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="dashboard-empty">
+            <h3>{{ vm.clinicalActivity.emptyTitle }}</h3>
+            <p>{{ vm.clinicalActivity.emptyMessage }}</p>
+          </div>
+        }
       </app-section-card>
     </div>
   }

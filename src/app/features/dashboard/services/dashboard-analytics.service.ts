@@ -132,7 +132,7 @@ export class DashboardAnalyticsService {
         icon: 'groups',
         label: 'Pacientes registrados',
         value: this.formatCount(totalPatients, 'paciente', 'pacientes'),
-        supportingText: 'Base clinica disponible para la operacion diaria.',
+        supportingText: 'Base clínica disponible para la operación diaria.',
         variant: 'blue',
       },
       {
@@ -148,7 +148,7 @@ export class DashboardAnalyticsService {
       {
         id: 'upcoming-appointments',
         icon: 'event_upcoming',
-        label: 'Proximas citas',
+        label: 'Próximas citas',
         value: this.formatCount(upcomingAppointments.length, 'cita', 'citas'),
         supportingText: nextUpcomingAppointment
           ? `${nextUpcomingAppointment.patientName} - ${nextUpcomingAppointment.scheduleLabel}`
@@ -183,7 +183,7 @@ export class DashboardAnalyticsService {
       items,
       totalCount: todayAppointments.length,
       emptyTitle: 'Sin citas para hoy',
-      emptyMessage: 'La agenda del dia esta libre por ahora.',
+      emptyMessage: 'La agenda del día está libre por ahora.',
     };
   }
 
@@ -193,11 +193,11 @@ export class DashboardAnalyticsService {
     const items = upcomingAppointments.slice(0, DashboardAnalyticsService.UPCOMING_LIMIT);
 
     return {
-      title: 'Proximas citas',
+      title: 'Próximas citas',
       subtitle: 'Siguientes atenciones programadas para dar continuidad a la agenda.',
       items,
       totalCount: upcomingAppointments.length,
-      emptyTitle: 'Sin citas proximas',
+      emptyTitle: 'Sin citas próximas',
       emptyMessage: 'No hay atenciones futuras pendientes en la agenda.',
     };
   }
@@ -210,7 +210,7 @@ export class DashboardAnalyticsService {
         icon: 'trending_up',
         label: 'Ingresos del mes',
         value: summary ? formatFinancialCurrency(summary.incomeTotal) : '--',
-        supportingText: 'Monto acumulado desde el primer dia del mes hasta hoy.',
+        supportingText: 'Monto acumulado desde el primer día del mes hasta hoy.',
         variant: 'green',
       },
       {
@@ -232,9 +232,9 @@ export class DashboardAnalyticsService {
       {
         id: 'movements',
         icon: 'receipt_long',
-        label: 'Movimientos del mes',
-        value: summary ? `${formatFinancialCount(summary.transactionCount)} movimientos` : '--',
-        supportingText: 'Cantidad de transacciones encontradas para el rango mensual activo.',
+        label: 'Movimientos',
+        value: summary ? `${formatFinancialCount(summary.transactionCount)} transacciones` : '--',
+        supportingText: 'Registradas en el mes en curso.',
         variant: 'violet',
       },
     ];
@@ -257,8 +257,9 @@ export class DashboardAnalyticsService {
       id: `note-${note.id}`,
       type: 'session-note',
       icon: 'notes',
-      title: note.title?.trim() || 'Nota de sesion',
-      description: 'Nota clinica registrada en el expediente.',
+      typeLabel: 'Nota clínica',
+      title: note.title?.trim() || 'Nota de sesión',
+      description: 'Nota clínica registrada en el expediente.',
       patientName: this.resolvePatientNameByCaseFileId(caseFilePatientIds, patientNames, note.caseFileId),
       timestamp: note.createdAt,
       dateLabel: this.formatDateTime(note.createdAt),
@@ -268,6 +269,7 @@ export class DashboardAnalyticsService {
       id: `document-${document.id}`,
       type: 'document',
       icon: 'description',
+      typeLabel: 'Documento',
       title: document.fileName,
       description: 'Documento agregado o actualizado en el expediente.',
       patientName: this.resolveDocumentPatientName(document, caseFilePatientIds, patientNames),
@@ -279,10 +281,11 @@ export class DashboardAnalyticsService {
       id: `case-file-${caseFile.id}`,
       type: 'case-file',
       icon: 'folder_open',
+      typeLabel: 'Expediente',
       title: this.hasFoundationInformation(caseFile) ? 'Expediente con base completa' : 'Expediente actualizado',
       description: this.hasFoundationInformation(caseFile)
-        ? 'Diagnostico y plan terapeutico visibles en el expediente.'
-        : 'El expediente aun requiere completar informacion base.',
+        ? 'Diagnóstico y plan terapéutico visibles en el expediente.'
+        : 'El expediente aún requiere completar información base.',
       patientName: this.resolvePatientNameByCaseFileId(caseFilePatientIds, patientNames, caseFile.id),
       timestamp: caseFile.updatedAt,
       dateLabel: this.formatDateTime(caseFile.updatedAt),
@@ -293,11 +296,11 @@ export class DashboardAnalyticsService {
       .slice(0, DashboardAnalyticsService.ACTIVITY_LIMIT);
 
     return {
-      title: 'Actividad clinica reciente',
-      subtitle: 'Ultimos movimientos clinicos para recuperar contexto rapido.',
+      title: 'Actividad clínica reciente',
+      subtitle: 'Últimos movimientos clínicos para recuperar contexto rápido.',
       items,
-      emptyTitle: 'Sin actividad clinica reciente',
-      emptyMessage: 'Cuando existan notas, documentos o expedientes actualizados apareceran aqui.',
+      emptyTitle: 'Sin actividad clínica reciente',
+      emptyMessage: 'Cuando existan notas, documentos o expedientes actualizados aparecerán aquí.',
     };
   }
 
@@ -323,7 +326,7 @@ export class DashboardAnalyticsService {
 
     return {
       title: 'Alertas operativas',
-      subtitle: 'Senales concretas que pueden requerir una revision rapida.',
+      subtitle: 'Señales concretas que pueden requerir una revisión rápida.',
       items,
       emptyTitle: 'Sin alertas operativas inmediatas',
       emptyMessage: 'No se detectaron citas pasadas que sigan marcadas como programadas.',
@@ -359,8 +362,8 @@ export class DashboardAnalyticsService {
     ];
 
     return {
-      title: 'Acciones rapidas',
-      subtitle: 'Accesos frecuentes para iniciar tareas sin salir del overview ejecutivo.',
+      title: 'Acciones rápidas',
+      subtitle: 'Accesos frecuentes para iniciar tareas sin salir del resumen ejecutivo.',
       items,
     };
   }
@@ -472,11 +475,11 @@ export class DashboardAnalyticsService {
     const time = this.formatTime(date);
 
     if (dayDifference === 0) {
-      return `Hoy - ${time}`;
+      return `Hoy · ${time}`;
     }
 
     if (dayDifference === 1) {
-      return `Manana - ${time}`;
+      return `Mañana · ${time}`;
     }
 
     if (dayDifference > 1 && isAfterTodayLocal(date, referenceDate) && dayDifference <= 7) {

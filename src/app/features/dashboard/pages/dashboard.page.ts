@@ -12,6 +12,7 @@ import { SectionCardComponent } from '../../../shared/components/section-card/se
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import {
   DashboardAppointmentItem,
+  DashboardClinicalActivityItem,
   DashboardQuickActionId,
   DashboardViewModel,
 } from '../models/dashboard-analytics.models';
@@ -165,6 +166,10 @@ export class DashboardPage {
 
     event.preventDefault();
     this.openAppointmentDetails(item);
+  }
+
+  getActivityAriaLabel(activity: DashboardClinicalActivityItem): string {
+    return `${activity.typeLabel}: ${activity.title}. ${activity.patientName}. ${activity.description}`;
   }
 
   private openCreateAppointmentDialogWithPatients(): void {

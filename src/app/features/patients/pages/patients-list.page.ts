@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
+import { MetricCardComponent, MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
@@ -33,6 +34,7 @@ import { PatientsService } from '../services/patients.service';
     MatTooltipModule,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
+    MetricCardComponent,
     PageHeaderComponent,
     SectionCardComponent,
   ],
@@ -40,11 +42,19 @@ import { PatientsService } from '../services/patients.service';
   styleUrl: './patients-list.page.scss',
 })
 export class PatientsListPage {
+  private static readonly SUMMARY_DATE_FORMATTER = new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  });
+
   private readonly dialog = inject(MatDialog);
   private readonly patientsService = inject(PatientsService);
 
   readonly displayedColumns = ['name', 'phoneNumber', 'email', 'birthDate', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
+  readonly summarySkeletonItems = Array.from({ length: 4 });
+  readonly tableSkeletonRows = Array.from({ length: 6 });
   readonly patients = signal<Patient[]>([]);
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
@@ -97,12 +107,77 @@ export class PatientsListPage {
       result.hasActiveFilters
     );
   });
+  readonly summaryMetrics = computed(() => {
+    const patients = this.patients();
+    const currentMonth = new Date();
+    const currentMonthIndex = currentMonth.getMonth();
+    const currentYear = currentMonth.getFullYear();
+    const recentPatients = patients.filter((patient) => {
+      const createdAt = this.parseIsoDate(patient.createdAt);
+
+      return createdAt
+        ? createdAt.getMonth() === currentMonthIndex && createdAt.getFullYear() === currentYear
+        : false;
+    }).length;
+    const patientsWithContact = patients.filter((patient) => this.hasContactInformation(patient)).length;
+    const latestPatient = patients.reduce<Patient | null>((latest, patient) => {
+      const patientDate = this.parseIsoDate(patient.createdAt);
+      const latestDate = latest ? this.parseIsoDate(latest.createdAt) : null;
+
+      if (!patientDate) {
+        return latest;
+      }
+
+      if (!latestDate || patientDate > latestDate) {
+        return patient;
+      }
+
+      return latest;
+    }, null);
+
+    return [
+      {
+        id: 'registered',
+        icon: 'groups',
+        label: 'Pacientes registrados',
+        value: `${patients.length}`,
+        supportingText: 'Base total visible en el listado actual.',
+        variant: 'blue' as MetricCardVariant,
+      },
+      {
+        id: 'recent',
+        icon: 'person_add',
+        label: 'Nuevos del mes',
+        value: `${recentPatients}`,
+        supportingText: 'Altas registradas durante el mes en curso.',
+        variant: 'green' as MetricCardVariant,
+      },
+      {
+        id: 'contact',
+        icon: 'contact_phone',
+        label: 'Con contacto registrado',
+        value: `${patientsWithContact}`,
+        supportingText: 'Pacientes con telefono o correo disponible.',
+        variant: 'amber' as MetricCardVariant,
+      },
+      {
+        id: 'latest',
+        icon: 'history',
+        label: 'Ultimo registro',
+        value: latestPatient ? this.getFullName(latestPatient) : 'Sin registros',
+        supportingText: latestPatient
+          ? `Alta del ${this.formatCreatedAt(latestPatient.createdAt)}`
+          : 'Aun no hay pacientes creados.',
+        variant: 'violet' as MetricCardVariant,
+      },
+    ];
+  });
 
   constructor() {
     this.loadPatients();
   }
 
-  private loadPatients(): void {
+  loadPatients(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -139,6 +214,16 @@ export class PatientsListPage {
     }
 
     return `${day}/${month}/${year}`;
+  }
+
+  formatCreatedAt(value: string): string {
+    const date = this.parseIsoDate(value);
+
+    if (!date) {
+      return '-';
+    }
+
+    return PatientsListPage.SUMMARY_DATE_FORMATTER.format(date);
   }
 
   updateSearchTerm(searchTerm: string): void {
@@ -283,5 +368,19 @@ export class PatientsListPage {
 
   private formatPatientCount(count: number): string {
     return count === 1 ? '1 paciente' : `${count} pacientes`;
+  }
+
+  private hasContactInformation(patient: Patient): boolean {
+    return Boolean(patient.phoneNumber?.trim() || patient.email?.trim());
+  }
+
+  private parseIsoDate(value?: string | null): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 }

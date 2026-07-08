@@ -70,6 +70,7 @@ export interface DashboardClinicalActivityItem {
   id: string;
   type: 'session-note' | 'document' | 'case-file';
   icon: string;
+  typeLabel: string;
   title: string;
   description: string;
   patientName: string;
