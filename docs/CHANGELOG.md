@@ -8,6 +8,50 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 13
 
+## Sprint 13.5 - Patients Dialog Polish
+
+### Changed
+
+* Los dialogs del modulo `Patients` reciben una pasada final de polish visual y estructural para alinearse mejor con el nivel ya alcanzado por `Dashboard` y `Patients List` sin alterar flujos, contratos ni navegacion.
+* `Patient Form Dialog` ahora reutiliza mejor el baseline compartido de dialogs y formularios mediante secciones visuales, agrupacion por intencion, placeholders/hints para campos opcionales, mejor jerarquia interna y un body scrollable con footer persistente.
+* `Patient Delete Dialog` ahora presenta una confirmacion destructiva mas profesional con header consistente, resumen visual del paciente, nombre destacado y CTA destructivo explicito.
+* `Patient Detail Dialog` recibe solo micro-polish de UI/UX, con pequenos ajustes de copy y consistencia visual para acompanar el cierre del modulo sin redisenar el `Clinical Workspace`.
+* Con este sprint, el modulo `Patients` queda cerrado a nivel UI/UX dentro del alcance actual del MVP.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se modificaron servicios, payloads, DTOs, validaciones, permisos ni navegacion.
+* El ajuste quedo acotado a `patient-form-dialog.component.html/.scss`, `patient-delete-dialog.component.html/.scss` y micro-ajustes en `patient-detail-dialog.component.html/.scss`.
+* `styles.scss` no requirio cambios para completar el polish.
+* `npm.cmd run build` finalizo correctamente.
+
+## Sprint 13.4 - Patients List Polish
+
+### Changed
+
+* El listado global de `Patients` recibe una pasada final de polish visual para alinearse mejor con el nivel profesional alcanzado por `Dashboard` sin rediseñar el modulo ni alterar su flujo CRUD.
+* La cabecera de `Patients` ahora usa un hero mas compacto y ejecutivo, con jerarquia mas sobria, menos altura vertical y mejor integracion con el ritmo general de la pagina.
+* La pantalla principal ahora expone un `summary strip` compacto construido unicamente con datos ya cargados del listado, incluyendo volumen total, altas del mes, pacientes con contacto registrado y ultimo registro visible.
+* La toolbar del listado reduce el protagonismo visual del buscador en escritorio y mejora su composicion general para dejar una base mas limpia y consistente para futuras acciones o filtros.
+* La tabla mantiene exactamente la misma informacion y comportamiento, pero mejora la lectura visual con mejor dominancia del nombre del paciente, metadata secundaria mas corta y una cabecera ligeramente mas presente.
+* Las acciones por fila conservan la misma iconografia y orden, pero ahora se sienten mas consistentes gracias a un mejor espaciado, area clickeable y feedback hover.
+* Los estados de carga, error y vacio del listado se refinan para verse mas profesionales sin introducir nuevas rutas, componentes compartidos ni cambios de comportamiento.
+* El breadcrumb visible `Dashboard / Pacientes` se retira de esta pagina al no aportar contexto suficiente frente al sidebar, el titulo y el CTA principal ya presentes en la vista.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se agregaron llamadas HTTP nuevas para metricas del resumen; toda la presentacion reutiliza exclusivamente el dataset ya cargado por `PatientsService.getPatients()`.
+* No se modificaron dialogs de paciente, `Patient Detail`, `Patient Form` ni `Patient Delete`.
+* No se altero la logica de busqueda, ordenamiento, paginacion, acciones por fila ni navegacion del modulo.
+* El polish quedo acotado a `patients-list.page.ts`, `patients-list.page.html` y `patients-list.page.scss`.
+* `npm.cmd run build` finalizo correctamente.
+
 ## Sprint 13.1 - Dashboard Analytics
 
 ### Added

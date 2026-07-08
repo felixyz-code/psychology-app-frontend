@@ -5,55 +5,76 @@
   </div>
 
   <form class="patient-dialog__form app-dialog__form app-form" [formGroup]="patientForm" (ngSubmit)="submit()">
-    <div class="patient-dialog__grid app-dialog__grid app-form-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Nombre</mat-label>
-        <input matInput formControlName="firstName" />
+    <div class="patient-dialog__body">
+      <section class="patient-dialog__section app-form-section">
+        <div class="app-form-section__header">
+          <h3>Información básica</h3>
+          <p>Completa los datos principales del paciente para identificarlo dentro del módulo.</p>
+        </div>
 
-        @if (hasRequiredError('firstName')) {
-          <mat-error>El nombre es obligatorio.</mat-error>
-        }
-      </mat-form-field>
+        <div class="patient-dialog__grid app-dialog__grid app-form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="firstName" placeholder="Ej. Ana" />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Apellido</mat-label>
-        <input matInput formControlName="lastName" />
+            @if (hasRequiredError('firstName')) {
+              <mat-error>El nombre es obligatorio.</mat-error>
+            }
+          </mat-form-field>
 
-        @if (hasRequiredError('lastName')) {
-          <mat-error>El apellido es obligatorio.</mat-error>
-        }
-      </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido</mat-label>
+            <input matInput formControlName="lastName" placeholder="Ej. Martínez" />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Teléfono</mat-label>
-        <input matInput formControlName="phoneNumber" />
-      </mat-form-field>
+            @if (hasRequiredError('lastName')) {
+              <mat-error>El apellido es obligatorio.</mat-error>
+            }
+          </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput type="email" formControlName="email" />
+          <mat-form-field appearance="outline" class="app-form-field--compact">
+            <mat-label>Fecha de nacimiento</mat-label>
+            <input matInput type="date" formControlName="birthDate" />
+            <mat-hint>Opcional</mat-hint>
+          </mat-form-field>
+        </div>
+      </section>
 
-        @if (hasEmailError()) {
-          <mat-error>Ingresa un correo válido.</mat-error>
-        }
-      </mat-form-field>
+      <section class="patient-dialog__section app-form-section">
+        <div class="app-form-section__header">
+          <h3>Contacto</h3>
+          <p>Estos datos ayudan a ubicar al paciente cuando estén disponibles.</p>
+        </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha de nacimiento</mat-label>
-        <input matInput type="date" formControlName="birthDate" />
-      </mat-form-field>
+        <div class="patient-dialog__grid app-dialog__grid app-form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
+            <input matInput formControlName="phoneNumber" placeholder="Ej. 662 123 4567" />
+            <mat-hint>Opcional</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" placeholder="nombre@correo.com" />
+            <mat-hint>Opcional</mat-hint>
+
+            @if (hasEmailError()) {
+              <mat-error>Ingresa un correo válido.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </section>
+
+      @if (errorMessage()) {
+        <p class="patient-dialog__error app-dialog__error app-form-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      @if (isSaving()) {
+        <div class="patient-dialog__saving app-dialog__saving app-form-saving" aria-live="polite">
+          <mat-spinner diameter="20" />
+          <span>Guardando...</span>
+        </div>
+      }
     </div>
-
-    @if (errorMessage()) {
-      <p class="patient-dialog__error app-dialog__error app-form-error" role="alert">{{ errorMessage() }}</p>
-    }
-
-    @if (isSaving()) {
-      <div class="patient-dialog__saving app-dialog__saving app-form-saving" aria-live="polite">
-        <mat-spinner diameter="20" />
-        <span>Guardando...</span>
-      </div>
-    }
 
     <div class="patient-dialog__actions app-dialog__actions">
       <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>

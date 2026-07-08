@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 13.1 - Dashboard Analytics
+Sprint 13.5 - Patients Dialog Polish
 ```
 
 Phase 3 progress:
@@ -75,6 +75,8 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 11.2 completed - Global page baseline aligned with the shared header and spacing rhythm used across the main modules
 * Sprint 11.3 completed - Primary CTA moved to the shared page header and table actions remain aligned with the common action language
 * Sprint 11.4 completed - Row actions, tooltips, loading states and table density aligned more closely with the shared list system
+* Sprint 13.4 completed - Global patients list now feels visually closer to Dashboard with a more executive hero, compact summary strip, refined toolbar, more polished states and a stronger final table presentation without changing CRUD behavior
+* Sprint 13.5 completed - Patient dialogs now share a more mature visual baseline, and the Patients module is considered closed at the UI/UX level for the current MVP scope
 
 ### Case Files
 
@@ -230,6 +232,7 @@ Current development efforts include:
 * Manual browser validation of dense clinical workflows
 * Incremental technical debt reduction after release-candidate closure
 * Shared component consolidation where it meaningfully reduces maintenance cost
+* Patients remains closed at the UI/UX level after Sprint 13.5, so future work should only reopen it for defects or clearly scoped product changes
 
 ---
 
