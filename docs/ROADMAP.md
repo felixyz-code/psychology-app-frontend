@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 14.2 - Global Styles & Tokens Cleanup
+Sprint 14.3 - Dialog Baseline Consolidation
 ```
 
 Phase 3 progress:
@@ -166,8 +166,19 @@ Completed - Reports foundation generalized for multiple professional reports
 
 ### Sprint 14
 
-* Sprint 14.2 completed - Global Styles & Tokens Cleanup
-* Sprint 14.2 status - ✅ Global Styles & Tokens Cleanup
+### ✅ Sprint 14.1
+- Design System Audit
+
+### ✅ Sprint 14.2
+- Global Styles & Tokens Cleanup
+
+### ✅ Sprint 14.3
+- Delete Dialog Baseline Consolidation
+
+### Pendiente
+
+- Sprint 14.4 — Detail Dialog Consolidation
+- Sprint 14.5 — Lists & Design System Harmonization
 
 ### Financial Transactions
 
@@ -233,7 +244,7 @@ Completed - Reports foundation generalized for multiple professional reports
 Next planned sprint:
 
 ```text
-Sprint 14.3 - Dialog Baseline Consolidation
+Sprint 14.4 - Detail Dialog Consolidation
 ```
 
 ---

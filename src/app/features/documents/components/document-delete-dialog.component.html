@@ -1,12 +1,18 @@
-<div class="document-delete-dialog">
-  <h2>Eliminar documento</h2>
-
-  <p>Esta accion eliminara el registro del documento seleccionado. El archivo fisico no se elimina. Confirme solo si desea continuar.</p>
-
-  <div class="document-delete-dialog__summary">
-    <p class="document-delete-dialog__title">"{{ document.fileName }}"</p>
-    <p>{{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+<div class="document-delete-dialog app-dialog">
+  <div class="document-delete-dialog__header app-dialog__header">
+    <h2>Eliminar documento</h2>
+    <p>Confirma si deseas eliminar este documento del módulo de Documentos.</p>
   </div>
+
+  <div class="document-delete-dialog__summary app-dialog__summary">
+    <p class="document-delete-dialog__summary-title app-dialog__summary-title">Documento seleccionado</p>
+    <p class="document-delete-dialog__title">"{{ document.fileName }}"</p>
+    <p class="document-delete-dialog__meta">Fecha de carga: {{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+  </div>
+
+  <p class="document-delete-dialog__warning">
+    Esta acción eliminará el registro del documento seleccionado. El archivo físico no se elimina y esta acción no puede deshacerse.
+  </p>
 
   @if (errorMessage()) {
     <p class="document-delete-dialog__error" role="alert">{{ errorMessage() }}</p>
@@ -15,12 +21,18 @@
   <div class="document-delete-dialog__actions">
     <button mat-button type="button" [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
 
-    <button mat-flat-button type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+    <button
+      mat-flat-button
+      type="button"
+      class="document-delete-dialog__confirm app-dialog__danger"
+      [disabled]="isDeleting()"
+      (click)="confirmDelete()"
+    >
       @if (isDeleting()) {
         <mat-spinner diameter="20" />
         <span>Eliminando...</span>
       } @else {
-        <span>Eliminar</span>
+        <span>Eliminar documento</span>
       }
     </button>
   </div>

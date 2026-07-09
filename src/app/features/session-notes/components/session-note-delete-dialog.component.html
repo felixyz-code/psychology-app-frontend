@@ -1,14 +1,18 @@
-<div class="session-note-delete-dialog">
-  <h2>Eliminar nota de sesión</h2>
-
-  <p>¿Está seguro que desea eliminar esta nota de sesión?</p>
-
-  <div class="session-note-delete-dialog__summary">
-    <p class="session-note-delete-dialog__title">
-      "{{ sessionNote.title || 'Sesión sin título' }}"
-    </p>
-    <p>{{ sessionNote.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+<div class="session-note-delete-dialog app-dialog">
+  <div class="session-note-delete-dialog__header app-dialog__header">
+    <h2>Eliminar nota de sesión</h2>
+    <p>Confirma si deseas eliminar esta nota de sesión del expediente clínico actual.</p>
   </div>
+
+  <div class="session-note-delete-dialog__summary app-dialog__summary">
+    <p class="session-note-delete-dialog__summary-title app-dialog__summary-title">Nota seleccionada</p>
+    <p class="session-note-delete-dialog__title">"{{ sessionNote.title || 'Sesión sin título' }}"</p>
+    <p class="session-note-delete-dialog__meta">Fecha de sesión: {{ sessionNote.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+  </div>
+
+  <p class="session-note-delete-dialog__warning">
+    Esta acción eliminará el registro clínico actual y no podrá deshacerse.
+  </p>
 
   @if (errorMessage()) {
     <p class="session-note-delete-dialog__error" role="alert">{{ errorMessage() }}</p>
@@ -17,12 +21,18 @@
   <div class="session-note-delete-dialog__actions">
     <button mat-button type="button" [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
 
-    <button mat-flat-button type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+    <button
+      mat-flat-button
+      type="button"
+      class="session-note-delete-dialog__confirm app-dialog__danger"
+      [disabled]="isDeleting()"
+      (click)="confirmDelete()"
+    >
       @if (isDeleting()) {
         <mat-spinner diameter="20" />
         <span>Eliminando...</span>
       } @else {
-        <span>Eliminar</span>
+        <span>Eliminar nota</span>
       }
     </button>
   </div>

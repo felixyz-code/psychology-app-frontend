@@ -1,14 +1,58 @@
 .document-delete-dialog {
-  gap: 1rem;
+  gap: 1.25rem;
+}
+
+.document-delete-dialog__header {
+  gap: 0.45rem;
+}
+
+.document-delete-dialog__summary {
+  gap: 0.45rem;
+}
+
+.document-delete-dialog__summary-title {
+  color: var(--app-color-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .document-delete-dialog__title {
   color: var(--app-color-heading);
   font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.document-delete-dialog__meta {
+  color: var(--app-color-text-secondary);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.document-delete-dialog__warning {
+  color: var(--app-color-text-secondary);
+  line-height: 1.55;
+}
+
+.document-delete-dialog__actions {
+  align-items: center;
 }
 
 .document-delete-dialog__actions button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.document-delete-dialog__confirm {
+  min-width: 11rem;
+}
+
+@media (max-width: 720px) {
+  .document-delete-dialog__confirm {
+    min-width: 0;
+  }
 }
