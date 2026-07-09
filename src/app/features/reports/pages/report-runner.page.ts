@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -78,6 +79,7 @@ import { buildCurrentMonthDateRange } from '../utils/report-date-range';
 })
 export class ReportRunnerPage {
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly patientsService = inject(PatientsService);
   private readonly reportsCatalogService = inject(ReportsCatalogService);
@@ -292,6 +294,7 @@ export class ReportRunnerPage {
     if (this.isFinancialReport()) {
       this.reportLoadSubscription = this.reportsRunnerService
         .runFinancialReport(filters as FinancialReportFilters)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (result) => {
             this.reportResult.set(result);
@@ -308,17 +311,20 @@ export class ReportRunnerPage {
     }
 
     if (this.isAgendaReport()) {
-      this.reportLoadSubscription = this.reportsRunnerService.runAgendaReport(filters as AgendaReportFilters).subscribe({
-        next: (result) => {
-          this.reportResult.set(result);
-          this.isLoading.set(false);
-        },
-        error: () => {
-          this.reportResult.set(null);
-          this.errorMessage.set('No fue posible generar el reporte de agenda.');
-          this.isLoading.set(false);
-        },
-      });
+      this.reportLoadSubscription = this.reportsRunnerService
+        .runAgendaReport(filters as AgendaReportFilters)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (result) => {
+            this.reportResult.set(result);
+            this.isLoading.set(false);
+          },
+          error: () => {
+            this.reportResult.set(null);
+            this.errorMessage.set('No fue posible generar el reporte de agenda.');
+            this.isLoading.set(false);
+          },
+        });
 
       return;
     }
@@ -326,6 +332,7 @@ export class ReportRunnerPage {
     if (this.isClinicalSummaryReport()) {
       this.reportLoadSubscription = this.reportsRunnerService
         .runClinicalSummaryReport(filters as ClinicalSummaryReportFilters)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (result) => {
             this.reportResult.set(result);
@@ -344,6 +351,7 @@ export class ReportRunnerPage {
     if (this.isClinicalRecordReport()) {
       this.reportLoadSubscription = this.reportsRunnerService
         .runClinicalRecordReport(filters as ClinicalRecordReportFilters)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (result) => {
             this.reportResult.set(result);
@@ -372,6 +380,7 @@ export class ReportRunnerPage {
     this.patientsService
       .getPatients()
       .pipe(catchError(() => of([] as Patient[])))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((patients) => {
         const sortedPatients = [...patients].sort((left, right) =>
           `${left.firstName} ${left.lastName}`.localeCompare(`${right.firstName} ${right.lastName}`)
