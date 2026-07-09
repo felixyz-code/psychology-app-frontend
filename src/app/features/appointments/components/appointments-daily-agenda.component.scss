@@ -78,13 +78,6 @@
   display: grid;
   align-items: center;
   gap: 0.6rem;
-}
-
-.appointments-agenda__top-row {
-  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
-}
-
-.appointments-agenda__bottom-row {
   grid-template-columns: 4.5rem minmax(0, 1fr) auto;
 }
 

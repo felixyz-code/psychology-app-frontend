@@ -1,14 +1,4 @@
-.appointments-overview,
-.appointments-loading-state,
-.appointments-loading-state__header,
-.appointments-loading-state__filters,
-.appointments-loading-row,
-.appointments-loading-state__table,
-.appointments-state__copy,
-.appointments-empty-state,
-.appointments-patient-cell,
-.appointments-date-cell,
-.appointments-duration-cell {
+:is(.appointments-overview,.appointments-loading-state,.appointments-loading-state__header,.appointments-loading-state__filters,.appointments-loading-row,.appointments-loading-state__table,.appointments-state__copy,.appointments-empty-state,.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) {
   display: grid;
 }
 
@@ -16,23 +6,13 @@
   gap: 0.8rem;
 }
 
-.appointments-loading-state,
-.appointments-loading-state__header,
-.appointments-loading-state__filters,
-.appointments-loading-row,
-.appointments-empty-state {
+:is(.appointments-loading-state,.appointments-loading-state__header,.appointments-loading-state__filters,.appointments-loading-row,.appointments-empty-state) {
   gap: 1rem;
 }
 
 .appointments-overview__hero h2,
-.appointments-state__copy h3,
-.appointments-state__copy p,
-.appointments-patient-cell strong,
-.appointments-patient-cell span,
-.appointments-date-cell strong,
-.appointments-date-cell span,
-.appointments-duration-cell strong,
-.appointments-duration-cell span {
+.appointments-state__copy :is(h3, p),
+:is(.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) :is(strong,span) {
   margin: 0;
 }
 
@@ -214,23 +194,17 @@
   min-width: 700px;
 }
 
-.appointments-patient-cell,
-.appointments-date-cell,
-.appointments-duration-cell {
+:is(.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) {
   gap: 0.12rem;
 }
 
-.appointments-patient-cell strong,
-.appointments-date-cell strong,
-.appointments-duration-cell strong {
+:is(.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) strong {
   color: var(--app-color-heading);
   font-weight: 675;
   line-height: 1.3;
 }
 
-.appointments-patient-cell span,
-.appointments-date-cell span,
-.appointments-duration-cell span {
+:is(.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) span {
   color: var(--app-color-text-secondary);
   font-size: 0.88rem;
   line-height: 1.4;
@@ -271,15 +245,14 @@
   text-transform: uppercase;
 }
 
-.appointments-table.app-data-table .mat-mdc-cell,
-.appointments-table.app-data-table .mat-mdc-header-cell {
+.appointments-table.app-data-table :is(.mat-mdc-cell, .mat-mdc-header-cell) {
   padding-top: 0.95rem;
   padding-bottom: 0.95rem;
   vertical-align: middle;
 }
 
 .appointments-table .app-clickable-table-row {
-  transition: background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  transition: transform 150ms ease;
 }
 
 .appointments-table .app-clickable-table-row:hover {
@@ -301,9 +274,7 @@
 }
 
 @media (max-width: 900px) {
-  .appointments-filters-panel,
-  .appointments-filters-panel--with-date-range,
-  .appointments-loading-state__filters {
+  :is(.appointments-filters-panel,.appointments-filters-panel--with-date-range,.appointments-loading-state__filters) {
     grid-template-columns: 1fr;
   }
 
@@ -321,8 +292,7 @@
     padding: 0.78rem 0.9rem;
   }
 
-  .appointments-summary,
-  .appointments-loading-state__header {
+  :is(.appointments-summary,.appointments-loading-state__header) {
     grid-template-columns: 1fr;
   }
 
