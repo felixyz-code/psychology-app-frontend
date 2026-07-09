@@ -172,8 +172,26 @@ export class AppointmentFormDialogComponent {
     return this.mode === 'edit' ? 'Editar cita' : 'Nueva cita';
   }
 
+  getSubtitle(): string {
+    return this.mode === 'edit'
+      ? 'Actualiza la programacion de la cita y conserva la informacion asociada.'
+      : 'Completa los datos necesarios para registrar una nueva cita en la agenda.';
+  }
+
   getSubmitLabel(): string {
     return this.mode === 'edit' ? 'Guardar cambios' : 'Guardar cita';
+  }
+
+  getPatientSectionMessage(): string {
+    if (this.isLoadingPatients()) {
+      return 'Cargando pacientes disponibles...';
+    }
+
+    if (this.availablePatients().length) {
+      return 'Selecciona al paciente asociado a esta cita.';
+    }
+
+    return 'No hay pacientes disponibles para seleccionar en este momento.';
   }
 
   getStatusLabel(status: AppointmentStatus): string {

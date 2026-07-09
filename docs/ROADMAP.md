@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 13.5 - Patients Dialog Polish
+Sprint 13.6 - Product Polish Closure
 ```
 
 Phase 3 progress:
@@ -143,6 +143,7 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 11.4 completed - Table and agenda actions now follow the shared action order, icon-button tooltips and more homogeneous loading and empty states
 * Sprint 11.6A completed - Appointment dialog structure now follows the shared dialog header/footer and action hierarchy baseline
 * Sprint 11.6B completed - Appointment form layout now follows the shared form spacing baseline and its dialog now uses a scrollable body with a persistently visible footer
+* Sprint 13.6 completed - Global appointments list now shares the same level of visual polish as Dashboard and Patients, while appointment dialogs align more clearly with the shared Design System baseline
 * The module now provides a stable foundation for future additions such as working hours, availability, drag & drop, reminders and notification integration without requiring major refactors
 
 ### Dashboard
@@ -153,6 +154,15 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 11.3 completed - Quick appointment action iconography aligned with the shared action language
 * Sprint 11.9 completed - Dashboard stabilized as part of the cross-module release candidate closure
 * Sprint 13.1 completed - Dashboard ahora funciona como un Executive Overview con snapshot analitico local, view model por widgets, resumen financiero mensual, proximas citas, actividad clinica reciente y alertas operativas minimas sin invadir Reports
+* Sprint 13.6 completed - Dashboard refinado como referencia visual del producto para consolidar el cierre del Product Polish cross-module
+
+### Sprint 13
+
+* Sprint 13.1 completed - Dashboard analytics delivered as an Executive Overview with local orchestration and widget-based view model
+* Sprint 13.4 completed - Patients List modernized and aligned more closely with the polished Dashboard baseline
+* Sprint 13.5 completed - Patients Dialogs aligned with the shared Design System and mature CRUD dialog language
+* Sprint 13.6 completed - Appointments List modernized, Appointment Dialogs aligned with the Design System, shared toolbar patterns consolidated and cross-module empty/error/loading states made more consistent
+* Sprint 13 closure - Responsive spacing, shared visual language and global UI consistency improved across Dashboard, Patients and Appointments
 
 ### Financial Transactions
 
@@ -218,7 +228,7 @@ Completed - Reports foundation generalized for multiple professional reports
 Next planned sprint:
 
 ```text
-Sprint 13.2 - Dashboard Analytics Hardening
+Sprint 13.7 - Post-Polish QA and Technical Debt Review
 ```
 
 ---
@@ -227,12 +237,13 @@ Sprint 13.2 - Dashboard Analytics Hardening
 
 Current development efforts include:
 
-* Dashboard Analytics hardening after Sprint 13.1
+* Post-polish QA validation after Sprint 13.6
 * Final backend integration verification
 * Manual browser validation of dense clinical workflows
 * Incremental technical debt reduction after release-candidate closure
 * Shared component consolidation where it meaningfully reduces maintenance cost
 * Patients remains closed at the UI/UX level after Sprint 13.5, so future work should only reopen it for defects or clearly scoped product changes
+* Appointments list and dialogs now share the current visual baseline, so future work should prioritize defects or scoped product additions rather than new polish passes
 
 ---
 
@@ -304,7 +315,7 @@ Current technical debt includes:
 * Design system consolidation
 * Automated frontend testing
 * Minor visual flicker when closing the child `Editar paciente` dialog from Clinical Workspace
-* SCSS budget warnings in `patient-detail-dialog.component.scss`, `dashboard.page.scss` and `appointments-calendar.component.scss`
+* SCSS budget warnings in `patient-detail-dialog.component.scss`, `dashboard.page.scss`, `appointments-calendar.component.scss`, `patients-list.page.scss`, `appointments-list.page.scss` and `appointments-daily-agenda.component.scss`
 * Potential future consolidation of duplicated page titles between `PageHeaderComponent` and some `SectionCardComponent` list shells
 * Potential future timeline/backend event coverage for `APPOINTMENT_CANCELLED`, `APPOINTMENT_NO_SHOW` and `CASE_FILE_UPDATED`
 * Potential evolution of `SessionNote` toward a more structured clinical schema including motivo, objetivos, intervenciones, observaciones, tareas and plan de siguiente sesion

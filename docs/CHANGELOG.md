@@ -8,6 +8,29 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 # Sprint 13
 
+## Sprint 13.6 - Product Polish Closure
+
+### Changed
+
+* Sprint 13 cierra una pasada amplia de `Product Polish` enfocada en consistencia visual, ritmo de espaciado, estados compartidos y madurez de UI/UX sin introducir nuevas funcionalidades ni cambios de contratos.
+* `Dashboard` queda refinado como superficie ejecutiva principal con una lectura mas clara, widgets mas consistentes y mejor integracion con el lenguaje visual del producto.
+* `Patients List` ahora comparte un baseline visual mas cercano al `Dashboard`, con hero ejecutivo compacto, summary strip, toolbar mas limpia, mejores estados y tabla mas consistente.
+* `Patients Dialogs` quedan alineados al `Design System` actual mediante `app-dialog`, agrupacion por intencion, mejor jerarquia interna y confirmaciones destructivas mas profesionales.
+* `Appointments List` ahora comparte el mismo nivel visual de polish de los modulos principales con hero compacto, metricas ejecutivas, toolbar unificada, estados mas maduros y tabla mas consistente.
+* `Appointment Dialogs` quedan alineados al `Design System` del producto, con formularios mejor seccionados, confirmacion destructiva mas clara y detalle de cita con shell mas consistente.
+* Los estados `Empty`, `Error` y `Loading` se vuelven mas homogeneos entre superficies operativas clave.
+* La experiencia responsive recibe ajustes de espaciado, jerarquia y acomodo de acciones para desktop, tablet y mobile sin redisenar los flujos principales.
+* La consistencia visual global del frontend mejora al reducir variaciones entre dashboards, listados, tablas, dialogs y acciones compartidas.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se modificaron servicios, DTOs, payloads, validaciones clinicas ni navegacion como parte del polish.
+* El cierre del sprint se apoyó principalmente en componentes shared existentes, estilos feature-level y ajustes presentacionales acotados por modulo.
+* `npm.cmd run build` finalizo correctamente durante los sprints de cierre visual.
+
 ## Sprint 13.5 - Patients Dialog Polish
 
 ### Changed

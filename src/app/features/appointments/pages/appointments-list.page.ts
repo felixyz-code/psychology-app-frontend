@@ -18,6 +18,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
+import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
+import { MetricCardComponent, MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
@@ -68,6 +70,8 @@ interface AppointmentsTableState extends DataTableState {
     MatTableModule,
     MatTooltipModule,
     DataTableEmptyStateComponent,
+    DataTableToolbarComponent,
+    MetricCardComponent,
     PageHeaderComponent,
     SectionCardComponent,
     StatusBadgeComponent,
@@ -78,6 +82,12 @@ interface AppointmentsTableState extends DataTableState {
   styleUrl: './appointments-list.page.scss',
 })
 export class AppointmentsListPage {
+  private static readonly SUMMARY_DATE_FORMATTER = new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  });
+
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly patientsService = inject(PatientsService);
   private readonly dialog = inject(MatDialog);
@@ -86,6 +96,8 @@ export class AppointmentsListPage {
   readonly displayedColumns = ['patient', 'scheduledAt', 'durationMinutes', 'status', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
   readonly appointmentStatuses: AppointmentStatus[] = APPOINTMENT_STATUSES;
+  readonly summarySkeletonItems = Array.from({ length: 4 });
+  readonly tableSkeletonRows = Array.from({ length: 6 });
   readonly viewMode = signal<'table' | 'calendar' | 'agenda'>('table');
   readonly selectedAgendaDate = signal(startOfLocalDay(new Date()));
   readonly patientNameResolver = (patientId: string) => this.getPatientName(patientId);
@@ -164,9 +176,6 @@ export class AppointmentsListPage {
     const state = this.tableState();
     return Boolean(state.searchTerm.trim()) || state.statusFilter !== 'ALL';
   });
-  readonly showToolbarReset = computed(() => {
-    return this.hasNonDateFilters() || this.showDateRangeReset();
-  });
   readonly safePageIndex = computed(() => {
     const state = this.tableState();
     return getSafePageIndex(this.filteredAppointments().length, state.pageIndex, state.pageSize);
@@ -180,6 +189,65 @@ export class AppointmentsListPage {
       (count) => this.formatAppointmentCount(count),
       result.hasActiveFilters
     );
+  });
+  readonly summaryMetrics = computed(() => {
+    const appointments = this.appointments();
+    const today = startOfLocalDay(new Date());
+    const scheduledAppointments = appointments.filter((appointment) => appointment.status === 'SCHEDULED');
+    const completedAppointments = appointments.filter((appointment) => appointment.status === 'COMPLETED');
+    const upcomingAppointments = scheduledAppointments.filter((appointment) => {
+      return this.getAppointmentTimestamp(appointment.scheduledAt) >= today.getTime();
+    });
+    const nextAppointment = scheduledAppointments.reduce<Appointment | null>((next, appointment) => {
+      const appointmentTimestamp = this.getAppointmentTimestamp(appointment.scheduledAt);
+
+      if (appointmentTimestamp < today.getTime()) {
+        return next;
+      }
+
+      if (!next || appointmentTimestamp < this.getAppointmentTimestamp(next.scheduledAt)) {
+        return appointment;
+      }
+
+      return next;
+    }, null);
+
+    return [
+      {
+        id: 'total',
+        icon: 'event_note',
+        label: 'Citas registradas',
+        value: `${appointments.length}`,
+        supportingText: 'Base total visible en la agenda global.',
+        variant: 'blue' as MetricCardVariant,
+      },
+      {
+        id: 'scheduled',
+        icon: 'event_available',
+        label: 'Programadas',
+        value: `${scheduledAppointments.length}`,
+        supportingText: 'Citas activas pendientes dentro del modulo.',
+        variant: 'green' as MetricCardVariant,
+      },
+      {
+        id: 'completed',
+        icon: 'task_alt',
+        label: 'Completadas',
+        value: `${completedAppointments.length}`,
+        supportingText: 'Sesiones marcadas como finalizadas.',
+        variant: 'amber' as MetricCardVariant,
+      },
+      {
+        id: 'upcoming',
+        icon: 'schedule',
+        label: 'Proximas citas',
+        value: `${upcomingAppointments.length}`,
+        supportingText: nextAppointment
+          ? `Siguiente: ${this.formatAppointmentSummaryDate(nextAppointment.scheduledAt)}`
+          : 'No hay citas futuras programadas.',
+        variant: 'violet' as MetricCardVariant,
+      },
+    ];
   });
   readonly visibleCalendarMonth = computed(() => {
     const startDate = this.tableState().startDate;
@@ -520,6 +588,10 @@ export class AppointmentsListPage {
 
   private formatAppointmentCount(count: number): string {
     return count === 1 ? '1 cita' : `${count} citas`;
+  }
+
+  private formatAppointmentSummaryDate(value: string): string {
+    return AppointmentsListPage.SUMMARY_DATE_FORMATTER.format(parseAppointmentDate(value));
   }
 
   private getAppointmentTimestamp(value: string): number {

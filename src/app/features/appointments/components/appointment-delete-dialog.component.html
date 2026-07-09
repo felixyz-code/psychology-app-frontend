@@ -1,14 +1,19 @@
-<div class="appointment-delete-dialog">
-  <h2>Eliminar cita</h2>
-
-  <p>¿Está seguro que desea eliminar esta cita?</p>
-
-  <div class="appointment-delete-dialog__summary">
-    <p class="appointment-delete-dialog__title">
-      {{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
-    </p>
-    <p>{{ appointment.durationMinutes }} minutos</p>
+<div class="appointment-delete-dialog app-dialog">
+  <div class="appointment-delete-dialog__header app-dialog__header">
+    <h2>Eliminar cita</h2>
+    <p>Confirma si deseas eliminar esta cita de la agenda. Esta accion requiere confirmacion explicita.</p>
   </div>
+
+  <div class="appointment-delete-dialog__summary app-dialog__summary">
+    <p class="appointment-delete-dialog__summary-title app-dialog__summary-title">Cita seleccionada</p>
+    <p class="appointment-delete-dialog__title">{{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+    <p class="appointment-delete-dialog__meta">Paciente asociado: {{ appointment.patientId }}</p>
+    <p class="appointment-delete-dialog__meta">Duracion programada: {{ appointment.durationMinutes }} minutos</p>
+  </div>
+
+  <p class="appointment-delete-dialog__warning">
+    Esta accion eliminara el registro actual de la cita y ya no estara disponible en la agenda visible.
+  </p>
 
   @if (errorMessage()) {
     <p class="appointment-delete-dialog__error" role="alert">{{ errorMessage() }}</p>
@@ -17,12 +22,18 @@
   <div class="appointment-delete-dialog__actions">
     <button mat-button type="button" [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
 
-    <button mat-flat-button type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+    <button
+      mat-flat-button
+      type="button"
+      class="appointment-delete-dialog__confirm app-dialog__danger"
+      [disabled]="isDeleting()"
+      (click)="confirmDelete()"
+    >
       @if (isDeleting()) {
         <mat-spinner diameter="20" />
         <span>Eliminando...</span>
       } @else {
-        <span>Eliminar</span>
+        <span>Eliminar cita</span>
       }
     </button>
   </div>
