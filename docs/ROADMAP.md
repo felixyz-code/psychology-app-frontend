@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 13.6 - Product Polish Closure
+Sprint 14.2 - Global Styles & Tokens Cleanup
 ```
 
 Phase 3 progress:
@@ -164,6 +164,11 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 13.6 completed - Appointments List modernized, Appointment Dialogs aligned with the Design System, shared toolbar patterns consolidated and cross-module empty/error/loading states made more consistent
 * Sprint 13 closure - Responsive spacing, shared visual language and global UI consistency improved across Dashboard, Patients and Appointments
 
+### Sprint 14
+
+* Sprint 14.2 completed - Global Styles & Tokens Cleanup
+* Sprint 14.2 status - ✅ Global Styles & Tokens Cleanup
+
 ### Financial Transactions
 
 * Global list
@@ -228,7 +233,7 @@ Completed - Reports foundation generalized for multiple professional reports
 Next planned sprint:
 
 ```text
-Sprint 13.7 - Post-Polish QA and Technical Debt Review
+Sprint 14.3 - Dialog Baseline Consolidation
 ```
 
 ---
