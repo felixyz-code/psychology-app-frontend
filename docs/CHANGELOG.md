@@ -6,6 +6,51 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# Sprint 15
+
+## Sprint 15.2 - Report Runner Subscription Hardening
+
+### Changed
+
+* Se endureció el ciclo de vida de las suscripciones.
+* Integración con `takeUntilDestroyed`.
+* Sin cambios funcionales.
+
+## Sprint 15.3 - Dialog Focus Accessibility Audit
+
+### Changed
+
+* Auditoría completa del manejo de foco.
+* Estrategia definida.
+* Sin cambios de implementación.
+
+## Sprint 15.4 - SCSS Budget Audit
+
+### Changed
+
+* Auditoría de budgets.
+* Identificación de deuda técnica.
+* Priorización de reducción.
+
+## Sprint 15.5–15.7 - Low-Risk SCSS Budget Reduction
+
+### Changed
+
+* Reducción conservadora de SCSS.
+* Eliminación de duplicación interna.
+* `appointments-daily-agenda` salió del warning.
+* `patients-list` y `appointments-list` redujeron tamaño.
+* Sin cambios visuales.
+
+## Sprint 15.8 - Delete Dialog Accessibility Phase 1
+
+### Changed
+
+* `cdkFocusInitial` agregado al botón Cancelar.
+* Sin cambios funcionales.
+* Sin cambios visuales.
+* Base preparada para futuras mejoras de accesibilidad.
+
 # Sprint 14
 
 ## Sprint 14.4 - Detail Dialog Baseline Consolidation (Phase 1)

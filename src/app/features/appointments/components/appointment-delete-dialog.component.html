@@ -20,7 +20,7 @@
   }
 
   <div class="appointment-delete-dialog__actions">
-    <button mat-button type="button" [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
 
     <button
       mat-flat-button

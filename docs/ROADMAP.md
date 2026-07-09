@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 14.4 - Detail Dialog Baseline Consolidation (Phase 1)
+Sprint 15.8 - Delete Dialog Accessibility Phase 1
 ```
 
 Phase 3 progress:
@@ -163,6 +163,18 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 13.5 completed - Patients Dialogs aligned with the shared Design System and mature CRUD dialog language
 * Sprint 13.6 completed - Appointments List modernized, Appointment Dialogs aligned with the Design System, shared toolbar patterns consolidated and cross-module empty/error/loading states made more consistent
 * Sprint 13 closure - Responsive spacing, shared visual language and global UI consistency improved across Dashboard, Patients and Appointments
+
+### Sprint 15
+
+### Completed
+
+- ✓ Sprint 15.2
+- ✓ Sprint 15.3
+- ✓ Sprint 15.4
+- ✓ Sprint 15.5
+- ✓ Sprint 15.6
+- ✓ Sprint 15.7
+- ✓ Sprint 15.8
 
 ### Sprint 14
 
