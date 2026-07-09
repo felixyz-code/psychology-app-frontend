@@ -6,6 +6,47 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# Sprint 14
+
+## Sprint 14.4 - Detail Dialog Baseline Consolidation (Phase 1)
+
+### Changed
+
+* `Sprint 14.4` consolida la primera fase del baseline visual para dialogs de detalle de menor riesgo sin introducir nuevas funcionalidades ni cambios de comportamiento.
+* `Document Detail Dialog` y `Financial Transaction Detail Dialog` quedan homologados visualmente bajo el lenguaje actual del `Design System`.
+* Ambos dialogs ahora comparten un header mas consistente, con mejor jerarquia visual entre titulo y subtitulo.
+* El layout general del detalle se vuelve mas consistente en espaciado, ritmo visual y acomodo responsive.
+* La organizacion visual interna mejora para hacer mas clara la lectura de la informacion ya existente sin agregar ni eliminar datos.
+* Se mantiene compatibilidad con `Light` y `Dark` mode dentro del baseline actual del frontend.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se modificaron servicios, modelos, interfaces, routing ni comportamiento funcional.
+* La consolidacion quedo acotada a presentacion y estructura visual de dialogs existentes.
+* `npm.cmd run build` finalizo correctamente.
+
+## Sprint 14.3 - Dialog Baseline Consolidation (Delete Dialogs)
+
+### Changed
+
+* `Sprint 14.3` consolida el baseline visual de dialogs destructivos sin introducir nuevas funcionalidades ni cambios de comportamiento.
+* Se homologa visualmente `Documents`, `Session Notes` y `Financial Transactions` dentro de sus `Delete Dialogs`.
+* Los dialogs ahora comparten un header unificado, una `summary card` consistente y una seccion de advertencia mas clara.
+* El `CTA` destructivo queda mejor alineado con la jerarquia visual del `Design System` actual.
+* La experiencia responsive se vuelve mas consistente entre desktop y mobile para este tipo de confirmaciones.
+* Se corrigen textos y detalles de codificacion `UTF-8` visibles dentro de estas superficies.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se modificaron servicios, payloads, DTOs, validaciones, permisos ni navegacion.
+* La consolidacion quedo acotada a `Delete Dialogs` existentes y a ajustes presentacionales.
+* `npm.cmd run build` finalizo correctamente.
 # Sprint 13
 
 ## Sprint 13.6 - Product Polish Closure
@@ -991,3 +1032,8 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 * Se anadio un boton visible de cierre (X) en dispositivos moviles.
 * Se mejoro el espaciado superior del header del drawer movil.
 * Desktop permanece sin cambios.
+
+
+
+
+
