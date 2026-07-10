@@ -6,6 +6,34 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# RC.FE.3.1 - Authentication And Session Regression Closure
+
+## Changed
+
+* Se cerro la red minima de regresion de autenticacion y sesion para `AuthStore`, `AuthService`, `LoginPage`, `NavbarComponent`, `authGuard`, `authInterceptor`, `HttpErrorPolicyService` y `errorPolicyInterceptor`.
+* La suite de regresion paso de `27` a `57` pruebas, incorporando casos de login exitoso y fallido, logout, persistencia, restauracion, almacenamiento ausente o corrupto, token ausente o en blanco, proteccion de rutas, JWT en requests protegidas, exclusion de `/auth/login`, preservacion del request, manejo de `401` y `403`, deduplicacion de expiracion y propagacion de errores.
+* Se corrigio una inconsistencia en `AuthStore` para que la restauracion de sesion solo acepte estado persistido estructuralmente valido y limpie token y usuario cuando los datos no cumplen el contrato.
+* La validacion manual confirmo login, navegacion autenticada, logout, restauracion tras recarga, login invalido, JWT en requests protegidas, ausencia de JWT en `/auth/login`, proteccion de rutas privadas y descarte de sesiones persistidas invalidas.
+
+## Validation
+
+* `57/57` pruebas aprobadas.
+* `0` pruebas fallidas.
+* `0` pruebas skipped.
+* Build productivo correcto.
+* `git diff --check` correcto.
+* Validacion manual aprobada.
+
+## Notes
+
+* No se modifico backend.
+* No se modifico CI.
+* No se agregaron dependencias.
+* No se cambio el runner.
+* No se hizo commit ni push.
+
+---
+
 # RC.FE.2 - UTF-8/BOM Compatibility For CSV Exports
 
 ## Changed

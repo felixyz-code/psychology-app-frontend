@@ -52,6 +52,30 @@ RC.FE.2 status:
 Completed - UTF-8/BOM compatibility added to CSV exports for Microsoft Excel without changing PDF, UI or contracts
 ```
 
+RC.FE.3.1 status:
+
+```text
+Completed - Authentication and session regression baseline closed with validated AuthStore restoration hardening
+```
+
+RC.FE.3.2 status:
+
+```text
+Pending - Clinical core regression
+```
+
+RC.FE.3.3 status:
+
+```text
+Pending - Operational and reporting regression
+```
+
+RC.FE.3.4 status:
+
+```text
+Pending - CI gate
+```
+
 ---
 
 # Completed Milestones
