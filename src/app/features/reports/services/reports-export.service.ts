@@ -563,8 +563,20 @@ export class ReportsExportService {
   }
 
   private escapeCsvValue(value: string): string {
-    const normalizedValue = value.replace(/"/g, '""');
+    const neutralizedValue = this.neutralizeCsvFormula(value);
+    const normalizedValue = neutralizedValue.replace(/"/g, '""');
     return `"${normalizedValue}"`;
+  }
+
+  private neutralizeCsvFormula(value: string): string {
+    if (value.startsWith("'")) {
+      return value;
+    }
+
+    const firstEffectiveCharacter = value.match(/^[ \t\r\n]*([\s\S])/u)?.[1];
+    const dangerousFormulaPrefixes = '=+-@＝＋－＠';
+
+    return firstEffectiveCharacter && dangerousFormulaPrefixes.includes(firstEffectiveCharacter) ? `\t${value}` : value;
   }
 
   private escapeHtml(value: string): string {

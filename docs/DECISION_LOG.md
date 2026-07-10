@@ -588,6 +588,36 @@ Clinical data and personal information must not reach browser logs or future pro
 
 ---
 
+# ADR-024 - Centralized CSV Formula Neutralization For Spreadsheet Exports
+
+## Decision
+
+CSV exports in `Reports` neutralize spreadsheet formulas centrally inside the CSV serialiser before structural CSV escaping.
+
+Current rule:
+
+- text cells that begin with a dangerous formula prefix after leading whitespace or control characters receive a real tab prefix
+- the neutralization happens before quote escaping and CSV wrapping
+- the preserved tab becomes part of the exported CSV value, but the data model and PDF exports remain unchanged
+- this protection applies to human-readable spreadsheet workflows, not to stored data
+
+## Rationale
+
+Spreadsheet applications may interpret exported text as formulas when a cell begins with `=`, `+`, `-`, `@` or a Unicode equivalent.
+
+Centralizing the neutralization in the exporter keeps the protection consistent for every CSV report without duplicating logic in individual report builders.
+
+Using a real tab is a conservative mitigation that keeps the exported value visible as text while avoiding changes to PDF or backend contracts.
+
+## Implications
+
+- new CSV report surfaces should reuse the same central serializer
+- formula detection must continue to consider leading spaces, tabs and line breaks before the first effective character
+- CSV exports remain suitable for manual spreadsheet review, but the tab prefix is part of the exported file content
+- data stored by the application is not altered by this presentation-layer protection
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

@@ -1,6 +1,22 @@
 # Changelog
 
-## Sprint 14.3 — Dialog Baseline Consolidation (Delete Dialogs)
+## RC.FE.1 - CSV Formula Injection Closure
+
+### Changed
+- Documented the closure of FE-RC-001 after central CSV hardening in `ReportsExportService`.
+- Confirmed protected export coverage for Financial Report and Agenda Report.
+- Recorded the hardened CSV behavior for dangerous prefixes, leading controls and safe preservation of commas, quotes, line breaks and UTF-8 text.
+
+### Validation
+- 16 new CSV export tests were added.
+- Full suite validation reached 26/26 tests.
+- Manual Excel verification confirmed that `=1+1` and `@SUM(1,1)` are rendered as text and not evaluated.
+
+### Notes
+- No PDF, UI, contract, dependency or CI/CD changes were introduced.
+- A separate UTF-8/BOM compatibility issue with Excel was detected and remains pending outside the scope of RC.FE.1.
+
+## Sprint 14.3 â€” Dialog Baseline Consolidation (Delete Dialogs)
 
 ### Changed
 - Homologated the delete dialogs for:
@@ -27,7 +43,7 @@
 - No contract changes.
 - Build completed successfully.
 
-## Sprint 14.2 — Global Styles & Tokens Cleanup
+## Sprint 14.2 â€” Global Styles & Tokens Cleanup
 
 ### Added
 - Added missing global design tokens:

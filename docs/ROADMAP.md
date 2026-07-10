@@ -40,6 +40,12 @@ Phase 3 progress:
 Completed - Reports foundation generalized for multiple professional reports
 ```
 
+RC.FE.1 status:
+
+```text
+Completed - FE-RC-001 closed with centralized CSV formula injection hardening in ReportsExportService
+```
+
 ---
 
 # Completed Milestones
@@ -228,6 +234,7 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 12.4 completed - Resumen Clinico delivered with patient-required execution, clinical preview, workspace-based orchestration, summarized notes, related documents and PDF-first export
 * Sprint 12.5 completed - Expediente Clinico delivered as a second patient-centered clinical document with full structured content, PDF-only export and descriptive PDF filenames
 * Sprint 12.6 completed - Reports QA hardening delivered with mojibake correction, single error surface in preview, blocked-popup PDF feedback, nomenclatura visible en español consistente y helper compartido para MIME labels
+* RC.FE.1 completed - CSV Formula Injection mitigated in the centralized export serializer, covering Financial Report and Agenda Report with protected CSV output and manual Excel validation
 
 ### Sprint 11
 
@@ -349,6 +356,7 @@ Current technical debt includes:
 * Automated frontend testing
 * Minor visual flicker when closing the child `Editar paciente` dialog from Clinical Workspace
 * SCSS budget warnings in `patient-detail-dialog.component.scss`, `dashboard.page.scss`, `appointments-calendar.component.scss`, `patients-list.page.scss`, `appointments-list.page.scss` and `appointments-daily-agenda.component.scss`
+* UTF-8/BOM compatibility in CSV exports with Excel, low severity, pending outside the scope of RC.FE.1
 * Potential future consolidation of duplicated page titles between `PageHeaderComponent` and some `SectionCardComponent` list shells
 * Potential future timeline/backend event coverage for `APPOINTMENT_CANCELLED`, `APPOINTMENT_NO_SHOW` and `CASE_FILE_UPDATED`
 * Potential evolution of `SessionNote` toward a more structured clinical schema including motivo, objetivos, intervenciones, observaciones, tareas and plan de siguiente sesion

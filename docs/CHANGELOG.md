@@ -6,6 +6,27 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# RC.FE.1 - CSV Formula Injection Closure
+
+## Changed
+
+* Se cerro FE-RC-001 con endurecimiento centralizado de exportacion CSV en `ReportsExportService`.
+* Se confirmo proteccion para `Financial Report` y `Agenda Report`.
+* Se neutralizaron prefijos peligrosos, variantes Unicode y deteccion despues de espacios y controles iniciales, preservando comas, comillas, saltos de linea y texto UTF-8.
+
+## Validation
+
+* Se agregaron 16 pruebas nuevas de exportacion CSV.
+* La suite completa quedo en 26/26.
+* La validacion manual en Excel confirmo que `=1+1` y `@SUM(1,1)` se muestran como texto y no se evaluan.
+
+## Notes
+
+* No hubo cambios en PDF, UI, contratos, dependencias ni CI/CD.
+* Se detecto un problema independiente de compatibilidad UTF-8/BOM con Excel, pendiente para otro sub-sprint y fuera del alcance de RC.FE.1.
+
+---
+
 # Sprint 17
 
 ## Sprint 17.2 - Global HTTP Error Policy
