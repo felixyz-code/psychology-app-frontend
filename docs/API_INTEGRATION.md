@@ -182,8 +182,15 @@ Current integration rules:
 - the current reports engine supports `Financial Report`, `Agenda Report`, `Clinical Summary` and `Clinical Record`
 - date-only filters are parsed locally and applied with inclusive user semantics when the report flow requires client-side range orchestration
 - export generation is currently client-side for `PDF` print output and `CSV` download output
+- CSV downloads keep `text/csv;charset=utf-8` and prepend a UTF-8 BOM so Microsoft Excel can open the file directly without mojibake
 
 This allows the frontend to deliver a first reporting layer without creating new contracts or duplicating backend rules.
+
+## CSV Excel Compatibility Notes
+
+`Financial Report` and `Agenda Report` keep CSV as their spreadsheet export format. The frontend prepends a UTF-8 BOM to the file content so Excel on Windows can interpret the text correctly when the file is opened directly.
+
+This change does not affect the CSV formula neutralization strategy, the PDF export flow or any backend contract.
 
 ## Clinical Summary Report Integration
 

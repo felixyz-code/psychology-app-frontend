@@ -4,6 +4,8 @@ import { ClinicalRecordContent } from '../models/clinical-record-report.model';
 import { ClinicalSummaryContent } from '../models/clinical-summary-report.model';
 import { ReportResult } from '../models/report-result.model';
 
+const UTF8_BOM = '\uFEFF';
+
 @Injectable({ providedIn: 'root' })
 export class ReportsExportService {
   exportAsPdf(result: ReportResult<unknown>): boolean {
@@ -552,7 +554,7 @@ export class ReportsExportService {
       .map((row) => row.map((cell) => this.escapeCsvValue(cell)).join(','))
       .join('\r\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([UTF8_BOM, csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = globalThis.document.createElement('a');
 

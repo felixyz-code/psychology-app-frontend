@@ -46,6 +46,12 @@ RC.FE.1 status:
 Completed - FE-RC-001 closed with centralized CSV formula injection hardening in ReportsExportService
 ```
 
+RC.FE.2 status:
+
+```text
+Completed - UTF-8/BOM compatibility added to CSV exports for Microsoft Excel without changing PDF, UI or contracts
+```
+
 ---
 
 # Completed Milestones
@@ -356,7 +362,7 @@ Current technical debt includes:
 * Automated frontend testing
 * Minor visual flicker when closing the child `Editar paciente` dialog from Clinical Workspace
 * SCSS budget warnings in `patient-detail-dialog.component.scss`, `dashboard.page.scss`, `appointments-calendar.component.scss`, `patients-list.page.scss`, `appointments-list.page.scss` and `appointments-daily-agenda.component.scss`
-* UTF-8/BOM compatibility in CSV exports with Excel, low severity, pending outside the scope of RC.FE.1
+* UTF-8/BOM compatibility in CSV exports with Excel resolved in RC.FE.2
 * Potential future consolidation of duplicated page titles between `PageHeaderComponent` and some `SectionCardComponent` list shells
 * Potential future timeline/backend event coverage for `APPOINTMENT_CANCELLED`, `APPOINTMENT_NO_SHOW` and `CASE_FILE_UPDATED`
 * Potential evolution of `SessionNote` toward a more structured clinical schema including motivo, objetivos, intervenciones, observaciones, tareas and plan de siguiente sesion

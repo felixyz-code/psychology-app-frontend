@@ -1,13 +1,17 @@
 import { ReportResult } from '../models/report-result.model';
 import { ReportsExportService } from './reports-export.service';
 
+const UTF8_BOM = '\uFEFF';
+
 describe('ReportsExportService', () => {
   let service: ReportsExportService;
   let csvContent: string;
+  let csvBlob: Blob | null;
 
   beforeEach(() => {
     service = new ReportsExportService();
     csvContent = '';
+    csvBlob = null;
 
     const NativeBlob = globalThis.Blob;
 
@@ -17,6 +21,7 @@ describe('ReportsExportService', () => {
         constructor(parts?: BlobPart[], options?: BlobPropertyBag) {
           super(parts, options);
           csvContent = (parts ?? []).map((part) => String(part)).join('');
+          csvBlob = this;
         }
       }
     );
@@ -37,7 +42,7 @@ describe('ReportsExportService', () => {
     (value) => {
       exportCsv(service, [value]);
 
-      expect(csvContent).toBe(`"Valor"\r\n"\t${value}"`);
+      expect(csvContent).toBe(`${UTF8_BOM}"Valor"\r\n"\t${value}"`);
     }
   );
 
@@ -46,7 +51,7 @@ describe('ReportsExportService', () => {
     (value) => {
       exportCsv(service, [value]);
 
-      expect(csvContent).toBe(`"Valor"\r\n"\t${value}"`);
+      expect(csvContent).toBe(`${UTF8_BOM}"Valor"\r\n"\t${value}"`);
     }
   );
 
@@ -54,14 +59,14 @@ describe('ReportsExportService', () => {
     exportCsv(service, ['Hola', 'Álvarez', 'Texto, con coma', 'Texto "citado"', 'Línea uno\nLínea dos', '', "'=1+1", 'Paciente = revisión']);
 
     expect(csvContent).toBe(
-      '"Valor"\r\n"Hola"\r\n"Álvarez"\r\n"Texto, con coma"\r\n"Texto ""citado"""\r\n"Línea uno\nLínea dos"\r\n""\r\n"\'=1+1"\r\n"Paciente = revisión"'
+      `${UTF8_BOM}"Valor"\r\n"Hola"\r\n"Álvarez"\r\n"Texto, con coma"\r\n"Texto ""citado"""\r\n"Línea uno\nLínea dos"\r\n""\r\n"'=1+1"\r\n"Paciente = revisión"`
     );
   });
 
   it('serializes null, undefined, and empty values as empty cells', () => {
     service.exportAsCsv(createResult([{ value: undefined }, { value: null }, { value: '' }]));
 
-    expect(csvContent).toBe('"Valor"\r\n""\r\n""\r\n""');
+    expect(csvContent).toBe(`${UTF8_BOM}"Valor"\r\n""\r\n""\r\n""`);
   });
 
   it('keeps the structural CSV layout while protecting only dangerous cells', () => {
@@ -73,7 +78,19 @@ describe('ReportsExportService', () => {
     service.exportAsCsv(result);
 
     expect(csvContent).toBe(
-      '"Concept","Patient","Notes","Amount"\r\n"\t=1+1","\t+Paciente","Nota ""clínica"",\nmultilínea","1,234.50"\r\n"Consulta","Álvarez","Paciente = revisión","\t-1,234.50"'
+      `${UTF8_BOM}"Concept","Patient","Notes","Amount"\r\n"\t=1+1","\t+Paciente","Nota ""clínica"",\nmultilínea","1,234.50"\r\n"Consulta","Álvarez","Paciente = revisión","\t-1,234.50"`
+    );
+  });
+
+  it('writes a UTF-8 BOM before the logical CSV content', async () => {
+    exportCsv(service, ['Categoría', 'Método', 'seguimiento clínico', 'sesión']);
+
+    const bytes = new Uint8Array(await csvBlob!.arrayBuffer());
+
+    expect(csvBlob!.type).toBe('text/csv;charset=utf-8;');
+    expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+    expect(csvContent.slice(UTF8_BOM.length)).toBe(
+      '"Valor"\r\n"Categoría"\r\n"Método"\r\n"seguimiento clínico"\r\n"sesión"'
     );
   });
 });

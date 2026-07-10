@@ -6,6 +6,28 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# RC.FE.2 - UTF-8/BOM Compatibility For CSV Exports
+
+## Changed
+
+* Se agrego BOM UTF-8 al inicio del archivo CSV completo para mejorar la compatibilidad con Microsoft Excel en Windows.
+* `Reporte Financiero` y `Reporte Agenda` ahora se abren correctamente en Excel sin mojibake para textos como `Categoría`, `Método`, `clínico` y `sesión`.
+* Se mantuvo intacto el endurecimiento de `FE-RC-001` contra formula injection en CSV.
+
+## Validation
+
+* La suite actualizada queda en `27/27`.
+* La validacion tecnica y manual confirmo compatibilidad con Excel.
+
+## Notes
+
+* No hubo cambios en `PDF`.
+* No hubo cambios en `UI`.
+* No hubo cambios de contratos.
+* No se agregaron dependencias nuevas.
+
+---
+
 # RC.FE.1 - CSV Formula Injection Closure
 
 ## Changed

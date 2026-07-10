@@ -618,6 +618,28 @@ Using a real tab is a conservative mitigation that keeps the exported value visi
 
 ---
 
+# ADR-025 - UTF-8 BOM For Excel Compatibility In CSV Exports
+
+## Decision
+
+CSV exports in `Reports` keep `text/csv;charset=utf-8` as their MIME type and prepend a UTF-8 BOM to the exported file content.
+
+The frontend does not migrate report exports to `XLSX`.
+
+## Rationale
+
+Microsoft Excel on Windows can misinterpret UTF-8 CSV files without a BOM when they are opened directly. Adding the BOM preserves the current CSV workflow while improving compatibility for end users.
+
+Keeping CSV avoids introducing a heavier export format that is unnecessary for the current release candidate scope.
+
+## Implications
+
+- CSV remains the export format for `Financial Report` and `Agenda Report`.
+- Formula hardening from `ADR-024` remains in place and is not replaced by the BOM decision.
+- The export strategy stays conservative and aligned with the existing reports architecture.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:
