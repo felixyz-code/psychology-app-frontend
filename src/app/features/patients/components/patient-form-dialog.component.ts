@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthStore } from '../../../core/auth/auth.store';
+import { logError } from '../../../core/logging/app-logger';
 import { CreatePatientRequest, Patient, UpdatePatientRequest } from '../models/patient.models';
 import { PatientsService } from '../services/patients.service';
 
@@ -96,12 +97,7 @@ export class PatientFormDialogComponent {
             this.dialogRef.close(patient);
           },
           error: (error) => {
-            console.error('PATCH /patients/:id failed', {
-              status: error?.status,
-              body: error?.error,
-              patientId: this.data.patient?.id,
-              payload,
-            });
+            logError('patients.update', error);
             this.errorMessage.set('No fue posible guardar los cambios.');
           },
         });
@@ -123,11 +119,7 @@ export class PatientFormDialogComponent {
           this.dialogRef.close(true);
         },
         error: (error) => {
-          console.error('POST /patients failed', {
-            status: error?.status,
-            body: error?.error,
-            payload,
-          });
+          logError('patients.create', error);
           this.errorMessage.set('No fue posible crear el paciente.');
         },
       });

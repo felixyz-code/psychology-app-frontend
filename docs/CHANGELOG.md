@@ -6,6 +6,46 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# Sprint 17
+
+## Sprint 17.2 - Global HTTP Error Policy
+
+### Added
+
+* Se incorporo una politica global de errores HTTP mediante un interceptor funcional y un servicio centralizado.
+* La politica clasifica errores de red, autenticacion, autorizacion, recurso no encontrado, limite de solicitudes y servidor, sin alterar la propagacion del error hacia los flujos existentes.
+* Las respuestas `401` de solicitudes autenticadas cierran la sesion y redirigen al login, sin aplicar esa accion al propio endpoint de autenticacion.
+
+### Technical
+
+* No hubo cambios de backend, endpoints ni contratos.
+* No se modificaron los mensajes de error presentados al usuario.
+
+## Sprint 17.3 - Secure Logging And Sensitive Data Protection
+
+### Changed
+
+* Los logs directos de errores en pacientes, notas de sesion, documentos y arranque se reemplazaron por una abstraccion centralizada.
+* La salida de desarrollo se limita a una operacion estatica, estado HTTP numerico y frames de stack sanitizados.
+* Produccion no emite estos logs; no se registran payloads, cuerpos HTTP, PII, contenido clinico, metadatos de archivos ni mensajes de error potencialmente sensibles.
+
+### Technical
+
+* No se incorporaron plataformas externas de observabilidad.
+* No hubo cambios funcionales ni cambios en la politica global de errores HTTP.
+
+## Sprint 17.4 - Test Suite Baseline Fix
+
+### Changed
+
+* Se actualizo la expectativa obsoleta de la aplicacion raiz: ahora valida el `router-outlet` que representa la plantilla actual en lugar de un titulo inicial inexistente.
+* La suite vuelve a pasar completamente con 10 pruebas exitosas.
+
+### Technical
+
+* El cambio quedo limitado a `src/app/app.spec.ts`; no hubo cambios productivos.
+* `npm.cmd test -- --watch=false` y `npm.cmd run build` finalizaron correctamente.
+
 # Sprint 15
 
 ## Sprint 15.2 - Report Runner Subscription Hardening

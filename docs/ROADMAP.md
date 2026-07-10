@@ -31,7 +31,7 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 15.8 - Delete Dialog Accessibility Phase 1
+Sprint 17.4 - Test Suite Baseline Fix
 ```
 
 Phase 3 progress:
@@ -176,6 +176,14 @@ Completed - Reports foundation generalized for multiple professional reports
 - ✓ Sprint 15.7
 - ✓ Sprint 15.8
 
+### Sprint 17
+
+### Completed
+
+- Sprint 17.2 - Global HTTP Error Policy
+- Sprint 17.3 - Secure Logging And Sensitive Data Protection
+- Sprint 17.4 - Test Suite Baseline Fix
+
 ### Sprint 14
 
 ### Completed
@@ -253,7 +261,7 @@ Completed - Reports foundation generalized for multiple professional reports
 Next planned sprint:
 
 ```text
-Sprint 14.5 - Lists & Design System Harmonization
+To be prioritized after Sprint 17.4
 ```
 
 ---
@@ -298,7 +306,7 @@ Current development efforts include:
 * Component testing
 * Service testing
 * Form validation improvements
-* Error handling improvements
+* Continued validation of global error handling and secure logging
 
 ---
 

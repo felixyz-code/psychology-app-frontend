@@ -547,6 +547,47 @@ La estabilizacion previa reduce riesgo y deja una base mas segura para futuras c
 
 ---
 
+# ADR-022 - Global HTTP Error Policy Through Functional Interceptor
+
+## Decision
+
+HTTP errors are observed by a global functional interceptor that delegates their classification and session-related actions to `HttpErrorPolicyService`.
+
+The interceptor preserves the original error propagation. User-facing messages and feature-level recovery remain owned by the existing flows.
+
+## Rationale
+
+Authentication failures and HTTP error classification are cross-cutting concerns. Centralizing them prevents duplicated authentication cleanup and redirect behavior while preserving feature ownership of UX.
+
+## Implications
+
+- `401` responses from authenticated requests clear the local session and redirect to login.
+- Login requests and already anonymous sessions do not trigger a redundant redirect.
+- New HTTP consumers inherit the policy without modifying contracts or backend behavior.
+- The policy does not log response bodies or replace component-level user feedback.
+
+---
+
+# ADR-023 - Development-Only Safe Logging
+
+## Decision
+
+Application diagnostics use a centralized logging utility that emits only in development.
+
+Permitted development fields are a static operation identifier, numeric HTTP status and sanitized stack frames. Request payloads, HTTP response bodies, PII, clinical content, file metadata and error messages are excluded.
+
+## Rationale
+
+Clinical data and personal information must not reach browser logs or future production logging sinks. A narrow logger retains useful debugging context without serializing sensitive data.
+
+## Implications
+
+- Production does not emit application diagnostic logs through this utility.
+- New application error logs must use the centralized utility rather than direct `console.*` calls.
+- External observability platforms remain outside the current scope and must apply the same data-minimization policy if introduced later.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:
