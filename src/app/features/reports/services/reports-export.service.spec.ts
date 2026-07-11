@@ -93,6 +93,59 @@ describe('ReportsExportService', () => {
       '"Valor"\r\n"Categoría"\r\n"Método"\r\n"seguimiento clínico"\r\n"sesión"'
     );
   });
+
+  it('downloads CSV through a Blob URL using the report filename and revokes it afterwards', () => {
+    const createElement = vi.spyOn(globalThis.document, 'createElement');
+    const result = createResult([{ concept: 'Sesión clínica' }]);
+    result.csvFileName = 'reporte-financiero.csv';
+
+    service.exportAsCsv(result);
+
+    const link = createElement.mock.results[0]?.value as HTMLAnchorElement;
+    expect(csvBlob?.type).toBe('text/csv;charset=utf-8;');
+    expect(URL.createObjectURL).toHaveBeenCalledWith(csvBlob);
+    expect(link.href).toBe('blob:reports-csv');
+    expect(link.download).toBe('reporte-financiero.csv');
+    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:reports-csv');
+  });
+
+  it('returns false without writing when the print popup is blocked', () => {
+    vi.stubGlobal('open', vi.fn(() => null));
+
+    const exported = service.exportAsPdf(createResult([{ value: 'contenido' }]));
+
+    expect(exported).toBe(false);
+  });
+
+  it('writes escaped dynamic content, focuses, and prints through the opened HTML window', () => {
+    const print = vi.fn();
+    const focus = vi.fn();
+    const write = vi.fn();
+    const printWindow = {
+      document: { open: vi.fn(), write, close: vi.fn(), title: '' },
+      name: '',
+      onload: null,
+      focus,
+      print,
+      setTimeout: (callback: () => void) => {
+        callback();
+        return 0;
+      },
+    };
+    vi.stubGlobal('open', vi.fn(() => printWindow));
+    const result = createResult([{ value: '<img src=x onerror=alert(1)>' }]);
+    result.title = '<script>alert(1)</script>';
+
+    const exported = service.exportAsPdf(result);
+
+    expect(exported).toBe(true);
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(write.mock.calls[0]?.[0]).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(write.mock.calls[0]?.[0]).toContain('&lt;img src=x onerror=alert(1)&gt;');
+    expect(focus).toHaveBeenCalledTimes(2);
+    expect(print).toHaveBeenCalledTimes(1);
+  });
 });
 
 function exportCsv(service: ReportsExportService, values: string[]): void {

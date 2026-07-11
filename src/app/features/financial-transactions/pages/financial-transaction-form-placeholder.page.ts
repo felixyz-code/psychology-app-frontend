@@ -20,6 +20,10 @@ export class FinancialTransactionFormPlaceholderPage {
   readonly errorMessage = signal('');
 
   submit(payload: CreateFinancialTransactionDto): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     this.isSaving.set(true);
     this.errorMessage.set('');
 
