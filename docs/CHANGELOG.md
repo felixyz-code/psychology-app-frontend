@@ -6,6 +6,30 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# RC.FE.3.4 - Cross-Cutting And Release Infrastructure Regression Closure
+
+## Changed
+
+* Se cerro la red minima de regresion transversal para infraestructura de release y contratos compartidos de mayor riesgo antes de `Release Candidate 1.0`.
+* El workflow de CI ahora certifica automaticamente `development` en `push` y `pull_request`, conservando tambien `main`, `master` y ejecucion manual.
+* La validacion automatica de frontend ejecuta `npm ci`, suite unitaria completa, build Angular de produccion y build de imagen Docker antes de considerar valida la integracion.
+* Se agrego cobertura de regresion para `DashboardAnalyticsService`, utilidades compartidas de data-table, `ThemeService`, secure logger, rutas globales y `appConfig`.
+* No hubo cambios funcionales de TypeScript productivo, backend, deploy, contratos HTTP ni dependencias.
+
+## Validation
+
+* Suite final: `38` archivos de prueba, `210` pruebas aprobadas, `0` fallidas y `0` skipped.
+* Build Angular correcto.
+* Build Docker correcto.
+* Validacion manual aprobada.
+
+## Notes
+
+* Los warnings SCSS preexistentes de budgets permanecen como deuda tecnica conocida y no bloquearon el cierre.
+* La cobertura agregada protege contratos transversales sin reabrir modulos CRUD ya certificados.
+
+---
+
 # RC.FE.3.3 - Operational And Reporting Regression Closure
 
 ## Changed

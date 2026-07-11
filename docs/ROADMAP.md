@@ -55,13 +55,13 @@ Completed - UTF-8/BOM compatibility added to CSV exports for Microsoft Excel wit
 RC.FE.3 status:
 
 ```text
-Open - Consolidated release-candidate regression track
+Completed - Consolidated release-candidate regression track
 ```
 
 FE-RC-002 status:
 
 ```text
-Partially open - Regression hardening remains in progress
+Closed - Regression hardening completed through RC.FE.3.1, RC.FE.3.2, RC.FE.3.3 and RC.FE.3.4
 ```
 
 RC.FE.3.1 status:
@@ -85,7 +85,7 @@ Completed - Operational and reporting regression
 RC.FE.3.4 status:
 
 ```text
-Open - CI gate
+Completed - Cross-Cutting & Release Infrastructure Regression
 ```
 
 ---
