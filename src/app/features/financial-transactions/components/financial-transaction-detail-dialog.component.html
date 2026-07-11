@@ -1,7 +1,7 @@
-<div class="detail-dialog-shell">
-  <header class="detail-dialog-header">
-    <div>
-      <span class="detail-dialog-eyebrow">Detalle financiero</span>
+<div class="financial-transaction-detail-dialog app-dialog">
+  <header class="financial-transaction-detail-dialog__header app-dialog__header">
+    <div class="financial-transaction-detail-dialog__header-copy">
+      <span class="financial-transaction-detail-dialog__eyebrow">Detalle financiero</span>
       <h2>Detalle de transaccion</h2>
       <p>{{ transaction.concept }}</p>
     </div>
@@ -11,12 +11,14 @@
     </button>
   </header>
 
-  <div class="detail-dialog-body">
+  <div class="financial-transaction-detail-dialog__body">
     <app-financial-transaction-detail-content [transaction]="transaction" />
   </div>
 
-  <footer class="detail-dialog-footer">
+  <footer class="financial-transaction-detail-dialog__actions app-dialog__actions">
     <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
-    <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']" (click)="close()">Editar</a>
+    <div class="financial-transaction-detail-dialog__actions-group app-dialog__actions-group">
+      <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']" (click)="close()">Editar</a>
+    </div>
   </footer>
 </div>

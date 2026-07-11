@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthStore } from '../../../core/auth/auth.store';
+import { logError } from '../../../core/logging/app-logger';
 import {
   CreateSessionNoteRequest,
   SessionNote,
@@ -91,12 +92,7 @@ export class SessionNoteFormDialogComponent {
             this.dialogRef.close(true);
           },
           error: (error) => {
-            console.error('PATCH /session-notes/:id failed', {
-              status: error?.status,
-              body: error?.error,
-              sessionNoteId: this.data.sessionNote?.id,
-              payload: basePayload,
-            });
+            logError('session-notes.update', error);
             this.errorMessage.set('No fue posible guardar los cambios.');
           },
         });
@@ -121,11 +117,7 @@ export class SessionNoteFormDialogComponent {
           this.dialogRef.close(true);
         },
         error: (error) => {
-          console.error('POST /session-notes failed', {
-            status: error?.status,
-            body: error?.error,
-            payload,
-          });
+          logError('session-notes.create', error);
           this.errorMessage.set('No fue posible crear la nota de sesión.');
         },
       });

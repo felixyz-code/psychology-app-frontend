@@ -6,6 +6,357 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# RC.FE.3.3 - Operational And Reporting Regression Closure
+
+## Changed
+
+* Se cerro la red de regresion operativa y de reporting para `Appointments`, `Financial Transactions`, `Reports Runner`, exportacion HTML por impresion, exportacion CSV integrada y el helper compartido `local-date-range`.
+* El objetivo fue consolidar la cobertura minima necesaria para los modulos operativos restantes antes del `Release Candidate 1.0`.
+* Se corrigio el riesgo `RCFE33-01` con una guarda basada en `isSaving()` para evitar doble submit en la creacion de transacciones financieras.
+* La suite evoluciono de `146` a `185` pruebas, con `0` fallidas y `0` skipped.
+* La validacion tecnica confirmo build correcto y la validacion manual quedo aprobada.
+* No hubo cambios en backend, CI, dependencias, configuracion ni workflows.
+
+## Validation
+
+* `185` pruebas aprobadas.
+* `0` pruebas fallidas.
+* `0` pruebas skipped.
+* Build correcto.
+* Validacion manual aprobada.
+
+## Notes
+
+* No se modifico backend.
+* No se modifico CI.
+* No se agregaron dependencias.
+* No se cambio la configuracion.
+* No se hizo commit ni push.
+
+---
+
+# RC.FE.3.2 - Clinical Core Regression Closure
+
+## Changed
+
+* Se cerro la red de regresion clinica basada en riesgo para `Clinical Core`, `Session Notes` y `Documents` como cierre consolidado de `RC.FE.3.2A`, `RC.FE.3.2B.1` y `RC.FE.3.2B.2`.
+* La suite de regresion evoluciono historicamente de `71` a `146` pruebas para cubrir los flujos clinicos y documentales relevantes sin introducir cambios productivos.
+* La validacion final quedo en `146/146` pruebas aprobadas, `0` fallidas y `0` skipped.
+* La validacion tecnica confirmo build correcto y la validacion manual quedo aprobada.
+* No hubo cambios en backend, CI, dependencias, configuracion ni workflows.
+
+## Validation
+
+* `146/146` pruebas aprobadas.
+* `0` pruebas fallidas.
+* `0` pruebas skipped.
+* Build correcto.
+* Validacion manual aprobada.
+
+## Notes
+
+* No se modifico codigo productivo.
+* No se modifico backend.
+* No se modifico CI.
+* No se agregaron dependencias.
+* No se modificaron configuracion ni workflows.
+
+---
+
+# RC.FE.3.1 - Authentication And Session Regression Closure
+
+## Changed
+
+* Se cerro la red minima de regresion de autenticacion y sesion para `AuthStore`, `AuthService`, `LoginPage`, `NavbarComponent`, `authGuard`, `authInterceptor`, `HttpErrorPolicyService` y `errorPolicyInterceptor`.
+* La suite de regresion paso de `27` a `57` pruebas, incorporando casos de login exitoso y fallido, logout, persistencia, restauracion, almacenamiento ausente o corrupto, token ausente o en blanco, proteccion de rutas, JWT en requests protegidas, exclusion de `/auth/login`, preservacion del request, manejo de `401` y `403`, deduplicacion de expiracion y propagacion de errores.
+* Se corrigio una inconsistencia en `AuthStore` para que la restauracion de sesion solo acepte estado persistido estructuralmente valido y limpie token y usuario cuando los datos no cumplen el contrato.
+* La validacion manual confirmo login, navegacion autenticada, logout, restauracion tras recarga, login invalido, JWT en requests protegidas, ausencia de JWT en `/auth/login`, proteccion de rutas privadas y descarte de sesiones persistidas invalidas.
+
+## Validation
+
+* `57/57` pruebas aprobadas.
+* `0` pruebas fallidas.
+* `0` pruebas skipped.
+* Build productivo correcto.
+* `git diff --check` correcto.
+* Validacion manual aprobada.
+
+## Notes
+
+* No se modifico backend.
+* No se modifico CI.
+* No se agregaron dependencias.
+* No se cambio el runner.
+* No se hizo commit ni push.
+
+---
+
+# RC.FE.2 - UTF-8/BOM Compatibility For CSV Exports
+
+## Changed
+
+* Se agrego BOM UTF-8 al inicio del archivo CSV completo para mejorar la compatibilidad con Microsoft Excel en Windows.
+* `Reporte Financiero` y `Reporte Agenda` ahora se abren correctamente en Excel sin mojibake para textos como `Categoría`, `Método`, `clínico` y `sesión`.
+* Se mantuvo intacto el endurecimiento de `FE-RC-001` contra formula injection en CSV.
+
+## Validation
+
+* La suite actualizada queda en `27/27`.
+* La validacion tecnica y manual confirmo compatibilidad con Excel.
+
+## Notes
+
+* No hubo cambios en `PDF`.
+* No hubo cambios en `UI`.
+* No hubo cambios de contratos.
+* No se agregaron dependencias nuevas.
+
+---
+
+# RC.FE.1 - CSV Formula Injection Closure
+
+## Changed
+
+* Se cerro FE-RC-001 con endurecimiento centralizado de exportacion CSV en `ReportsExportService`.
+* Se confirmo proteccion para `Financial Report` y `Agenda Report`.
+* Se neutralizaron prefijos peligrosos, variantes Unicode y deteccion despues de espacios y controles iniciales, preservando comas, comillas, saltos de linea y texto UTF-8.
+
+## Validation
+
+* Se agregaron 16 pruebas nuevas de exportacion CSV.
+* La suite completa quedo en 26/26.
+* La validacion manual en Excel confirmo que `=1+1` y `@SUM(1,1)` se muestran como texto y no se evaluan.
+
+## Notes
+
+* No hubo cambios en PDF, UI, contratos, dependencias ni CI/CD.
+* Se detecto un problema independiente de compatibilidad UTF-8/BOM con Excel, pendiente para otro sub-sprint y fuera del alcance de RC.FE.1.
+
+---
+
+# Sprint 17
+
+## Sprint 17.2 - Global HTTP Error Policy
+
+### Added
+
+* Se incorporo una politica global de errores HTTP mediante un interceptor funcional y un servicio centralizado.
+* La politica clasifica errores de red, autenticacion, autorizacion, recurso no encontrado, limite de solicitudes y servidor, sin alterar la propagacion del error hacia los flujos existentes.
+* Las respuestas `401` de solicitudes autenticadas cierran la sesion y redirigen al login, sin aplicar esa accion al propio endpoint de autenticacion.
+
+### Technical
+
+* No hubo cambios de backend, endpoints ni contratos.
+* No se modificaron los mensajes de error presentados al usuario.
+
+## Sprint 17.3 - Secure Logging And Sensitive Data Protection
+
+### Changed
+
+* Los logs directos de errores en pacientes, notas de sesion, documentos y arranque se reemplazaron por una abstraccion centralizada.
+* La salida de desarrollo se limita a una operacion estatica, estado HTTP numerico y frames de stack sanitizados.
+* Produccion no emite estos logs; no se registran payloads, cuerpos HTTP, PII, contenido clinico, metadatos de archivos ni mensajes de error potencialmente sensibles.
+
+### Technical
+
+* No se incorporaron plataformas externas de observabilidad.
+* No hubo cambios funcionales ni cambios en la politica global de errores HTTP.
+
+## Sprint 17.4 - Test Suite Baseline Fix
+
+### Changed
+
+* Se actualizo la expectativa obsoleta de la aplicacion raiz: ahora valida el `router-outlet` que representa la plantilla actual en lugar de un titulo inicial inexistente.
+* La suite vuelve a pasar completamente con 10 pruebas exitosas.
+
+### Technical
+
+* El cambio quedo limitado a `src/app/app.spec.ts`; no hubo cambios productivos.
+* `npm.cmd test -- --watch=false` y `npm.cmd run build` finalizaron correctamente.
+
+# Sprint 15
+
+## Sprint 15.2 - Report Runner Subscription Hardening
+
+### Changed
+
+* Se endureció el ciclo de vida de las suscripciones.
+* Integración con `takeUntilDestroyed`.
+* Sin cambios funcionales.
+
+## Sprint 15.3 - Dialog Focus Accessibility Audit
+
+### Changed
+
+* Auditoría completa del manejo de foco.
+* Estrategia definida.
+* Sin cambios de implementación.
+
+## Sprint 15.4 - SCSS Budget Audit
+
+### Changed
+
+* Auditoría de budgets.
+* Identificación de deuda técnica.
+* Priorización de reducción.
+
+## Sprint 15.5–15.7 - Low-Risk SCSS Budget Reduction
+
+### Changed
+
+* Reducción conservadora de SCSS.
+* Eliminación de duplicación interna.
+* `appointments-daily-agenda` salió del warning.
+* `patients-list` y `appointments-list` redujeron tamaño.
+* Sin cambios visuales.
+
+## Sprint 15.8 - Delete Dialog Accessibility Phase 1
+
+### Changed
+
+* `cdkFocusInitial` agregado al botón Cancelar.
+* Sin cambios funcionales.
+* Sin cambios visuales.
+* Base preparada para futuras mejoras de accesibilidad.
+
+# Sprint 14
+
+## Sprint 14.4 - Detail Dialog Baseline Consolidation (Phase 1)
+
+### Changed
+
+* `Sprint 14.4` consolida la primera fase del baseline visual para dialogs de detalle de menor riesgo sin introducir nuevas funcionalidades ni cambios de comportamiento.
+* `Document Detail Dialog` y `Financial Transaction Detail Dialog` quedan homologados visualmente bajo el lenguaje actual del `Design System`.
+* Ambos dialogs ahora comparten un header mas consistente, con mejor jerarquia visual entre titulo y subtitulo.
+* El layout general del detalle se vuelve mas consistente en espaciado, ritmo visual y acomodo responsive.
+* La organizacion visual interna mejora para hacer mas clara la lectura de la informacion ya existente sin agregar ni eliminar datos.
+* Se mantiene compatibilidad con `Light` y `Dark` mode dentro del baseline actual del frontend.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se modificaron servicios, modelos, interfaces, routing ni comportamiento funcional.
+* La consolidacion quedo acotada a presentacion y estructura visual de dialogs existentes.
+* `npm.cmd run build` finalizo correctamente.
+
+## Sprint 14.3 - Dialog Baseline Consolidation (Delete Dialogs)
+
+### Changed
+
+* `Sprint 14.3` consolida el baseline visual de dialogs destructivos sin introducir nuevas funcionalidades ni cambios de comportamiento.
+* Se homologa visualmente `Documents`, `Session Notes` y `Financial Transactions` dentro de sus `Delete Dialogs`.
+* Los dialogs ahora comparten un header unificado, una `summary card` consistente y una seccion de advertencia mas clara.
+* El `CTA` destructivo queda mejor alineado con la jerarquia visual del `Design System` actual.
+* La experiencia responsive se vuelve mas consistente entre desktop y mobile para este tipo de confirmaciones.
+* Se corrigen textos y detalles de codificacion `UTF-8` visibles dentro de estas superficies.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se modificaron servicios, payloads, DTOs, validaciones, permisos ni navegacion.
+* La consolidacion quedo acotada a `Delete Dialogs` existentes y a ajustes presentacionales.
+* `npm.cmd run build` finalizo correctamente.
+# Sprint 13
+
+## Sprint 13.6 - Product Polish Closure
+
+### Changed
+
+* Sprint 13 cierra una pasada amplia de `Product Polish` enfocada en consistencia visual, ritmo de espaciado, estados compartidos y madurez de UI/UX sin introducir nuevas funcionalidades ni cambios de contratos.
+* `Dashboard` queda refinado como superficie ejecutiva principal con una lectura mas clara, widgets mas consistentes y mejor integracion con el lenguaje visual del producto.
+* `Patients List` ahora comparte un baseline visual mas cercano al `Dashboard`, con hero ejecutivo compacto, summary strip, toolbar mas limpia, mejores estados y tabla mas consistente.
+* `Patients Dialogs` quedan alineados al `Design System` actual mediante `app-dialog`, agrupacion por intencion, mejor jerarquia interna y confirmaciones destructivas mas profesionales.
+* `Appointments List` ahora comparte el mismo nivel visual de polish de los modulos principales con hero compacto, metricas ejecutivas, toolbar unificada, estados mas maduros y tabla mas consistente.
+* `Appointment Dialogs` quedan alineados al `Design System` del producto, con formularios mejor seccionados, confirmacion destructiva mas clara y detalle de cita con shell mas consistente.
+* Los estados `Empty`, `Error` y `Loading` se vuelven mas homogeneos entre superficies operativas clave.
+* La experiencia responsive recibe ajustes de espaciado, jerarquia y acomodo de acciones para desktop, tablet y mobile sin redisenar los flujos principales.
+* La consistencia visual global del frontend mejora al reducir variaciones entre dashboards, listados, tablas, dialogs y acciones compartidas.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se modificaron servicios, DTOs, payloads, validaciones clinicas ni navegacion como parte del polish.
+* El cierre del sprint se apoyó principalmente en componentes shared existentes, estilos feature-level y ajustes presentacionales acotados por modulo.
+* `npm.cmd run build` finalizo correctamente durante los sprints de cierre visual.
+
+## Sprint 13.5 - Patients Dialog Polish
+
+### Changed
+
+* Los dialogs del modulo `Patients` reciben una pasada final de polish visual y estructural para alinearse mejor con el nivel ya alcanzado por `Dashboard` y `Patients List` sin alterar flujos, contratos ni navegacion.
+* `Patient Form Dialog` ahora reutiliza mejor el baseline compartido de dialogs y formularios mediante secciones visuales, agrupacion por intencion, placeholders/hints para campos opcionales, mejor jerarquia interna y un body scrollable con footer persistente.
+* `Patient Delete Dialog` ahora presenta una confirmacion destructiva mas profesional con header consistente, resumen visual del paciente, nombre destacado y CTA destructivo explicito.
+* `Patient Detail Dialog` recibe solo micro-polish de UI/UX, con pequenos ajustes de copy y consistencia visual para acompanar el cierre del modulo sin redisenar el `Clinical Workspace`.
+* Con este sprint, el modulo `Patients` queda cerrado a nivel UI/UX dentro del alcance actual del MVP.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se modificaron servicios, payloads, DTOs, validaciones, permisos ni navegacion.
+* El ajuste quedo acotado a `patient-form-dialog.component.html/.scss`, `patient-delete-dialog.component.html/.scss` y micro-ajustes en `patient-detail-dialog.component.html/.scss`.
+* `styles.scss` no requirio cambios para completar el polish.
+* `npm.cmd run build` finalizo correctamente.
+
+## Sprint 13.4 - Patients List Polish
+
+### Changed
+
+* El listado global de `Patients` recibe una pasada final de polish visual para alinearse mejor con el nivel profesional alcanzado por `Dashboard` sin rediseñar el modulo ni alterar su flujo CRUD.
+* La cabecera de `Patients` ahora usa un hero mas compacto y ejecutivo, con jerarquia mas sobria, menos altura vertical y mejor integracion con el ritmo general de la pagina.
+* La pantalla principal ahora expone un `summary strip` compacto construido unicamente con datos ya cargados del listado, incluyendo volumen total, altas del mes, pacientes con contacto registrado y ultimo registro visible.
+* La toolbar del listado reduce el protagonismo visual del buscador en escritorio y mejora su composicion general para dejar una base mas limpia y consistente para futuras acciones o filtros.
+* La tabla mantiene exactamente la misma informacion y comportamiento, pero mejora la lectura visual con mejor dominancia del nombre del paciente, metadata secundaria mas corta y una cabecera ligeramente mas presente.
+* Las acciones por fila conservan la misma iconografia y orden, pero ahora se sienten mas consistentes gracias a un mejor espaciado, area clickeable y feedback hover.
+* Los estados de carga, error y vacio del listado se refinan para verse mas profesionales sin introducir nuevas rutas, componentes compartidos ni cambios de comportamiento.
+* El breadcrumb visible `Dashboard / Pacientes` se retira de esta pagina al no aportar contexto suficiente frente al sidebar, el titulo y el CTA principal ya presentes en la vista.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* No se agregaron llamadas HTTP nuevas para metricas del resumen; toda la presentacion reutiliza exclusivamente el dataset ya cargado por `PatientsService.getPatients()`.
+* No se modificaron dialogs de paciente, `Patient Detail`, `Patient Form` ni `Patient Delete`.
+* No se altero la logica de busqueda, ordenamiento, paginacion, acciones por fila ni navegacion del modulo.
+* El polish quedo acotado a `patients-list.page.ts`, `patients-list.page.html` y `patients-list.page.scss`.
+* `npm.cmd run build` finalizo correctamente.
+
+## Sprint 13.1 - Dashboard Analytics
+
+### Added
+
+* Nuevo `DashboardAnalyticsService` dentro del feature `dashboard` para orquestar la carga ejecutiva sin crear nuevos contratos backend.
+* Nuevo `DashboardSnapshot` como capa local de datos crudos para pacientes, citas, expedientes, notas, documentos y resumen financiero mensual.
+* Nuevo `DashboardViewModel` como capa local orientada a UI con bloques de `KPIs`, `Agenda de hoy`, `Proximas citas`, `Resumen financiero`, `Actividad clinica`, `Alertas operativas` y `Acciones rapidas`.
+* Nuevo resumen financiero mensual dentro del dashboard reutilizando `FinancialTransactionsService.findSummary(...)` y el rango mensual local ya estandarizado en frontend.
+* Nueva seccion visible de `Proximas citas` para complementar la agenda del dia sin convertir el dashboard en un modulo analitico profundo.
+* Nueva seccion de `Alertas operativas` limitada a citas pasadas que aun siguen en estado `SCHEDULED`, con copy conservador y sin reglas ambiguas nuevas.
+
+### Changed
+
+* El dashboard deja de concentrar la agregacion pesada dentro de `dashboard.page.ts` y ahora consume un `ViewModel` ya preparado por servicio.
+* La pantalla principal evoluciona desde un home resumido hacia un `Executive Overview` mas claro para responder rapidamente como va el dia, el estado de la agenda, el balance mensual y la actividad clinica reciente.
+* `Agenda de hoy` se mantiene como bloque principal y ahora convive con `Proximas citas`, `Resumen financiero`, `Actividad clinica reciente` y `Acciones rapidas` de peso secundario.
+* La carga del dashboard mantiene degradacion parcial por fuente fallida para no colapsar toda la experiencia cuando un endpoint no responde.
+* Se evita introducir metricas ambiguas como pacientes activos, pacientes sin seguimiento o indicadores basados en reglas no formalizadas.
+
+### Technical
+
+* No hubo cambios de backend.
+* No hubo nuevos endpoints.
+* No hubo cambios de contratos HTTP.
+* El dashboard sigue reutilizando servicios existentes de `Patients`, `Appointments`, `Case Files`, `Session Notes`, `Documents` y `Financial Transactions`.
+* No se utiliza `getWorkspace()` en bucle ni se introduce un patron `N+1` para la carga del dashboard global.
+* La arquitectura interna del dashboard queda preparada para evolucionar a widgets con carga independiente en un sprint futuro sin requerir un rediseño mayor del feature.
+
 # Sprint 12
 
 ## Sprint 12.6 - Reports QA Hardening
@@ -894,3 +1245,8 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 * Se anadio un boton visible de cierre (X) en dispositivos moviles.
 * Se mejoro el espaciado superior del header del drawer movil.
 * Desktop permanece sin cambios.
+
+
+
+
+

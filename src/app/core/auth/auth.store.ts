@@ -41,17 +41,38 @@ export class AuthStore {
     const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
     const rawUser = localStorage.getItem(AUTH_USER_KEY);
 
-    if (!accessToken || !rawUser) {
+    if (!accessToken?.trim() || !rawUser) {
       this.clearSession();
       return;
     }
 
     try {
-      const user = JSON.parse(rawUser) as AuthUser;
+      const user: unknown = JSON.parse(rawUser);
+
+      if (!this.isStoredUser(user)) {
+        this.clearSession();
+        return;
+      }
+
       this.accessTokenSignal.set(accessToken);
       this.currentUserSignal.set(user);
     } catch {
       this.clearSession();
     }
+  }
+
+  private isStoredUser(user: unknown): user is AuthUser {
+    if (!user || typeof user !== 'object') {
+      return false;
+    }
+
+    const candidate = user as Partial<AuthUser>;
+
+    return (
+      typeof candidate.id === 'string' &&
+      typeof candidate.name === 'string' &&
+      typeof candidate.email === 'string' &&
+      (candidate.role === 'ADMIN' || candidate.role === 'PSYCHOLOGIST')
+    );
   }
 }

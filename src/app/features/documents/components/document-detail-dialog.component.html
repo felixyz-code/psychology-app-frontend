@@ -1,7 +1,7 @@
-<div class="detail-dialog-shell">
-  <header class="detail-dialog-header">
-    <div>
-      <span class="detail-dialog-eyebrow">Detalle tecnico</span>
+<div class="document-detail-dialog app-dialog">
+  <header class="document-detail-dialog__header app-dialog__header">
+    <div class="document-detail-dialog__header-copy">
+      <span class="document-detail-dialog__eyebrow">Detalle del documento</span>
       <h2>Detalle del documento</h2>
       <p>{{ getDisplayValue(document.fileName) }}</p>
     </div>
@@ -11,59 +11,86 @@
     </button>
   </header>
 
-  <div class="detail-dialog-body">
-    <div class="detail-dialog-grid">
-      <div class="detail-dialog-item">
-        <span class="detail-dialog-label">ID del documento</span>
-        <p class="detail-dialog-value detail-dialog-value--technical">{{ getDisplayValue(document.id) }}</p>
+  <div class="document-detail-dialog__body">
+    <section class="document-detail-dialog__section">
+      <div class="document-detail-dialog__section-header">
+        <h3>Resumen del documento</h3>
+        <p>Informacion principal del archivo asociado al expediente.</p>
       </div>
 
-      <div class="detail-dialog-item">
-        <span class="detail-dialog-label">Nombre de archivo</span>
-        <p class="detail-dialog-value">{{ getDisplayValue(document.fileName) }}</p>
-      </div>
-
-      <div class="detail-dialog-item">
-        <span class="detail-dialog-label">Tipo MIME</span>
-        <p class="detail-dialog-value detail-dialog-value--technical">
-          {{ getDisplayValue(document.mimeType) }}
-        </p>
-      </div>
-
-      <div class="detail-dialog-item">
-        <span class="detail-dialog-label">Expediente</span>
-        <p class="detail-dialog-value detail-dialog-value--technical">
-          {{ getDisplayValue(document.caseFileId) }}
-        </p>
-      </div>
-
-      <div class="detail-dialog-item">
-        <span class="detail-dialog-label">Subido por</span>
-        <p class="detail-dialog-value detail-dialog-value--technical">
-          {{ getDisplayValue(document.uploadedById) }}
-        </p>
-      </div>
-
-      <div class="detail-dialog-item">
-        <span class="detail-dialog-label">Fecha de subida</span>
-        <p class="detail-dialog-value">{{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
-      </div>
-
-      <div class="detail-dialog-item">
-        <span class="detail-dialog-label">Ultima actualizacion</span>
-        <p class="detail-dialog-value">{{ document.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
-      </div>
-
-      @if (document.filePath) {
-        <div class="detail-dialog-item detail-dialog-item--full">
-          <span class="detail-dialog-label">Ruta del archivo</span>
-          <p class="detail-dialog-value detail-dialog-value--technical">{{ document.filePath }}</p>
+      <div class="document-detail-dialog__grid">
+        <div class="document-detail-dialog__item">
+          <span class="document-detail-dialog__label">Nombre de archivo</span>
+          <p class="document-detail-dialog__value">{{ getDisplayValue(document.fileName) }}</p>
         </div>
-      }
-    </div>
+
+        <div class="document-detail-dialog__item">
+          <span class="document-detail-dialog__label">Tipo MIME</span>
+          <p class="document-detail-dialog__value document-detail-dialog__value--technical">
+            {{ getDisplayValue(document.mimeType) }}
+          </p>
+        </div>
+
+        <div class="document-detail-dialog__item">
+          <span class="document-detail-dialog__label">Expediente</span>
+          <p class="document-detail-dialog__value document-detail-dialog__value--technical">
+            {{ getDisplayValue(document.caseFileId) }}
+          </p>
+        </div>
+
+        <div class="document-detail-dialog__item">
+          <span class="document-detail-dialog__label">Subido por</span>
+          <p class="document-detail-dialog__value document-detail-dialog__value--technical">
+            {{ getDisplayValue(document.uploadedById) }}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="document-detail-dialog__section">
+      <div class="document-detail-dialog__section-header">
+        <h3>Identificadores</h3>
+        <p>Referencias tecnicas del registro y la ubicacion del archivo.</p>
+      </div>
+
+      <div class="document-detail-dialog__grid">
+        <div class="document-detail-dialog__item">
+          <span class="document-detail-dialog__label">ID del documento</span>
+          <p class="document-detail-dialog__value document-detail-dialog__value--technical">
+            {{ getDisplayValue(document.id) }}
+          </p>
+        </div>
+
+        @if (document.filePath) {
+          <div class="document-detail-dialog__item document-detail-dialog__item--full">
+            <span class="document-detail-dialog__label">Ruta del archivo</span>
+            <p class="document-detail-dialog__value document-detail-dialog__value--technical">{{ document.filePath }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="document-detail-dialog__section">
+      <div class="document-detail-dialog__section-header">
+        <h3>Trazabilidad</h3>
+        <p>Fechas clave para el seguimiento del documento.</p>
+      </div>
+
+      <div class="document-detail-dialog__grid">
+        <div class="document-detail-dialog__item">
+          <span class="document-detail-dialog__label">Fecha de subida</span>
+          <p class="document-detail-dialog__value">{{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <div class="document-detail-dialog__item">
+          <span class="document-detail-dialog__label">Ultima actualizacion</span>
+          <p class="document-detail-dialog__value">{{ document.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <footer class="detail-dialog-footer">
+  <footer class="document-detail-dialog__actions app-dialog__actions">
     <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
   </footer>
 </div>

@@ -1,33 +1,39 @@
 :host {
   display: block;
+  width: min(100%, 960px, calc(100vw - 48px));
+  max-width: min(100%, 960px, calc(100vw - 48px));
   min-height: 0;
+  box-sizing: border-box;
 }
 
-.detail-dialog-shell {
+.financial-transaction-detail-dialog {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
+  max-width: 100%;
   max-height: 85vh;
+  min-height: 0;
   box-sizing: border-box;
   overflow: hidden;
-  overflow-x: hidden;
-  min-height: 0;
-  padding: 1.25rem;
-  background: transparent;
-  color: var(--app-color-heading);
 }
 
-.detail-dialog-header {
+.financial-transaction-detail-dialog__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  width: 100%;
+  max-width: 100%;
   flex: 0 0 auto;
-  padding-bottom: 0.25rem;
+  box-sizing: border-box;
 }
 
-.detail-dialog-eyebrow {
+.financial-transaction-detail-dialog__header-copy {
+  min-width: 0;
+}
+
+.financial-transaction-detail-dialog__eyebrow {
   display: inline-block;
   margin-bottom: 0.35rem;
   color: var(--app-color-text-secondary);
@@ -37,64 +43,39 @@
   text-transform: uppercase;
 }
 
-.detail-dialog-header h2,
-.detail-dialog-header p {
-  margin: 0;
+.financial-transaction-detail-dialog__body {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.1rem;
 }
 
-.detail-dialog-header > div {
+.financial-transaction-detail-dialog__body app-financial-transaction-detail-content {
   min-width: 0;
 }
 
-.detail-dialog-header h2 {
-  color: var(--app-color-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.detail-dialog-header p {
-  margin-top: 0.35rem;
-  color: var(--app-color-text-secondary);
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  white-space: normal;
-}
-
-.detail-dialog-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: calc(85vh - 8.5rem);
-  padding: 0.25rem;
-}
-
-.detail-dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+.financial-transaction-detail-dialog__actions {
   flex: 0 0 auto;
-  flex-shrink: 0;
-  padding: 0.75rem 0.5rem 0.25rem;
-  border-top: 1px solid var(--app-color-card-border);
-  background: var(--app-color-dialog-bg);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding-inline: 0.1rem;
+}
+
+.financial-transaction-detail-dialog__actions-group {
+  min-width: 0;
 }
 
 @media (max-width: 720px) {
-  .detail-dialog-shell {
-    padding: 1rem;
-  }
-
-  .detail-dialog-body {
-    max-height: calc(85vh - 11rem);
-    padding: 0;
-  }
-
-  .detail-dialog-footer {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0.75rem 0 0;
+  .financial-transaction-detail-dialog__body,
+  .financial-transaction-detail-dialog__actions {
+    padding-right: 0;
+    padding-inline: 0;
   }
 }

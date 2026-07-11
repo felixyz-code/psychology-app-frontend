@@ -191,6 +191,7 @@
 .patient-detail-dialog__section-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .patient-detail-dialog__label {
@@ -222,7 +223,6 @@
   color: var(--app-color-danger-text);
   font-weight: 600;
 }
-
 .patient-detail-dialog__actions {
   display: flex;
   justify-content: flex-end;

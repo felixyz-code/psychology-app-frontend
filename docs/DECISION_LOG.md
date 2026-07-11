@@ -547,6 +547,99 @@ La estabilizacion previa reduce riesgo y deja una base mas segura para futuras c
 
 ---
 
+# ADR-022 - Global HTTP Error Policy Through Functional Interceptor
+
+## Decision
+
+HTTP errors are observed by a global functional interceptor that delegates their classification and session-related actions to `HttpErrorPolicyService`.
+
+The interceptor preserves the original error propagation. User-facing messages and feature-level recovery remain owned by the existing flows.
+
+## Rationale
+
+Authentication failures and HTTP error classification are cross-cutting concerns. Centralizing them prevents duplicated authentication cleanup and redirect behavior while preserving feature ownership of UX.
+
+## Implications
+
+- `401` responses from authenticated requests clear the local session and redirect to login.
+- Login requests and already anonymous sessions do not trigger a redundant redirect.
+- New HTTP consumers inherit the policy without modifying contracts or backend behavior.
+- The policy does not log response bodies or replace component-level user feedback.
+
+---
+
+# ADR-023 - Development-Only Safe Logging
+
+## Decision
+
+Application diagnostics use a centralized logging utility that emits only in development.
+
+Permitted development fields are a static operation identifier, numeric HTTP status and sanitized stack frames. Request payloads, HTTP response bodies, PII, clinical content, file metadata and error messages are excluded.
+
+## Rationale
+
+Clinical data and personal information must not reach browser logs or future production logging sinks. A narrow logger retains useful debugging context without serializing sensitive data.
+
+## Implications
+
+- Production does not emit application diagnostic logs through this utility.
+- New application error logs must use the centralized utility rather than direct `console.*` calls.
+- External observability platforms remain outside the current scope and must apply the same data-minimization policy if introduced later.
+
+---
+
+# ADR-024 - Centralized CSV Formula Neutralization For Spreadsheet Exports
+
+## Decision
+
+CSV exports in `Reports` neutralize spreadsheet formulas centrally inside the CSV serialiser before structural CSV escaping.
+
+Current rule:
+
+- text cells that begin with a dangerous formula prefix after leading whitespace or control characters receive a real tab prefix
+- the neutralization happens before quote escaping and CSV wrapping
+- the preserved tab becomes part of the exported CSV value, but the data model and PDF exports remain unchanged
+- this protection applies to human-readable spreadsheet workflows, not to stored data
+
+## Rationale
+
+Spreadsheet applications may interpret exported text as formulas when a cell begins with `=`, `+`, `-`, `@` or a Unicode equivalent.
+
+Centralizing the neutralization in the exporter keeps the protection consistent for every CSV report without duplicating logic in individual report builders.
+
+Using a real tab is a conservative mitigation that keeps the exported value visible as text while avoiding changes to PDF or backend contracts.
+
+## Implications
+
+- new CSV report surfaces should reuse the same central serializer
+- formula detection must continue to consider leading spaces, tabs and line breaks before the first effective character
+- CSV exports remain suitable for manual spreadsheet review, but the tab prefix is part of the exported file content
+- data stored by the application is not altered by this presentation-layer protection
+
+---
+
+# ADR-025 - UTF-8 BOM For Excel Compatibility In CSV Exports
+
+## Decision
+
+CSV exports in `Reports` keep `text/csv;charset=utf-8` as their MIME type and prepend a UTF-8 BOM to the exported file content.
+
+The frontend does not migrate report exports to `XLSX`.
+
+## Rationale
+
+Microsoft Excel on Windows can misinterpret UTF-8 CSV files without a BOM when they are opened directly. Adding the BOM preserves the current CSV workflow while improving compatibility for end users.
+
+Keeping CSV avoids introducing a heavier export format that is unnecessary for the current release candidate scope.
+
+## Implications
+
+- CSV remains the export format for `Financial Report` and `Agenda Report`.
+- Formula hardening from `ADR-024` remains in place and is not replaced by the BOM decision.
+- The export strategy stays conservative and aligned with the existing reports architecture.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

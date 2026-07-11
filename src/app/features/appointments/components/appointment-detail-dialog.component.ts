@@ -21,6 +21,14 @@ interface AppointmentDetailDialogData {
   styleUrl: './appointment-detail-dialog.component.scss',
 })
 export class AppointmentDetailDialogComponent {
+  private static readonly DATE_TIME_FORMATTER = new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   private readonly data = inject<AppointmentDetailDialogData>(MAT_DIALOG_DATA);
   private readonly authStore = inject(AuthStore);
   private readonly dialogRef = inject(
@@ -75,5 +83,9 @@ export class AppointmentDetailDialogComponent {
     };
 
     return classes[status];
+  }
+
+  getAppointmentSummary(): string {
+    return AppointmentDetailDialogComponent.DATE_TIME_FORMATTER.format(new Date(this.appointment.scheduledAt));
   }
 }

@@ -1,3 +1,62 @@
+.patient-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: min(85vh, calc(100dvh - 2rem));
+  height: min(85vh, calc(100dvh - 2rem));
+  min-height: 0;
+  gap: 0.4rem;
+  overflow: hidden;
+}
+
 .patient-dialog__form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
   gap: 1.5rem;
+  overflow: hidden;
+}
+
+.patient-dialog__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.patient-dialog__section {
+  gap: 0.95rem;
+}
+
+.patient-dialog__grid {
+  gap: 0.75rem 1rem;
+}
+
+.patient-dialog__error,
+.patient-dialog__saving {
+  margin-top: 0.25rem;
+}
+
+.patient-dialog__actions {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 0.4rem;
+  background: var(--app-color-dialog-bg);
+}
+
+.patient-dialog__grid .mat-mdc-form-field {
+  --mat-form-field-container-height: 52px;
+  --mat-form-field-container-vertical-padding: 14px;
+}
+
+.patient-dialog__grid .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 0.1rem;
+}
+
+@media (max-width: 720px) {
+  .patient-dialog {
+    max-height: calc(100dvh - 1.25rem);
+    height: calc(100dvh - 1.25rem);
+  }
 }

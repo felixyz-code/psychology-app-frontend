@@ -175,6 +175,7 @@ Current characteristics:
 * `ReportPreviewShell` supports tabular, grouped and `clinical` preview strategies
 * `previewMode: clinical` is used for patient-centered clinical documents with narrative sections, timeline, summarized notes, complete notes and related documents
 * export infrastructure is centralized in the `reports` feature while data ownership remains in the source feature
+* CSV exports prepend a UTF-8 BOM for Excel compatibility while keeping the `text/csv;charset=utf-8` MIME type and existing formula protection
 * `ReportResult` now includes `pdfFileName` so each report can provide a descriptive export filename without changing the shared print-based `PDF` flow
 * a small `report-formatters` utility now centralizes presentational helpers such as readable MIME labels for report-owned clinical document surfaces
 * recent hardening keeps error presentation centralized in `ReportPreviewShell` and preserves explicit frontend feedback when `PDF` popup opening is blocked by the browser

@@ -1,6 +1,6 @@
 <section class="dashboard-page app-page">
   @if (isLoading()) {
-    <section class="dashboard-skeleton" aria-label="Cargando dashboard clinico" aria-busy="true">
+    <section class="dashboard-skeleton" aria-label="Cargando dashboard ejecutivo" aria-busy="true">
       <mat-card class="dashboard-hero dashboard-hero--skeleton">
         <div class="dashboard-hero__copy">
           <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--eyebrow" aria-hidden="true"></span>
@@ -15,202 +15,266 @@
         }
       </div>
 
-      <div class="dashboard-content-grid">
-        <mat-card class="dashboard-panel dashboard-panel--skeleton">
-          <div class="dashboard-panel__header">
-            <div>
+      <div class="dashboard-grid dashboard-grid--skeleton">
+        @for (item of dashboardSkeletonSections; track $index) {
+          <mat-card class="dashboard-panel dashboard-panel--skeleton">
+            <div class="dashboard-panel__header">
               <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-title" aria-hidden="true"></span>
               <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-subtitle" aria-hidden="true"></span>
             </div>
-          </div>
 
-          <div class="dashboard-list">
-            @for (item of dashboardSkeletonList; track $index) {
-              <article class="dashboard-list-item dashboard-list-item--skeleton">
-                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-title" aria-hidden="true"></span>
-                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-meta" aria-hidden="true"></span>
-                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-body" aria-hidden="true"></span>
-              </article>
-            }
-          </div>
-        </mat-card>
-
-        <div class="dashboard-side-column">
-          <mat-card class="dashboard-panel dashboard-panel--skeleton">
-            <div class="dashboard-panel__header">
-              <div>
-                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-title" aria-hidden="true"></span>
-                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-subtitle" aria-hidden="true"></span>
-              </div>
-            </div>
-
-            <div class="quick-actions quick-actions--skeleton">
-              @for (item of dashboardSkeletonList; track $index) {
-                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--action" aria-hidden="true"></span>
-              }
+            <div class="dashboard-list">
+              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-title" aria-hidden="true"></span>
+              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-meta" aria-hidden="true"></span>
+              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-body" aria-hidden="true"></span>
             </div>
           </mat-card>
-
-          <mat-card class="dashboard-panel dashboard-panel--skeleton">
-            <div class="dashboard-panel__header">
-              <div>
-                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-title" aria-hidden="true"></span>
-                <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-subtitle" aria-hidden="true"></span>
-              </div>
-            </div>
-
-            <div class="dashboard-activity">
-              @for (item of dashboardSkeletonList; track $index) {
-                <article class="dashboard-activity-item dashboard-activity-item--skeleton">
-                  <span class="app-skeleton dashboard-activity-item__icon-skeleton" aria-hidden="true"></span>
-                  <div class="dashboard-activity-item__content">
-                    <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-title" aria-hidden="true"></span>
-                    <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-body" aria-hidden="true"></span>
-                  </div>
-                </article>
-              }
-            </div>
-          </mat-card>
-        </div>
+        }
       </div>
     </section>
   } @else if (errorMessage()) {
     <mat-card class="dashboard-state dashboard-state--error">
       <p>{{ errorMessage() }}</p>
+      <button mat-stroked-button type="button" (click)="loadDashboard()">Reintentar</button>
     </mat-card>
-  } @else {
+  } @else if (viewModel(); as vm) {
     <mat-card class="dashboard-hero">
       <div class="dashboard-hero__copy">
-        <span class="dashboard-hero__eyebrow">Inicio del dia</span>
+        <span class="dashboard-hero__eyebrow">Resumen ejecutivo</span>
         <app-page-header
-          heading="Bienvenido de nuevo"
-          subtitle="Resumen rapido para organizar tu jornada clinica y acceder a las acciones clave."
+          heading="Panorama del consultorio"
+          subtitle="Resumen ejecutivo para entender la jornada, detectar pendientes y entrar rapido al modulo correcto."
         />
       </div>
 
       <div class="dashboard-hero__meta">
         <span class="dashboard-hero__label">Fecha actual</span>
-        <strong>{{ currentDateLabel() }}</strong>
-        <p>Tablero principal del consultorio.</p>
+        <strong>{{ vm.currentDateLabel }}</strong>
+        <p>Lectura diaria del estado clinico, operativo y financiero.</p>
       </div>
     </mat-card>
 
-    @if (failedSourcesMessage()) {
-      <p class="dashboard-warning" role="status">{{ failedSourcesMessage() }}</p>
+    @if (vm.warnings.length) {
+      <div class="dashboard-warnings" aria-label="Advertencias de carga">
+        @for (warning of vm.warnings; track warning) {
+          <p class="dashboard-warning" role="status">{{ warning }}</p>
+        }
+      </div>
     }
 
     <section class="dashboard-metrics app-page__metrics" aria-label="Metricas principales">
-      @for (metric of dashboardMetrics(); track metric.label) {
+      @for (metric of vm.kpiStrip; track metric.id) {
         <app-metric-card
           [icon]="metric.icon"
           [title]="metric.label"
           [value]="metric.value"
           [supportingText]="metric.supportingText"
-          [variant]="metric.tone"
+          [variant]="metric.variant"
         />
       }
     </section>
 
-    <div class="dashboard-content-grid">
+    <div class="dashboard-grid">
       <app-section-card
-        title="Citas de hoy"
-        subtitle="Atenciones programadas para la jornada."
+        class="dashboard-widget dashboard-widget--agenda"
+        [title]="vm.agendaToday.title"
+        [subtitle]="vm.agendaToday.subtitle"
       >
-        @if (todayAppointmentsPreview().length) {
+        @if (vm.agendaToday.items.length) {
           <div class="dashboard-list">
-            @for (appointment of todayAppointmentsPreview(); track appointment.id) {
+            @for (appointment of vm.agendaToday.items; track appointment.id) {
               <article
                 class="dashboard-list-item dashboard-list-item--interactive"
                 tabindex="0"
                 role="button"
-                [attr.aria-label]="'Abrir detalle de la cita de ' + getPatientName(appointment.patientId)"
+                [attr.aria-label]="'Abrir detalle de la cita de ' + appointment.patientName"
                 (click)="openAppointmentDetails(appointment)"
                 (keydown)="handleAppointmentCardKeydown($event, appointment)"
               >
-                <div class="dashboard-list-item__time">
-                  <span>{{ appointment.scheduledAt | date: 'HH:mm' }}</span>
+                <div class="dashboard-list-item__time dashboard-list-item__time--today">
+                  <span>{{ appointment.timeLabel }}</span>
                 </div>
 
                 <div class="dashboard-list-item__content">
                   <div class="dashboard-list-item__topline">
-                    <h3>{{ getPatientName(appointment.patientId) }}</h3>
-                    <app-status-badge
-                      [label]="getStatusLabel(appointment.status)"
-                      [variant]="getStatusVariant(appointment.status)"
-                    />
+                    <h3>{{ appointment.patientName }}</h3>
+                    <div class="dashboard-list-item__badge">
+                      <app-status-badge
+                        [label]="appointment.statusLabel"
+                        [variant]="appointment.statusVariant"
+                      />
+                    </div>
                   </div>
 
-                  <p class="dashboard-list-item__meta">{{ getAppointmentScheduleLabel(appointment) }}</p>
-                  <p class="dashboard-list-item__note">{{ getAppointmentDescription(appointment) }}</p>
+                  <p class="dashboard-list-item__meta">{{ appointment.scheduleLabel }}</p>
+                  <p class="dashboard-list-item__note">{{ appointment.notes }}</p>
                 </div>
               </article>
             }
           </div>
         } @else {
           <div class="dashboard-empty">
-            <h3>Sin citas para hoy</h3>
-            <p>La agenda del dia esta libre. Puedes crear una nueva cita desde las acciones rapidas.</p>
+            <h3>{{ vm.agendaToday.emptyTitle }}</h3>
+            <p>{{ vm.agendaToday.emptyMessage }}</p>
           </div>
         }
 
         <div sectionCardFooter class="dashboard-footer-end">
-          <button mat-stroked-button type="button" (click)="navigateToAppointments()">Ver agenda</button>
+          <button mat-stroked-button type="button" (click)="navigateToAppointments()">Ver agenda completa</button>
         </div>
       </app-section-card>
 
-      <div class="dashboard-side-column">
-        <app-section-card
-          title="Acciones rapidas"
-          subtitle="Accesos frecuentes para iniciar tu flujo de trabajo sin salir del dashboard."
-        >
-          <div class="quick-actions">
-            <app-action-card
-              icon="person_add"
-              label="Nuevo paciente"
-              variant="primary"
-              (triggered)="openCreatePatientDialog()"
-            />
-            <app-action-card
-              icon="event"
-              label="Nueva cita"
-              (triggered)="openCreateAppointmentDialog()"
-            />
-            <app-action-card
-              icon="manage_search"
-              label="Buscar paciente"
-              (triggered)="navigateToPatients()"
-            />
-          </div>
-        </app-section-card>
-
-        <app-section-card
-          title="Actividad reciente"
-          subtitle="Eventos clinicos recientes listos para futura integracion con un feed dedicado."
-        >
-          <div class="dashboard-activity">
-            @for (activity of recentActivity(); track activity.type + activity.id) {
-              <article class="dashboard-activity-item">
-                <div class="dashboard-activity-item__icon">
-                  <mat-icon>{{ getActivityIcon(activity.type) }}</mat-icon>
+      <app-section-card
+        class="dashboard-widget dashboard-widget--upcoming"
+        [title]="vm.upcomingAppointments.title"
+        [subtitle]="vm.upcomingAppointments.subtitle"
+      >
+        @if (vm.upcomingAppointments.items.length) {
+          <div class="dashboard-list">
+            @for (appointment of vm.upcomingAppointments.items; track appointment.id) {
+              <article
+                class="dashboard-upcoming-item dashboard-list-item--interactive"
+                tabindex="0"
+                role="button"
+                [attr.aria-label]="'Abrir detalle de la proxima cita de ' + appointment.patientName"
+                (click)="openAppointmentDetails(appointment)"
+                (keydown)="handleAppointmentCardKeydown($event, appointment)"
+              >
+                <div class="dashboard-upcoming-item__time">
+                  <span>{{ appointment.timeLabel }}</span>
                 </div>
 
-                <div class="dashboard-activity-item__content">
-                  <div class="dashboard-activity-item__topline">
-                    <h3>{{ activity.title }}</h3>
-                    <span>{{ activity.date | date: 'dd/MM HH:mm' }}</span>
-                  </div>
-                  <p>{{ getActivityTypeLabel(activity.type) }} - {{ activity.patientName }}</p>
-                  <p>{{ activity.description }}</p>
+                <div class="dashboard-upcoming-item__content">
+                  <h3>{{ appointment.patientName }}</h3>
+                  <p class="dashboard-upcoming-item__schedule">{{ appointment.scheduleLabel }}</p>
+                  <p class="dashboard-upcoming-item__note">{{ appointment.notes }}</p>
                 </div>
               </article>
             }
           </div>
-
-          <div sectionCardFooter>
-            <button mat-button type="button" class="dashboard-history-link" disabled>Ver historial ></button>
+        } @else {
+          <div class="dashboard-empty">
+            <h3>{{ vm.upcomingAppointments.emptyTitle }}</h3>
+            <p>{{ vm.upcomingAppointments.emptyMessage }}</p>
           </div>
-        </app-section-card>
-      </div>
+        }
+      </app-section-card>
+
+      <app-section-card
+        class="dashboard-widget dashboard-widget--alerts"
+        [title]="vm.operationalAlerts.title"
+        [subtitle]="vm.operationalAlerts.subtitle"
+      >
+        @if (vm.operationalAlerts.items.length) {
+          <div class="dashboard-alerts">
+            @for (alert of vm.operationalAlerts.items; track alert.id) {
+              <article class="dashboard-alert-card">
+                <div class="dashboard-alert-card__topline">
+                  <div class="dashboard-alert-card__title">
+                    <mat-icon>{{ alert.icon }}</mat-icon>
+                    <h3>{{ alert.title }}</h3>
+                  </div>
+
+                  <app-status-badge [label]="alert.badgeLabel" [variant]="alert.variant" />
+                </div>
+
+                <p>{{ alert.description }}</p>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="dashboard-empty dashboard-empty--soft">
+            <h3>{{ vm.operationalAlerts.emptyTitle }}</h3>
+            <p>{{ vm.operationalAlerts.emptyMessage }}</p>
+          </div>
+        }
+      </app-section-card>
+
+      <app-section-card
+        class="dashboard-widget dashboard-widget--finance"
+        [title]="vm.financeSummary.title"
+        [subtitle]="vm.financeSummary.subtitle"
+      >
+        <div class="dashboard-finance__meta">
+          <span>{{ vm.financeSummary.periodLabel }}</span>
+        </div>
+
+        <div class="dashboard-finance-list">
+          @for (metric of vm.financeSummary.metrics; track metric.id) {
+            <article class="dashboard-finance-row" [attr.data-metric]="metric.id">
+              <div class="dashboard-finance-row__label">
+                <div class="dashboard-finance-row__labelline">
+                  <mat-icon class="dashboard-finance-row__icon">{{ metric.icon }}</mat-icon>
+                  <span class="dashboard-finance-row__name">{{ metric.label }}</span>
+                </div>
+
+                <span class="dashboard-finance-row__supporting">{{ metric.supportingText }}</span>
+              </div>
+
+              <strong class="dashboard-finance-row__value">{{ metric.value }}</strong>
+            </article>
+          }
+        </div>
+
+        <div sectionCardFooter class="dashboard-footer-end">
+          <button mat-stroked-button type="button" (click)="navigateToFinance()">Ir a finanzas</button>
+        </div>
+      </app-section-card>
+
+      <app-section-card
+        class="dashboard-widget dashboard-widget--quick-actions"
+        [title]="vm.quickActions.title"
+        [subtitle]="vm.quickActions.subtitle"
+      >
+        <div class="quick-actions">
+          @for (action of vm.quickActions.items; track action.id) {
+            <app-action-card
+              [icon]="action.icon"
+              [label]="action.label"
+              [variant]="action.variant"
+              (triggered)="handleQuickAction(action.id)"
+            />
+          }
+        </div>
+      </app-section-card>
+
+      <app-section-card
+        class="dashboard-widget dashboard-widget--activity"
+        [title]="vm.clinicalActivity.title"
+        [subtitle]="vm.clinicalActivity.subtitle"
+      >
+        @if (vm.clinicalActivity.items.length) {
+          <div class="dashboard-activity">
+            @for (activity of vm.clinicalActivity.items; track activity.id) {
+              <article
+                class="dashboard-activity-item"
+                [attr.aria-label]="getActivityAriaLabel(activity)"
+              >
+                <div class="dashboard-activity-item__marker">
+                  <mat-icon>{{ activity.icon }}</mat-icon>
+                </div>
+
+                <div class="dashboard-activity-item__body">
+                  <h3>{{ activity.title }}</h3>
+
+                  <div class="dashboard-activity-item__meta">
+                    <p class="dashboard-activity-item__patient">{{ activity.patientName }}</p>
+                    <span class="dashboard-activity-item__type">{{ activity.typeLabel }}</span>
+                  </div>
+
+                  <p class="dashboard-activity-item__description">{{ activity.description }}</p>
+                  <span class="dashboard-activity-item__date">{{ activity.dateLabel }}</span>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="dashboard-empty">
+            <h3>{{ vm.clinicalActivity.emptyTitle }}</h3>
+            <p>{{ vm.clinicalActivity.emptyMessage }}</p>
+          </div>
+        }
+      </app-section-card>
     </div>
   }
 </section>

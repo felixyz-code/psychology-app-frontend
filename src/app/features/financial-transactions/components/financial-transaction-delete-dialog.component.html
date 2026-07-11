@@ -1,26 +1,40 @@
-<div class="financial-transaction-delete-dialog">
-  <h2>Eliminar transaccion financiera</h2>
-
-  <p>Esta accion eliminara de forma permanente el movimiento seleccionado. Confirme solo si desea continuar.</p>
-
-  <div class="financial-transaction-delete-dialog__summary">
-    <p class="financial-transaction-delete-dialog__title">"{{ transaction.concept }}"</p>
-    <p>{{ formatAmount(transaction.amount, transaction.currency) }} {{ transaction.currency }}</p>
+<div class="financial-transaction-delete-dialog app-dialog">
+  <div class="financial-transaction-delete-dialog__header app-dialog__header">
+    <h2>Eliminar transacción financiera</h2>
+    <p>Confirma si deseas eliminar este movimiento del módulo financiero.</p>
   </div>
+
+  <div class="financial-transaction-delete-dialog__summary app-dialog__summary">
+    <p class="financial-transaction-delete-dialog__summary-title app-dialog__summary-title">Movimiento seleccionado</p>
+    <p class="financial-transaction-delete-dialog__title">"{{ transaction.concept }}"</p>
+    <p class="financial-transaction-delete-dialog__meta">
+      Monto registrado: {{ formatAmount(transaction.amount, transaction.currency) }} {{ transaction.currency }}
+    </p>
+  </div>
+
+  <p class="financial-transaction-delete-dialog__warning">
+    Esta acción eliminará de forma permanente el movimiento seleccionado y no podrá deshacerse.
+  </p>
 
   @if (errorMessage()) {
     <p class="financial-transaction-delete-dialog__error" role="alert">{{ errorMessage() }}</p>
   }
 
   <div class="financial-transaction-delete-dialog__actions">
-    <button mat-button type="button" [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
 
-    <button mat-flat-button type="button" [disabled]="isDeleting()" (click)="confirmDelete()">
+    <button
+      mat-flat-button
+      type="button"
+      class="financial-transaction-delete-dialog__confirm app-dialog__danger"
+      [disabled]="isDeleting()"
+      (click)="confirmDelete()"
+    >
       @if (isDeleting()) {
         <mat-spinner diameter="20" />
         <span>Eliminando...</span>
       } @else {
-        <span>Eliminar</span>
+        <span>Eliminar movimiento</span>
       }
     </button>
   </div>

@@ -31,13 +31,61 @@ Current priorities:
 Latest completed sprint:
 
 ```text
-Sprint 12.6 - Reports QA Hardening
+Sprint 17.4 - Test Suite Baseline Fix
 ```
 
 Phase 3 progress:
 
 ```text
 Completed - Reports foundation generalized for multiple professional reports
+```
+
+RC.FE.1 status:
+
+```text
+Completed - FE-RC-001 closed with centralized CSV formula injection hardening in ReportsExportService
+```
+
+RC.FE.2 status:
+
+```text
+Completed - UTF-8/BOM compatibility added to CSV exports for Microsoft Excel without changing PDF, UI or contracts
+```
+
+RC.FE.3 status:
+
+```text
+Open - Consolidated release-candidate regression track
+```
+
+FE-RC-002 status:
+
+```text
+Partially open - Regression hardening remains in progress
+```
+
+RC.FE.3.1 status:
+
+```text
+Completed - Authentication and session regression baseline closed with validated AuthStore restoration hardening
+```
+
+RC.FE.3.2 status:
+
+```text
+Completed - Clinical core regression closed with RC.FE.3.2A, RC.FE.3.2B.1 and RC.FE.3.2B.2
+```
+
+RC.FE.3.3 status:
+
+```text
+Completed - Operational and reporting regression
+```
+
+RC.FE.3.4 status:
+
+```text
+Open - CI gate
 ```
 
 ---
@@ -75,6 +123,8 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 11.2 completed - Global page baseline aligned with the shared header and spacing rhythm used across the main modules
 * Sprint 11.3 completed - Primary CTA moved to the shared page header and table actions remain aligned with the common action language
 * Sprint 11.4 completed - Row actions, tooltips, loading states and table density aligned more closely with the shared list system
+* Sprint 13.4 completed - Global patients list now feels visually closer to Dashboard with a more executive hero, compact summary strip, refined toolbar, more polished states and a stronger final table presentation without changing CRUD behavior
+* Sprint 13.5 completed - Patient dialogs now share a more mature visual baseline, and the Patients module is considered closed at the UI/UX level for the current MVP scope
 
 ### Case Files
 
@@ -141,6 +191,7 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 11.4 completed - Table and agenda actions now follow the shared action order, icon-button tooltips and more homogeneous loading and empty states
 * Sprint 11.6A completed - Appointment dialog structure now follows the shared dialog header/footer and action hierarchy baseline
 * Sprint 11.6B completed - Appointment form layout now follows the shared form spacing baseline and its dialog now uses a scrollable body with a persistently visible footer
+* Sprint 13.6 completed - Global appointments list now shares the same level of visual polish as Dashboard and Patients, while appointment dialogs align more clearly with the shared Design System baseline
 * The module now provides a stable foundation for future additions such as working hours, availability, drag & drop, reminders and notification integration without requiring major refactors
 
 ### Dashboard
@@ -150,6 +201,49 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 11.2 completed - Metric rhythm and lower content spacing aligned with the shared page baseline
 * Sprint 11.3 completed - Quick appointment action iconography aligned with the shared action language
 * Sprint 11.9 completed - Dashboard stabilized as part of the cross-module release candidate closure
+* Sprint 13.1 completed - Dashboard ahora funciona como un Executive Overview con snapshot analitico local, view model por widgets, resumen financiero mensual, proximas citas, actividad clinica reciente y alertas operativas minimas sin invadir Reports
+* Sprint 13.6 completed - Dashboard refinado como referencia visual del producto para consolidar el cierre del Product Polish cross-module
+
+### Sprint 13
+
+* Sprint 13.1 completed - Dashboard analytics delivered as an Executive Overview with local orchestration and widget-based view model
+* Sprint 13.4 completed - Patients List modernized and aligned more closely with the polished Dashboard baseline
+* Sprint 13.5 completed - Patients Dialogs aligned with the shared Design System and mature CRUD dialog language
+* Sprint 13.6 completed - Appointments List modernized, Appointment Dialogs aligned with the Design System, shared toolbar patterns consolidated and cross-module empty/error/loading states made more consistent
+* Sprint 13 closure - Responsive spacing, shared visual language and global UI consistency improved across Dashboard, Patients and Appointments
+
+### Sprint 15
+
+### Completed
+
+- ✓ Sprint 15.2
+- ✓ Sprint 15.3
+- ✓ Sprint 15.4
+- ✓ Sprint 15.5
+- ✓ Sprint 15.6
+- ✓ Sprint 15.7
+- ✓ Sprint 15.8
+
+### Sprint 17
+
+### Completed
+
+- Sprint 17.2 - Global HTTP Error Policy
+- Sprint 17.3 - Secure Logging And Sensitive Data Protection
+- Sprint 17.4 - Test Suite Baseline Fix
+
+### Sprint 14
+
+### Completed
+
+- Sprint 14.1 - Design System Audit
+- Sprint 14.2 - Global Styles & Tokens Cleanup
+- Sprint 14.3 - Delete Dialog Baseline Consolidation
+- Sprint 14.4 - Detail Dialog Baseline Consolidation (Phase 1)
+
+### Pending
+
+- Sprint 14.5 - Lists & Design System Harmonization
 
 ### Financial Transactions
 
@@ -182,6 +276,7 @@ Completed - Reports foundation generalized for multiple professional reports
 * Sprint 12.4 completed - Resumen Clinico delivered with patient-required execution, clinical preview, workspace-based orchestration, summarized notes, related documents and PDF-first export
 * Sprint 12.5 completed - Expediente Clinico delivered as a second patient-centered clinical document with full structured content, PDF-only export and descriptive PDF filenames
 * Sprint 12.6 completed - Reports QA hardening delivered with mojibake correction, single error surface in preview, blocked-popup PDF feedback, nomenclatura visible en español consistente y helper compartido para MIME labels
+* RC.FE.1 completed - CSV Formula Injection mitigated in the centralized export serializer, covering Financial Report and Agenda Report with protected CSV output and manual Excel validation
 
 ### Sprint 11
 
@@ -215,7 +310,7 @@ Completed - Reports foundation generalized for multiple professional reports
 Next planned sprint:
 
 ```text
-Sprint 13 - Dashboard Analytics
+To be prioritized after Sprint 17.4
 ```
 
 ---
@@ -224,12 +319,13 @@ Sprint 13 - Dashboard Analytics
 
 Current development efforts include:
 
-* Transition planning after Reports stabilization
-* Preparacion de Sprint 13 - Dashboard Analytics
+* Post-polish QA validation after Sprint 13.6
 * Final backend integration verification
 * Manual browser validation of dense clinical workflows
 * Incremental technical debt reduction after release-candidate closure
 * Shared component consolidation where it meaningfully reduces maintenance cost
+* Patients remains closed at the UI/UX level after Sprint 13.5, so future work should only reopen it for defects or clearly scoped product changes
+* Appointments list and dialogs now share the current visual baseline, so future work should prioritize defects or scoped product additions rather than new polish passes
 
 ---
 
@@ -259,7 +355,7 @@ Current development efforts include:
 * Component testing
 * Service testing
 * Form validation improvements
-* Error handling improvements
+* Continued validation of global error handling and secure logging
 
 ---
 
@@ -301,7 +397,8 @@ Current technical debt includes:
 * Design system consolidation
 * Automated frontend testing
 * Minor visual flicker when closing the child `Editar paciente` dialog from Clinical Workspace
-* SCSS budget warnings in `patient-detail-dialog.component.scss`, `dashboard.page.scss` and `appointments-calendar.component.scss`
+* SCSS budget warnings in `patient-detail-dialog.component.scss`, `dashboard.page.scss`, `appointments-calendar.component.scss`, `patients-list.page.scss`, `appointments-list.page.scss` and `appointments-daily-agenda.component.scss`
+* UTF-8/BOM compatibility in CSV exports with Excel resolved in RC.FE.2
 * Potential future consolidation of duplicated page titles between `PageHeaderComponent` and some `SectionCardComponent` list shells
 * Potential future timeline/backend event coverage for `APPOINTMENT_CANCELLED`, `APPOINTMENT_NO_SHOW` and `CASE_FILE_UPDATED`
 * Potential evolution of `SessionNote` toward a more structured clinical schema including motivo, objetivos, intervenciones, observaciones, tareas and plan de siguiente sesion
@@ -335,3 +432,7 @@ Related documentation:
 * DECISION_LOG.md
 
 End of document.
+
+
+
+

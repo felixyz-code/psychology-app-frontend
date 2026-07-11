@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 
+import { logError } from '../../../core/logging/app-logger';
 import { DocumentsService } from '../services/documents.service';
 
 interface DocumentUploadDialogData {
@@ -62,12 +63,7 @@ export class DocumentUploadDialogComponent {
           this.dialogRef.close(true);
         },
         error: (error) => {
-          console.error('POST /documents/upload failed', {
-            status: error?.status,
-            body: error?.error,
-            caseFileId: this.data.caseFileId,
-            fileName: file?.name,
-          });
+          logError('documents.upload', error);
           this.errorMessage.set('No fue posible subir el documento.');
         },
       });
