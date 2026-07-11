@@ -6,6 +6,34 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# RC.FE.3.2 - Clinical Core Regression Closure
+
+## Changed
+
+* Se cerro la red de regresion clinica basada en riesgo para `Clinical Core`, `Session Notes` y `Documents` como cierre consolidado de `RC.FE.3.2A`, `RC.FE.3.2B.1` y `RC.FE.3.2B.2`.
+* La suite de regresion evoluciono historicamente de `71` a `146` pruebas para cubrir los flujos clinicos y documentales relevantes sin introducir cambios productivos.
+* La validacion final quedo en `146/146` pruebas aprobadas, `0` fallidas y `0` skipped.
+* La validacion tecnica confirmo build correcto y la validacion manual quedo aprobada.
+* No hubo cambios en backend, CI, dependencias, configuracion ni workflows.
+
+## Validation
+
+* `146/146` pruebas aprobadas.
+* `0` pruebas fallidas.
+* `0` pruebas skipped.
+* Build correcto.
+* Validacion manual aprobada.
+
+## Notes
+
+* No se modifico codigo productivo.
+* No se modifico backend.
+* No se modifico CI.
+* No se agregaron dependencias.
+* No se modificaron configuracion ni workflows.
+
+---
+
 # RC.FE.3.1 - Authentication And Session Regression Closure
 
 ## Changed

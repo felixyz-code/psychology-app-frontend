@@ -52,6 +52,18 @@ RC.FE.2 status:
 Completed - UTF-8/BOM compatibility added to CSV exports for Microsoft Excel without changing PDF, UI or contracts
 ```
 
+RC.FE.3 status:
+
+```text
+Open - Consolidated release-candidate regression track
+```
+
+FE-RC-002 status:
+
+```text
+Partially open - Regression hardening remains in progress
+```
+
 RC.FE.3.1 status:
 
 ```text
@@ -61,19 +73,19 @@ Completed - Authentication and session regression baseline closed with validated
 RC.FE.3.2 status:
 
 ```text
-Pending - Clinical core regression
+Completed - Clinical core regression closed with RC.FE.3.2A, RC.FE.3.2B.1 and RC.FE.3.2B.2
 ```
 
 RC.FE.3.3 status:
 
 ```text
-Pending - Operational and reporting regression
+Open - Operational and reporting regression
 ```
 
 RC.FE.3.4 status:
 
 ```text
-Pending - CI gate
+Open - CI gate
 ```
 
 ---
