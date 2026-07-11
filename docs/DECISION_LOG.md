@@ -640,6 +640,33 @@ Keeping CSV avoids introducing a heavier export format that is unnecessary for t
 
 ---
 
+# ADR-026 - Development Branch Release Certification
+
+## Decision
+
+The `development` branch must pass the frontend release certification workflow before an integration is considered valid.
+
+The required automated checks are:
+
+- dependency installation with `npm ci`
+- complete unit test suite
+- production Angular build
+- Docker image build
+
+## Rationale
+
+`development` is the integration branch for release-candidate work. Requiring the same cross-cutting validation on pushes and pull requests reduces the risk of accepting regressions that only appear after local testing.
+
+This keeps release infrastructure aligned with the regression hardening completed during RC.FE.3 and makes the CI gate an explicit part of the frontend baseline instead of an optional manual step.
+
+## Implications
+
+- Changes targeting `development` should be treated as invalid when the certification workflow fails.
+- The workflow must fail on unit test, Angular build or Docker build errors.
+- Deployment, image publication and repository protection changes remain separate operational decisions.
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:
