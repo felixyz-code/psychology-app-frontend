@@ -79,7 +79,7 @@ Completed - Clinical core regression closed with RC.FE.3.2A, RC.FE.3.2B.1 and RC
 RC.FE.3.3 status:
 
 ```text
-Open - Operational and reporting regression
+Completed - Operational and reporting regression
 ```
 
 RC.FE.3.4 status:

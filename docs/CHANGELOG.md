@@ -6,6 +6,35 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# RC.FE.3.3 - Operational And Reporting Regression Closure
+
+## Changed
+
+* Se cerro la red de regresion operativa y de reporting para `Appointments`, `Financial Transactions`, `Reports Runner`, exportacion HTML por impresion, exportacion CSV integrada y el helper compartido `local-date-range`.
+* El objetivo fue consolidar la cobertura minima necesaria para los modulos operativos restantes antes del `Release Candidate 1.0`.
+* Se corrigio el riesgo `RCFE33-01` con una guarda basada en `isSaving()` para evitar doble submit en la creacion de transacciones financieras.
+* La suite evoluciono de `146` a `185` pruebas, con `0` fallidas y `0` skipped.
+* La validacion tecnica confirmo build correcto y la validacion manual quedo aprobada.
+* No hubo cambios en backend, CI, dependencias, configuracion ni workflows.
+
+## Validation
+
+* `185` pruebas aprobadas.
+* `0` pruebas fallidas.
+* `0` pruebas skipped.
+* Build correcto.
+* Validacion manual aprobada.
+
+## Notes
+
+* No se modifico backend.
+* No se modifico CI.
+* No se agregaron dependencias.
+* No se cambio la configuracion.
+* No se hizo commit ni push.
+
+---
+
 # RC.FE.3.2 - Clinical Core Regression Closure
 
 ## Changed
