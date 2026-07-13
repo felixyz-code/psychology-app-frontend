@@ -20,9 +20,12 @@ Detailed technical documentation is intentionally separated into dedicated docum
 * TypeScript
 * SCSS
 * Angular Signals
-* CoreUI
-* Bootstrap
-* Angular Material (where appropriate)
+* Angular Router
+* HttpClient
+* Reactive Forms
+* Angular Material
+* Angular CDK
+* RxJS
 
 ---
 
