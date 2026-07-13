@@ -53,9 +53,10 @@ Current technologies:
 * Angular Signals
 * Angular Router
 * HttpClient
-* CoreUI
-* Bootstrap
-* Angular Material (where appropriate)
+* Reactive Forms
+* Angular Material
+* Angular CDK
+* RxJS
 
 ---
 
@@ -318,9 +319,9 @@ To keep business rules centralized and avoid duplicated logic.
 
 ---
 
-## Why CoreUI?
+## Why Angular Material?
 
-To accelerate development with a professional UI foundation while allowing customization through SCSS.
+To provide a maintained Angular UI foundation while allowing customization through SCSS and shared application styles.
 
 ---
 
