@@ -1,524 +1,414 @@
-# POST-GO-LIVE.4 — SaaS User Experience Contract
+# POST-GO-LIVE.4 - SaaS User Experience / Frontend Integration Contract
 
 ## Formal status
 
-```text
-PHASE: POST-GO-LIVE.4 — SaaS User Experience
-STATUS: CONTRACT DOCUMENTED
-IMPLEMENTATION: NOT STARTED
+~~~text
+PHASE: POST-GO-LIVE.4 - SaaS User Experience
+STATUS: CONTRACT FINALIZED
+WIRE CONTRACT VERSION: 1
+IMPLEMENTATION: READY AFTER CONTRACT COMMITS
 PRODUCTION ROLLOUT: NOT AUTHORIZED
-PRIMARY REPOSITORY: frontend
-SECONDARY REPOSITORY: backend
 READINESS TARGET: SAAS DEMO-READY
-```
+~~~
 
-This document is the frontend half of the paired contract with
-`backend/docs/POST_GO_LIVE_4_FRONTEND_INTEGRATION_CONTRACT.md`. It records
-architecture and UX behavior only. It authorizes no TypeScript, route, store,
-interceptor, schema, API, migration, seed, test, workflow, infrastructure, or
-production change.
+This is one distributed specification. The frontend and backend copies must
+remain identical in vocabulary, schemas, states, capabilities, endpoint
+metadata, errors, and lifecycle rules.
 
-## Repository baselines
+The frontend owns rendering, navigation, interaction, and client invalidation.
+The backend owns DTO validation, tenant authority, authorization, persistence,
+concurrency, and redaction.
 
-The preflight was performed in the canonical repositories before branch
-creation:
+## 1. Authority and accepted technical debt
 
-| Repository | Baseline branch | Baseline HEAD | Upstream | Ahead/behind | Working tree |
+JWT is identity-only. X-Organization-Id is request-time tenant authority.
+preferredOrganizationId, URLs, history state, sessionStorage, client roles,
+and client capabilities never authorize a request. The backend validates every
+protected request and redacts hidden cross-tenant resources.
+
+The following debt is accepted for SAAS DEMO-READY and does not authorize
+production rollout:
+
+| Debt | Boundary and justification |
+| --- | --- |
+| JWT in localStorage | Existing MVP storage remains; the token is forbidden in events, logs, URLs, or feature state. Storage migration is a separate security phase. |
+| Cross-tab transport | The observable rules in section 12 are mandatory; the browser transport is not prescribed. |
+| Internal store ownership | resetTenantState and generation rules are mandatory; Angular decomposition is implementation detail. |
+| Advanced retry | No automatic mutation retry; retry is user-controlled per section 8. |
+| Pagination | Phase 4 uses bounded demo projections; server pagination is deferred. |
+| Advanced offline | Safe error and user retry only; no offline mutation queue exists. |
+| Read idempotency tokens | Client generations protect rendering; the backend does not persist a read-generation token. |
+
+## 2. Endpoint metadata
+
+Every endpoint belongs to exactly one category:
+
+| Mode | JWT | X-Organization-Id |
+| --- | --- | --- |
+| PUBLIC | No | No |
+| IDENTITY_ONLY | Yes | No |
+| TENANT_OPTIONAL | Yes | Optional validated header |
+| TENANT_REQUIRED | Yes | Confirmed tenant ID required |
+
+The interceptor attaches JWT only for authenticated modes and attaches
+X-Organization-Id only for TENANT_OPTIONAL or TENANT_REQUIRED. It never
+infers mode from a URL denylist and never retries mutations automatically.
+
+## 3. Definitive GET /auth/context contract
+
+Request: GET /auth/context, Bearer JWT, optional UUID header, no body.
+Malformed or repeated header returns 400 VALIDATION_ERROR. An ineligible
+header returns redacted 403 FORBIDDEN.
+
+The V1 response always contains every field below. Nullable fields are present
+as null and arrays are present as empty arrays.
+
+~~~json
+{
+  "schemaVersion": 1,
+  "status": "ACTIVE_TENANT_READY",
+  "tenantContext": {
+    "userId": "uuid",
+    "organizationId": "uuid",
+    "membershipId": "uuid",
+    "organizationRole": "OWNER",
+    "resolutionMode": "EXPLICIT"
+  },
+  "organization": {
+    "id": "uuid",
+    "displayName": "string",
+    "status": "ACTIVE"
+  },
+  "membership": {
+    "id": "uuid",
+    "userId": "uuid",
+    "displayName": "string or null",
+    "email": "string",
+    "role": "OWNER",
+    "status": "ACTIVE",
+    "createdAt": "date-time",
+    "updatedAt": "date-time",
+    "isCurrentUser": true
+  },
+  "capabilities": ["organization.read"],
+  "selectableMemberships": [],
+  "preferredOrganizationId": "uuid or null"
+}
+~~~
+
+The definitive field domains are:
+
+- schemaVersion is the integer 1.
+- status is one of ACTIVE_TENANT_READY, AMBIGUOUS_SELECTION,
+  NO_ACTIVE_TENANT, or ADMIN_SUSPENDED_CONTEXT.
+- tenantContext is required for ACTIVE_TENANT_READY and
+  ADMIN_SUSPENDED_CONTEXT and is null for the other statuses.
+- tenantContext.organizationRole is one of OWNER, ADMIN, PSYCHOLOGIST,
+  RECEPTIONIST, BILLING, AUDITOR, or READ_ONLY.
+- tenantContext.resolutionMode is EXPLICIT or SINGLE_MEMBERSHIP.
+- organization is required for the two resolved statuses and null otherwise.
+  organization.status is ACTIVE or SUSPENDED.
+- membership is required for the two resolved statuses and null otherwise.
+  membership.role uses the role enum above; membership.status is ACTIVE for
+  the resolved context. displayName is nullable; email is canonical.
+- selectableMemberships is always an array. Each item contains exactly
+  membershipId, organizationId, organizationDisplayName, and
+  organizationRole. The first three values are UUID, UUID, and string;
+  organizationRole uses the role enum above.
+- capabilities is always an array of strings from the closed catalog in
+  section 6.
+- preferredOrganizationId is always UUID or null and is never an authority
+  field.
+
+Allowed status values are exactly:
+
+| Status | Required behavior |
+| --- | --- |
+| ACTIVE_TENANT_READY | Active organization, active membership, populated tenantContext, organization, membership, and capabilities. |
+| AMBIGUOUS_SELECTION | No confirmed tenant; selectableMemberships contains all eligible active memberships; capabilities is empty. |
+| NO_ACTIVE_TENANT | No eligible active membership; selectableMemberships and capabilities are empty. |
+| ADMIN_SUSPENDED_CONTEXT | Suspended organization and active membership may be shown only for permitted administration; operational capabilities are absent. |
+
+The historical RESOLVED, UNRESOLVED, and LEGACY_COMPATIBILITY responses are
+not Phase 4 inputs. A missing field, unknown status, invalid identity,
+unknown schemaVersion, or invalid capability enters ERROR; no silent legacy
+interpretation exists.
+
+## 4. Context version and tenant lifecycle
+
+switchGeneration and contextVersion are client-only coordination values.
+
+- switchGeneration increments on identity change, logout, candidate tenant
+  change, access loss, or tenant reset. It does not increment for a same-tenant
+  context refresh.
+- contextVersion increments after every accepted context snapshot, including
+  same-tenant role, capability, membership, organization-status, or preference
+  refresh. It resets for a new identity lifecycle.
+- switchGeneration distinguishes tenant replacement from stale work.
+  contextVersion distinguishes refreshed authorization context from replacement.
+- Neither value is persisted as authority, sent as a JWT claim, or used by the
+  backend for authorization.
+
+Source of truth:
+
+| Value | Rule |
+| --- | --- |
+| candidateOrganizationId | In-memory only until confirmation |
+| selectedOrganizationId | In-memory only after V1 confirmation |
+| sessionStorage tenant ID | Confirmed ID only; remove on logout, identity change, access loss, and reset |
+| preferredOrganizationId | Backend UX preference only |
+| URL | Navigation input only |
+| history state | Ephemeral invitation intent only |
+
+## 5. Definitive state table
+
+| State | Origin | Allowed destinations | Events and backend trigger | Frontend UX |
+| --- | --- | --- | --- | --- |
+| UNINITIALIZED | New tab or cleared identity | LOADING, ERROR | login, refresh | Tenant UI blocked |
+| LOADING | Initial context request | ACTIVE_TENANT_READY, AMBIGUOUS_SELECTION, NO_ACTIVE_TENANT, ADMIN_SUSPENDED_CONTEXT, FORBIDDEN, ERROR | context response/failure | Tenant UI blocked |
+| ACTIVE_TENANT_READY | Confirmed active context | SWITCHING, LOADING, ADMIN_SUSPENDED_CONTEXT, FORBIDDEN, ERROR, UNINITIALIZED | switch, refresh, access loss, logout | Operational shell visible |
+| SWITCHING | Tenant candidate or identity reset | ACTIVE_TENANT_READY, AMBIGUOUS_SELECTION, NO_ACTIVE_TENANT, ADMIN_SUSPENDED_CONTEXT, FORBIDDEN, ERROR | switch response/failure | Old data hidden |
+| AMBIGUOUS_SELECTION | Multiple eligible memberships | SWITCHING, LOADING, UNINITIALIZED | candidate selected, logout | Selector only |
+| NO_ACTIVE_TENANT | Zero eligible memberships | LOADING, ADMIN_SUSPENDED_CONTEXT, UNINITIALIZED | membership change, login, logout | No-membership UX only |
+| ADMIN_SUSPENDED_CONTEXT | Valid suspended admin context | ACTIVE_TENANT_READY, SWITCHING, LOADING, FORBIDDEN, UNINITIALIZED | restore, switch, access loss, logout | Admin shell; no operational data |
+| FORBIDDEN | Redacted denied context/action | LOADING, SWITCHING, UNINITIALIZED, ERROR | access denied, logout | Least-revealing recovery |
+| ERROR | Unsafe or failed context resolution | LOADING, SWITCHING, UNINITIALIZED | user retry, logout | Recovery only |
+
+No implicit transition is valid. A same-tenant context refresh does not enter
+SWITCHING.
+
+## 6. Capabilities
+
+Capabilities serialize as a JSON array of exact case-sensitive ASCII strings.
+The array is non-null, lexically ascending by Unicode code point, duplicate
+free, and uses no aliases or case folding. Unknown values are absent to the
+frontend. The backend remains authoritative.
+
+Closed catalog:
+
+organization.read, organization.manage,
+membership.read, membership.manage_role, membership.suspend,
+membership.reactivate, membership.remove, membership.leave,
+invitation.read, invitation.create, invitation.revoke, invitation.resend,
+ownership.transfer,
+patient.read, patient.create, patient.update, patient.delete,
+case_file.read, case_file.create, case_file.update, workspace.read,
+session_note.read, session_note.create, session_note.update, session_note.delete,
+document.metadata_read, document.upload, document.download, document.update,
+document.delete, appointment.read, appointment.manage,
+finance.read, finance.manage, finance.summary_read, report.read.
+
+For every row below, the guard is capability-aware UX only; backend policy and
+assignment checks remain mandatory.
+
+| Module actions | Capability | Backend authority | Frontend UX | Guard | Interceptor |
 | --- | --- | --- | --- | --- | --- |
-| frontend | `development` | `1e04dac1e762e0c020243dc18c6276eb764a008a` | `origin/development` | `0/0` | clean |
-| backend | `development` | `f6bdea366251b34db760dc85edb69bd9e86e075a` | `origin/development` | `0/0` | clean |
-
-The frontend contract branch is
-`codex/post-go-live-4-0-saas-ux-contract`. The detached Codex worktree was
-dirty and was intentionally left untouched; it is not a canonical baseline.
-
-## Objective and readiness boundary
-
-Phase 4 converts the certified multi-tenant backend into a frontend experience
-that is secure, consistent, responsive, accessible, demonstrable, resistant to
-concurrency, and free of visual cross-tenant leakage. The outcome is:
-
-```text
-SAAS DEMO-READY
-```
-
-This does not mean `PRIVATE-BETA-READY`, `PUBLIC-BETA-READY`, or
-`PRODUCTION-READY`. The next maximum gate is
-`NEXT-PHASE-B2-R1 — Independent Contract Review`.
-
-## Scope
-
-The contract covers tenant context, organization selection,
-`X-Organization-Id`, preferred organization, cross-tenant invalidation,
-organization administration, memberships, invitations, ownership transfer,
-public freelancer signup, authorization UX, suspended and revoked states,
-error handling, responsive and accessible presentation, observability, and
-frontend certification.
-
-## Explicit exclusions
-
-The following remain outside Phase 4: branding, logo, assets, themes, password
-reset, email verification, refresh tokens, session revocation, MFA, email
-provider, transactional email, TLS, domain, external backups, alerts, WAF,
-production rollout, billing, plans, subscriptions, trials, entitlements, SSO,
-SCIM, patient portal, and clinical redesign. Infrastructure is reference-only.
-
-## Closed authority rules
-
-These rules are inherited and non-negotiable:
-
-* JWT is identity-only. It contains no organization, membership, tenant,
-  tenant-role, capability, or preferred-organization authority.
-* `X-Organization-Id` is the request-time tenant selector and authority input;
-  the backend validates the authenticated user, an `ACTIVE` membership, and an
-  `ACTIVE` organization for normal tenant-aware work.
-* `preferredOrganizationId` is UX-only. It never authorizes, selects a tenant
-  by itself, or replaces `X-Organization-Id`; a stale preference is treated as
-  `null`.
-* The backend remains the final authorization authority. Hiding a control is
-  an interaction affordance, not authorization.
-* Ownership is role-based. There is no persisted primary-owner marker. A
-  transfer is `source OWNER -> ADMIN` and `target ACTIVE membership -> OWNER`.
-* Cross-tenant failures are redacted so the UI never reveals that a resource
-  exists in another tenant.
-
-## TenantContextStore
-
-The conceptual `TenantContextStore` owns the confirmed tenant lifecycle. It is
-an Angular signal-based store coordinated with `AuthStore`, the request
-interceptor, router guards, and all tenant-aware feature stores. It is not a
-second authorization engine.
-
-### State model
-
-The implementation must preserve these semantic distinctions, even if names
-are adapted to local conventions:
-
-| State | Meaning | Tenant-aware rendering |
-| --- | --- | --- |
-| `UNINITIALIZED` | No context attempt in this tab | Blocked |
-| `LOADING` | Initial context resolution is in progress | Blocked |
-| `READY` / `ACTIVE_TENANT_READY` | Confirmed active organization and membership | Allowed |
-| `SWITCHING` | A generation is replacing the confirmed tenant | Blocked; old data is hidden |
-| `EMPTY` / `NO_ACTIVE_TENANT` | No active selectable membership | Only empty/no-membership UX |
-| `ADMIN_SUSPENDED_CONTEXT` | Suspended organization is visible for administration only | Operational tenant data blocked |
-| `FORBIDDEN` | Authenticated user cannot use the requested context | Blocked |
-| `ERROR` | Context load or switch failed without a safe confirmed result | Blocked; recovery UX |
-
-`SUSPENDED` must never be presented as a normal operational tenant. A
-suspended organization is an administrative context only, with an explicit
-route and shell that cannot load clinical or operational tenant data.
-
-### Store responsibilities
-
-The store exposes conceptually:
-
-* signals for `status`, confirmed `selectedOrganizationId`, candidate ID,
-  `switchGeneration`, tenant metadata, membership, capabilities, and the last
-  typed error;
-* computed signals such as `hasActiveTenant`, `isSwitching`, `isSuspendedAdmin`
-  and `can(capability)`;
-* actions for `initialize`, `selectCandidate`, `confirm`, `resetTenantState`,
-  `handleAccessLost`, and `clear`;
-* one lifecycle for initial load, switching, rollback, logout, preference
-  writes, and multi-tab notifications;
-* coordination hooks for clearing dashboard, patients, case files, session
-  notes, documents, appointments, finance, reports, organization admin,
-  memberships, invitations, dialogs, and open forms.
-
-Feature stores consume the confirmed context and generation. They do not read a
-URL or preference as authority and do not keep data after a reset.
-
-## Source of truth and persistence
-
-| Value | Authority/lifetime |
-| --- | --- |
-| `candidateOrganizationId` | Ephemeral value during validation only |
-| confirmed `selectedOrganizationId` | In-memory signal after backend confirmation |
-| `sessionStorage` | Per-tab persistence written only after confirmation |
-| `preferredOrganizationId` | Backend UX preference; never authority |
-| URL | Navigation/deep-link input only; never authority |
-| interceptor | Consumer of the confirmed store, not a selector |
-
-The mandatory order is:
-
-```text
-candidateOrganizationId
-→ contextual request validated
-→ membership and organization confirmed
-→ selectedOrganizationId confirmed
-→ sessionStorage
-```
-
-The frontend must never persist a candidate before validation. A URL or stale
-session value may seed a candidate, but it cannot make a tenant ready.
-
-## Deterministic tenant-switch protocol
-
-1. Validate the candidate as a UUID and reject a known-invalid local value.
-2. Increment and capture `switchGeneration`.
-3. Cancel requests where possible and invalidate all earlier generations.
-4. Enter `SWITCHING`.
-5. Block tenant-aware rendering and hide old tenant data.
-6. Reset feature stores and close or invalidate tenant-bound dialogs and forms.
-7. Keep the candidate ephemeral while the request is made.
-8. Issue the contextual request with `X-Organization-Id: candidate`.
-9. Accept the response only after membership, organization status, and
-   capabilities are validated by the backend contract.
-10. Confirm the candidate as the selected in-memory signal.
-11. Write the confirmed ID to `sessionStorage` for this tab.
-12. Load the minimum shell and then feature data for the new generation.
-13. Resolve navigation and deep-link eligibility.
-14. End `SWITCHING` only when the confirmed shell is safe to render.
-15. Update the backend preference independently; a preference failure does not
-   roll back a valid switch.
-16. On failure, discard candidate data, keep no old tenant data visible, and
-   return to a safe prior confirmed context only if it is revalidated. Else
-   route to selection, forbidden, suspended-admin, or context-error UX.
-
-There are no sleeps, no automatic mutation retries, no acceptance of an older
-generation response, and no use of preferred organization as tenant
-authority. A response must match both expected `organizationId` and the
-current `switchGeneration` before it can update state.
-
-## Cross-tenant invalidation contract
-
-Every tenant-aware store implements the conceptual common operation:
-
-```text
-resetTenantState(reason, generation)
-```
-
-The reset clears data, loading/error state, selected row/detail state, cached
-lists, open dialogs, unsaved tenant-bound forms, and pending actions. It is
-called on a switch before new data loads, logout, membership suspension or
-revocation, organization suspension, ownership transfer, and a stale or
-redacted response. It must be idempotent.
-
-The minimum inventory is dashboard, patients, case files, session notes,
-documents, appointments, finance, reports, organization administration,
-memberships, invitations, dialogs, and open forms. Every tenant-aware response
-is checked against the expected organization ID and current generation. A
-failed check is discarded and emits `stale_response_discarded`.
-
-## HTTP interceptor contract
-
-Requests declare metadata through `HttpContext` or an equivalent explicit
-request option. The interceptor must not infer tenant behavior from a fragile
-URL denylist.
-
-| Mode | JWT | `X-Organization-Id` |
-| --- | --- | --- |
-| `PUBLIC` | No | No |
-| `IDENTITY_ONLY` | Yes | No |
-| `TENANT_AWARE` | Yes | Confirmed ID required |
-| `TENANT_OPTIONAL` | Yes | Header when a confirmed context exists |
-
-`POST /auth/login`, `POST /auth/freelancer-bootstrap`, and public signup entry
-are `PUBLIC`. Login-independent authenticated calls such as preference update,
-invitation accept/reject, and `GET /organizations` are `IDENTITY_ONLY`.
-`/auth/context` and organization/clinical operations are `TENANT_OPTIONAL` or
-`TENANT_AWARE` according to the backend endpoint matrix. The interceptor must
-not attach a header to a public request, must not invent one, and must not
-retry a mutation automatically.
-
-## Routing and guards
-
-The conceptual route set is:
-
-```text
-/context/select
-/organization
-/organization/memberships
-/organization/invitations
-/organization/ownership-transfer
-/invitations/accept
-/signup/freelancer
-/organization/suspended
-/no-active-memberships
-/forbidden
-/tenant-context-error
-```
-
-Guards have separate responsibilities:
-
-* auth guard establishes identity and redirects unauthenticated users to
-  login, preserving only explicitly safe navigation state;
-* tenant-context guard ensures a context attempt exists and routes ambiguous
-  or missing context to selection/no-memberships;
-* tenant-ready guard requires `ACTIVE_TENANT_READY` for tenant-aware pages;
-* suspended-admin guard permits only the administrative suspended shell;
-* capability guard uses `can(capability)` for UX gating and still expects
-  backend enforcement;
-* invitation flow guard preserves an invitation intent without persisting the
-  token.
-
-Refresh, direct access, and deep links rehydrate identity first, revalidate
-context second, and resolve the requested URL third. If access is lost during
-navigation, clear tenant state and route to the least revealing recovery page.
-
-## Capabilities UX
-
-The frontend must not duplicate the complete authorization matrix. It consumes
-backend-projected capabilities and exposes:
-
-```text
-can(capability): boolean
-```
-
-Roles are descriptive metadata only. A capability can hide or disable an
-action, but the backend remains authoritative.
-
-| Action | Capability | Backend authority | UX |
-| --- | --- | --- | --- |
-| Read/update organization identity | `organization.read` / `organization.manage` | Selected tenant and OWNER policy | Show admin controls only when allowed |
-| List/manage memberships | `membership.read`, `membership.manage_role`, `membership.suspend`, `membership.remove` | Backend policy and owner invariant | Filter controls; handle `403`/`409` |
-| Create/revoke/resend invitations | `invitation.create`, `invitation.revoke`, `invitation.resend` | Tenant policy and invitation state | Disable invalid terminal actions |
-| Transfer ownership | `ownership.transfer` | Current active OWNER, eligible target, transaction | Strong confirmation; expect immediate permission loss |
-| Patients | `patient.read/create/update/delete` | Tenant, capability, assignment policy | Hide unavailable operations; redact errors |
-| Appointments | `appointment.read/manage` | Tenant and operational/clinical field policy | Separate scheduling from notes |
-| Finance | `finance.read/manage/summary_read` | Tenant-scoped finance policy | No clinical assumptions |
-| Reports | `report.read` | Backend report and redaction policy | Show only permitted report surfaces |
-
-## Organization selection and preference
-
-* Single active organization: the backend may resolve it automatically; the
-  frontend still records a confirmed context before rendering tenant data.
-* Multiple organizations: show only backend-provided selectable active
-  memberships and require an explicit candidate selection.
-* Valid preferred organization: use it as a candidate hint, then validate it.
-* `null` or stale preference: show selection or use the sole valid membership;
-  never treat it as authority.
-* Zero active memberships: route to `/no-active-memberships`.
-* Suspended organization: expose only the suspended administrative context;
-  do not present it as an operational tenant.
-* Switching does not mint a new JWT. It changes request context only.
-* `sessionStorage` is per-tab and receives only the confirmed ID.
-* A preference write is independent and non-blocking for a valid switch.
-
-## Membership administration UX
-
-The list uses the backend projection and supports minimum search plus role and
-status filters. It presents role, status, display identity, timestamps, and
-current-user marking without inventing an owner marker. `OWNER` is derived
-from `role === OWNER`.
-
-Role changes, suspension, reactivation, removal, and leave are mutation flows
-with disabled double-submit state, no automatic retry, and explicit handling
-for self-lockout, the last active OWNER, ADMIN versus OWNER limits, and `409`
-concurrency. After a mutation, reload the context and capabilities because the
-same JWT can now have different request-time authorization. If the current
-membership is suspended or revoked, reset tenant state immediately and route
-to the appropriate recovery page.
-
-## Invitation UX
-
-Administration provides list, create, revoke, and resend. Acceptance provides
-accept and reject, deep-link entry, authenticated and unauthenticated states,
-recipient mismatch handling, one-shot terminal behavior, URL scrubbing, and
-no durable token persistence. Derived states are `PENDING`, `ACCEPTED`,
-`REJECTED`, `REVOKED`, and `EXPIRED`.
-
-The chosen login-preservation strategy is `history.state`: retain an
-ephemeral invitation intent in navigation state while redirecting through
-login, consume it once after authentication, and immediately replace/scrub the
-URL. The token is never placed in `localStorage`, `sessionStorage`, logs,
-analytics, clipboard helpers, or any durable store. If navigation state is
-lost, require re-entry through the original link.
-
-The frontend does not send invitation email. The backend returns a token only
-where its non-production contract permits it; the frontend must never log or
-telemetry-capture it.
-
-## Ownership transfer UX
-
-The target list contains only another `ACTIVE`, non-OWNER membership in the
-selected organization. The UI uses strong confirmation that names the target,
-explains immediate permission loss, and prevents double submit. It does not
-implement ownership transfer as a role patch. On success, reload capabilities
-and context, then navigate according to the demoted user's available surface.
-On `409`, refresh the target list/context and ask for a new confirmation.
-
-## Freelancer signup UX
-
-`/signup/freelancer` is public and is controlled by the backend feature flag
-and throttling. Fields are canonical email, name, organization name, and
-password. The password must be at least 12 characters and at most 72 UTF-8
-bytes; frontend hints do not replace backend validation. Handle `400`, `409`,
-and `429` without exposing account existence beyond the backend message/code
-contract. A successful bootstrap returns a session and an initial active owner
-organization; the frontend validates that result, sets the initial confirmed
-context, and navigates to the tenant shell. Email verification remains out of
-scope.
-
-## Error taxonomy
-
-The frontend consumes stable backend `code` values and HTTP status. It never
-parses human-readable messages to infer behavior.
-
-| Status | UX behavior |
-| --- | --- |
-| `400` | Field/form validation; preserve safe input |
-| `401` | Clear identity-dependent state and route to login |
-| `403` | Forbidden surface or redacted recovery; no enumeration |
-| `404` | Redacted not-found; do not reveal cross-tenant existence |
-| `409` | Refresh context/resource and explain concurrent/terminal state |
-| `429` | Rate-limit feedback and user-controlled retry later |
-| `5xx` | Generic recoverable error with request ID |
-| network | Offline/connection recovery without stale tenant rendering |
-
-The paired backend contract defines the envelope and codes:
-`VALIDATION_ERROR`, `UNAUTHENTICATED`, `FORBIDDEN`,
-`TENANT_CONTEXT_REQUIRED`, `RESOURCE_NOT_FOUND`, `CONFLICT`,
-`CONCURRENT_UPDATE`, `CAPABILITY_DENIED`, `INVITATION_TERMINAL`,
-`INVITATION_RECIPIENT_MISMATCH`, `RATE_LIMITED`, and `UNEXPECTED_ERROR`.
-
-## Concurrency and multiple tabs
-
-The UI handles role changes, membership suspension/revocation, organization
-suspension, ownership transfer, invitation terminal transitions, preference
-changes, stale requests, and requests started before a switch. Generation
-checks prevent old responses from winning. No constant polling is introduced;
-reload follows user actions, navigation, or an explicit invalidation event.
-
-`BroadcastChannel` is optional for logout, session invalidation, preference
-changed, organization access lost, and membership changed. It must never carry
-JWTs, full users, full capabilities, memberships, clinical data, or invitation
-tokens. Each tab reloads its own context from the backend and applies its own
-generation checks. `sessionStorage` remains tab-local.
-
-## Security threat model
-
-| Threat | Phase 4 mitigation | Deferred/operational boundary |
-| --- | --- | --- |
-| JWT in `localStorage` | Prefer the existing secure auth storage contract; never copy JWT into tenant events/logs | Storage migration/security expansion is separate |
-| XSS | Angular escaping, safe rendering, no token persistence, CSP-compatible markup | Final CSP deployment policy |
-| Invitation token | `history.state`, one-shot consumption, URL scrubbing, no logs/analytics | Email delivery is excluded |
-| Tenant ID manipulation | Header is generated only from confirmed store; backend validates it | Backend remains authority |
-| Cache leakage | Generation-keyed stores, reset on switch, no old shell rendering | CDN/infra policy excluded |
-| History leakage | Scrub invitation URLs and avoid sensitive query data | Browser policy outside app scope |
-| Tabs | Minimal `BroadcastChannel` events and backend reload | Full distributed session invalidation excluded |
-| Source maps/logs | No secrets, tokens, clinical content, or full emails in telemetry | Production source-map policy deferred |
-| PII/documents/clipboard/autocomplete | Minimize projections, avoid clipboard/token helpers, explicit form autocomplete policy | Broader data governance deferred |
-| CORS/CSRF | Respect bearer-token request contract and same-origin deployment assumptions | TLS, WAF, and infra are excluded |
-
-## Responsive and accessibility contract
-
-The demo journey must be usable on desktop, tablet, and mobile. Dense tables
-become readable cards or responsive rows without losing role/status actions.
-Dialogs must preserve focus, support Escape and keyboard traversal, use labels
-and appropriate descriptions, announce async state with `aria-live`, meet
-contrast AA, and never rely on color alone. Loading, empty, forbidden,
-suspended, error, and stale-response states are explicit. Respect reduced
-motion and do not animate tenant transitions in a way that suggests old data
-is still active.
-
-## Observability
-
-Conceptual events are:
-
-```text
-context_load
-context_failure
-organization_switch_started
-organization_switch_completed
-organization_switch_failed
-stale_response_discarded
-tenant_state_reset
-authorization_denied
-invitation_flow_failed
-ownership_conflict
-membership_state_invalidated
-```
-
-Events may include opaque request IDs, status, reason codes, generation, and
-redacted organization identifiers only where the telemetry policy permits. They
-must never include JWTs, invitation tokens, passwords, clinical content,
-document content, or full email addresses.
-
-## Testing and certification strategy
-
-Phase 4 certification covers:
-
-* unit tests for store transitions, generation checks, `can`, persistence, and
-  error normalization;
-* component tests for selection, suspended/no-membership, admin, invitation,
-  ownership, signup, loading, empty, forbidden, and responsive states;
-* integration tests for interceptor metadata, guards, context reload, feature
-  reset, and preference independence;
-* frontend E2E for deep links, refresh, switch, access loss, invitation login,
-  mutation conflicts, and multiple tabs;
-* backend certification against the paired contract, Postman flows, and seed
-  fixtures;
-* cross-tenant visual certification proving old tenant data is not visible;
-* stale-response certification proving earlier generations cannot update UI.
-
-Playwright is a recommended candidate for future E2E coverage, not an approved
-dependency and not to be installed by this contract.
-
-## Subphases
-
-| Subphase | Objective | Repository | Endpoints/inputs | Dependencies | Tests | Risks | Exit gate |
+| Organization read/manage | organization.read / organization.manage | Selected tenant and OWNER/status policy | Show identity/admin controls | Capability guard | TENANT_REQUIRED |
+| Membership read/role/suspend/reactivate/remove/leave | membership.read / membership.manage_role / membership.suspend / membership.reactivate / membership.remove / membership.leave | Membership policy, self-only leave, owner invariant, CAS | Show permitted list/actions | Capability guard | TENANT_REQUIRED |
+| Invitation read/create/revoke/resend | invitation.read / invitation.create / invitation.revoke / invitation.resend | Invitation policy and terminal state | Show permitted admin actions | Capability guard | TENANT_REQUIRED |
+| Ownership transfer | ownership.transfer | Active OWNER, eligible target, transaction | Strong confirmation and immediate refresh | Capability guard | TENANT_REQUIRED |
+| Patients read/create/update/delete | patient.read / patient.create / patient.update / patient.delete | Tenant, capability, assignment | Show or enable permitted operations | Capability guard | TENANT_REQUIRED |
+| Case Files read/create/update | case_file.read / case_file.create / case_file.update | Tenant, capability, assignment | Show or enable permitted operations | Capability guard | TENANT_REQUIRED |
+| Workspace read | workspace.read | Tenant, capability, assignment | Show clinical workspace | Capability guard | TENANT_REQUIRED |
+| Session Notes read/create/update/delete | session_note.read / session_note.create / session_note.update / session_note.delete | Tenant, capability, assignment | Show or enable permitted operations | Capability guard | TENANT_REQUIRED |
+| Documents metadata/upload/download/update/delete | document.metadata_read / document.upload / document.download / document.update / document.delete | Metadata authorization, tenant, capability, assignment | Show or enable permitted operations | Capability guard | TENANT_REQUIRED |
+| Appointments read/manage | appointment.read / appointment.manage | Tenant and operational/clinical policy | Show permitted fields/actions | Capability guard | TENANT_REQUIRED |
+| Financial read/manage/summary | finance.read / finance.manage / finance.summary_read | Organization-scoped financial policy | Show or enable permitted operations | Capability guard | TENANT_REQUIRED |
+| Reports read | report.read | Report and redaction policy | Show report navigation/exports | Capability guard | TENANT_REQUIRED |
+
+## 7. Error contract
+
+All errors use:
+
+~~~json
+{
+  "statusCode": 409,
+  "code": "CONCURRENT_UPDATE",
+  "message": "The resource changed. Refresh and try again.",
+  "requestId": "opaque-request-id",
+  "details": null
+}
+~~~
+
+message is never parsed. details is bounded and never contains tokens, JWTs,
+stack traces, clinical data, cross-tenant existence, or unnecessary PII.
+
+| Code | HTTP | Details schema | Retry | Redacted | Frontend action |
+| --- | ---: | --- | --- | --- | --- |
+| VALIDATION_ERROR | 400 | fields: [{ field, code, message }] or null | Correct input; no automatic retry | Safe fields only | Bind form errors |
+| UNAUTHENTICATED | 401 | null | Re-authenticate | Yes | Clear identity/tenant; route login |
+| FORBIDDEN | 403 | reasonCode or null | No automatic retry | Yes | Forbidden/recovery; retain context unless access lost |
+| TENANT_CONTEXT_REQUIRED | 409 | reason: MISSING or AMBIGUOUS | Select explicitly | Yes | Context selector |
+| RESOURCE_NOT_FOUND | 404 | null | No blind retry | Yes | Redacted not-found |
+| CONFLICT | 409 | resource, transition or null | Refresh then deliberate retry | Safe only | Refresh and explain |
+| CONCURRENT_UPDATE | 409 | resource, retryContext: true or null | Refresh context/resource then deliberate retry | Safe only | Reload and reconfirm |
+| CAPABILITY_DENIED | 403 | capability or null | No automatic retry | Policy not disclosed | Hide/disable action |
+| INVITATION_TERMINAL | 409 | terminalState | Reload only | No token/recipient data | Show terminal state |
+| INVITATION_RECIPIENT_MISMATCH | 403 | null | Explicit re-authentication | Yes | Safe mismatch UX |
+| RATE_LIMITED | 429 | retryAfterSeconds or null | User-controlled backoff | Safe only | Throttle guidance |
+| UNEXPECTED_ERROR | 500/502/503/504 | category: SERVER or null | User-controlled retry | Generic | Show requestId |
+| NETWORK_OFFLINE | client status 0 | offline: true | User-controlled retry | N/A | Offline recovery |
+
+## 8. Endpoint matrix
+
+The following is exhaustive for Phase 4. DTO names are frozen contract names.
+Reports have no independent REST endpoint; report.read gates frontend
+composition of the source requests below.
+
+| Method | Route | Tenant mode | Capability | Interceptor mode | Errors | DTO | Consumer |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 4.0 | Contract and frontend architecture | frontend + paired backend docs | Existing context contract | B2 review | Document checks | Ambiguous future DTOs | Independent review accepts contract |
-| 4.1 | Tenant context foundation | frontend | `GET /auth/context`, header | AuthStore, backend context | Store/interceptor/guard | Stale responses | Confirmed context lifecycle certified |
-| 4.2 | Selection and preference | frontend | `GET /auth/context`, `PUT /auth/context/preference` | 4.1 | Single/multi/stale/null/tab | Preference mistaken as authority | Selection and tab tests pass |
-| 4.3 | Cross-tenant invalidation | frontend | All tenant-aware calls | 4.1 | Generation and visual isolation | Cached clinical data | No stale tenant content |
-| 4.4 | Organization administration | frontend | `/organizations*` | Capabilities projection | CRUD/conflict/suspended | Suspension semantics | Admin shell certified |
-| 4.5 | Membership administration | frontend | Membership routes | Membership projection | Role/status/leave/409 | Self-lockout/last owner | Context refresh certified |
-| 4.6 | Invitations | frontend | Invitation admin and recipient routes | Token contract | Deep link/login/terminal | Token leakage | One-shot and scrub certified |
-| 4.7 | Ownership transfer | frontend | Ownership transfer route | Role-based ownership | Double submit/409/loss | Immediate permission loss | Transfer flow certified |
-| 4.8 | Freelancer signup | frontend | `POST /auth/freelancer-bootstrap` | Feature flag/throttle | 400/409/429/success | Account enumeration | Bootstrap journey certified |
-| 4.9 | Authorization, suspended, errors | frontend | Error envelope and capability data | 4.1–4.8 | Error matrix/accessibility | Human-message parsing | Safe recovery certified |
-| 4.10 | Cross-tenant certification | frontend + backend | Full endpoint matrix | All prior phases | E2E, Postman, seed, visual | Coverage gaps | Certification evidence accepted |
-| 4.11 | Closeout | frontend + backend | Documentation and CI artifacts | 4.10 | Final validation | Scope drift | Closeout gate approved |
+| GET | / | PUBLIC | none | PUBLIC | none | RootResponse | Infrastructure |
+| GET | /health | PUBLIC | none | PUBLIC | none | HealthResponse | Infrastructure |
+| POST | /auth/login | PUBLIC | none | PUBLIC | VALIDATION_ERROR, UNAUTHENTICATED | LoginRequest/Response | AuthStore |
+| POST | /auth/freelancer-bootstrap | PUBLIC | none | PUBLIC | VALIDATION_ERROR, CONFLICT, RATE_LIMITED, UNEXPECTED_ERROR | BootstrapRequest/Response | Signup |
+| GET | /auth/context | TENANT_OPTIONAL | none | TENANT_OPTIONAL | VALIDATION_ERROR, UNAUTHENTICATED, FORBIDDEN | AuthContextResponseV1 | TenantContextStore |
+| PUT | /auth/context/preference | IDENTITY_ONLY | none | IDENTITY_ONLY | VALIDATION_ERROR, UNAUTHENTICATED, RESOURCE_NOT_FOUND, CONFLICT | PreferenceRequest/Response | Preference |
+| GET | /organizations | IDENTITY_ONLY | none | IDENTITY_ONLY | UNAUTHENTICATED | OrganizationSelectableListResponse | Selector |
+| GET | /organizations/current | TENANT_REQUIRED | organization.read | TENANT_REQUIRED | UNAUTHENTICATED, FORBIDDEN, RESOURCE_NOT_FOUND | OrganizationResponse | Organization |
+| GET | /organizations/:id | TENANT_REQUIRED | organization.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | OrganizationResponse | Organization |
+| PATCH | /organizations/:id | TENANT_REQUIRED | organization.manage | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, CONFLICT, CONCURRENT_UPDATE | OrganizationUpdateRequest/Response | Organization |
+| PATCH | /organizations/:id/status | TENANT_REQUIRED | organization.manage | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, CONFLICT, CONCURRENT_UPDATE | OrganizationStatusRequest/Response | Organization |
+| GET | /organizations/:id/memberships | TENANT_REQUIRED | membership.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | MembershipListResponse | Membership |
+| PATCH | /organizations/:id/memberships/:mid/role | TENANT_REQUIRED | membership.manage_role | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, RESOURCE_NOT_FOUND, CONFLICT, CONCURRENT_UPDATE | MembershipRoleRequest/Response | Membership |
+| PATCH | /organizations/:id/memberships/:mid/status | TENANT_REQUIRED | membership.suspend or membership.reactivate | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, RESOURCE_NOT_FOUND, CONFLICT, CONCURRENT_UPDATE | MembershipStatusRequest/Response | Membership |
+| DELETE | /organizations/:id/memberships/:mid | TENANT_REQUIRED | membership.remove | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND, CONFLICT, CONCURRENT_UPDATE | MembershipRevocationResponse | Membership |
+| POST | /organizations/:id/memberships/leave | TENANT_REQUIRED | membership.leave | TENANT_REQUIRED | FORBIDDEN, CONFLICT, CONCURRENT_UPDATE | MembershipRevocationResponse | Membership |
+| GET | /organizations/:id/invitations | TENANT_REQUIRED | invitation.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | InvitationListResponse | Invitations |
+| POST | /organizations/:id/invitations | TENANT_REQUIRED | invitation.create | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, CONFLICT | InvitationCreateRequest/Response | Invitations |
+| POST | /organizations/:id/invitations/:iid/revoke | TENANT_REQUIRED | invitation.revoke | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND, INVITATION_TERMINAL | InvitationTerminalResponse | Invitations |
+| POST | /organizations/:id/invitations/:iid/resend | TENANT_REQUIRED | invitation.resend | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND, INVITATION_TERMINAL | InvitationResendResponse | Invitations |
+| POST | /organization-invitations/:token/accept | IDENTITY_ONLY | recipient binding | IDENTITY_ONLY | UNAUTHENTICATED, FORBIDDEN, RESOURCE_NOT_FOUND, INVITATION_TERMINAL, INVITATION_RECIPIENT_MISMATCH | InvitationDecisionResponse | Invitations |
+| POST | /organization-invitations/:token/reject | IDENTITY_ONLY | recipient binding | IDENTITY_ONLY | UNAUTHENTICATED, FORBIDDEN, RESOURCE_NOT_FOUND, INVITATION_TERMINAL, INVITATION_RECIPIENT_MISMATCH | InvitationDecisionResponse | Invitations |
+| POST | /organizations/:id/ownership-transfer | TENANT_REQUIRED | ownership.transfer | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND, CONFLICT, CONCURRENT_UPDATE | OwnershipTransferRequest/Response | Ownership |
+| POST | /patients | TENANT_REQUIRED | patient.create | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, CONFLICT | PatientCreateRequest/Response | Patients |
+| GET | /patients | TENANT_REQUIRED | patient.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | PatientListResponse | Patients |
+| GET | /patients/:id | TENANT_REQUIRED | patient.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | PatientResponse | Patients |
+| PATCH | /patients/:id | TENANT_REQUIRED | patient.update | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, RESOURCE_NOT_FOUND, CONCURRENT_UPDATE | PatientUpdateRequest/Response | Patients |
+| DELETE | /patients/:id | TENANT_REQUIRED | patient.delete | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND, CONFLICT | DeleteResponse | Patients |
+| POST | /case-files | TENANT_REQUIRED | case_file.create | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, CONFLICT | CaseFileCreateRequest/Response | Case Files |
+| GET | /case-files | TENANT_REQUIRED | case_file.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | CaseFileListResponse | Case Files |
+| GET | /case-files/patient/:patientId | TENANT_REQUIRED | case_file.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | CaseFileListResponse | Case Files |
+| GET | /case-files/:id | TENANT_REQUIRED | case_file.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | CaseFileResponse | Case Files |
+| GET | /case-files/:id/workspace | TENANT_REQUIRED | workspace.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | WorkspaceResponse | Workspace |
+| PATCH | /case-files/:id | TENANT_REQUIRED | case_file.update | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, RESOURCE_NOT_FOUND, CONCURRENT_UPDATE | CaseFileUpdateRequest/Response | Case Files |
+| POST | /session-notes | TENANT_REQUIRED | session_note.create | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, CONFLICT | SessionNoteCreateRequest/Response | Session Notes |
+| GET | /session-notes | TENANT_REQUIRED | session_note.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | SessionNoteListResponse | Session Notes |
+| GET | /session-notes/case-file/:caseFileId | TENANT_REQUIRED | session_note.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | SessionNoteListResponse | Session Notes |
+| GET | /session-notes/:id | TENANT_REQUIRED | session_note.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | SessionNoteResponse | Session Notes |
+| PATCH | /session-notes/:id | TENANT_REQUIRED | session_note.update | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, RESOURCE_NOT_FOUND, CONCURRENT_UPDATE | SessionNoteUpdateRequest/Response | Session Notes |
+| DELETE | /session-notes/:id | TENANT_REQUIRED | session_note.delete | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND, CONFLICT | DeleteResponse | Session Notes |
+| POST | /documents/upload | TENANT_REQUIRED | document.upload | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, RESOURCE_NOT_FOUND | DocumentUploadRequest/Response | Documents |
+| POST | /documents | TENANT_REQUIRED | document.upload | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, CONFLICT | DocumentCreateRequest/Response | Documents |
+| GET | /documents | TENANT_REQUIRED | document.metadata_read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | DocumentListResponse | Documents |
+| GET | /documents/case-file/:caseFileId | TENANT_REQUIRED | document.metadata_read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | DocumentListResponse | Documents |
+| GET | /documents/:id | TENANT_REQUIRED | document.metadata_read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | DocumentResponse | Documents |
+| GET | /documents/:id/download | TENANT_REQUIRED | document.download | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | DocumentDownloadResponse | Documents |
+| GET | /documents/:id/view | TENANT_REQUIRED | document.download | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | DocumentViewResponse | Documents |
+| PATCH | /documents/:id | TENANT_REQUIRED | document.update | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, RESOURCE_NOT_FOUND, CONCURRENT_UPDATE | DocumentUpdateRequest/Response | Documents |
+| DELETE | /documents/:id | TENANT_REQUIRED | document.delete | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND, CONFLICT | DeleteResponse | Documents |
+| POST | /appointments | TENANT_REQUIRED | appointment.manage | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, CONFLICT | AppointmentCreateRequest/Response | Appointments |
+| GET | /appointments | TENANT_REQUIRED | appointment.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | AppointmentListResponse | Appointments |
+| GET | /appointments/patient/:patientId | TENANT_REQUIRED | appointment.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | AppointmentListResponse | Appointments |
+| GET | /appointments/:id | TENANT_REQUIRED | appointment.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | AppointmentResponse | Appointments |
+| PATCH | /appointments/:id | TENANT_REQUIRED | appointment.manage | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, RESOURCE_NOT_FOUND, CONCURRENT_UPDATE | AppointmentUpdateRequest/Response | Appointments |
+| DELETE | /appointments/:id | TENANT_REQUIRED | appointment.manage | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND, CONFLICT | DeleteResponse | Appointments |
+| POST | /financial-transactions | TENANT_REQUIRED | finance.manage | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, CONFLICT | FinancialTransactionCreateRequest/Response | Financial |
+| GET | /financial-transactions | TENANT_REQUIRED | finance.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | FinancialTransactionListResponse | Financial |
+| GET | /financial-transactions/summary | TENANT_REQUIRED | finance.summary_read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | FinancialSummaryResponse | Financial |
+| GET | /financial-transactions/:id | TENANT_REQUIRED | finance.read | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND | FinancialTransactionResponse | Financial |
+| PATCH | /financial-transactions/:id | TENANT_REQUIRED | finance.manage | TENANT_REQUIRED | VALIDATION_ERROR, FORBIDDEN, RESOURCE_NOT_FOUND, CONCURRENT_UPDATE | FinancialTransactionUpdateRequest/Response | Financial |
+| DELETE | /financial-transactions/:id | TENANT_REQUIRED | finance.manage | TENANT_REQUIRED | FORBIDDEN, RESOURCE_NOT_FOUND, CONFLICT | DeleteResponse | Financial |
 
-Every subphase requires a documented endpoint mapping, backend authority, test
-evidence, and explicit sign-off. No subphase authorizes production rollout.
+## 9. Invitation lifecycle
 
-## Cross-Repository Contract References
+Invitation intent contains only the token and a safe return route. It exists in
+memory/history state for one login redirect and is never durable, logged,
+telemetry-captured, copied, or retained after the decision.
 
-The paired backend contract is:
+| Event | Behavior |
+| --- | --- |
+| Initial link | Capture and scrub URL before authentication or decision UI |
+| Refresh | Resume only if ephemeral intent survives; otherwise require re-entry |
+| Back/forward | Sanitized URL cannot reconstruct a token; terminal state is not retried |
+| Accept/reject | Send once, consume intent immediately, honor backend terminal result |
+| Terminal replay | Show INVITATION_TERMINAL; no automatic mutation |
+| Recipient mismatch | Safe mismatch UX; no mutation; explicit re-authentication required |
+| Expired/revoked | Show terminal EXPIRED or REVOKED state; no retry with same token |
+| Logout during flow | Clear token, JWT, tenant state, and URL; re-entry required |
+| Multiple tabs | Each tab owns its intent; backend terminal state wins |
 
-```text
-backend repository:
-docs/POST_GO_LIVE_4_FRONTEND_INTEGRATION_CONTRACT.md
-```
+## 10. Session lifecycle
 
-This frontend contract is:
+| Event | JWT | Selected/candidate tenant | sessionStorage | Preference | Stores | Observable cross-tab behavior |
+| --- | --- | --- | --- | --- | --- | --- |
+| Login | New | Both null until V1 | Remove previous ID | Read through V1 | Clear tenant stores | All tabs clear old identity |
+| Logout | Cleared | Both null | Remove | Not retained | Clear auth, tenant, dialogs, forms | All tabs become unauthenticated |
+| Refresh | Rehydrated if valid | Session ID is candidate only | Confirmed ID remains until V1 | Read through V1 | Block until V1 | No tenant adoption by other tabs |
+| Tenant switch | Same | Candidate ephemeral; selected commits after V1 | Write confirmed ID only | Independent write | Reset before load | Only initiating tab switches |
+| Context refresh | Same | Same selected ID if valid | Unchanged | Replace sanitized value | Refresh context stores | Other tabs revalidate on event |
+| Membership revoked/suspended | Same until backend response | Cleared | Remove | Re-read on V1 | Reset and recover | Every tab revalidates |
+| Organization suspended/restored | Same | Admin context or active after V1 | Confirmed ID only | Re-read on V1 | Operational stores blocked/restored | Every tab revalidates |
+| Ownership transfer | Same | Same ID after refresh | Unchanged | Refreshed | Refresh caps and route | Every tab revalidates |
 
-```text
-frontend repository:
-docs/POST_GO_LIVE_4_SAAS_UX_CONTRACT.md
-```
+## 11. Cross-tenant invalidation
 
-The two files are one distributed specification. The backend contract is the
-authority for DTOs, HTTP status/codes, persistence, and authorization. This
-file is the authority for frontend lifecycle, rendering, navigation, and
-interaction behavior. Neither overrides the closed identity/tenant rules.
+Every tenant-bound store implements resetTenantState(reason,
+switchGeneration). It clears data, loading/error state, selections, caches,
+dialogs, forms, and pending actions. It is idempotent.
 
-## Findings and deferred risks
+A response is discarded when its captured generation or expected organization
+does not match current state. Discarding emits stale_response_discarded
+without sensitive payloads.
 
-* Current backend context responses do not yet project capabilities; this is a
-  `REQUIRED` integration gap for capability-aware UX.
-* Current membership administration response is sanitized but lacks the
-  proposed display identity and current-user marker; the paired contract
-  classifies the projection as `REQUIRED` and privacy-minimized.
-* Current backend errors are not yet the complete stable envelope; frontend
-  implementation must wait for the paired error contract or maintain a narrow
-  compatibility adapter during transition.
-* Suspended administrative context is an explicit semantic state, not an
-  operational tenant. The implementation must not weaken that boundary.
+## 12. Observable multi-tab contract
 
-These are contract gaps for later implementation and do not authorize code or
-schema changes in B2.
+- Logout clears identity and tenant-bound UI in every tab and routes each tab
+  to a safe unauthenticated surface.
+- Membership suspension, revocation, ownership transfer, and organization
+  status changes require every tab to revalidate its own V1 context before
+  showing tenant data or actions.
+- A tenant switch affects only its initiating tab.
+- A preference change never forces another tab to switch tenants.
+- A cross-tab signal is never authority; stale or malformed signals only cause
+  backend revalidation.
 
-## Gate and authorization statement
+## 13. Ownership and membership projection
 
-```text
-IMPLEMENTATION: NOT AUTHORIZED
-SCHEMA CHANGE: NOT AUTHORIZED
-MIGRATIONS: NOT AUTHORIZED
+Ownership is role-based and OWNER is derived only from role. Transfer is a
+dedicated operation to another ACTIVE non-OWNER membership. The backend
+enforces the last ACTIVE OWNER invariant transactionally. Current-user role or
+status changes require context and capability refresh before actions return.
+
+The bounded minimum membership projection is id, userId, nullable displayName,
+canonical email, role, status, createdAt, updatedAt, and isCurrentUser.
+Historical REVOKED rows are omitted from current administration lists.
+
+## 14. Certification and consistency checklist
+
+| Item | Result |
+| --- | --- |
+| DTOs | PASS - V1 context and endpoint DTO names frozen |
+| Endpoints | PASS - each Phase 4 endpoint has one explicit metadata row |
+| Capabilities | PASS - closed catalog and exhaustive module/action mapping |
+| States | PASS - origins, destinations, events, UX, and backend triggers frozen |
+| Errors | PASS - status, code, details, retry, redaction, and action frozen |
+| Tenant lifecycle | PASS - switch, refresh, reset, suspension, and restoration frozen |
+| Invitation lifecycle | PASS - refresh, navigation, mismatch, terminal, and logout frozen |
+| Ownership | PASS - transfer, last owner, self lockout, and refresh frozen |
+| Session lifecycle | PASS - login, logout, refresh, and access loss frozen |
+| Endpoint metadata | PASS - PUBLIC, IDENTITY_ONLY, TENANT_OPTIONAL, TENANT_REQUIRED frozen |
+| Technical debt | PASS - accepted boundaries documented |
+| Cross references | PASS - paired files must be identical |
+
+## 15. Final gate
+
+~~~text
+F-01: RESOLVED
+F-03: RESOLVED
+F-04: RESOLVED
+F-07: RESOLVED
+ACCEPTED TECHNICAL DEBT: DOCUMENTED
+CONTEXT VERSION: RESOLVED
+CONTRACT: IMPLEMENTATION READY
 PRODUCTION ROLLOUT: NOT AUTHORIZED
-NEXT GATE: NEXT-PHASE-B2-R1 — Independent Contract Review
-```
+~~~
