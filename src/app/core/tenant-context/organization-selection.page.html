@@ -1,0 +1,69 @@
+<section class="organization-selection-page">
+  <mat-card class="organization-selection-card">
+    <mat-card-header>
+      <div mat-card-avatar class="organization-selection-card__avatar">
+        <mat-icon>business</mat-icon>
+      </div>
+      <mat-card-title>Selecciona una organizacion</mat-card-title>
+      <mat-card-subtitle>Elige el espacio de trabajo que quieres abrir.</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (tenantContextStore.isLoading()) {
+        <div class="organization-selection-card__loading" role="status">
+          <mat-spinner diameter="32" />
+          <span>Cargando organizaciones...</span>
+        </div>
+      } @else if (tenantContextStore.selectableMemberships().length > 0) {
+        <form class="organization-selection-form" (ngSubmit)="selectOrganization()">
+          <mat-form-field appearance="outline">
+            <mat-label>Organizacion</mat-label>
+            <mat-select [formControl]="organizationControl" aria-label="Seleccionar organizacion">
+              @for (
+                membership of tenantContextStore.selectableMemberships();
+                track membership.organizationId
+              ) {
+                <mat-option [value]="membership.organizationId">
+                  {{ membership.organizationDisplayName }}
+                </mat-option>
+              }
+            </mat-select>
+            @if (organizationControl.hasError('required') && organizationControl.touched) {
+              <mat-error>Selecciona una organizacion.</mat-error>
+            }
+          </mat-form-field>
+
+          @if (tenantContextStore.preferredOrganizationId()) {
+            <p class="organization-selection-form__hint">
+              <mat-icon aria-hidden="true">star</mat-icon>
+              Se selecciono tu organizacion preferida.
+            </p>
+          }
+
+          @if (errorMessage()) {
+            <p class="organization-selection-form__error" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
+            @if (isSubmitting()) {
+              <mat-spinner diameter="20" />
+              <span>Abriendo...</span>
+            } @else {
+              <span>Continuar</span>
+            }
+          </button>
+        </form>
+      } @else {
+        <div class="organization-selection-card__empty">
+          <mat-icon aria-hidden="true">domain_disabled</mat-icon>
+          <p>No tienes una organizacion activa disponible.</p>
+          <span>Contacta a un administrador para recuperar el acceso.</span>
+        </div>
+      }
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-button type="button" (click)="logout()">Cerrar sesion</button>
+    </mat-card-actions>
+  </mat-card>
+</section>

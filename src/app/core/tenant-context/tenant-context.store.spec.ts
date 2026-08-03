@@ -47,7 +47,10 @@ const activeContext: AuthContextResponseV1 = {
 describe('TenantContextStore', () => {
   let store: TenantContextStore;
   let authStore: AuthStore;
-  let contextService: { getContext: ReturnType<typeof vi.fn> };
+  let contextService: {
+    getContext: ReturnType<typeof vi.fn>;
+    updatePreferredOrganization: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     localStorage.setItem('psychology_app_access_token', 'active-token');
@@ -56,6 +59,7 @@ describe('TenantContextStore', () => {
 
     contextService = {
       getContext: vi.fn(() => of(activeContext)),
+      updatePreferredOrganization: vi.fn(() => of({ preferredOrganizationId: 'organization-a' })),
     };
 
     TestBed.configureTestingModule({
@@ -155,6 +159,101 @@ describe('TenantContextStore', () => {
       'organization-b',
     );
     expect(contextService.getContext).toHaveBeenLastCalledWith('organization-b');
+  });
+
+  it('restores a valid preferred organization through the explicit switch flow', async () => {
+    const ambiguousContext: AuthContextResponseV1 = {
+      schemaVersion: 1,
+      status: 'AMBIGUOUS_SELECTION',
+      tenantContext: null,
+      organization: null,
+      membership: null,
+      capabilities: [],
+      selectableMemberships: [
+        {
+          membershipId: 'membership-a',
+          organizationId: 'organization-a',
+          organizationDisplayName: 'Organization A',
+          organizationRole: 'OWNER',
+        },
+        {
+          membershipId: 'membership-b',
+          organizationId: 'organization-b',
+          organizationDisplayName: 'Organization B',
+          organizationRole: 'ADMIN',
+        },
+      ],
+      preferredOrganizationId: 'organization-b',
+    };
+    const preferredContext: AuthContextResponseV1 = {
+      ...activeContext,
+      tenantContext: {
+        ...activeContext.tenantContext!,
+        organizationId: 'organization-b',
+        membershipId: 'membership-b',
+        organizationRole: 'ADMIN',
+        resolutionMode: 'EXPLICIT',
+      },
+      organization: {
+        ...activeContext.organization!,
+        id: 'organization-b',
+        displayName: 'Organization B',
+      },
+      membership: {
+        ...activeContext.membership!,
+        id: 'membership-b',
+        role: 'ADMIN',
+      },
+      selectableMemberships: [
+        {
+          membershipId: 'membership-b',
+          organizationId: 'organization-b',
+          organizationDisplayName: 'Organization B',
+          organizationRole: 'ADMIN',
+        },
+      ],
+      preferredOrganizationId: 'organization-b',
+    };
+
+    contextService.getContext
+      .mockReturnValueOnce(of(ambiguousContext))
+      .mockReturnValueOnce(of(preferredContext));
+
+    await store.bootstrap();
+
+    expect(store.state()).toBe('ACTIVE_TENANT_READY');
+    expect(store.selectedOrganizationId()).toBe('organization-b');
+    expect(contextService.getContext).toHaveBeenNthCalledWith(2, 'organization-b');
+    expect(contextService.updatePreferredOrganization).toHaveBeenCalledWith('organization-b');
+  });
+
+  it('persists a manually selected organization after the context is confirmed', async () => {
+    const selectedContext = {
+      ...activeContext,
+      tenantContext: {
+        ...activeContext.tenantContext!,
+        organizationId: 'organization-b',
+        membershipId: 'membership-b',
+        organizationRole: 'ADMIN',
+        resolutionMode: 'EXPLICIT' as const,
+      },
+      organization: {
+        ...activeContext.organization!,
+        id: 'organization-b',
+        displayName: 'Organization B',
+      },
+      membership: {
+        ...activeContext.membership!,
+        id: 'membership-b',
+        role: 'ADMIN' as const,
+      },
+    };
+    contextService.getContext.mockReturnValueOnce(of(selectedContext));
+
+    await store.selectOrganization('organization-b');
+
+    expect(store.selectedOrganizationId()).toBe('organization-b');
+    expect(contextService.updatePreferredOrganization).toHaveBeenCalledWith('organization-b');
   });
 
   it('enters ERROR for an unsafe V1 response and resetTenantState is idempotent', async () => {

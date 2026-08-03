@@ -5,6 +5,7 @@ import { AuthUser } from '../auth/auth.models';
 import { AuthService } from '../auth/auth.service';
 import { AuthStore } from '../auth/auth.store';
 import { ThemeService } from '../theme/theme.service';
+import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { NavbarComponent } from './navbar.component';
 
 const user: AuthUser = {
@@ -32,6 +33,12 @@ describe('NavbarComponent', () => {
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
         { provide: ThemeService, useValue: {} },
+        {
+          provide: TenantContextStore,
+          useValue: {
+            snapshot: vi.fn(() => null),
+          },
+        },
       ],
     });
 

@@ -9,6 +9,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../auth/auth.service';
 import { AuthStore } from '../auth/auth.store';
 import { ThemeService } from '../theme/theme.service';
+import { TenantContextStore } from '../tenant-context/tenant-context.store';
 
 @Component({
   selector: 'app-navbar',
@@ -21,6 +22,7 @@ export class NavbarComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
+  readonly tenantContextStore = inject(TenantContextStore);
 
   readonly authStore = inject(AuthStore);
   readonly isSidebarCollapsed = input(false);
@@ -45,5 +47,9 @@ export class NavbarComponent {
   toggleTheme(enabled?: boolean, menuTrigger?: MatMenuTrigger): void {
     this.themeService.toggleDarkTheme(enabled ?? !this.isDarkTheme());
     menuTrigger?.closeMenu();
+  }
+
+  openOrganizationSelection(): void {
+    void this.router.navigate(['/organization-selection']);
   }
 }

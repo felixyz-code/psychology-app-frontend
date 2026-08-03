@@ -140,6 +140,24 @@ export class TenantContextStore {
     return this.loadContext('switch', organizationId, generation);
   }
 
+  async selectOrganization(organizationId: string): Promise<void> {
+    await this.switchTenant(organizationId);
+
+    if (
+      this.selectedOrganizationId() !== organizationId ||
+      (!this.isActiveTenantReady() && !this.isAdminSuspendedContext())
+    ) {
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.contextService.updatePreferredOrganization(organizationId));
+    } catch {
+      // Preference is UX metadata; a successful tenant switch remains usable
+      // when a transient preference write fails.
+    }
+  }
+
   resetTenantState(reason: string, generation?: number): void {
     const hasTenantState =
       this.stateSignal() !== 'UNINITIALIZED' ||
@@ -190,13 +208,7 @@ export class TenantContextStore {
           return;
         }
 
-        if (
-          !isValidContextResponse(
-            response,
-            this.authStore.user()?.id ?? null,
-            organizationId,
-          )
-        ) {
+        if (!isValidContextResponse(response, this.authStore.user()?.id ?? null, organizationId)) {
           this.errorSignal.set({
             statusCode: 0,
             code: 'UNEXPECTED_ERROR',
@@ -209,6 +221,16 @@ export class TenantContextStore {
         }
 
         this.applySnapshot(response);
+
+        if (
+          origin === 'initial' &&
+          response.status === 'AMBIGUOUS_SELECTION' &&
+          response.preferredOrganizationId
+        ) {
+          return this.selectOrganization(response.preferredOrganizationId);
+        }
+
+        return undefined;
       })
       .catch((error: unknown) => {
         if (
@@ -319,8 +341,7 @@ function isValidContextResponse(
   if (
     response['preferredOrganizationId'] !== null &&
     !selectableMemberships.some(
-      (membership) =>
-        membership.organizationId === response['preferredOrganizationId'],
+      (membership) => membership.organizationId === response['preferredOrganizationId'],
     )
   ) {
     return false;
@@ -335,11 +356,7 @@ function isValidContextResponse(
       isTenantContext(response['tenantContext']) &&
       isOrganization(response['organization']) &&
       isMembership(response['membership']) &&
-      isResolvedContextCoherent(
-        response,
-        expectedUserId,
-        expectedOrganizationId,
-      )
+      isResolvedContextCoherent(response, expectedUserId, expectedOrganizationId)
     );
   }
 
@@ -370,8 +387,7 @@ function isResolvedContextCoherent(
     tenantContext['membershipId'] !== membership['id'] ||
     tenantContext['organizationRole'] !== membership['role'] ||
     membership['isCurrentUser'] !== true ||
-    (expectedOrganizationId !== null &&
-      tenantContext['organizationId'] !== expectedOrganizationId)
+    (expectedOrganizationId !== null && tenantContext['organizationId'] !== expectedOrganizationId)
   ) {
     return false;
   }
@@ -386,8 +402,7 @@ function isResolvedContextCoherent(
   if (
     response['status'] === 'ADMIN_SUSPENDED_CONTEXT' &&
     (response['capabilities'] as string[]).some(
-      (capability) =>
-        !ADMIN_SUSPENDED_CAPABILITIES.has(capability as TenantCapability),
+      (capability) => !ADMIN_SUSPENDED_CAPABILITIES.has(capability as TenantCapability),
     )
   ) {
     return false;

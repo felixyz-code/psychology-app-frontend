@@ -16,6 +16,19 @@
 
   <div class="navbar__spacer"></div>
 
+  @if (tenantContextStore.snapshot()?.organization; as organization) {
+    <button
+      class="organization-menu-trigger"
+      type="button"
+      (click)="openOrganizationSelection()"
+      aria-label="Cambiar organizacion"
+    >
+      <mat-icon aria-hidden="true">business</mat-icon>
+      <span>{{ organization.displayName }}</span>
+      <mat-icon aria-hidden="true">expand_more</mat-icon>
+    </button>
+  }
+
   @if (authStore.user(); as user) {
     <button
       #userMenuTrigger="matMenuTrigger"
@@ -32,7 +45,12 @@
       <mat-icon class="chevron">expand_more</mat-icon>
     </button>
 
-    <mat-menu #userMenu="matMenu" xPosition="before" class="navbar-user-menu" panelClass="navbar-user-menu-panel">
+    <mat-menu
+      #userMenu="matMenu"
+      xPosition="before"
+      class="navbar-user-menu"
+      panelClass="navbar-user-menu-panel"
+    >
       <div class="navbar-user-menu__summary">
         <span class="navbar-user-menu__avatar" aria-hidden="true">{{ user.name.charAt(0) }}</span>
         <span class="navbar-user-menu__identity">

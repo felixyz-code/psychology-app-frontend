@@ -10,6 +10,13 @@ describe('app routes', () => {
     expect(loginRoute?.loadComponent).toBeDefined();
   });
 
+  it('exposes organization selection behind authentication but outside tenant resolution', () => {
+    const selectionRoute = routes.find((route) => route.path === 'organization-selection');
+
+    expect(selectionRoute?.canActivate).toEqual([authGuard]);
+    expect(selectionRoute?.loadComponent).toBeDefined();
+  });
+
   it('keeps the root shell protected by the real auth guard', () => {
     const shellRoute = routes.find((route) => route.path === '');
 

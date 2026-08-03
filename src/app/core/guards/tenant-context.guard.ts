@@ -15,5 +15,9 @@ export const tenantContextGuard: CanActivateFn = () => {
     return router.createUrlTree(['/login']);
   }
 
+  if (store.state() === 'AMBIGUOUS_SELECTION' || store.state() === 'NO_ACTIVE_TENANT') {
+    return router.createUrlTree(['/organization-selection']);
+  }
+
   return false;
 };
