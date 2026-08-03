@@ -6,6 +6,30 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# POST-GO-LIVE.4 Documentation Closeout
+
+## Status
+
+* Documentacion contractual cerrada para POST-GO-LIVE.4.
+* Estado: `CONTRACT COMPLETE / IMPLEMENTATION READY`.
+* La siguiente fase es `POST-GO-LIVE.4.1 Tenant Context Foundation`, aun no iniciada.
+
+## Baseline
+
+* Contract version: `1`.
+* Contract commit: `722ff910acc85b9c31d00d57b4655064c85f7458`.
+* Documentation branch: `codex/post-go-live-4-0-saas-ux-contract`.
+* Pull request: `#24`.
+* Date: `2026-08-02`.
+
+## Validation and rollback
+
+* Frontend CI `#51` completed successfully.
+* Document-only rollback: `git revert <documentation-commit>` and restore the previous documentation baseline.
+* No runtime, DTO, Angular, NestJS, Prisma, infrastructure, or Postman changes are included.
+
+---
+
 # RC.FE.3.4 - Cross-Cutting And Release Infrastructure Regression Closure
 
 ## Changed
