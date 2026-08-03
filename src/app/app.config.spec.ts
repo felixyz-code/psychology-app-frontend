@@ -47,12 +47,27 @@ describe('appConfig', () => {
       role: 'PSYCHOLOGIST',
     });
 
+    const contextRequest = httpTesting.expectOne('/api/auth/context');
+    contextRequest.flush({
+      schemaVersion: 1,
+      status: 'NO_ACTIVE_TENANT',
+      tenantContext: null,
+      organization: null,
+      membership: null,
+      capabilities: [],
+      selectableMemberships: [],
+      preferredOrganizationId: null,
+    });
+
     client.get('/api/protected').subscribe({ error: () => undefined });
 
     const request = httpTesting.expectOne('/api/protected');
     expect(request.request.headers.get('Authorization')).toBe('Bearer active-token');
     request.flush({ message: 'Unavailable' }, { status: 500, statusText: 'Server Error' });
 
-    expect(handleError).toHaveBeenCalledWith(expect.objectContaining({ status: 500 }), '/api/protected');
+    expect(handleError).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 500 }),
+      '/api/protected',
+    );
   });
 });

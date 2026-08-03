@@ -1,4 +1,5 @@
 import { authGuard } from './core/guards/auth.guard';
+import { tenantContextGuard } from './core/guards/tenant-context.guard';
 import { routes } from './app.routes';
 
 describe('app routes', () => {
@@ -12,9 +13,11 @@ describe('app routes', () => {
   it('keeps the root shell protected by the real auth guard', () => {
     const shellRoute = routes.find((route) => route.path === '');
 
-    expect(shellRoute?.canActivate).toEqual([authGuard]);
+    expect(shellRoute?.canActivate).toEqual([authGuard, tenantContextGuard]);
     expect(shellRoute?.loadComponent).toBeDefined();
-    expect(shellRoute?.children?.some((route) => route.path === 'dashboard' && route.loadComponent)).toBe(true);
+    expect(
+      shellRoute?.children?.some((route) => route.path === 'dashboard' && route.loadComponent),
+    ).toBe(true);
   });
 
   it('keeps critical redirects and lazy feature children stable', () => {
@@ -30,9 +33,15 @@ describe('app routes', () => {
       path: '**',
       redirectTo: '',
     });
-    expect(childRoutes.some((route) => route.path === 'financial-transactions' && route.loadChildren)).toBe(true);
-    expect(childRoutes.some((route) => route.path === 'case-files' && route.loadChildren)).toBe(true);
-    expect(childRoutes.some((route) => route.path === 'documents' && route.loadChildren)).toBe(true);
+    expect(
+      childRoutes.some((route) => route.path === 'financial-transactions' && route.loadChildren),
+    ).toBe(true);
+    expect(childRoutes.some((route) => route.path === 'case-files' && route.loadChildren)).toBe(
+      true,
+    );
+    expect(childRoutes.some((route) => route.path === 'documents' && route.loadChildren)).toBe(
+      true,
+    );
     expect(childRoutes.some((route) => route.path === 'reports' && route.loadChildren)).toBe(true);
   });
 });

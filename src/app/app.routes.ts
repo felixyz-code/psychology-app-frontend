@@ -1,16 +1,16 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
+import { tenantContextGuard } from './core/guards/tenant-context.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
-    loadComponent: () =>
-      import('./core/auth/login.page').then((m) => m.LoginPage),
+    loadComponent: () => import('./core/auth/login.page').then((m) => m.LoginPage),
   },
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, tenantContextGuard],
     loadComponent: () =>
       import('./core/layout/main-layout.component').then((m) => m.MainLayoutComponent),
     children: [
@@ -27,26 +27,31 @@ export const routes: Routes = [
       {
         path: 'appointments',
         loadComponent: () =>
-          import('./features/appointments/pages/appointments-list.page').then((m) => m.AppointmentsListPage),
+          import('./features/appointments/pages/appointments-list.page').then(
+            (m) => m.AppointmentsListPage,
+          ),
       },
       {
         path: 'financial-transactions',
         loadChildren: () =>
           import('./features/financial-transactions/financial-transactions.routes').then(
-            (m) => m.financialTransactionsRoutes
+            (m) => m.financialTransactionsRoutes,
           ),
       },
       {
         path: 'case-files',
-        loadChildren: () => import('./features/case-files/case-files.routes').then((m) => m.caseFilesRoutes),
+        loadChildren: () =>
+          import('./features/case-files/case-files.routes').then((m) => m.caseFilesRoutes),
       },
       {
         path: 'documents',
-        loadChildren: () => import('./features/documents/documents.routes').then((m) => m.documentsRoutes),
+        loadChildren: () =>
+          import('./features/documents/documents.routes').then((m) => m.documentsRoutes),
       },
       {
         path: 'reports',
-        loadChildren: () => import('./features/reports/reports.routes').then((m) => m.reportsRoutes),
+        loadChildren: () =>
+          import('./features/reports/reports.routes').then((m) => m.reportsRoutes),
       },
       {
         path: '',
