@@ -40,6 +40,25 @@ Phase 3 progress:
 Completed - Reports foundation generalized for multiple professional reports
 ```
 
+POST-GO-LIVE.4 Documentation status:
+
+```text
+STATUS: CONTRACT COMPLETE / IMPLEMENTATION READY
+CONTRACT VERSION: 1
+DATE: 2026-08-02
+DOCUMENTATION BRANCH: codex/post-go-live-4-0-saas-ux-contract
+CONTRACT COMMIT: 722ff910acc85b9c31d00d57b4655064c85f7458
+RELATED PR: #24
+NEXT PHASE: POST-GO-LIVE.4.1 Tenant Context Foundation - NOT STARTED
+```
+
+Documentation-only rollback:
+
+```text
+Document-only rollback -> git revert <documentation-commit> -> restore previous documentation baseline.
+No code rollback is included in this phase.
+```
+
 RC.FE.1 status:
 
 ```text
