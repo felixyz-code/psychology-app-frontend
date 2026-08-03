@@ -14,12 +14,14 @@ describe('tenantContextGuard', () => {
   let router: Router;
   let tenantStore: {
     isActiveTenantReady: ReturnType<typeof vi.fn>;
+    isAdminSuspendedContext: ReturnType<typeof vi.fn>;
     state: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     tenantStore = {
       isActiveTenantReady: vi.fn().mockReturnValue(false),
+      isAdminSuspendedContext: vi.fn().mockReturnValue(false),
       state: vi.fn().mockReturnValue('AMBIGUOUS_SELECTION'),
     };
 
@@ -35,6 +37,13 @@ describe('tenantContextGuard', () => {
 
   it('allows only a confirmed active tenant context', () => {
     tenantStore.isActiveTenantReady.mockReturnValue(true);
+
+    expect(runGuard()).toBe(true);
+  });
+
+  it('allows the administrative shell for a suspended administrator context', () => {
+    tenantStore.state.mockReturnValue('ADMIN_SUSPENDED_CONTEXT');
+    tenantStore.isAdminSuspendedContext.mockReturnValue(true);
 
     expect(runGuard()).toBe(true);
   });

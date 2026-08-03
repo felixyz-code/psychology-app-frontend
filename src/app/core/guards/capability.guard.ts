@@ -8,5 +8,9 @@ export const capabilityGuard: CanActivateFn = (route) => {
   const store = inject(TenantContextStore);
   const capability = route.data?.['requiredCapability'] as TenantCapability | undefined;
 
-  return Boolean(capability && store.isActiveTenantReady() && store.hasCapability(capability));
+  return Boolean(
+    capability &&
+      (store.isActiveTenantReady() || store.isAdminSuspendedContext()) &&
+      store.hasCapability(capability),
+  );
 };

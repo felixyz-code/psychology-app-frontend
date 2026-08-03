@@ -7,7 +7,7 @@ export const tenantContextGuard: CanActivateFn = () => {
   const store = inject(TenantContextStore);
   const router = inject(Router);
 
-  if (store.isActiveTenantReady()) {
+  if (store.isActiveTenantReady() || store.isAdminSuspendedContext()) {
     return true;
   }
 
