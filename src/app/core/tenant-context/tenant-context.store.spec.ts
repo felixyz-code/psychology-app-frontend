@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { AuthStore } from '../auth/auth.store';
 import { TenantContextService } from './tenant-context.service';
@@ -121,6 +121,7 @@ describe('TenantContextStore', () => {
         ...activeContext.tenantContext!,
         organizationId: 'organization-b',
         membershipId: 'membership-b',
+        organizationRole: 'ADMIN',
         resolutionMode: 'EXPLICIT' as const,
       },
       organization: {
@@ -191,5 +192,89 @@ describe('TenantContextStore', () => {
 
     expect(store.state()).toBe('ERROR');
     expect(store.error()?.code).toBe('UNEXPECTED_ERROR');
+  });
+
+  it('accepts an administrative suspended context without operational capabilities', async () => {
+    contextService.getContext.mockReturnValue(
+      of({
+        ...activeContext,
+        status: 'ADMIN_SUSPENDED_CONTEXT',
+        tenantContext: {
+          ...activeContext.tenantContext!,
+          organizationRole: 'ADMIN',
+        },
+        organization: {
+          ...activeContext.organization!,
+          status: 'SUSPENDED',
+        },
+        membership: {
+          ...activeContext.membership!,
+          role: 'ADMIN',
+        },
+        capabilities: ['organization.read'],
+      }),
+    );
+
+    await store.bootstrap();
+
+    expect(store.state()).toBe('ADMIN_SUSPENDED_CONTEXT');
+    expect(store.isAdminSuspendedContext()).toBe(true);
+    expect(store.hasCapability('organization.read')).toBe(true);
+    expect(store.hasCapability('patient.read')).toBe(false);
+  });
+
+  it('rejects a resolved response whose identity projections do not agree', async () => {
+    contextService.getContext.mockReturnValue(
+      of({
+        ...activeContext,
+        organization: {
+          ...activeContext.organization!,
+          id: 'organization-b',
+        },
+      }),
+    );
+
+    await store.bootstrap();
+
+    expect(store.state()).toBe('ERROR');
+    expect(store.selectedOrganizationId()).toBeNull();
+  });
+
+  it('discards an older same-tenant refresh response', async () => {
+    const firstRefresh = new Subject<AuthContextResponseV1>();
+    const secondRefresh = new Subject<AuthContextResponseV1>();
+
+    await store.bootstrap();
+    contextService.getContext
+      .mockReturnValueOnce(firstRefresh.asObservable())
+      .mockReturnValueOnce(secondRefresh.asObservable());
+
+    const firstRequest = store.refreshContext();
+    const secondRequest = store.refreshContext();
+    const latestContext = {
+      ...activeContext,
+      organization: {
+        ...activeContext.organization!,
+        displayName: 'Latest organization',
+      },
+    };
+    const staleContext = {
+      ...activeContext,
+      organization: {
+        ...activeContext.organization!,
+        displayName: 'Stale organization',
+      },
+    };
+
+    secondRefresh.next(latestContext);
+    secondRefresh.complete();
+    await secondRequest;
+
+    firstRefresh.next(staleContext);
+    firstRefresh.complete();
+    await firstRequest;
+
+    expect(store.snapshot()?.organization?.displayName).toBe('Latest organization');
+    expect(store.contextVersion()).toBe(2);
   });
 });

@@ -1,6 +1,6 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { from, map, Observable, switchMap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
@@ -21,9 +21,11 @@ export class AuthService {
     return this.http
       .post<LoginResponse>(this.apiUrl + '/auth/login', credentials, { context })
       .pipe(
-        tap((response) => {
+        switchMap((response) => {
           this.authStore.setSession(response.accessToken, response.user);
-          this.tenantContextStore.startForIdentity(response.user.id);
+          return from(this.tenantContextStore.startForIdentity(response.user.id)).pipe(
+            map(() => response),
+          );
         }),
       );
   }

@@ -33,6 +33,8 @@ export class TenantContextStore {
   private readonly switchGenerationSignal = signal(0);
   private readonly snapshotSignal = signal<AuthContextResponseV1 | null>(null);
   private readonly errorSignal = signal<TenantContextError | null>(null);
+  private pendingLoad: Promise<void> | null = null;
+  private requestSequence = 0;
   private identityId: string | null = null;
 
   readonly state = computed(() => this.stateSignal());
@@ -65,7 +67,7 @@ export class TenantContextStore {
         return;
       }
 
-      this.startForIdentity(user.id);
+      void this.startForIdentity(user.id);
     });
   }
 
@@ -84,7 +86,7 @@ export class TenantContextStore {
     }
 
     if (this.stateSignal() !== 'UNINITIALIZED') {
-      return Promise.resolve();
+      return this.pendingLoad ?? Promise.resolve();
     }
 
     return this.loadContext(
@@ -94,14 +96,14 @@ export class TenantContextStore {
     );
   }
 
-  startForIdentity(userId: string): void {
+  startForIdentity(userId: string): Promise<void> {
     if (this.identityId === userId && this.stateSignal() !== 'UNINITIALIZED') {
-      return;
+      return this.pendingLoad ?? Promise.resolve();
     }
 
     this.identityId = userId;
     this.resetTenantState('identity-change', this.switchGenerationSignal() + 1);
-    void this.loadContext(
+    return this.loadContext(
       'initial',
       this.readPersistedOrganizationId(),
       this.switchGenerationSignal(),
@@ -172,18 +174,29 @@ export class TenantContextStore {
     organizationId: string | null,
     generation: number,
   ): Promise<void> {
+    const requestSequence = ++this.requestSequence;
+
     if (origin === 'initial') {
       this.stateSignal.set('LOADING');
     }
     this.errorSignal.set(null);
 
-    return firstValueFrom(this.contextService.getContext(organizationId))
+    const request = firstValueFrom(this.contextService.getContext(organizationId))
       .then((response) => {
-        if (generation !== this.switchGenerationSignal()) {
+        if (
+          generation !== this.switchGenerationSignal() ||
+          requestSequence !== this.requestSequence
+        ) {
           return;
         }
 
-        if (!isValidContextResponse(response)) {
+        if (
+          !isValidContextResponse(
+            response,
+            this.authStore.user()?.id ?? null,
+            organizationId,
+          )
+        ) {
           this.errorSignal.set({
             statusCode: 0,
             code: 'UNEXPECTED_ERROR',
@@ -198,7 +211,10 @@ export class TenantContextStore {
         this.applySnapshot(response);
       })
       .catch((error: unknown) => {
-        if (generation !== this.switchGenerationSignal()) {
+        if (
+          generation !== this.switchGenerationSignal() ||
+          requestSequence !== this.requestSequence
+        ) {
           return;
         }
 
@@ -219,6 +235,15 @@ export class TenantContextStore {
 
         this.stateSignal.set('ERROR');
       });
+
+    this.pendingLoad = request;
+    void request.finally(() => {
+      if (this.pendingLoad === request) {
+        this.pendingLoad = null;
+      }
+    });
+
+    return request;
   }
 
   private applySnapshot(response: AuthContextResponseV1): void {
@@ -258,7 +283,11 @@ export class TenantContextStore {
   }
 }
 
-function isValidContextResponse(response: unknown): response is AuthContextResponseV1 {
+function isValidContextResponse(
+  response: unknown,
+  expectedUserId: string | null,
+  expectedOrganizationId: string | null,
+): response is AuthContextResponseV1 {
   if (!isRecord(response)) {
     return false;
   }
@@ -287,6 +316,16 @@ function isValidContextResponse(response: unknown): response is AuthContextRespo
     return false;
   }
 
+  if (
+    response['preferredOrganizationId'] !== null &&
+    !selectableMemberships.some(
+      (membership) =>
+        membership.organizationId === response['preferredOrganizationId'],
+    )
+  ) {
+    return false;
+  }
+
   const resolved =
     response['status'] === 'ACTIVE_TENANT_READY' ||
     response['status'] === 'ADMIN_SUSPENDED_CONTEXT';
@@ -295,7 +334,12 @@ function isValidContextResponse(response: unknown): response is AuthContextRespo
     return (
       isTenantContext(response['tenantContext']) &&
       isOrganization(response['organization']) &&
-      isMembership(response['membership'])
+      isMembership(response['membership']) &&
+      isResolvedContextCoherent(
+        response,
+        expectedUserId,
+        expectedOrganizationId,
+      )
     );
   }
 
@@ -306,6 +350,50 @@ function isValidContextResponse(response: unknown): response is AuthContextRespo
     capabilities.length === 0 &&
     (response['status'] !== 'AMBIGUOUS_SELECTION' || selectableMemberships.length > 0)
   );
+}
+
+function isResolvedContextCoherent(
+  response: Record<string, unknown>,
+  expectedUserId: string | null,
+  expectedOrganizationId: string | null,
+): boolean {
+  const tenantContext = response['tenantContext'] as Record<string, unknown>;
+  const organization = response['organization'] as Record<string, unknown>;
+  const membership = response['membership'] as Record<string, unknown>;
+
+  if (
+    expectedUserId === null ||
+    tenantContext['userId'] !== expectedUserId ||
+    membership['userId'] !== expectedUserId ||
+    tenantContext['userId'] !== membership['userId'] ||
+    tenantContext['organizationId'] !== organization['id'] ||
+    tenantContext['membershipId'] !== membership['id'] ||
+    tenantContext['organizationRole'] !== membership['role'] ||
+    membership['isCurrentUser'] !== true ||
+    (expectedOrganizationId !== null &&
+      tenantContext['organizationId'] !== expectedOrganizationId)
+  ) {
+    return false;
+  }
+
+  const expectedOrganizationStatus =
+    response['status'] === 'ADMIN_SUSPENDED_CONTEXT' ? 'SUSPENDED' : 'ACTIVE';
+
+  if (organization['status'] !== expectedOrganizationStatus) {
+    return false;
+  }
+
+  if (
+    response['status'] === 'ADMIN_SUSPENDED_CONTEXT' &&
+    (response['capabilities'] as string[]).some(
+      (capability) =>
+        !ADMIN_SUSPENDED_CAPABILITIES.has(capability as TenantCapability),
+    )
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -390,6 +478,22 @@ function isSortedUniqueCapabilities(capabilities: string[]): boolean {
 
   return true;
 }
+
+const ADMIN_SUSPENDED_CAPABILITIES = new Set<TenantCapability>([
+  'invitation.create',
+  'invitation.read',
+  'invitation.resend',
+  'invitation.revoke',
+  'membership.leave',
+  'membership.manage_role',
+  'membership.read',
+  'membership.reactivate',
+  'membership.remove',
+  'membership.suspend',
+  'organization.manage',
+  'organization.read',
+  'ownership.transfer',
+]);
 
 function normalizeError(error: unknown): TenantContextError {
   if (error instanceof HttpErrorResponse) {
