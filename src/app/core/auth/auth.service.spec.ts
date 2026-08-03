@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../environments/environment';
+import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { AuthUser, LoginRequest, LoginResponse } from './auth.models';
 import { AuthService } from './auth.service';
 import { AuthStore } from './auth.store';
@@ -27,14 +28,26 @@ const loginResponse: LoginResponse = {
 describe('AuthService', () => {
   let service: AuthService;
   let store: AuthStore;
+  let tenantContextStore: {
+    startForIdentity: ReturnType<typeof vi.fn>;
+    resetTenantState: ReturnType<typeof vi.fn>;
+  };
   let httpTesting: HttpTestingController;
 
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
+    tenantContextStore = {
+      startForIdentity: vi.fn(() => Promise.resolve()),
+      resetTenantState: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: TenantContextStore, useValue: tenantContextStore },
+      ],
     });
 
     service = TestBed.inject(AuthService);
@@ -49,7 +62,7 @@ describe('AuthService', () => {
     sessionStorage.clear();
   });
 
-  it('sends credentials and persists the successful login response', () => {
+  it('sends credentials and persists the successful login response', async () => {
     let receivedResponse: LoginResponse | undefined;
 
     service.login(credentials).subscribe((response) => {
@@ -61,10 +74,36 @@ describe('AuthService', () => {
     expect(request.request.body).toEqual(credentials);
 
     request.flush(loginResponse);
+    await Promise.resolve();
 
     expect(receivedResponse).toEqual(loginResponse);
     expect(store.token()).toBe(loginResponse.accessToken);
     expect(store.user()).toEqual(user);
+    expect(tenantContextStore.startForIdentity).toHaveBeenCalledWith(user.id);
+  });
+
+  it('does not complete login navigation input until tenant context bootstrap resolves', async () => {
+    let resolveContext: (() => void) | undefined;
+    const contextReady = new Promise<void>((resolve) => {
+      resolveContext = resolve;
+    });
+    tenantContextStore.startForIdentity.mockReturnValue(contextReady);
+
+    let receivedResponse: LoginResponse | undefined;
+    service.login(credentials).subscribe((response) => {
+      receivedResponse = response;
+    });
+
+    httpTesting.expectOne(`${environment.apiUrl}/auth/login`).flush(loginResponse);
+    await Promise.resolve();
+
+    expect(receivedResponse).toBeUndefined();
+
+    resolveContext?.();
+    await contextReady;
+    await Promise.resolve();
+
+    expect(receivedResponse).toEqual(loginResponse);
   });
 
   it('keeps an anonymous user anonymous and exposes a login error', () => {
@@ -105,6 +144,7 @@ describe('AuthService', () => {
     service.logout();
 
     expect(clearSession).toHaveBeenCalledOnce();
+    expect(tenantContextStore.resetTenantState).toHaveBeenCalledWith('logout');
     expect(store.isAuthenticated()).toBe(false);
   });
 });

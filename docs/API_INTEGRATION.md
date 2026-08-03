@@ -120,18 +120,18 @@ Implementation uses Angular Signals.
 
 ---
 
-# JWT Interceptor
+# JWT and tenant metadata
 
-The JWT interceptor:
+The authentication interceptor reads the request mode from Angular `HttpContext` metadata:
 
-- Reads the token from `AuthStore`
-- Adds Authorization header
-- Excludes `/auth/login`
-- Does not refresh tokens
+- `PUBLIC`: no authentication or tenant headers
+- `IDENTITY_ONLY`: bearer JWT only
+- `TENANT_OPTIONAL`: bearer JWT plus `X-Organization-Id` when a confirmed tenant is selected
+- `TENANT_REQUIRED`: bearer JWT plus the confirmed tenant header
 
-Refresh Tokens are outside the current MVP.
+The interceptor does not infer behavior from URL strings. A request may provide an explicit organization override through its context metadata, but the frontend never treats that value as authorization evidence.
 
----
+`TenantContextStore` bootstraps `GET /auth/context` after identity restoration, validates the V1 response, and exposes the state machine, confirmed selection, capabilities, context version, and switch generation through Angular Signals. The confirmed organization is persisted only in `sessionStorage`, so selection is isolated per browser tab and is cleared by `resetTenantState`.
 
 # Route Guards
 
