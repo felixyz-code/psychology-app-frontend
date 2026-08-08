@@ -44,6 +44,46 @@
   flex: 1;
 }
 
+.organization-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 16rem;
+  min-height: 40px;
+  padding: 0.45rem 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(191, 219, 254, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.organization-menu-trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.organization-menu-trigger:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.organization-preference-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #fde68a;
+  font-size: 0.75rem;
+}
+
+.organization-preference-warning mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
 .user-menu-trigger {
   appearance: none;
   display: inline-flex;
@@ -152,6 +192,14 @@
   }
 
   .user-info {
+    display: none;
+  }
+
+  .organization-menu-trigger {
+    max-width: 10rem;
+  }
+
+  .organization-preference-warning > span {
     display: none;
   }
 

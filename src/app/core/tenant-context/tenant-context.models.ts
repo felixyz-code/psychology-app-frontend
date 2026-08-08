@@ -147,6 +147,10 @@ export interface AuthContextResponseV1 {
   preferredOrganizationId: string | null;
 }
 
+export interface AuthContextPreferenceResponse {
+  preferredOrganizationId: string | null;
+}
+
 export interface TenantContextError {
   statusCode: number;
   code: string;

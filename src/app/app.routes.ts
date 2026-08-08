@@ -9,6 +9,14 @@ export const routes: Routes = [
     loadComponent: () => import('./core/auth/login.page').then((m) => m.LoginPage),
   },
   {
+    path: 'organization-selection',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./core/tenant-context/organization-selection.page').then(
+        (m) => m.OrganizationSelectionPage,
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard, tenantContextGuard],
     loadComponent: () =>

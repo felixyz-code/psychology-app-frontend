@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AuthContextResponseV1 } from './tenant-context.models';
+import { AuthContextPreferenceResponse, AuthContextResponseV1 } from './tenant-context.models';
 import { TENANT_HTTP_MODE, TENANT_ORGANIZATION_ID } from './tenant-http-context';
 
 @Injectable({ providedIn: 'root' })
@@ -26,5 +26,17 @@ export class TenantContextService {
       context,
       headers,
     });
+  }
+
+  updatePreferredOrganization(
+    organizationId: string | null,
+  ): Observable<AuthContextPreferenceResponse> {
+    const context = new HttpContext().set(TENANT_HTTP_MODE, 'IDENTITY_ONLY');
+
+    return this.http.put<AuthContextPreferenceResponse>(
+      this.apiUrl + '/auth/context/preference',
+      { organizationId },
+      { context },
+    );
   }
 }

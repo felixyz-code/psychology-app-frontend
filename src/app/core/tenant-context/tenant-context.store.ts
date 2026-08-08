@@ -6,6 +6,8 @@ import { AuthStore } from '../auth/auth.store';
 import { TenantContextService } from './tenant-context.service';
 import {
   AuthContextResponseV1,
+  AuthContextPreferenceResponse,
+  SelectableMembership,
   TENANT_CAPABILITIES,
   TenantCapability,
   TenantContextError,
@@ -32,9 +34,17 @@ export class TenantContextStore {
   private readonly contextVersionSignal = signal(0);
   private readonly switchGenerationSignal = signal(0);
   private readonly snapshotSignal = signal<AuthContextResponseV1 | null>(null);
+  private readonly selectableMembershipsSignal = signal<SelectableMembership[]>([]);
+  private readonly preferredOrganizationIdSignal = signal<string | null>(null);
+  private readonly preferredPersistenceStateSignal = signal<'IDLE' | 'SAVING' | 'SAVED' | 'ERROR'>(
+    'IDLE',
+  );
+  private readonly preferredPersistenceErrorSignal = signal<TenantContextError | null>(null);
   private readonly errorSignal = signal<TenantContextError | null>(null);
   private pendingLoad: Promise<void> | null = null;
+  private pendingPreferencePersistence: Promise<void> | null = null;
   private requestSequence = 0;
+  private preferenceRequestSequence = 0;
   private identityId: string | null = null;
 
   readonly state = computed(() => this.stateSignal());
@@ -45,12 +55,10 @@ export class TenantContextStore {
   readonly snapshot = computed(() => this.snapshotSignal());
   readonly error = computed(() => this.errorSignal());
   readonly capabilities = computed(() => this.snapshotSignal()?.capabilities ?? []);
-  readonly selectableMemberships = computed(
-    () => this.snapshotSignal()?.selectableMemberships ?? [],
-  );
-  readonly preferredOrganizationId = computed(
-    () => this.snapshotSignal()?.preferredOrganizationId ?? null,
-  );
+  readonly selectableMemberships = computed(() => this.selectableMembershipsSignal());
+  readonly preferredOrganizationId = computed(() => this.preferredOrganizationIdSignal());
+  readonly preferredPersistenceState = computed(() => this.preferredPersistenceStateSignal());
+  readonly preferredPersistenceError = computed(() => this.preferredPersistenceErrorSignal());
   readonly isLoading = computed(
     () => this.stateSignal() === 'LOADING' || this.stateSignal() === 'SWITCHING',
   );
@@ -134,10 +142,27 @@ export class TenantContextStore {
     this.selectedOrganizationIdSignal.set(null);
     this.snapshotSignal.set(null);
     this.errorSignal.set(null);
+    this.preferredPersistenceStateSignal.set('IDLE');
+    this.preferredPersistenceErrorSignal.set(null);
     this.removePersistedOrganizationId();
     this.stateSignal.set('SWITCHING');
 
     return this.loadContext('switch', organizationId, generation);
+  }
+
+  async selectOrganization(organizationId: string): Promise<void> {
+    await this.switchTenant(organizationId);
+
+    if (
+      this.selectedOrganizationId() !== organizationId ||
+      (!this.isActiveTenantReady() && !this.isAdminSuspendedContext())
+    ) {
+      return;
+    }
+
+    if (this.preferredOrganizationIdSignal() !== organizationId) {
+      this.persistPreferredOrganization(organizationId, this.switchGenerationSignal());
+    }
   }
 
   resetTenantState(reason: string, generation?: number): void {
@@ -156,6 +181,10 @@ export class TenantContextStore {
     this.selectedOrganizationIdSignal.set(null);
     this.contextVersionSignal.set(0);
     this.snapshotSignal.set(null);
+    this.selectableMembershipsSignal.set([]);
+    this.preferredOrganizationIdSignal.set(null);
+    this.preferredPersistenceStateSignal.set('IDLE');
+    this.preferredPersistenceErrorSignal.set(null);
     this.errorSignal.set(null);
     this.stateSignal.set('UNINITIALIZED');
     this.removePersistedOrganizationId();
@@ -190,13 +219,7 @@ export class TenantContextStore {
           return;
         }
 
-        if (
-          !isValidContextResponse(
-            response,
-            this.authStore.user()?.id ?? null,
-            organizationId,
-          )
-        ) {
+        if (!isValidContextResponse(response, this.authStore.user()?.id ?? null, organizationId)) {
           this.errorSignal.set({
             statusCode: 0,
             code: 'UNEXPECTED_ERROR',
@@ -209,6 +232,16 @@ export class TenantContextStore {
         }
 
         this.applySnapshot(response);
+
+        if (
+          origin === 'initial' &&
+          response.status === 'AMBIGUOUS_SELECTION' &&
+          response.preferredOrganizationId
+        ) {
+          return this.switchTenant(response.preferredOrganizationId);
+        }
+
+        return undefined;
       })
       .catch((error: unknown) => {
         if (
@@ -248,6 +281,8 @@ export class TenantContextStore {
 
   private applySnapshot(response: AuthContextResponseV1): void {
     this.snapshotSignal.set(response);
+    this.selectableMembershipsSignal.set(response.selectableMemberships);
+    this.preferredOrganizationIdSignal.set(response.preferredOrganizationId);
     this.contextVersionSignal.update((version) => version + 1);
     this.errorSignal.set(null);
     this.stateSignal.set(response.status);
@@ -273,6 +308,60 @@ export class TenantContextStore {
     }
   }
 
+  private persistPreferredOrganization(organizationId: string, generation: number): void {
+    const requestSequence = ++this.preferenceRequestSequence;
+    this.preferredPersistenceStateSignal.set('SAVING');
+    this.preferredPersistenceErrorSignal.set(null);
+
+    const request = firstValueFrom(this.contextService.updatePreferredOrganization(organizationId))
+      .then((response) => {
+        if (
+          generation !== this.switchGenerationSignal() ||
+          requestSequence !== this.preferenceRequestSequence
+        ) {
+          return;
+        }
+
+        if (!isValidPreferenceResponse(response)) {
+          this.preferredPersistenceStateSignal.set('ERROR');
+          this.preferredPersistenceErrorSignal.set({
+            statusCode: 0,
+            code: 'UNEXPECTED_ERROR',
+            message: 'The preferred organization response is invalid.',
+            requestId: null,
+            details: null,
+          });
+          return;
+        }
+
+        this.preferredOrganizationIdSignal.set(response.preferredOrganizationId);
+        this.snapshotSignal.update((snapshot) =>
+          snapshot
+            ? { ...snapshot, preferredOrganizationId: response.preferredOrganizationId }
+            : snapshot,
+        );
+        this.preferredPersistenceStateSignal.set('SAVED');
+      })
+      .catch((error: unknown) => {
+        if (
+          generation !== this.switchGenerationSignal() ||
+          requestSequence !== this.preferenceRequestSequence
+        ) {
+          return;
+        }
+
+        this.preferredPersistenceStateSignal.set('ERROR');
+        this.preferredPersistenceErrorSignal.set(normalizeError(error));
+      });
+
+    this.pendingPreferencePersistence = request;
+    void request.finally(() => {
+      if (this.pendingPreferencePersistence === request) {
+        this.pendingPreferencePersistence = null;
+      }
+    });
+  }
+
   private readPersistedOrganizationId(): string | null {
     const persisted = sessionStorage.getItem(SELECTED_ORGANIZATION_KEY);
     return persisted?.trim() || null;
@@ -281,6 +370,15 @@ export class TenantContextStore {
   private removePersistedOrganizationId(): void {
     sessionStorage.removeItem(SELECTED_ORGANIZATION_KEY);
   }
+}
+
+function isValidPreferenceResponse(response: unknown): response is AuthContextPreferenceResponse {
+  return (
+    isRecord(response) &&
+    hasOwn(response, 'preferredOrganizationId') &&
+    (response['preferredOrganizationId'] === null ||
+      isNonEmptyString(response['preferredOrganizationId']))
+  );
 }
 
 function isValidContextResponse(
@@ -319,8 +417,7 @@ function isValidContextResponse(
   if (
     response['preferredOrganizationId'] !== null &&
     !selectableMemberships.some(
-      (membership) =>
-        membership.organizationId === response['preferredOrganizationId'],
+      (membership) => membership.organizationId === response['preferredOrganizationId'],
     )
   ) {
     return false;
@@ -335,11 +432,7 @@ function isValidContextResponse(
       isTenantContext(response['tenantContext']) &&
       isOrganization(response['organization']) &&
       isMembership(response['membership']) &&
-      isResolvedContextCoherent(
-        response,
-        expectedUserId,
-        expectedOrganizationId,
-      )
+      isResolvedContextCoherent(response, expectedUserId, expectedOrganizationId)
     );
   }
 
@@ -370,8 +463,7 @@ function isResolvedContextCoherent(
     tenantContext['membershipId'] !== membership['id'] ||
     tenantContext['organizationRole'] !== membership['role'] ||
     membership['isCurrentUser'] !== true ||
-    (expectedOrganizationId !== null &&
-      tenantContext['organizationId'] !== expectedOrganizationId)
+    (expectedOrganizationId !== null && tenantContext['organizationId'] !== expectedOrganizationId)
   ) {
     return false;
   }
@@ -386,8 +478,7 @@ function isResolvedContextCoherent(
   if (
     response['status'] === 'ADMIN_SUSPENDED_CONTEXT' &&
     (response['capabilities'] as string[]).some(
-      (capability) =>
-        !ADMIN_SUSPENDED_CAPABILITIES.has(capability as TenantCapability),
+      (capability) => !ADMIN_SUSPENDED_CAPABILITIES.has(capability as TenantCapability),
     )
   ) {
     return false;

@@ -5,6 +5,7 @@ import { of, throwError } from 'rxjs';
 
 import { AuthService } from './auth.service';
 import { LoginPage } from './login.page';
+import { TenantContextStore } from '../tenant-context/tenant-context.store';
 
 describe('LoginPage', () => {
   const credentials = {
@@ -15,16 +16,25 @@ describe('LoginPage', () => {
   let page: LoginPage;
   let authService: { login: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let tenantContextStore: {
+    isActiveTenantReady: ReturnType<typeof vi.fn>;
+    isAdminSuspendedContext: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     authService = { login: vi.fn() };
     router = { navigate: vi.fn(() => Promise.resolve(true)) };
+    tenantContextStore = {
+      isActiveTenantReady: vi.fn(() => true),
+      isAdminSuspendedContext: vi.fn(() => false),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         FormBuilder,
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
+        { provide: TenantContextStore, useValue: tenantContextStore },
       ],
     });
 

@@ -57,8 +57,20 @@ describe('tenantContextGuard', () => {
     expect(router.serializeUrl(result as UrlTree)).toBe('/login');
   });
 
-  it('blocks unresolved tenant states without rendering operational data', () => {
-    expect(runGuard()).toBe(false);
+  it('routes ambiguous tenant states to organization selection', () => {
+    const result = runGuard();
+
+    expect(result instanceof UrlTree).toBe(true);
+    expect(router.serializeUrl(result as UrlTree)).toBe('/organization-selection');
+  });
+
+  it('routes users without an active organization to organization selection', () => {
+    tenantStore.state.mockReturnValue('NO_ACTIVE_TENANT');
+
+    const result = runGuard();
+
+    expect(result instanceof UrlTree).toBe(true);
+    expect(router.serializeUrl(result as UrlTree)).toBe('/organization-selection');
   });
 
   function runGuard(): boolean | UrlTree {
