@@ -43,7 +43,7 @@ Completed - Reports foundation generalized for multiple professional reports
 POST-GO-LIVE.4 status:
 
 ```text
-STATUS: IMPLEMENTED / INDEPENDENT REVIEW PENDING
+STATUS: ROADMAP CONTINUATION AUTHORIZED
 CONTRACT VERSION: 1
 DATE: 2026-08-02
 DOCUMENTATION BRANCH: codex/post-go-live-4-0-saas-ux-contract
@@ -51,8 +51,45 @@ CONTRACT COMMIT: 722ff910acc85b9c31d00d57b4655064c85f7458
 RELATED PR: #24
 POST-GO-LIVE.4.1: CERTIFIED AND MERGED
 POST-GO-LIVE.4.2: CERTIFIED AND MERGED
-POST-GO-LIVE.4.3: CROSS-TENANT STATE INVALIDATION REVIEW FINDINGS RESOLVED; CERTIFICATION PENDING
+POST-GO-LIVE.4.3: CROSS-TENANT STATE INVALIDATION - CERTIFIED / COMPLETE
+POST-GO-LIVE.4.4: ORGANIZATION ADMINISTRATION UX - AUTHORIZED / NOT STARTED
 ```
+
+## POST-GO-LIVE.4.4 - Organization Administration UX
+
+**Status:** `AUTHORIZED / NOT STARTED`. Authorization records roadmap scope
+only; implementation has not started.
+
+**Goal:** provide the first organization-domain administration experience for
+the confirmed tenant, using the certified backend organization read, identity
+update, and `ACTIVE`/`SUSPENDED` lifecycle APIs.
+
+**In scope:** organization details; capability-aware owner administration
+controls; identity fields (`legalName`, `displayName`, `slug`, `timezone`,
+`locale`, `currency`); deliberate suspend/reactivate UX; contract error and
+concurrency recovery; and context refresh/invalidation after a successful
+lifecycle change.
+
+**Out of scope:** membership administration, invitations and invitation
+decisions, ownership transfer, freelancer signup or organization creation,
+branding, billing, settings expansion, and infrastructure or backend schema
+work.
+
+**Dependencies:** 4.1 Tenant Context Foundation, 4.2 Organization Selection &
+Preferred Organization, and 4.3 Cross-Tenant State Invalidation.
+
+**Acceptance criteria:** only a confirmed selected organization is addressed;
+read/manage controls follow the server-projected capabilities; all tenant API
+calls use the established tenant-required metadata; successful updates refresh
+context; suspension clears operational UI and enters only the allowed
+administrative context; reactivation restores only after confirmed context;
+and 403/404 responses remain redacted without cross-tenant disclosure.
+
+**Security invariants:** `X-Organization-Id` remains request-time authority;
+the client never infers authorization from URLs, stored state, or capabilities;
+the backend remains authoritative; stale responses are discarded by tenant
+generation; and no suspended-organization operational data or action is
+rendered.
 
 Documentation-only rollback:
 

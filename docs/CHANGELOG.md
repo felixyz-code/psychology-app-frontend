@@ -6,13 +6,35 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# POST-GO-LIVE.4 Roadmap Continuation
+
+## Status
+
+* `POST-GO-LIVE.4.3 Cross-Tenant State Invalidation` is certified and complete
+  at frontend merge baseline `bee30457b2ec298d39970216e1ddfe6c9204c3df` (PR
+  `#27`).
+* `POST-GO-LIVE.4.4 Organization Administration UX` is authorized and not
+  started. This authorization is roadmap-only and does not start runtime work.
+
+## Scope
+
+* The next bounded frontend capability is organization detail, identity and
+  lifecycle administration on the confirmed tenant.
+* Membership administration, invitations, ownership transfer, signup, and
+  organization creation remain separate subsequent capabilities.
+* No Angular runtime, tests, backend contract, schema, migration, or
+  infrastructure behavior changed.
+
+---
+
 # POST-GO-LIVE.4 Documentation Closeout
 
 ## Status
 
 * Documentacion contractual cerrada para POST-GO-LIVE.4.
 * Estado: `CONTRACT COMPLETE / IMPLEMENTATION READY`.
-* La siguiente fase es `POST-GO-LIVE.4.1 Tenant Context Foundation`, aun no iniciada.
+* Historical closeout statement: the initial next phase was
+  `POST-GO-LIVE.4.1 Tenant Context Foundation`; it is now certified and merged.
 
 ## Baseline
 
