@@ -108,7 +108,12 @@
         @if (contextWarning()) {
           <div class="organization-admin-alert organization-admin-alert--warning" role="alert">
             <mat-icon aria-hidden="true">sync_problem</mat-icon>
-            <span>{{ contextWarning() }}</span>
+            <div>
+              <span>{{ contextWarning() }}</span>
+              <button mat-button type="button" (click)="retryContextSynchronization()">
+                Reintentar sincronizaci&oacute;n
+              </button>
+            </div>
           </div>
         }
 
@@ -209,7 +214,9 @@
                     mat-flat-button
                     color="primary"
                     type="submit"
-                    [disabled]="isSaving() || isChangingStatus()"
+                    [disabled]="
+                      isSaving() || isChangingStatus() || isCanonicalContextSynchronizationPending()
+                    "
                   >
                     @if (isSaving()) {
                       <mat-spinner diameter="20" />
@@ -244,7 +251,9 @@
                     [color]="isSuspended() ? 'primary' : 'warn'"
                     mat-stroked-button
                     type="button"
-                    [disabled]="isChangingStatus() || isSaving()"
+                    [disabled]="
+                      isChangingStatus() || isSaving() || isCanonicalContextSynchronizationPending()
+                    "
                     (click)="openStatusConfirmation()"
                   >
                     @if (isChangingStatus()) {

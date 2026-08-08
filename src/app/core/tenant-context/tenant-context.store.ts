@@ -28,6 +28,13 @@ export interface TenantStateInvalidation {
   readonly generation: number;
 }
 
+export type CanonicalContextSynchronizationResult = 'synchronized' | 'failed' | 'stale';
+
+interface CanonicalContextSynchronization {
+  readonly generation: number;
+  readonly organizationId: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TenantContextStore {
   private readonly authStore = inject(AuthStore);
@@ -46,6 +53,8 @@ export class TenantContextStore {
   );
   private readonly preferredPersistenceErrorSignal = signal<TenantContextError | null>(null);
   private readonly errorSignal = signal<TenantContextError | null>(null);
+  private readonly canonicalContextSynchronizationSignal =
+    signal<CanonicalContextSynchronization | null>(null);
   private readonly invalidationSubject = new Subject<TenantStateInvalidation>();
   private pendingLoad: Promise<void> | null = null;
   private pendingRefresh: {
@@ -67,6 +76,9 @@ export class TenantContextStore {
   readonly switchGeneration = computed(() => this.switchGenerationSignal());
   readonly snapshot = computed(() => this.snapshotSignal());
   readonly error = computed(() => this.errorSignal());
+  readonly isCanonicalContextSynchronizationPending = computed(
+    () => this.canonicalContextSynchronizationSignal() !== null,
+  );
   readonly capabilities = computed(() => this.snapshotSignal()?.capabilities ?? []);
   readonly selectableMemberships = computed(() => this.selectableMembershipsSignal());
   readonly preferredOrganizationId = computed(() => this.preferredOrganizationIdSignal());
@@ -148,6 +160,41 @@ export class TenantContextStore {
     return this.refreshCurrentContext(false);
   }
 
+  async synchronizeCanonicalContext(
+    generation: number,
+    organizationId: string,
+    failClosed: boolean,
+  ): Promise<CanonicalContextSynchronizationResult> {
+    if (!this.isRequestContextCurrent(generation, organizationId)) {
+      return 'stale';
+    }
+
+    const synchronization = failClosed ? { generation, organizationId } : null;
+    if (synchronization) {
+      this.canonicalContextSynchronizationSignal.set(synchronization);
+    }
+
+    const request = this.startRefresh(generation, organizationId, this.contextVersionSignal());
+    await request;
+
+    const selectedOrganizationId = this.selectedOrganizationIdSignal();
+    const failed = selectedOrganizationId === organizationId && this.errorSignal() !== null;
+
+    if (
+      synchronization &&
+      this.canonicalContextSynchronizationSignal() === synchronization &&
+      !failed
+    ) {
+      this.canonicalContextSynchronizationSignal.set(null);
+    }
+
+    if (selectedOrganizationId !== organizationId) {
+      return 'stale';
+    }
+
+    return failed ? 'failed' : 'synchronized';
+  }
+
   private refreshCurrentContext(showLoadingState: boolean): Promise<void> {
     if (!this.authStore.isAuthenticated()) {
       this.resetTenantState('refresh-without-identity');
@@ -170,6 +217,14 @@ export class TenantContextStore {
     if (showLoadingState) {
       this.stateSignal.set('LOADING');
     }
+    return this.startRefresh(generation, organizationId, contextVersion);
+  }
+
+  private startRefresh(
+    generation: number,
+    organizationId: string | null,
+    contextVersion: number,
+  ): Promise<void> {
     this.errorSignal.set(null);
 
     const request = this.loadContext('refresh', organizationId, generation);
@@ -232,6 +287,7 @@ export class TenantContextStore {
     this.preferredPersistenceStateSignal.set('IDLE');
     this.preferredPersistenceErrorSignal.set(null);
     this.errorSignal.set(null);
+    this.canonicalContextSynchronizationSignal.set(null);
     this.stateSignal.set('UNINITIALIZED');
     this.removePersistedOrganizationId();
     this.emitInvalidation(reason, nextGeneration);
@@ -455,6 +511,7 @@ export class TenantContextStore {
     this.selectedOrganizationIdSignal.set(null);
     this.snapshotSignal.set(null);
     this.errorSignal.set(null);
+    this.canonicalContextSynchronizationSignal.set(null);
     this.preferredPersistenceStateSignal.set('IDLE');
     this.preferredPersistenceErrorSignal.set(null);
     this.removePersistedOrganizationId();

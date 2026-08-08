@@ -512,6 +512,165 @@ describe('TenantContextStore', () => {
     expect(store.contextVersion()).toBe(2);
   });
 
+  it('forces canonical synchronization after commit instead of reusing a pre-commit refresh', async () => {
+    const preCommitRefresh = new Subject<AuthContextResponseV1>();
+    const postCommitRefresh = new Subject<AuthContextResponseV1>();
+
+    await store.bootstrap();
+    contextService.getContext
+      .mockReturnValueOnce(preCommitRefresh.asObservable())
+      .mockReturnValueOnce(postCommitRefresh.asObservable());
+
+    const preCommitRequest = store.revalidateOperationalContext(1, 'organization-a', 1);
+    const synchronization = store.synchronizeCanonicalContext(1, 'organization-a', true);
+
+    expect(contextService.getContext).toHaveBeenCalledTimes(3);
+    expect(store.isCanonicalContextSynchronizationPending()).toBe(true);
+
+    preCommitRefresh.next(activeContext);
+    preCommitRefresh.complete();
+    await preCommitRequest;
+
+    postCommitRefresh.next({
+      ...activeContext,
+      status: 'ADMIN_SUSPENDED_CONTEXT',
+      organization: {
+        ...activeContext.organization!,
+        status: 'SUSPENDED',
+      },
+    });
+    postCommitRefresh.complete();
+
+    await expect(synchronization).resolves.toBe('synchronized');
+    expect(store.state()).toBe('ADMIN_SUSPENDED_CONTEXT');
+    expect(store.contextVersion()).toBe(2);
+    expect(store.isCanonicalContextSynchronizationPending()).toBe(false);
+  });
+
+  it('synchronizes lifecycle state after a same-tenant revalidation advances the context version', async () => {
+    await store.bootstrap();
+    contextService.getContext.mockReturnValueOnce(of(activeContext));
+
+    await store.revalidateOperationalContext(1, 'organization-a', 1);
+
+    expect(store.contextVersion()).toBe(2);
+
+    contextService.getContext.mockReturnValueOnce(
+      of({
+        ...activeContext,
+        status: 'ADMIN_SUSPENDED_CONTEXT',
+        organization: {
+          ...activeContext.organization!,
+          status: 'SUSPENDED',
+        },
+      }),
+    );
+
+    await expect(store.synchronizeCanonicalContext(1, 'organization-a', true)).resolves.toBe(
+      'synchronized',
+    );
+
+    expect(store.contextVersion()).toBe(3);
+    expect(store.state()).toBe('ADMIN_SUSPENDED_CONTEXT');
+    expect(store.snapshot()?.organization?.status).toBe('SUSPENDED');
+  });
+
+  it('does not let canonical synchronization for A refresh or mutate B after a switch', async () => {
+    const synchronizationA = new Subject<AuthContextResponseV1>();
+
+    await store.bootstrap();
+    contextService.getContext
+      .mockReturnValueOnce(synchronizationA.asObservable())
+      .mockReturnValueOnce(of(contextForOrganization('organization-b')));
+
+    const synchronization = store.synchronizeCanonicalContext(1, 'organization-a', true);
+    const switchToB = store.switchTenant('organization-b');
+
+    synchronizationA.next({
+      ...activeContext,
+      status: 'ADMIN_SUSPENDED_CONTEXT',
+      organization: {
+        ...activeContext.organization!,
+        status: 'SUSPENDED',
+      },
+    });
+    synchronizationA.complete();
+
+    await synchronization;
+    await switchToB;
+
+    expect(store.selectedOrganizationId()).toBe('organization-b');
+    expect(store.state()).toBe('ACTIVE_TENANT_READY');
+    expect(store.snapshot()?.organization?.id).toBe('organization-b');
+    expect(store.isCanonicalContextSynchronizationPending()).toBe(false);
+  });
+
+  it('keeps operational access fail-closed after synchronization fails until a retry succeeds', async () => {
+    await store.bootstrap();
+    contextService.getContext.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 503 })),
+    );
+
+    await expect(store.synchronizeCanonicalContext(1, 'organization-a', true)).resolves.toBe(
+      'failed',
+    );
+
+    expect(store.state()).toBe('ACTIVE_TENANT_READY');
+    expect(store.isCanonicalContextSynchronizationPending()).toBe(true);
+
+    contextService.getContext.mockReturnValueOnce(
+      of({
+        ...activeContext,
+        status: 'ADMIN_SUSPENDED_CONTEXT',
+        organization: {
+          ...activeContext.organization!,
+          status: 'SUSPENDED',
+        },
+      }),
+    );
+
+    await expect(store.synchronizeCanonicalContext(1, 'organization-a', true)).resolves.toBe(
+      'synchronized',
+    );
+
+    expect(store.state()).toBe('ADMIN_SUSPENDED_CONTEXT');
+    expect(store.isCanonicalContextSynchronizationPending()).toBe(false);
+  });
+
+  it('restores an externally reactivated tenant only from the V1 context response', async () => {
+    const suspendedContext: AuthContextResponseV1 = {
+      ...activeContext,
+      status: 'ADMIN_SUSPENDED_CONTEXT',
+      organization: {
+        ...activeContext.organization!,
+        status: 'SUSPENDED',
+      },
+      capabilities: ['organization.read'],
+    };
+    const reactivation = new Subject<AuthContextResponseV1>();
+    contextService.getContext.mockReturnValueOnce(of(suspendedContext));
+
+    await store.bootstrap();
+    contextService.getContext.mockReturnValueOnce(reactivation.asObservable());
+
+    const synchronization = store.synchronizeCanonicalContext(1, 'organization-a', true);
+
+    expect(store.state()).toBe('ADMIN_SUSPENDED_CONTEXT');
+    expect(store.isCanonicalContextSynchronizationPending()).toBe(true);
+    expect(store.capabilities()).toEqual(['organization.read']);
+
+    reactivation.next({
+      ...activeContext,
+      capabilities: ['organization.read', 'patient.read'],
+    });
+    reactivation.complete();
+
+    await expect(synchronization).resolves.toBe('synchronized');
+    expect(store.state()).toBe('ACTIVE_TENANT_READY');
+    expect(store.capabilities()).toEqual(['organization.read', 'patient.read']);
+    expect(store.isCanonicalContextSynchronizationPending()).toBe(false);
+  });
+
   it('discards out-of-order context responses during A to B to C', async () => {
     const organizationB = new Subject<AuthContextResponseV1>();
     const organizationC = new Subject<AuthContextResponseV1>();

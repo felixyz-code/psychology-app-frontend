@@ -171,9 +171,13 @@ tenant. It owns organization detail, editable identity fields and the
 
 All organization requests capture the selected organization through
 `TENANT_REQUIRED` request metadata. Successful mutations adopt the canonical
-backend response and refresh V1 tenant context. The feature does not own
-membership, invitation, ownership-transfer, signup or organization-creation
-workflows.
+backend response and force a fresh V1 tenant-context synchronization for the
+same organization and switch generation. Canonical detail responses also
+trigger synchronization when their lifecycle status differs from the current
+V1 snapshot. While that mismatch is unresolved, operational navigation and
+actions fail closed, without synthesizing capabilities or lifecycle state in
+the frontend. The feature does not own membership, invitation,
+ownership-transfer, signup or organization-creation workflows.
 
 ## Reports Module
 
@@ -236,8 +240,10 @@ Authentication is required before accessing protected areas.
 Operational children additionally require `activeTenantGuard`. A confirmed
 `ADMIN_SUSPENDED_CONTEXT` is redirected to `/organization-administration`,
 whose route requires the server-projected `organization.read` capability.
-`organization.manage` controls identity and lifecycle actions, while the
-backend remains authoritative for every request.
+Operational children are also redirected there while a canonical lifecycle
+mismatch is awaiting V1 synchronization. `organization.manage` controls
+identity and lifecycle actions, while the backend remains authoritative for
+every request.
 
 ---
 
@@ -266,6 +272,7 @@ Current isolation responsibilities are:
 * `TenantStateInvalidationCoordinator` closes Angular Material dialogs and leaves tenant-aware routes during switch or unsafe context recovery; confirmed suspension redirects operational routes to the suspended-safe organization administration surface
 * `tenantStateInterceptor` captures the request generation, organization and context version for every `TENANT_REQUIRED` request, then cancels or discards work after the tenant identity becomes stale
 * an operational `403` triggers one coalesced V1 context refresh for the captured tenant; only the canonical refresh result can confirm access loss
+* organization lifecycle reconciliation starts a distinct forced V1 refresh, superseding any pre-commit refresh for the same tenant; a lifecycle mismatch keeps operational routes and navigation fail-closed until synchronization succeeds or the tenant changes
 * the main layout removes its routed tenant surface whenever no confirmed context is ready
 
 Feature services remain stateless HTTP adapters. Tenant data, filters, forms and selections are route- or dialog-scoped and are discarded when the coordinator leaves the invalid route or closes overlays.

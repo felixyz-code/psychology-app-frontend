@@ -176,10 +176,19 @@ evidence. The identity update accepts only `legalName`, `displayName`, `slug`,
 `SUSPENDED`.
 
 Successful mutations replace page data with the canonical response and then
-refresh `GET /auth/context`. A `409` is treated as a recoverable concurrent
-change and requires reload before retry. Runtime `403`, redacted `404`,
-validation `400`, network and server failures remain distinct visible states;
-transient failures are not converted into empty organization data.
+force a new `GET /auth/context` for the captured organization and switch
+generation. This forced post-commit request does not reuse an older in-flight
+refresh. Canonical detail or mutation responses whose lifecycle status differs
+from the current V1 snapshot also trigger synchronization. Operational routes,
+links, and organization mutations remain fail-closed during that mismatch; a
+transient synchronization failure preserves the last confirmed snapshot and
+requires an explicit retry.
+
+A `409` is a recoverable conflict and may represent either concurrent state or
+an identifier uniqueness conflict, so the UI does not claim concurrency as the
+only cause. Runtime `403`, redacted `404`, validation `400`, network and server
+failures remain distinct visible states; transient failures are not converted
+into empty organization data.
 
 # Route Guards
 
@@ -192,7 +201,8 @@ Current responsibilities:
 - Return `UrlTree`
 
 Capability routing uses `capabilityGuard`; operational routes also use
-`activeTenantGuard` so suspended tenants cannot mount operational pages.
+`activeTenantGuard` so suspended tenants, and tenants with unresolved canonical
+lifecycle synchronization, cannot mount operational pages.
 
 Authorization remains enforced by the backend.
 

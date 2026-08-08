@@ -26,6 +26,10 @@ export const activeTenantGuard: CanActivateFn = () => {
   const store = inject(TenantContextStore);
   const router = inject(Router);
 
+  if (store.isCanonicalContextSynchronizationPending()) {
+    return router.createUrlTree(['/organization-administration']);
+  }
+
   if (store.isActiveTenantReady()) {
     return true;
   }

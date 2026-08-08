@@ -30,7 +30,6 @@ type ViewState = 'loading' | 'loaded' | 'forbidden' | 'not-found' | 'error';
 interface RequestScope {
   organizationId: string;
   generation: number;
-  contextVersion: number;
 }
 
 @Component({
@@ -59,6 +58,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
   private loadSubscription?: Subscription;
   private mutationSubscription?: Subscription;
   private loadSequence = 0;
+  private destroyed = false;
 
   readonly viewState = signal<ViewState>('loading');
   readonly organization = signal<OrganizationDetails | null>(null);
@@ -69,6 +69,8 @@ export class OrganizationAdministrationPage implements OnDestroy {
   readonly contextWarning = signal('');
   readonly canManage = computed(() => this.tenantContextStore.hasCapability('organization.manage'));
   readonly isSuspended = computed(() => this.organization()?.status === 'SUSPENDED');
+  readonly isCanonicalContextSynchronizationPending =
+    this.tenantContextStore.isCanonicalContextSynchronizationPending;
 
   readonly form = new FormGroup({
     legalName: new FormControl('', {
@@ -110,6 +112,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.loadSubscription?.unsubscribe();
     this.mutationSubscription?.unsubscribe();
   }
@@ -138,6 +141,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
 
         this.applyCanonicalOrganization(organization);
         this.viewState.set('loaded');
+        this.reconcileCanonicalLifecycle(scope, organization);
       },
       error: (error: HttpErrorResponse) => {
         if (sequence !== this.loadSequence || !this.isScopeCurrent(scope)) {
@@ -161,7 +165,8 @@ export class OrganizationAdministrationPage implements OnDestroy {
       !scope ||
       !this.canManage() ||
       this.isSaving() ||
-      this.isChangingStatus()
+      this.isChangingStatus() ||
+      this.isCanonicalContextSynchronizationPending()
     ) {
       return;
     }
@@ -189,9 +194,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
           }
 
           this.applyCanonicalOrganization(canonical);
-          this.isSaving.set(false);
-          this.successMessage.set('La organización se actualizó correctamente.');
-          void this.refreshCanonicalContext(scope);
+          void this.finishMutationSynchronization(scope, canonical, 'update');
         },
         error: (error: HttpErrorResponse) => {
           if (!this.isScopeCurrent(scope)) {
@@ -209,7 +212,13 @@ export class OrganizationAdministrationPage implements OnDestroy {
 
     this.clearFeedback();
 
-    if (!organization || !this.canManage() || this.isChangingStatus() || this.isSaving()) {
+    if (
+      !organization ||
+      !this.canManage() ||
+      this.isChangingStatus() ||
+      this.isSaving() ||
+      this.isCanonicalContextSynchronizationPending()
+    ) {
       return;
     }
 
@@ -262,7 +271,13 @@ export class OrganizationAdministrationPage implements OnDestroy {
   private changeStatus(targetStatus: OrganizationStatus): void {
     const scope = this.captureScope();
 
-    if (!scope || !this.canManage() || this.isChangingStatus() || this.isSaving()) {
+    if (
+      !scope ||
+      !this.canManage() ||
+      this.isChangingStatus() ||
+      this.isSaving() ||
+      this.isCanonicalContextSynchronizationPending()
+    ) {
       return;
     }
 
@@ -277,13 +292,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
           }
 
           this.applyCanonicalOrganization(canonical);
-          this.isChangingStatus.set(false);
-          this.successMessage.set(
-            targetStatus === 'SUSPENDED'
-              ? 'La organización fue suspendida. Solo permanece disponible la administración autorizada.'
-              : 'La organización fue reactivada. Los permisos se actualizaron desde el servidor.',
-          );
-          void this.refreshCanonicalContext(scope);
+          void this.finishMutationSynchronization(scope, canonical, 'status');
         },
         error: (error: HttpErrorResponse) => {
           if (!this.isScopeCurrent(scope)) {
@@ -296,22 +305,89 @@ export class OrganizationAdministrationPage implements OnDestroy {
       });
   }
 
-  private async refreshCanonicalContext(scope: RequestScope): Promise<void> {
-    await this.tenantContextStore.revalidateOperationalContext(
-      scope.generation,
-      scope.organizationId,
-      scope.contextVersion,
-    );
+  retryContextSynchronization(): void {
+    const scope = this.captureScope();
+    const organization = this.organization();
+
+    if (!scope || !organization) {
+      return;
+    }
+
+    this.contextWarning.set('');
+    this.reconcileCanonicalLifecycle(scope, organization);
+  }
+
+  private reconcileCanonicalLifecycle(
+    scope: RequestScope,
+    organization: OrganizationDetails,
+  ): void {
+    if (!this.hasLifecycleMismatch(organization)) {
+      return;
+    }
+
+    void this.synchronizeCanonicalContext(scope, organization);
+  }
+
+  private async finishMutationSynchronization(
+    scope: RequestScope,
+    organization: OrganizationDetails,
+    operation: 'update' | 'status',
+  ): Promise<void> {
+    const result = await this.synchronizeCanonicalContext(scope, organization);
+
+    if (this.destroyed) {
+      return;
+    }
+
+    if (operation === 'update') {
+      this.isSaving.set(false);
+    } else {
+      this.isChangingStatus.set(false);
+    }
 
     if (this.tenantContextStore.selectedOrganizationId() !== scope.organizationId) {
       return;
     }
 
-    if (this.tenantContextStore.error()) {
-      this.contextWarning.set(
-        'El cambio se guardó, pero no fue posible actualizar por completo el contexto. Vuelve a intentar la carga antes de continuar.',
+    if (result === 'synchronized') {
+      this.successMessage.set(
+        operation === 'update'
+          ? 'La organización se actualizó correctamente.'
+          : organization.status === 'SUSPENDED'
+            ? 'La organización fue suspendida. Solo permanece disponible la administración autorizada.'
+            : 'La organización fue reactivada. Los permisos se actualizaron desde el servidor.',
       );
     }
+  }
+
+  private async synchronizeCanonicalContext(
+    scope: RequestScope,
+    organization: OrganizationDetails,
+  ): Promise<'synchronized' | 'failed' | 'stale'> {
+    const result = await this.tenantContextStore.synchronizeCanonicalContext(
+      scope.generation,
+      scope.organizationId,
+      this.hasLifecycleMismatch(organization),
+    );
+
+    if (
+      this.destroyed ||
+      this.tenantContextStore.selectedOrganizationId() !== scope.organizationId
+    ) {
+      return result;
+    }
+
+    if (result === 'failed') {
+      this.contextWarning.set(
+        'La información canónica fue recibida, pero no fue posible sincronizar el contexto. Reintenta la sincronización antes de continuar.',
+      );
+    }
+
+    return result;
+  }
+
+  private hasLifecycleMismatch(organization: OrganizationDetails): boolean {
+    return this.tenantContextStore.snapshot()?.organization?.status !== organization.status;
   }
 
   private applyCanonicalOrganization(organization: OrganizationDetails): void {
@@ -357,7 +433,6 @@ export class OrganizationAdministrationPage implements OnDestroy {
     return {
       organizationId,
       generation: this.tenantContextStore.switchGeneration(),
-      contextVersion: this.tenantContextStore.contextVersion(),
     };
   }
 
@@ -389,7 +464,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
     }
 
     if (error.status === 409) {
-      return 'La organización cambió mientras trabajabas. Recarga la información antes de volver a intentarlo.';
+      return 'Existe un conflicto con la información actual o con el identificador solicitado. Recarga y revisa los datos antes de volver a intentarlo.';
     }
 
     if (error.status === 400) {

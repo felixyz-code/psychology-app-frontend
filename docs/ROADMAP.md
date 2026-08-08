@@ -89,15 +89,18 @@ and 403/404 responses remain redacted without cross-tenant disclosure.
 **Implementation:** lazy `/organization-administration` route; capability-aware
 read/manage controls; typed identity form; explicit lifecycle confirmation;
 canonical mutation reconciliation; V1 context refresh; suspended-safe routing;
-and generation/context-version guards for late responses. Operational routes
-now require an active tenant and cannot mount under
-`ADMIN_SUSPENDED_CONTEXT`.
+generation/context-version guards for late feature responses; and forced
+post-commit context synchronization keyed to the current organization and
+switch generation. Operational routes now require an active tenant and cannot
+mount under `ADMIN_SUSPENDED_CONTEXT` or while a canonical lifecycle mismatch
+is unresolved.
 
 **Security invariants:** `X-Organization-Id` remains request-time authority;
 the client never infers authorization from URLs, stored state, or capabilities;
 the backend remains authoritative; stale responses are discarded by tenant
 generation; and no suspended-organization operational data or action is
-rendered.
+rendered. A failed lifecycle synchronization preserves the canonical warning
+and keeps operational navigation fail-closed until retry or tenant change.
 
 Documentation-only rollback:
 
@@ -498,5 +501,4 @@ Related documentation:
 * DECISION_LOG.md
 
 End of document.
-
 

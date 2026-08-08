@@ -15,7 +15,10 @@
     </div>
 
     <nav class="sidebar__nav" aria-label="Navegaci&oacute;n principal">
-      @if (tenantContextStore.isActiveTenantReady()) {
+      @if (
+        tenantContextStore.isActiveTenantReady() &&
+        !tenantContextStore.isCanonicalContextSynchronizationPending()
+      ) {
         <a
           routerLink="/dashboard"
           routerLinkActive="sidebar__link--active"

@@ -13,8 +13,10 @@ describe('OrganizationAdministrationPage', () => {
   let component: OrganizationAdministrationPage;
   let currentLoad: Subject<OrganizationDetails>;
   let dialogClosed: Subject<boolean | undefined>;
-  let scope: { organizationId: string | null; generation: number; contextVersion: number };
+  let scope: { organizationId: string | null; generation: number };
   let canManage: boolean;
+  let canonicalContextStatus: 'ACTIVE' | 'SUSPENDED';
+  let synchronizationPending: boolean;
   let organizationsService: {
     getCurrent: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
@@ -23,9 +25,10 @@ describe('OrganizationAdministrationPage', () => {
   let tenantStore: {
     selectedOrganizationId: ReturnType<typeof vi.fn>;
     switchGeneration: ReturnType<typeof vi.fn>;
-    contextVersion: ReturnType<typeof vi.fn>;
     hasCapability: ReturnType<typeof vi.fn>;
-    revalidateOperationalContext: ReturnType<typeof vi.fn>;
+    synchronizeCanonicalContext: ReturnType<typeof vi.fn>;
+    isCanonicalContextSynchronizationPending: ReturnType<typeof vi.fn>;
+    snapshot: ReturnType<typeof vi.fn>;
     error: ReturnType<typeof vi.fn>;
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
@@ -33,8 +36,10 @@ describe('OrganizationAdministrationPage', () => {
   beforeEach(async () => {
     currentLoad = new Subject<OrganizationDetails>();
     dialogClosed = new Subject<boolean | undefined>();
-    scope = { organizationId: 'organization-a', generation: 1, contextVersion: 1 };
+    scope = { organizationId: 'organization-a', generation: 1 };
     canManage = true;
+    canonicalContextStatus = 'ACTIVE';
+    synchronizationPending = false;
     organizationsService = {
       getCurrent: vi.fn(() => currentLoad.asObservable()),
       update: vi.fn(),
@@ -43,12 +48,13 @@ describe('OrganizationAdministrationPage', () => {
     tenantStore = {
       selectedOrganizationId: vi.fn(() => scope.organizationId),
       switchGeneration: vi.fn(() => scope.generation),
-      contextVersion: vi.fn(() => scope.contextVersion),
       hasCapability: vi.fn(
         (capability: string) =>
           capability === 'organization.read' || (capability === 'organization.manage' && canManage),
       ),
-      revalidateOperationalContext: vi.fn(() => Promise.resolve()),
+      synchronizeCanonicalContext: vi.fn(() => Promise.resolve('synchronized')),
+      isCanonicalContextSynchronizationPending: vi.fn(() => synchronizationPending),
+      snapshot: vi.fn(() => ({ organization: { status: canonicalContextStatus } })),
       error: vi.fn(() => null),
     };
     dialog = {
@@ -151,7 +157,11 @@ describe('OrganizationAdministrationPage', () => {
     });
     expect(component.organization()?.displayName).toBe('Canonical server name');
     expect(component.form.controls.displayName.value).toBe('Canonical server name');
-    expect(tenantStore.revalidateOperationalContext).toHaveBeenCalledWith(1, 'organization-a', 1);
+    expect(tenantStore.synchronizeCanonicalContext).toHaveBeenCalledWith(
+      1,
+      'organization-a',
+      false,
+    );
   });
 
   it('prevents duplicate and competing mutations while an update is pending', () => {
@@ -171,7 +181,7 @@ describe('OrganizationAdministrationPage', () => {
   it.each([
     [500, 'No fue posible guardar'],
     [403, 'El servidor rechazó esta acción'],
-    [409, 'cambió mientras trabajabas'],
+    [409, 'conflicto'],
   ])('keeps update failure %i visible and recoverable', (status, message) => {
     currentLoad.next(createOrganization());
     component.form.controls.displayName.setValue('Changed');
@@ -179,9 +189,6 @@ describe('OrganizationAdministrationPage', () => {
     organizationsService.update.mockReturnValue(update.asObservable());
 
     component.save();
-    if (status === 403) {
-      scope.contextVersion = 2;
-    }
     update.error(new HttpErrorResponse({ status }));
 
     expect(component.isSaving()).toBe(false);
@@ -212,7 +219,71 @@ describe('OrganizationAdministrationPage', () => {
       status: 'SUSPENDED',
     });
     expect(component.organization()?.status).toBe('SUSPENDED');
-    expect(tenantStore.revalidateOperationalContext).toHaveBeenCalledWith(1, 'organization-a', 1);
+    expect(tenantStore.synchronizeCanonicalContext).toHaveBeenCalledWith(1, 'organization-a', true);
+  });
+
+  it('uses current tenant identity rather than the obsolete context version after lifecycle success', async () => {
+    currentLoad.next(createOrganization());
+    const statusChange = new Subject<OrganizationDetails>();
+    organizationsService.changeStatus.mockReturnValue(statusChange.asObservable());
+
+    component.openStatusConfirmation();
+    dialogClosed.next(true);
+    statusChange.next(createOrganization({ status: 'SUSPENDED' }));
+    await Promise.resolve();
+
+    expect(tenantStore.synchronizeCanonicalContext).toHaveBeenCalledWith(1, 'organization-a', true);
+  });
+
+  it('keeps lifecycle controls locked until canonical context synchronization finishes', async () => {
+    currentLoad.next(createOrganization());
+    let finishSynchronization: ((result: string) => void) | undefined;
+    tenantStore.synchronizeCanonicalContext.mockReturnValue(
+      new Promise((resolve) => {
+        finishSynchronization = resolve;
+      }),
+    );
+    organizationsService.changeStatus.mockReturnValue(
+      of(createOrganization({ status: 'SUSPENDED' })),
+    );
+
+    component.openStatusConfirmation();
+    dialogClosed.next(true);
+    component.openStatusConfirmation();
+
+    expect(component.isChangingStatus()).toBe(true);
+    expect(dialog.open).toHaveBeenCalledOnce();
+
+    finishSynchronization?.('synchronized');
+    await vi.waitFor(() => expect(component.isChangingStatus()).toBe(false));
+  });
+
+  it('reconciles a canonical external suspension before leaving operations available', () => {
+    currentLoad.next(createOrganization({ status: 'SUSPENDED' }));
+
+    expect(tenantStore.synchronizeCanonicalContext).toHaveBeenCalledWith(1, 'organization-a', true);
+  });
+
+  it('reconciles external reactivation without restoring capabilities locally', () => {
+    canonicalContextStatus = 'SUSPENDED';
+    currentLoad.next(createOrganization({ status: 'ACTIVE' }));
+
+    expect(tenantStore.synchronizeCanonicalContext).toHaveBeenCalledWith(1, 'organization-a', true);
+    expect(tenantStore.hasCapability).not.toHaveBeenCalledWith('patient.read');
+  });
+
+  it('uses safe conflict copy that covers concurrency and slug uniqueness', () => {
+    currentLoad.next(createOrganization());
+    component.form.controls.slug.setValue('duplicate-slug');
+    const update = new Subject<OrganizationDetails>();
+    organizationsService.update.mockReturnValue(update.asObservable());
+
+    component.save();
+    update.error(new HttpErrorResponse({ status: 409 }));
+
+    expect(component.errorMessage()).toContain('conflicto');
+    expect(component.errorMessage()).toContain('identificador');
+    expect(component.errorMessage()).not.toContain('cambió mientras trabajabas');
   });
 
   it('reactivates a suspended organization only through the server operation', () => {
@@ -242,7 +313,7 @@ describe('OrganizationAdministrationPage', () => {
   });
 
   it('discards an out-of-order organization A response after switching to B', () => {
-    scope = { organizationId: 'organization-b', generation: 2, contextVersion: 0 };
+    scope = { organizationId: 'organization-b', generation: 2 };
 
     currentLoad.next(createOrganization({ displayName: 'Stale A' }));
 
@@ -257,11 +328,11 @@ describe('OrganizationAdministrationPage', () => {
     organizationsService.update.mockReturnValue(update.asObservable());
     component.save();
 
-    scope = { organizationId: 'organization-b', generation: 2, contextVersion: 0 };
+    scope = { organizationId: 'organization-b', generation: 2 };
     update.next(createOrganization({ displayName: 'Late A' }));
 
     expect(component.organization()?.displayName).toBe('Practice A');
-    expect(tenantStore.revalidateOperationalContext).not.toHaveBeenCalled();
+    expect(tenantStore.synchronizeCanonicalContext).not.toHaveBeenCalled();
   });
 });
 
