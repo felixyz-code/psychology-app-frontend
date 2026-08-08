@@ -36,28 +36,51 @@
           @if (tenantContextStore.preferredOrganizationId()) {
             <p class="organization-selection-form__hint">
               <mat-icon aria-hidden="true">star</mat-icon>
-              Se selecciono tu organizacion preferida.
+              Tienes una organizacion preferida guardada.
             </p>
           }
 
-          @if (errorMessage()) {
-            <p class="organization-selection-form__error" role="alert">{{ errorMessage() }}</p>
+          @if (errorMessage() || tenantContextStore.state() === 'ERROR') {
+            <p class="organization-selection-form__error" role="alert">
+              {{ errorMessage() || 'No fue posible activar la organizacion seleccionada.' }}
+            </p>
           }
 
-          <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
-            @if (isSubmitting()) {
-              <mat-spinner diameter="20" />
-              <span>Abriendo...</span>
-            } @else {
-              <span>Continuar</span>
+          <div class="organization-selection-form__actions">
+            @if (
+              tenantContextStore.state() === 'ERROR' && tenantContextStore.candidateOrganizationId()
+            ) {
+              <button
+                mat-stroked-button
+                type="button"
+                [disabled]="isSubmitting()"
+                (click)="retrySelection()"
+              >
+                Reintentar
+              </button>
             }
-          </button>
+
+            <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
+              @if (isSubmitting()) {
+                <mat-spinner diameter="20" />
+                <span>Abriendo...</span>
+              } @else {
+                <span>Continuar</span>
+              }
+            </button>
+          </div>
         </form>
-      } @else {
+      } @else if (tenantContextStore.state() === 'NO_ACTIVE_TENANT') {
         <div class="organization-selection-card__empty">
           <mat-icon aria-hidden="true">domain_disabled</mat-icon>
           <p>No tienes una organizacion activa disponible.</p>
           <span>Contacta a un administrador para recuperar el acceso.</span>
+        </div>
+      } @else {
+        <div class="organization-selection-card__error" role="alert">
+          <mat-icon aria-hidden="true">error_outline</mat-icon>
+          <p>No fue posible cargar las organizaciones.</p>
+          <span>Puedes cerrar sesion e intentarlo de nuevo.</span>
         </div>
       }
     </mat-card-content>

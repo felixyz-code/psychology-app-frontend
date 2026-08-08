@@ -20,6 +20,10 @@ describe('NavbarComponent', () => {
   let store: AuthStore;
   let authService: { logout: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let tenantContextStore: {
+    snapshot: ReturnType<typeof vi.fn>;
+    preferredPersistenceState: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     localStorage.clear();
@@ -27,17 +31,20 @@ describe('NavbarComponent', () => {
 
     authService = { logout: vi.fn() };
     router = { navigate: vi.fn(() => Promise.resolve(true)) };
+    tenantContextStore = {
+      snapshot: vi.fn(() => null),
+      preferredPersistenceState: vi.fn(() => 'IDLE'),
+    };
 
     TestBed.configureTestingModule({
+      imports: [NavbarComponent],
       providers: [
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
         { provide: ThemeService, useValue: {} },
         {
           provide: TenantContextStore,
-          useValue: {
-            snapshot: vi.fn(() => null),
-          },
+          useValue: tenantContextStore,
         },
       ],
     });
@@ -63,5 +70,14 @@ describe('NavbarComponent', () => {
     expect(store.isAuthenticated()).toBe(false);
     expect(localStorage.getItem('psychology_app_access_token')).toBeNull();
     expect(localStorage.getItem('psychology_app_auth_user')).toBeNull();
+  });
+
+  it('shows a non-blocking warning when preference persistence fails', () => {
+    tenantContextStore.preferredPersistenceState.mockReturnValue('ERROR');
+
+    const fixture = TestBed.createComponent(NavbarComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No se guardo como preferida');
   });
 });

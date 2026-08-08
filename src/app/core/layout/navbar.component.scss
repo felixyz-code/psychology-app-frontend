@@ -70,6 +70,20 @@
   background: rgba(255, 255, 255, 0.18);
 }
 
+.organization-preference-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #fde68a;
+  font-size: 0.75rem;
+}
+
+.organization-preference-warning mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
 .user-menu-trigger {
   appearance: none;
   display: inline-flex;
@@ -183,6 +197,10 @@
 
   .organization-menu-trigger {
     max-width: 10rem;
+  }
+
+  .organization-preference-warning > span {
+    display: none;
   }
 
   .user-menu-trigger {

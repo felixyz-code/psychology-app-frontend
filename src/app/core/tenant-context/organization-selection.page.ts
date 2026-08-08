@@ -61,11 +61,26 @@ export class OrganizationSelectionPage {
       return;
     }
 
+    this.submitSelection(this.organizationControl.getRawValue());
+  }
+
+  retrySelection(): void {
+    const organizationId = this.tenantContextStore.candidateOrganizationId();
+
+    if (!organizationId || this.isSubmitting()) {
+      return;
+    }
+
+    this.organizationControl.setValue(organizationId);
+    this.submitSelection(organizationId);
+  }
+
+  private submitSelection(organizationId: string): void {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
     this.tenantContextStore
-      .selectOrganization(this.organizationControl.getRawValue())
+      .selectOrganization(organizationId)
       .then(() => {
         if (
           this.tenantContextStore.isActiveTenantReady() ||

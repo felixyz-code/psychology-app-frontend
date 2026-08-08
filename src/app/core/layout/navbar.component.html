@@ -29,6 +29,17 @@
     </button>
   }
 
+  @if (tenantContextStore.preferredPersistenceState() === 'ERROR') {
+    <span
+      class="organization-preference-warning"
+      role="status"
+      title="La organizacion esta activa, pero no se pudo guardar como preferida."
+    >
+      <mat-icon aria-hidden="true">warning_amber</mat-icon>
+      <span>No se guardo como preferida</span>
+    </span>
+  }
+
   @if (authStore.user(); as user) {
     <button
       #userMenuTrigger="matMenuTrigger"
