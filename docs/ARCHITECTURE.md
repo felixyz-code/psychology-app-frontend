@@ -90,6 +90,7 @@ core/
 ├── guards/
 ├── interceptors/
 ├── layout/
+├── tenant-context/
 └── theme/
 ```
 
@@ -234,6 +235,21 @@ Current state responsibilities include:
 Business data continues to be provided by the backend.
 
 NgRx is intentionally not used.
+
+## Cross-Tenant State Invalidation
+
+`TenantContextStore` remains the single owner of `switchGeneration` and emits an explicit invalidation event whenever confirmed tenant state is abandoned.
+
+Current isolation responsibilities are:
+
+* `TenantContextStore` clears the confirmed organization, context snapshot, capabilities, errors and persisted session hint before resolving a replacement tenant
+* `TenantStateInvalidationCoordinator` closes Angular Material dialogs and leaves tenant-aware routes during switch or unsafe context recovery
+* `tenantStateInterceptor` captures the request generation and organization for every `TENANT_REQUIRED` request, then cancels or discards work after either value becomes stale
+* the main layout removes its routed tenant surface whenever no confirmed context is ready
+
+Feature services remain stateless HTTP adapters. Tenant data, filters, forms and selections are route- or dialog-scoped and are discarded when the coordinator leaves the invalid route or closes overlays.
+
+This mechanism does not add a second generation system, a tenant data cache, or browser persistence.
 
 ---
 

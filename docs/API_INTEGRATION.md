@@ -133,6 +133,21 @@ The interceptor does not infer behavior from URL strings. A request may provide 
 
 `TenantContextStore` bootstraps `GET /auth/context` after identity restoration, validates the V1 response, and exposes the state machine, confirmed selection, capabilities, context version, and switch generation through Angular Signals. The confirmed organization is persisted only in `sessionStorage`, so selection is isolated per browser tab and is cleared by `resetTenantState`.
 
+## Tenant Request Invalidation
+
+Every `TENANT_REQUIRED` request is observed by the cross-tenant state interceptor.
+
+At subscription time it captures:
+
+- the current `switchGeneration`
+- the confirmed organization ID
+
+The response may reach application state only while both values still match `TenantContextStore`. A tenant invalidation completes pending subscriptions, and the final response guard also discards a response if it races with the invalidation event.
+
+This applies uniformly to reads and mutations across Patients, Case Files, Session Notes, Documents, Appointments, Financial Transactions, Dashboard orchestration and Reports orchestration. The backend remains authoritative for whether an in-flight mutation commits; the stale frontend response cannot publish data, errors or follow-up state under a later tenant.
+
+`TENANT_OPTIONAL` context resolution and the `IDENTITY_ONLY` preference write retain their dedicated generation and request-sequence guards in `TenantContextStore`.
+
 # Route Guards
 
 Protected routes use Angular Guards.

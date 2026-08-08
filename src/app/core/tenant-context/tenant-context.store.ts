@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 
 import { AuthStore } from '../auth/auth.store';
 import { TenantContextService } from './tenant-context.service';
@@ -23,6 +23,11 @@ const VALID_STATUSES = new Set([
   'ADMIN_SUSPENDED_CONTEXT',
 ]);
 
+export interface TenantStateInvalidation {
+  readonly reason: string;
+  readonly generation: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TenantContextStore {
   private readonly authStore = inject(AuthStore);
@@ -41,11 +46,13 @@ export class TenantContextStore {
   );
   private readonly preferredPersistenceErrorSignal = signal<TenantContextError | null>(null);
   private readonly errorSignal = signal<TenantContextError | null>(null);
+  private readonly invalidationSubject = new Subject<TenantStateInvalidation>();
   private pendingLoad: Promise<void> | null = null;
   private pendingPreferencePersistence: Promise<void> | null = null;
   private requestSequence = 0;
   private preferenceRequestSequence = 0;
   private identityId: string | null = null;
+  private lastInvalidatedGeneration = -1;
 
   readonly state = computed(() => this.stateSignal());
   readonly candidateOrganizationId = computed(() => this.candidateOrganizationIdSignal());
@@ -66,6 +73,7 @@ export class TenantContextStore {
   readonly isAdminSuspendedContext = computed(
     () => this.stateSignal() === 'ADMIN_SUSPENDED_CONTEXT',
   );
+  readonly invalidations = this.invalidationSubject.asObservable();
 
   constructor() {
     this.authStore.sessionChanges.subscribe((user) => {
@@ -137,14 +145,8 @@ export class TenantContextStore {
     }
 
     const generation = this.switchGenerationSignal() + 1;
-    this.switchGenerationSignal.set(generation);
+    this.invalidateConfirmedTenantState('tenant-switch', generation);
     this.candidateOrganizationIdSignal.set(organizationId);
-    this.selectedOrganizationIdSignal.set(null);
-    this.snapshotSignal.set(null);
-    this.errorSignal.set(null);
-    this.preferredPersistenceStateSignal.set('IDLE');
-    this.preferredPersistenceErrorSignal.set(null);
-    this.removePersistedOrganizationId();
     this.stateSignal.set('SWITCHING');
 
     return this.loadContext('switch', organizationId, generation);
@@ -188,6 +190,7 @@ export class TenantContextStore {
     this.errorSignal.set(null);
     this.stateSignal.set('UNINITIALIZED');
     this.removePersistedOrganizationId();
+    this.emitInvalidation(reason, nextGeneration);
 
     if (reason === 'logout' || reason === 'access-loss') {
       this.identityId = null;
@@ -196,6 +199,16 @@ export class TenantContextStore {
 
   hasCapability(capability: TenantCapability | string): boolean {
     return this.capabilities().includes(capability);
+  }
+
+  isRequestContextCurrent(generation: number, organizationId: string | null): boolean {
+    return (
+      generation === this.switchGenerationSignal() &&
+      organizationId !== null &&
+      organizationId === this.selectedOrganizationIdSignal() &&
+      (this.stateSignal() === 'ACTIVE_TENANT_READY' ||
+        this.stateSignal() === 'ADMIN_SUSPENDED_CONTEXT')
+    );
   }
 
   private loadContext(
@@ -220,15 +233,26 @@ export class TenantContextStore {
         }
 
         if (!isValidContextResponse(response, this.authStore.user()?.id ?? null, organizationId)) {
-          this.errorSignal.set({
+          const invalidContextError: TenantContextError = {
             statusCode: 0,
             code: 'UNEXPECTED_ERROR',
             message: 'The tenant context response is invalid.',
             requestId: null,
             details: null,
-          });
+          };
+
+          this.invalidateConfirmedTenantState('invalid-context', generation + 1);
+          this.errorSignal.set(invalidContextError);
           this.stateSignal.set('ERROR');
           return;
+        }
+
+        if (origin === 'refresh') {
+          const invalidationReason = this.getRefreshInvalidationReason(response);
+
+          if (invalidationReason) {
+            this.invalidateConfirmedTenantState(invalidationReason, generation + 1);
+          }
         }
 
         this.applySnapshot(response);
@@ -266,6 +290,8 @@ export class TenantContextStore {
           return;
         }
 
+        this.invalidateConfirmedTenantState('context-resolution-failed', generation + 1);
+        this.errorSignal.set(normalized);
         this.stateSignal.set('ERROR');
       });
 
@@ -360,6 +386,60 @@ export class TenantContextStore {
         this.pendingPreferencePersistence = null;
       }
     });
+  }
+
+  private invalidateConfirmedTenantState(reason: string, generation: number): void {
+    this.switchGenerationSignal.set(generation);
+    this.selectedOrganizationIdSignal.set(null);
+    this.snapshotSignal.set(null);
+    this.errorSignal.set(null);
+    this.preferredPersistenceStateSignal.set('IDLE');
+    this.preferredPersistenceErrorSignal.set(null);
+    this.removePersistedOrganizationId();
+    this.emitInvalidation(reason, generation);
+  }
+
+  private getRefreshInvalidationReason(
+    response: AuthContextResponseV1,
+  ): 'authorization-loss' | 'organization-suspended' | null {
+    const currentSnapshot = this.snapshotSignal();
+    const currentOrganizationId = this.selectedOrganizationIdSignal();
+
+    if (!currentSnapshot || !currentOrganizationId) {
+      return null;
+    }
+
+    if (
+      response.status !== 'ACTIVE_TENANT_READY' &&
+      response.status !== 'ADMIN_SUSPENDED_CONTEXT'
+    ) {
+      return 'authorization-loss';
+    }
+
+    if (response.tenantContext?.organizationId !== currentOrganizationId) {
+      return 'authorization-loss';
+    }
+
+    if (
+      currentSnapshot.status === 'ACTIVE_TENANT_READY' &&
+      response.status === 'ADMIN_SUSPENDED_CONTEXT'
+    ) {
+      return 'organization-suspended';
+    }
+
+    const nextCapabilities = new Set(response.capabilities);
+    return currentSnapshot.capabilities.some((capability) => !nextCapabilities.has(capability))
+      ? 'authorization-loss'
+      : null;
+  }
+
+  private emitInvalidation(reason: string, generation: number): void {
+    if (generation === this.lastInvalidatedGeneration) {
+      return;
+    }
+
+    this.lastInvalidatedGeneration = generation;
+    this.invalidationSubject.next({ reason, generation });
   }
 
   private readPersistedOrganizationId(): string | null {

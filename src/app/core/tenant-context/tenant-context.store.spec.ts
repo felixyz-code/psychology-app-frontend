@@ -61,28 +61,29 @@ const selectableMemberships: AuthContextResponseV1['selectableMemberships'] = [
 ];
 
 function contextForOrganization(
-  organizationId: 'organization-a' | 'organization-b',
+  organizationId: 'organization-a' | 'organization-b' | 'organization-c',
   preferredOrganizationId: string | null = null,
 ): AuthContextResponseV1 {
   const isOrganizationA = organizationId === 'organization-a';
+  const organizationSuffix = organizationId.at(-1) ?? 'a';
 
   return {
     ...activeContext,
     tenantContext: {
       ...activeContext.tenantContext!,
       organizationId,
-      membershipId: isOrganizationA ? 'membership-a' : 'membership-b',
+      membershipId: `membership-${organizationSuffix}`,
       organizationRole: isOrganizationA ? 'OWNER' : 'ADMIN',
       resolutionMode: 'EXPLICIT',
     },
     organization: {
       ...activeContext.organization!,
       id: organizationId,
-      displayName: isOrganizationA ? 'Organization A' : 'Organization B',
+      displayName: `Organization ${organizationSuffix.toUpperCase()}`,
     },
     membership: {
       ...activeContext.membership!,
-      id: isOrganizationA ? 'membership-a' : 'membership-b',
+      id: `membership-${organizationSuffix}`,
       role: isOrganizationA ? 'OWNER' : 'ADMIN',
     },
     selectableMemberships,
@@ -520,5 +521,158 @@ describe('TenantContextStore', () => {
 
     expect(store.snapshot()?.organization?.displayName).toBe('Latest organization');
     expect(store.contextVersion()).toBe(2);
+  });
+
+  it('discards out-of-order context responses during A to B to C', async () => {
+    const organizationB = new Subject<AuthContextResponseV1>();
+    const organizationC = new Subject<AuthContextResponseV1>();
+
+    await store.bootstrap();
+    contextService.getContext
+      .mockReturnValueOnce(organizationB.asObservable())
+      .mockReturnValueOnce(organizationC.asObservable());
+
+    const switchToB = store.switchTenant('organization-b');
+    const switchToC = store.switchTenant('organization-c');
+
+    organizationB.next(contextForOrganization('organization-b'));
+    organizationB.complete();
+    await switchToB;
+
+    expect(store.selectedOrganizationId()).toBeNull();
+    expect(store.candidateOrganizationId()).toBe('organization-c');
+    expect(store.state()).toBe('SWITCHING');
+
+    organizationC.next(contextForOrganization('organization-c'));
+    organizationC.complete();
+    await switchToC;
+
+    expect(store.selectedOrganizationId()).toBe('organization-c');
+    expect(store.snapshot()?.organization?.displayName).toBe('Organization C');
+    expect(store.switchGeneration()).toBe(3);
+  });
+
+  it('invalidates confirmed data when a context refresh fails without clearing identity', async () => {
+    await store.bootstrap();
+    contextService.getContext.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 503 })),
+    );
+
+    await store.refreshContext();
+
+    expect(store.state()).toBe('ERROR');
+    expect(store.selectedOrganizationId()).toBeNull();
+    expect(store.snapshot()).toBeNull();
+    expect(store.capabilities()).toEqual([]);
+    expect(sessionStorage.getItem('psychology_app_selected_organization_id')).toBeNull();
+    expect(authStore.user()).toEqual(user);
+    expect(authStore.isAuthenticated()).toBe(true);
+  });
+
+  it('advances the generation when a refresh removes tenant authorization', async () => {
+    await store.bootstrap();
+    const invalidations: Array<{ reason: string; generation: number }> = [];
+    const subscription = store.invalidations.subscribe((event) => invalidations.push(event));
+    contextService.getContext.mockReturnValueOnce(
+      of({
+        ...ambiguousContext(null),
+        status: 'NO_ACTIVE_TENANT',
+        selectableMemberships: [],
+      }),
+    );
+
+    await store.refreshContext();
+
+    expect(store.state()).toBe('NO_ACTIVE_TENANT');
+    expect(store.selectedOrganizationId()).toBeNull();
+    expect(store.snapshot()?.capabilities).toEqual([]);
+    expect(store.switchGeneration()).toBe(2);
+    expect(invalidations).toEqual([{ reason: 'authorization-loss', generation: 2 }]);
+
+    subscription.unsubscribe();
+  });
+
+  it('invalidates operational state when the current organization becomes suspended', async () => {
+    await store.bootstrap();
+    const invalidations: Array<{ reason: string; generation: number }> = [];
+    const subscription = store.invalidations.subscribe((event) => invalidations.push(event));
+    contextService.getContext.mockReturnValueOnce(
+      of({
+        ...activeContext,
+        status: 'ADMIN_SUSPENDED_CONTEXT',
+        tenantContext: {
+          ...activeContext.tenantContext!,
+          organizationRole: 'ADMIN',
+        },
+        organization: {
+          ...activeContext.organization!,
+          status: 'SUSPENDED',
+        },
+        membership: {
+          ...activeContext.membership!,
+          role: 'ADMIN',
+        },
+        capabilities: ['organization.read'],
+      }),
+    );
+
+    await store.refreshContext();
+
+    expect(store.state()).toBe('ADMIN_SUSPENDED_CONTEXT');
+    expect(store.selectedOrganizationId()).toBe('organization-a');
+    expect(store.capabilities()).toEqual(['organization.read']);
+    expect(store.switchGeneration()).toBe(2);
+    expect(store.contextVersion()).toBe(2);
+    expect(invalidations).toEqual([{ reason: 'organization-suspended', generation: 2 }]);
+
+    subscription.unsubscribe();
+  });
+
+  it('keeps the generation for a same-tenant refresh that does not remove capabilities', async () => {
+    await store.bootstrap();
+    contextService.getContext.mockReturnValueOnce(
+      of({
+        ...activeContext,
+        organization: {
+          ...activeContext.organization!,
+          displayName: 'Organization A updated',
+        },
+      }),
+    );
+
+    await store.refreshContext();
+
+    expect(store.switchGeneration()).toBe(1);
+    expect(store.contextVersion()).toBe(2);
+    expect(store.snapshot()?.organization?.displayName).toBe('Organization A updated');
+  });
+
+  it('emits one invalidation for an idempotent reset generation', async () => {
+    await store.bootstrap();
+    const invalidations: Array<{ reason: string; generation: number }> = [];
+    const subscription = store.invalidations.subscribe((event) => invalidations.push(event));
+
+    store.resetTenantState('test-reset');
+    const generation = store.switchGeneration();
+    store.resetTenantState('test-reset', generation);
+
+    expect(invalidations).toEqual([{ reason: 'test-reset', generation }]);
+    expect(store.state()).toBe('UNINITIALIZED');
+    expect(store.selectedOrganizationId()).toBeNull();
+    expect(authStore.user()).toEqual(user);
+
+    subscription.unsubscribe();
+  });
+
+  it('clears tenant state when the identity logs out', async () => {
+    await store.bootstrap();
+
+    authStore.clearSession();
+
+    expect(store.state()).toBe('UNINITIALIZED');
+    expect(store.selectedOrganizationId()).toBeNull();
+    expect(store.snapshot()).toBeNull();
+    expect(store.capabilities()).toEqual([]);
+    expect(sessionStorage.getItem('psychology_app_selected_organization_id')).toBeNull();
   });
 });
