@@ -7,7 +7,7 @@ import {
 } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 
-import { tenantContextGuard } from './tenant-context.guard';
+import { activeTenantGuard, tenantContextGuard } from './tenant-context.guard';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 
 describe('tenantContextGuard', () => {
@@ -81,4 +81,46 @@ describe('tenantContextGuard', () => {
           | UrlTree,
     );
   }
+});
+
+describe('activeTenantGuard', () => {
+  it('redirects suspended administrative context away from operational routes', () => {
+    const store = {
+      isActiveTenantReady: vi.fn().mockReturnValue(false),
+      isAdminSuspendedContext: vi.fn().mockReturnValue(true),
+      isCanonicalContextSynchronizationPending: vi.fn().mockReturnValue(false),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: TenantContextStore, useValue: store }],
+    });
+
+    const router = TestBed.inject(Router);
+    const result = TestBed.runInInjectionContext(
+      () => activeTenantGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as UrlTree,
+    );
+
+    expect(router.serializeUrl(result)).toBe('/organization-administration');
+    TestBed.resetTestingModule();
+  });
+
+  it('blocks operational routes while canonical lifecycle reconciliation is pending', () => {
+    const store = {
+      isActiveTenantReady: vi.fn().mockReturnValue(true),
+      isAdminSuspendedContext: vi.fn().mockReturnValue(false),
+      isCanonicalContextSynchronizationPending: vi.fn().mockReturnValue(true),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: TenantContextStore, useValue: store }],
+    });
+
+    const router = TestBed.inject(Router);
+    const result = TestBed.runInInjectionContext(
+      () => activeTenantGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as UrlTree,
+    );
+
+    expect(router.serializeUrl(result)).toBe('/organization-administration');
+    TestBed.resetTestingModule();
+  });
 });

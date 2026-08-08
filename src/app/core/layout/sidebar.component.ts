@@ -1,7 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+
+import { TenantContextStore } from '../tenant-context/tenant-context.store';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
+  readonly tenantContextStore = inject(TenantContextStore);
   readonly collapsed = input(false);
   readonly navSelected = output<void>();
 }

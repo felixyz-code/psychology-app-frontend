@@ -52,13 +52,14 @@ RELATED PR: #24
 POST-GO-LIVE.4.1: CERTIFIED AND MERGED
 POST-GO-LIVE.4.2: CERTIFIED AND MERGED
 POST-GO-LIVE.4.3: CROSS-TENANT STATE INVALIDATION - CERTIFIED / COMPLETE
-POST-GO-LIVE.4.4: ORGANIZATION ADMINISTRATION UX - AUTHORIZED / NOT STARTED
+POST-GO-LIVE.4.4: ORGANIZATION ADMINISTRATION UX - IMPLEMENTED / PENDING INDEPENDENT REVIEW
 ```
 
 ## POST-GO-LIVE.4.4 - Organization Administration UX
 
-**Status:** `AUTHORIZED / NOT STARTED`. Authorization records roadmap scope
-only; implementation has not started.
+**Status:** `IMPLEMENTED / PENDING INDEPENDENT REVIEW`. The frontend
+implementation and local validation are complete; certification and completion
+remain reserved for the independent review gates.
 
 **Goal:** provide the first organization-domain administration experience for
 the confirmed tenant, using the certified backend organization read, identity
@@ -85,11 +86,21 @@ context; suspension clears operational UI and enters only the allowed
 administrative context; reactivation restores only after confirmed context;
 and 403/404 responses remain redacted without cross-tenant disclosure.
 
+**Implementation:** lazy `/organization-administration` route; capability-aware
+read/manage controls; typed identity form; explicit lifecycle confirmation;
+canonical mutation reconciliation; V1 context refresh; suspended-safe routing;
+generation/context-version guards for late feature responses; and forced
+post-commit context synchronization keyed to the current organization and
+switch generation. Operational routes now require an active tenant and cannot
+mount under `ADMIN_SUSPENDED_CONTEXT` or while a canonical lifecycle mismatch
+is unresolved.
+
 **Security invariants:** `X-Organization-Id` remains request-time authority;
 the client never infers authorization from URLs, stored state, or capabilities;
 the backend remains authoritative; stale responses are discarded by tenant
 generation; and no suspended-organization operational data or action is
-rendered.
+rendered. A failed lifecycle synchronization preserves the canonical warning
+and keeps operational navigation fail-closed until retry or tenant change.
 
 Documentation-only rollback:
 
@@ -490,6 +501,4 @@ Related documentation:
 * DECISION_LOG.md
 
 End of document.
-
-
 

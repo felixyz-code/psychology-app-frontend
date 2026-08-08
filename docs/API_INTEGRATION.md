@@ -159,6 +159,37 @@ The V1 response remains authoritative:
 
 The context request is `TENANT_OPTIONAL`, so it cannot recursively enter the operational `403` trigger. A response captured for an older organization, generation or context version cannot invalidate the current tenant.
 
+## Organization Administration Requests
+
+The lazy Organization Administration feature consumes only the certified
+organization primitives:
+
+- `GET /organizations/current` with `organization.read`
+- `PATCH /organizations/:organizationId` with `organization.manage`
+- `PATCH /organizations/:organizationId/status` with `organization.manage`
+
+Each request is `TENANT_REQUIRED` and captures the confirmed organization in
+`TENANT_ORGANIZATION_ID`; the URL identifier and `X-Organization-Id` therefore
+refer to the same selected tenant without becoming frontend authorization
+evidence. The identity update accepts only `legalName`, `displayName`, `slug`,
+`timezone`, `locale`, and `currency`. Lifecycle writes accept only `ACTIVE` or
+`SUSPENDED`.
+
+Successful mutations replace page data with the canonical response and then
+force a new `GET /auth/context` for the captured organization and switch
+generation. This forced post-commit request does not reuse an older in-flight
+refresh. Canonical detail or mutation responses whose lifecycle status differs
+from the current V1 snapshot also trigger synchronization. Operational routes,
+links, and organization mutations remain fail-closed during that mismatch; a
+transient synchronization failure preserves the last confirmed snapshot and
+requires an explicit retry.
+
+A `409` is a recoverable conflict and may represent either concurrent state or
+an identifier uniqueness conflict, so the UI does not claim concurrency as the
+only cause. Runtime `403`, redacted `404`, validation `400`, network and server
+failures remain distinct visible states; transient failures are not converted
+into empty organization data.
+
 # Route Guards
 
 Protected routes use Angular Guards.
@@ -169,7 +200,9 @@ Current responsibilities:
 - Redirect anonymous users
 - Return `UrlTree`
 
-Role-based routing is not implemented.
+Capability routing uses `capabilityGuard`; operational routes also use
+`activeTenantGuard` so suspended tenants, and tenants with unresolved canonical
+lifecycle synchronization, cannot mount operational pages.
 
 Authorization remains enforced by the backend.
 
@@ -188,6 +221,7 @@ Current services include:
 - DocumentsService
 - AppointmentsService
 - FinancialTransactionsService
+- OrganizationsService
 
 Services encapsulate HTTP communication.
 

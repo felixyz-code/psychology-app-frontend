@@ -146,6 +146,7 @@ documents/
 appointments/
 financial-transactions/
 reports/
+organization-administration/
 ```
 
 Each feature owns:
@@ -160,6 +161,23 @@ Each feature owns:
 Dependencies between features should be minimized.
 
 Cross-feature workflows should be composed from existing feature ownership boundaries instead of creating a parallel domain layer.
+
+## Organization Administration Module
+
+`organization-administration` is a lazy feature for the currently confirmed
+tenant. It owns organization detail, editable identity fields and the
+`ACTIVE`/`SUSPENDED` lifecycle UX. Its form and request state remain page-local;
+`TenantContextStore` remains the only global tenant authority.
+
+All organization requests capture the selected organization through
+`TENANT_REQUIRED` request metadata. Successful mutations adopt the canonical
+backend response and force a fresh V1 tenant-context synchronization for the
+same organization and switch generation. Canonical detail responses also
+trigger synchronization when their lifecycle status differs from the current
+V1 snapshot. While that mismatch is unresolved, operational navigation and
+actions fail closed, without synthesizing capabilities or lifecycle state in
+the frontend. The feature does not own membership, invitation,
+ownership-transfer, signup or organization-creation workflows.
 
 ## Reports Module
 
@@ -219,6 +237,14 @@ Main principles:
 
 Authentication is required before accessing protected areas.
 
+Operational children additionally require `activeTenantGuard`. A confirmed
+`ADMIN_SUSPENDED_CONTEXT` is redirected to `/organization-administration`,
+whose route requires the server-projected `organization.read` capability.
+Operational children are also redirected there while a canonical lifecycle
+mismatch is awaiting V1 synchronization. `organization.manage` controls
+identity and lifecycle actions, while the backend remains authoritative for
+every request.
+
 ---
 
 # State Management
@@ -243,12 +269,17 @@ NgRx is intentionally not used.
 Current isolation responsibilities are:
 
 * `TenantContextStore` clears the confirmed organization, context snapshot, capabilities, errors and persisted session hint before resolving a replacement tenant
-* `TenantStateInvalidationCoordinator` closes Angular Material dialogs and leaves tenant-aware routes during switch or unsafe context recovery
+* `TenantStateInvalidationCoordinator` closes Angular Material dialogs and leaves tenant-aware routes during switch or unsafe context recovery; confirmed suspension redirects operational routes to the suspended-safe organization administration surface
 * `tenantStateInterceptor` captures the request generation, organization and context version for every `TENANT_REQUIRED` request, then cancels or discards work after the tenant identity becomes stale
 * an operational `403` triggers one coalesced V1 context refresh for the captured tenant; only the canonical refresh result can confirm access loss
+* organization lifecycle reconciliation starts a distinct forced V1 refresh, superseding any pre-commit refresh for the same tenant; a lifecycle mismatch keeps operational routes and navigation fail-closed until synchronization succeeds or the tenant changes
 * the main layout removes its routed tenant surface whenever no confirmed context is ready
 
 Feature services remain stateless HTTP adapters. Tenant data, filters, forms and selections are route- or dialog-scoped and are discarded when the coordinator leaves the invalid route or closes overlays.
+
+Organization Administration applies the same rule: a switch closes its
+lifecycle dialog, destroys the old form route and prevents late detail or
+mutation responses from publishing into the replacement tenant.
 
 This mechanism does not add a second generation system, a tenant data cache, or browser persistence.
 

@@ -1,5 +1,6 @@
 import { authGuard } from './core/guards/auth.guard';
-import { tenantContextGuard } from './core/guards/tenant-context.guard';
+import { capabilityGuard } from './core/guards/capability.guard';
+import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
 import { routes } from './app.routes';
 
 describe('app routes', () => {
@@ -50,5 +51,32 @@ describe('app routes', () => {
       true,
     );
     expect(childRoutes.some((route) => route.path === 'reports' && route.loadChildren)).toBe(true);
+  });
+
+  it('separates operational routes from suspended-safe organization administration', () => {
+    const shellRoute = routes.find((route) => route.path === '');
+    const childRoutes = shellRoute?.children ?? [];
+    const operationalPaths = [
+      'dashboard',
+      'patients',
+      'appointments',
+      'financial-transactions',
+      'case-files',
+      'documents',
+      'reports',
+    ];
+
+    for (const path of operationalPaths) {
+      expect(childRoutes.find((route) => route.path === path)?.canActivate).toEqual([
+        activeTenantGuard,
+      ]);
+    }
+
+    expect(childRoutes.find((route) => route.path === 'organization-administration')).toMatchObject(
+      {
+        canActivate: [capabilityGuard],
+        data: { requiredCapability: 'organization.read' },
+      },
+    );
   });
 });

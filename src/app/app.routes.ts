@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
-import { tenantContextGuard } from './core/guards/tenant-context.guard';
+import { capabilityGuard } from './core/guards/capability.guard';
+import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
 
 export const routes: Routes = [
   {
@@ -24,16 +25,19 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        canActivate: [activeTenantGuard],
         loadComponent: () =>
           import('./features/dashboard/pages/dashboard.page').then((m) => m.DashboardPage),
       },
       {
         path: 'patients',
+        canActivate: [activeTenantGuard],
         loadComponent: () =>
           import('./features/patients/pages/patients-list.page').then((m) => m.PatientsListPage),
       },
       {
         path: 'appointments',
+        canActivate: [activeTenantGuard],
         loadComponent: () =>
           import('./features/appointments/pages/appointments-list.page').then(
             (m) => m.AppointmentsListPage,
@@ -41,6 +45,7 @@ export const routes: Routes = [
       },
       {
         path: 'financial-transactions',
+        canActivate: [activeTenantGuard],
         loadChildren: () =>
           import('./features/financial-transactions/financial-transactions.routes').then(
             (m) => m.financialTransactionsRoutes,
@@ -48,18 +53,30 @@ export const routes: Routes = [
       },
       {
         path: 'case-files',
+        canActivate: [activeTenantGuard],
         loadChildren: () =>
           import('./features/case-files/case-files.routes').then((m) => m.caseFilesRoutes),
       },
       {
         path: 'documents',
+        canActivate: [activeTenantGuard],
         loadChildren: () =>
           import('./features/documents/documents.routes').then((m) => m.documentsRoutes),
       },
       {
         path: 'reports',
+        canActivate: [activeTenantGuard],
         loadChildren: () =>
           import('./features/reports/reports.routes').then((m) => m.reportsRoutes),
+      },
+      {
+        path: 'organization-administration',
+        canActivate: [capabilityGuard],
+        data: { requiredCapability: 'organization.read' },
+        loadChildren: () =>
+          import('./features/organization-administration/organization-administration.routes').then(
+            (m) => m.organizationAdministrationRoutes,
+          ),
       },
       {
         path: '',
