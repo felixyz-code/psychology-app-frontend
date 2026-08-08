@@ -1,0 +1,293 @@
+<section class="organization-admin-page">
+  <app-page-header
+    heading="Administraci&oacute;n de la organizaci&oacute;n"
+    subtitle="Consulta la identidad y controla el estado de la organizaci&oacute;n confirmada."
+  />
+
+  @switch (viewState()) {
+    @case ('loading') {
+      <div class="organization-admin-state" role="status">
+        <mat-spinner diameter="42" />
+        <div>
+          <h2>Cargando organizaci&oacute;n</h2>
+          <p>Estamos consultando la informaci&oacute;n can&oacute;nica del servidor.</p>
+        </div>
+      </div>
+    }
+
+    @case ('forbidden') {
+      <div class="organization-admin-state organization-admin-state--error" role="alert">
+        <mat-icon aria-hidden="true">lock</mat-icon>
+        <div>
+          <h2>Acceso no autorizado</h2>
+          <p>El servidor no autoriz&oacute; la consulta de esta organizaci&oacute;n.</p>
+        </div>
+        <button mat-stroked-button type="button" (click)="loadOrganization()">Reintentar</button>
+      </div>
+    }
+
+    @case ('not-found') {
+      <div class="organization-admin-state organization-admin-state--error" role="alert">
+        <mat-icon aria-hidden="true">domain_disabled</mat-icon>
+        <div>
+          <h2>Organizaci&oacute;n no disponible</h2>
+          <p>La organizaci&oacute;n confirmada ya no est&aacute; disponible para este contexto.</p>
+        </div>
+        <button mat-stroked-button type="button" (click)="loadOrganization()">
+          Volver a verificar
+        </button>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="organization-admin-state organization-admin-state--error" role="alert">
+        <mat-icon aria-hidden="true">cloud_off</mat-icon>
+        <div>
+          <h2>No fue posible cargar la organizaci&oacute;n</h2>
+          <p>
+            Ocurri&oacute; un error transitorio. La informaci&oacute;n no se trat&oacute; como un
+            estado vac&iacute;o.
+          </p>
+        </div>
+        <button mat-stroked-button type="button" (click)="loadOrganization()">Reintentar</button>
+      </div>
+    }
+
+    @case ('loaded') {
+      @if (organization(); as currentOrganization) {
+        <div class="organization-admin-summary">
+          <div class="organization-admin-summary__identity">
+            <div class="organization-admin-summary__icon" aria-hidden="true">
+              <mat-icon>domain</mat-icon>
+            </div>
+            <div>
+              <span>Organizaci&oacute;n confirmada</span>
+              <h2>{{ currentOrganization.displayName }}</h2>
+              <p>{{ currentOrganization.legalName }}</p>
+            </div>
+          </div>
+
+          <app-status-badge
+            [label]="currentOrganization.status === 'ACTIVE' ? 'Activa' : 'Suspendida'"
+            [variant]="currentOrganization.status === 'ACTIVE' ? 'success' : 'warning'"
+          />
+        </div>
+
+        @if (isSuspended()) {
+          <div class="organization-admin-alert organization-admin-alert--warning" role="status">
+            <mat-icon aria-hidden="true">warning_amber</mat-icon>
+            <div>
+              <strong>La organizaci&oacute;n est&aacute; suspendida</strong>
+              <span>
+                Las superficies operativas permanecen cerradas. Solo se muestran acciones
+                administrativas autorizadas por el servidor.
+              </span>
+            </div>
+          </div>
+        }
+
+        @if (successMessage()) {
+          <div class="organization-admin-alert organization-admin-alert--success" role="status">
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <span>{{ successMessage() }}</span>
+          </div>
+        }
+
+        @if (errorMessage()) {
+          <div class="organization-admin-alert organization-admin-alert--error" role="alert">
+            <mat-icon aria-hidden="true">error</mat-icon>
+            <div>
+              <span>{{ errorMessage() }}</span>
+              @if (errorMessage().includes('Recarga')) {
+                <button mat-button type="button" (click)="loadOrganization()">Recargar</button>
+              }
+            </div>
+          </div>
+        }
+
+        @if (contextWarning()) {
+          <div class="organization-admin-alert organization-admin-alert--warning" role="alert">
+            <mat-icon aria-hidden="true">sync_problem</mat-icon>
+            <span>{{ contextWarning() }}</span>
+          </div>
+        }
+
+        <div class="organization-admin-grid">
+          <app-section-card
+            title="Identidad y configuraci&oacute;n"
+            subtitle="Los campos disponibles corresponden exactamente al contrato certificado."
+          >
+            <form class="organization-admin-form" [formGroup]="form" (ngSubmit)="save()">
+              <div class="organization-admin-form__grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nombre visible</mat-label>
+                  <input
+                    matInput
+                    formControlName="displayName"
+                    maxlength="150"
+                    [readonly]="!canManage()"
+                  />
+                  @if (getFieldError('displayName')) {
+                    <mat-error>{{ getFieldError('displayName') }}</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Raz&oacute;n social</mat-label>
+                  <input
+                    matInput
+                    formControlName="legalName"
+                    maxlength="255"
+                    [readonly]="!canManage()"
+                  />
+                  @if (getFieldError('legalName')) {
+                    <mat-error>{{ getFieldError('legalName') }}</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Identificador</mat-label>
+                  <input
+                    matInput
+                    formControlName="slug"
+                    maxlength="100"
+                    autocomplete="off"
+                    [readonly]="!canManage()"
+                  />
+                  <mat-hint>Min&uacute;sculas, n&uacute;meros y guiones.</mat-hint>
+                  @if (getFieldError('slug')) {
+                    <mat-error>{{ getFieldError('slug') }}</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Zona horaria</mat-label>
+                  <input
+                    matInput
+                    formControlName="timezone"
+                    maxlength="100"
+                    placeholder="America/Hermosillo"
+                    [readonly]="!canManage()"
+                  />
+                  @if (getFieldError('timezone')) {
+                    <mat-error>{{ getFieldError('timezone') }}</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Locale</mat-label>
+                  <input
+                    matInput
+                    formControlName="locale"
+                    maxlength="20"
+                    placeholder="es-MX"
+                    [readonly]="!canManage()"
+                  />
+                  @if (getFieldError('locale')) {
+                    <mat-error>{{ getFieldError('locale') }}</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Moneda</mat-label>
+                  <input
+                    matInput
+                    formControlName="currency"
+                    maxlength="3"
+                    placeholder="MXN"
+                    [readonly]="!canManage()"
+                  />
+                  @if (getFieldError('currency')) {
+                    <mat-error>{{ getFieldError('currency') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              @if (canManage()) {
+                <div class="organization-admin-form__actions">
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="isSaving() || isChangingStatus()"
+                  >
+                    @if (isSaving()) {
+                      <mat-spinner diameter="20" />
+                    }
+                    <span>{{ isSaving() ? 'Guardando' : 'Guardar cambios' }}</span>
+                  </button>
+                </div>
+              } @else {
+                <p class="organization-admin-readonly">
+                  Tienes acceso de consulta. La edici&oacute;n requiere la capability
+                  <code>organization.manage</code>.
+                </p>
+              }
+            </form>
+          </app-section-card>
+
+          <div class="organization-admin-aside">
+            <app-section-card
+              title="Estado de la organizaci&oacute;n"
+              subtitle="El servidor valida cada transici&oacute;n y conserva la autoridad final."
+            >
+              <div class="organization-admin-lifecycle">
+                <div>
+                  <span>Estado actual</span>
+                  <strong>{{
+                    currentOrganization.status === 'ACTIVE' ? 'Activa' : 'Suspendida'
+                  }}</strong>
+                </div>
+
+                @if (canManage()) {
+                  <button
+                    [color]="isSuspended() ? 'primary' : 'warn'"
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="isChangingStatus() || isSaving()"
+                    (click)="openStatusConfirmation()"
+                  >
+                    @if (isChangingStatus()) {
+                      <mat-spinner diameter="20" />
+                    } @else {
+                      <mat-icon aria-hidden="true">{{
+                        isSuspended() ? 'play_arrow' : 'pause'
+                      }}</mat-icon>
+                    }
+                    <span>{{
+                      isSuspended()
+                        ? 'Reactivar organizaci&oacute;n'
+                        : 'Suspender organizaci&oacute;n'
+                    }}</span>
+                  </button>
+                } @else {
+                  <p>No tienes una acci&oacute;n de lifecycle autorizada.</p>
+                }
+              </div>
+            </app-section-card>
+
+            <app-section-card
+              title="Metadatos"
+              subtitle="Informaci&oacute;n de solo lectura del contrato."
+            >
+              <dl class="organization-admin-metadata">
+                <div>
+                  <dt>ID</dt>
+                  <dd>{{ currentOrganization.id }}</dd>
+                </div>
+                <div>
+                  <dt>Creada</dt>
+                  <dd>{{ currentOrganization.createdAt | date: 'medium' }}</dd>
+                </div>
+                <div>
+                  <dt>&Uacute;ltima actualizaci&oacute;n</dt>
+                  <dd>{{ currentOrganization.updatedAt | date: 'medium' }}</dd>
+                </div>
+              </dl>
+            </app-section-card>
+          </div>
+        </div>
+      }
+    }
+  }
+</section>

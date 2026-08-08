@@ -118,6 +118,13 @@ class TenantDataPage {}
 class OrganizationSelectionPage {}
 
 @Component({
+  selector: 'app-test-organization-administration-page',
+  standalone: true,
+  template: '<p>Organization administration</p>',
+})
+class OrganizationAdministrationPage {}
+
+@Component({
   selector: 'app-test-shell',
   standalone: true,
   imports: [RouterOutlet],
@@ -148,6 +155,7 @@ describe('Operational 403 tenant context revalidation', () => {
         provideRouter([
           { path: 'patients', component: TenantDataPage },
           { path: 'organization-selection', component: OrganizationSelectionPage },
+          { path: 'organization-administration', component: OrganizationAdministrationPage },
         ]),
         provideHttpClient(withInterceptors([authInterceptor, tenantStateInterceptor])),
         provideHttpClientTesting(),
@@ -218,8 +226,9 @@ describe('Operational 403 tenant context revalidation', () => {
     expect(store.hasCapability('patient.read')).toBe(false);
     expect(store.switchGeneration()).toBe(2);
     expect(closeAll).toHaveBeenCalledOnce();
-    expect(router.url).toBe('/organization-selection');
+    expect(router.url).toBe('/organization-administration');
     expect(fixture.nativeElement.textContent).not.toContain('Organization A patient data');
+    expect(fixture.nativeElement.textContent).toContain('Organization administration');
   });
 
   it('preserves the tenant and propagates a capability-denied 403 after a valid revalidation', async () => {

@@ -21,3 +21,18 @@ export const tenantContextGuard: CanActivateFn = () => {
 
   return false;
 };
+
+export const activeTenantGuard: CanActivateFn = () => {
+  const store = inject(TenantContextStore);
+  const router = inject(Router);
+
+  if (store.isActiveTenantReady()) {
+    return true;
+  }
+
+  if (store.isAdminSuspendedContext()) {
+    return router.createUrlTree(['/organization-administration']);
+  }
+
+  return false;
+};

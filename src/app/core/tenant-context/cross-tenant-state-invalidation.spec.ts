@@ -64,15 +64,28 @@ describe('Cross-Tenant State Invalidation coordinator', () => {
     expect(navigate).toHaveBeenCalledWith(['/organization-selection'], { replaceUrl: true });
   });
 
-  it.each(['authorization-loss', 'organization-suspended'])(
-    'closes overlays and leaves operational routes after %s',
-    (reason) => {
-      invalidations.next({ reason, generation: 2 });
+  it('closes overlays and leaves tenant-aware routes after authorization loss', () => {
+    invalidations.next({ reason: 'authorization-loss', generation: 2 });
 
-      expect(closeAll).toHaveBeenCalledOnce();
-      expect(navigate).toHaveBeenCalledWith(['/organization-selection'], { replaceUrl: true });
-    },
-  );
+    expect(closeAll).toHaveBeenCalledOnce();
+    expect(navigate).toHaveBeenCalledWith(['/organization-selection'], { replaceUrl: true });
+  });
+
+  it('closes operational surfaces but preserves the suspended-safe administration route', () => {
+    invalidations.next({ reason: 'organization-suspended', generation: 2 });
+
+    expect(closeAll).toHaveBeenCalledOnce();
+    expect(navigate).toHaveBeenCalledWith(['/organization-administration'], { replaceUrl: true });
+  });
+
+  it('does not remount organization administration when suspension is confirmed there', () => {
+    routerUrl = '/organization-administration';
+
+    invalidations.next({ reason: 'organization-suspended', generation: 2 });
+
+    expect(closeAll).toHaveBeenCalledOnce();
+    expect(navigate).not.toHaveBeenCalled();
+  });
 
   it('does not enqueue redundant selector navigation when already recovering', () => {
     routerUrl = '/organization-selection';

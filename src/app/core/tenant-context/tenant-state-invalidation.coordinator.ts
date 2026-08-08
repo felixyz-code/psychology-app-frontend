@@ -23,11 +23,15 @@ export class TenantStateInvalidationCoordinator {
           return;
         }
 
+        if (reason === 'organization-suspended') {
+          this.navigateToOrganizationAdministration();
+          return;
+        }
+
         if (
           reason === 'invalid-context' ||
           reason === 'context-resolution-failed' ||
-          reason === 'authorization-loss' ||
-          reason === 'organization-suspended'
+          reason === 'authorization-loss'
         ) {
           this.navigateToOrganizationSelection();
           return;
@@ -45,5 +49,13 @@ export class TenantStateInvalidationCoordinator {
     }
 
     void this.router.navigate(['/organization-selection'], { replaceUrl: true });
+  }
+
+  private navigateToOrganizationAdministration(): void {
+    if (this.router.url.startsWith('/organization-administration')) {
+      return;
+    }
+
+    void this.router.navigate(['/organization-administration'], { replaceUrl: true });
   }
 }
