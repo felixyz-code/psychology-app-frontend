@@ -133,6 +133,32 @@ The interceptor does not infer behavior from URL strings. A request may provide 
 
 `TenantContextStore` bootstraps `GET /auth/context` after identity restoration, validates the V1 response, and exposes the state machine, confirmed selection, capabilities, context version, and switch generation through Angular Signals. The confirmed organization is persisted only in `sessionStorage`, so selection is isolated per browser tab and is cleared by `resetTenantState`.
 
+## Tenant Request Invalidation
+
+Every `TENANT_REQUIRED` request is observed by the cross-tenant state interceptor.
+
+At subscription time it captures:
+
+- the current `switchGeneration`
+- the confirmed organization ID
+
+The response may reach application state only while both values still match `TenantContextStore`. A tenant invalidation completes pending subscriptions, and the final response guard also discards a response if it races with the invalidation event.
+
+This applies uniformly to reads and mutations across Patients, Case Files, Session Notes, Documents, Appointments, Financial Transactions, Dashboard orchestration and Reports orchestration. The backend remains authoritative for whether an in-flight mutation commits; the stale frontend response cannot publish data, errors or follow-up state under a later tenant.
+
+`TENANT_OPTIONAL` context resolution and the `IDENTITY_ONLY` preference write retain their dedicated generation and request-sequence guards in `TenantContextStore`.
+
+An operational `403` from a `TENANT_REQUIRED` request does not directly invalidate the tenant. The interceptor asks `TenantContextStore` to revalidate `GET /auth/context` for the request's captured organization, switch generation and context version. Concurrent `403` responses for that same captured context share one refresh. This operational refresh keeps the last confirmed state mounted while the request is pending, so a capability-only denial does not destroy route- or dialog-scoped data.
+
+The V1 response remains authoritative:
+
+- a still-valid `ACTIVE_TENANT_READY` response updates the context and propagates the original capability-denied `403` without clearing tenant data
+- `NO_ACTIVE_TENANT`, an ineligible current organization or an equivalent unresolved V1 state emits authorization-loss invalidation
+- `ADMIN_SUSPENDED_CONTEXT` removes operational capabilities and emits organization-suspended invalidation while preserving only the administrative context allowed by V1
+- a transient network or `5xx` refresh failure preserves the last confirmed context, records the refresh error and propagates the original operational `403`; it does not grant permissions or claim that access loss was confirmed
+
+The context request is `TENANT_OPTIONAL`, so it cannot recursively enter the operational `403` trigger. A response captured for an older organization, generation or context version cannot invalidate the current tenant.
+
 # Route Guards
 
 Protected routes use Angular Guards.

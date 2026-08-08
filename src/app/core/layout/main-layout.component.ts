@@ -1,8 +1,9 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { NavbarComponent } from './navbar.component';
 import { SidebarComponent } from './sidebar.component';
+import { TenantContextStore } from '../tenant-context/tenant-context.store';
 
 @Component({
   selector: 'app-main-layout',
@@ -12,6 +13,7 @@ import { SidebarComponent } from './sidebar.component';
   styleUrl: './main-layout.component.scss',
 })
 export class MainLayoutComponent {
+  readonly tenantContextStore = inject(TenantContextStore);
   readonly isSidebarOpen = signal(false);
   readonly isSidebarCollapsed = signal(false);
   private scrollPosition = 0;

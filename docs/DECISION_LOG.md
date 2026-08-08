@@ -667,6 +667,35 @@ This keeps release infrastructure aligned with the regression hardening complete
 
 ---
 
+# ADR-027 - Generation-Gated Cross-Tenant State Invalidation
+
+## Decision
+
+Cross-tenant invalidation reuses `TenantContextStore.switchGeneration` as the only generation authority.
+
+The frontend coordinates isolation through three existing architectural boundaries:
+
+- the context store emits idempotent invalidation events after confirmed tenant state is cleared
+- a functional interceptor cancels or discards `TENANT_REQUIRED` responses whose captured generation or organization no longer matches
+- one application coordinator closes dialogs and leaves routes that can retain tenant-sensitive component or form state
+
+Feature HTTP services remain stateless and no global business-data store is introduced.
+
+## Rationale
+
+Current tenant-sensitive state is owned primarily by routed components, Angular Material dialogs and component-scoped document flow stores. Coordinating their lifecycle centrally avoids duplicating reset subscriptions across every feature while still preventing an out-of-order response from publishing after A to B or A to B to C.
+
+## Implications
+
+- identity-level authentication state and safe organization-selection metadata may survive when the context contract permits it
+- confirmed tenant snapshots, capabilities, operational route state, dialogs and forms do not survive tenant invalidation
+- same-tenant context refresh keeps its existing `contextVersion` semantics
+- operational `403` responses cause a generation-, organization- and context-version-bound V1 refresh; concurrent responses share the same refresh
+- capability denial does not itself invalidate the tenant, and transient refresh failure remains separate from canonically confirmed access loss
+- no tenant payload is added to `localStorage`, `sessionStorage`, cross-tab transport or a new cache
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:
