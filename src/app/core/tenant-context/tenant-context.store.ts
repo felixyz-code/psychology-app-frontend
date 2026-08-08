@@ -48,6 +48,12 @@ export class TenantContextStore {
   private readonly errorSignal = signal<TenantContextError | null>(null);
   private readonly invalidationSubject = new Subject<TenantStateInvalidation>();
   private pendingLoad: Promise<void> | null = null;
+  private pendingRefresh: {
+    readonly generation: number;
+    readonly organizationId: string | null;
+    readonly contextVersion: number;
+    readonly request: Promise<void>;
+  } | null = null;
   private pendingPreferencePersistence: Promise<void> | null = null;
   private requestSequence = 0;
   private preferenceRequestSequence = 0;
@@ -127,16 +133,54 @@ export class TenantContextStore {
   }
 
   refreshContext(): Promise<void> {
+    return this.refreshCurrentContext(true);
+  }
+
+  revalidateOperationalContext(
+    generation: number,
+    organizationId: string | null,
+    contextVersion: number,
+  ): Promise<void> {
+    if (!this.isTenantSelectionCurrent(generation, organizationId, contextVersion)) {
+      return Promise.resolve();
+    }
+
+    return this.refreshCurrentContext(false);
+  }
+
+  private refreshCurrentContext(showLoadingState: boolean): Promise<void> {
     if (!this.authStore.isAuthenticated()) {
       this.resetTenantState('refresh-without-identity');
       return Promise.resolve();
     }
 
     const generation = this.switchGenerationSignal();
-    this.stateSignal.set('LOADING');
+    const organizationId = this.selectedOrganizationIdSignal();
+    const contextVersion = this.contextVersionSignal();
+    const pendingRefresh = this.pendingRefresh;
+
+    if (
+      pendingRefresh?.generation === generation &&
+      pendingRefresh.organizationId === organizationId &&
+      pendingRefresh.contextVersion === contextVersion
+    ) {
+      return pendingRefresh.request;
+    }
+
+    if (showLoadingState) {
+      this.stateSignal.set('LOADING');
+    }
     this.errorSignal.set(null);
 
-    return this.loadContext('refresh', this.selectedOrganizationIdSignal(), generation);
+    const request = this.loadContext('refresh', organizationId, generation);
+    this.pendingRefresh = { generation, organizationId, contextVersion, request };
+    void request.finally(() => {
+      if (this.pendingRefresh?.request === request) {
+        this.pendingRefresh = null;
+      }
+    });
+
+    return request;
   }
 
   switchTenant(organizationId: string): Promise<void> {
@@ -208,6 +252,19 @@ export class TenantContextStore {
       organizationId === this.selectedOrganizationIdSignal() &&
       (this.stateSignal() === 'ACTIVE_TENANT_READY' ||
         this.stateSignal() === 'ADMIN_SUSPENDED_CONTEXT')
+    );
+  }
+
+  private isTenantSelectionCurrent(
+    generation: number,
+    organizationId: string | null,
+    contextVersion: number,
+  ): boolean {
+    return (
+      generation === this.switchGenerationSignal() &&
+      organizationId !== null &&
+      organizationId === this.selectedOrganizationIdSignal() &&
+      contextVersion === this.contextVersionSignal()
     );
   }
 
@@ -287,6 +344,11 @@ export class TenantContextStore {
         if (normalized.statusCode === 401) {
           this.resetTenantState('access-loss', this.switchGenerationSignal() + 1);
           this.stateSignal.set('FORBIDDEN');
+          return;
+        }
+
+        if (origin === 'refresh' && this.snapshotSignal()) {
+          this.stateSignal.set(this.snapshotSignal()!.status);
           return;
         }
 
@@ -427,10 +489,7 @@ export class TenantContextStore {
       return 'organization-suspended';
     }
 
-    const nextCapabilities = new Set(response.capabilities);
-    return currentSnapshot.capabilities.some((capability) => !nextCapabilities.has(capability))
-      ? 'authorization-loss'
-      : null;
+    return null;
   }
 
   private emitInvalidation(reason: string, generation: number): void {

@@ -690,6 +690,8 @@ Current tenant-sensitive state is owned primarily by routed components, Angular 
 - identity-level authentication state and safe organization-selection metadata may survive when the context contract permits it
 - confirmed tenant snapshots, capabilities, operational route state, dialogs and forms do not survive tenant invalidation
 - same-tenant context refresh keeps its existing `contextVersion` semantics
+- operational `403` responses cause a generation-, organization- and context-version-bound V1 refresh; concurrent responses share the same refresh
+- capability denial does not itself invalidate the tenant, and transient refresh failure remains separate from canonically confirmed access loss
 - no tenant payload is added to `localStorage`, `sessionStorage`, cross-tab transport or a new cache
 
 ---

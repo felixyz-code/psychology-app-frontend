@@ -1,10 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 
 import { TenantContextStore, TenantStateInvalidation } from './tenant-context.store';
+import { TENANT_HTTP_MODE } from './tenant-http-context';
 import { tenantStateInterceptor } from './tenant-state.interceptor';
 
 describe('Cross-Tenant State Invalidation HTTP protection', () => {
@@ -13,11 +14,13 @@ describe('Cross-Tenant State Invalidation HTTP protection', () => {
   let generation: number;
   let selectedOrganizationId: string | null;
   let invalidations: Subject<TenantStateInvalidation>;
+  let revalidateOperationalContext: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     generation = 1;
     selectedOrganizationId = 'organization-a';
     invalidations = new Subject<TenantStateInvalidation>();
+    revalidateOperationalContext = vi.fn(() => Promise.resolve());
 
     TestBed.configureTestingModule({
       providers: [
@@ -29,6 +32,8 @@ describe('Cross-Tenant State Invalidation HTTP protection', () => {
             invalidations: invalidations.asObservable(),
             selectedOrganizationId: () => selectedOrganizationId,
             switchGeneration: () => generation,
+            contextVersion: () => 1,
+            revalidateOperationalContext,
             isRequestContextCurrent: (
               requestGeneration: number,
               requestOrganizationId: string | null,
@@ -84,4 +89,21 @@ describe('Cross-Tenant State Invalidation HTTP protection', () => {
     expect(requestB.cancelled).toBe(true);
     expect(responses).toEqual(['organization-c-data']);
   });
+
+  it.each(['IDENTITY_ONLY', 'TENANT_OPTIONAL'] as const)(
+    'does not revalidate after a 403 from a %s request',
+    (mode) => {
+      const errors: unknown[] = [];
+
+      http
+        .get('/non-operational', {
+          context: new HttpContext().set(TENANT_HTTP_MODE, mode),
+        })
+        .subscribe({ error: (error) => errors.push(error) });
+      httpTesting.expectOne('/non-operational').flush({}, { status: 403, statusText: 'Forbidden' });
+
+      expect(errors).toHaveLength(1);
+      expect(revalidateOperationalContext).not.toHaveBeenCalled();
+    },
+  );
 });

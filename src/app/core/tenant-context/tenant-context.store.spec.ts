@@ -485,14 +485,11 @@ describe('TenantContextStore', () => {
     expect(store.selectedOrganizationId()).toBeNull();
   });
 
-  it('discards an older same-tenant refresh response', async () => {
-    const firstRefresh = new Subject<AuthContextResponseV1>();
-    const secondRefresh = new Subject<AuthContextResponseV1>();
+  it('coalesces concurrent same-tenant refreshes', async () => {
+    const refresh = new Subject<AuthContextResponseV1>();
 
     await store.bootstrap();
-    contextService.getContext
-      .mockReturnValueOnce(firstRefresh.asObservable())
-      .mockReturnValueOnce(secondRefresh.asObservable());
+    contextService.getContext.mockReturnValueOnce(refresh.asObservable());
 
     const firstRequest = store.refreshContext();
     const secondRequest = store.refreshContext();
@@ -503,20 +500,12 @@ describe('TenantContextStore', () => {
         displayName: 'Latest organization',
       },
     };
-    const staleContext = {
-      ...activeContext,
-      organization: {
-        ...activeContext.organization!,
-        displayName: 'Stale organization',
-      },
-    };
 
-    secondRefresh.next(latestContext);
-    secondRefresh.complete();
-    await secondRequest;
+    expect(firstRequest).toBe(secondRequest);
+    expect(contextService.getContext).toHaveBeenCalledTimes(2);
 
-    firstRefresh.next(staleContext);
-    firstRefresh.complete();
+    refresh.next(latestContext);
+    refresh.complete();
     await firstRequest;
 
     expect(store.snapshot()?.organization?.displayName).toBe('Latest organization');
@@ -552,7 +541,7 @@ describe('TenantContextStore', () => {
     expect(store.switchGeneration()).toBe(3);
   });
 
-  it('invalidates confirmed data when a context refresh fails without clearing identity', async () => {
+  it('preserves confirmed data when a context refresh fails transiently', async () => {
     await store.bootstrap();
     contextService.getContext.mockReturnValueOnce(
       throwError(() => new HttpErrorResponse({ status: 503 })),
@@ -560,11 +549,15 @@ describe('TenantContextStore', () => {
 
     await store.refreshContext();
 
-    expect(store.state()).toBe('ERROR');
-    expect(store.selectedOrganizationId()).toBeNull();
-    expect(store.snapshot()).toBeNull();
-    expect(store.capabilities()).toEqual([]);
-    expect(sessionStorage.getItem('psychology_app_selected_organization_id')).toBeNull();
+    expect(store.state()).toBe('ACTIVE_TENANT_READY');
+    expect(store.selectedOrganizationId()).toBe('organization-a');
+    expect(store.snapshot()).toEqual(activeContext);
+    expect(store.capabilities()).toEqual(['organization.read']);
+    expect(store.switchGeneration()).toBe(1);
+    expect(store.error()?.statusCode).toBe(503);
+    expect(sessionStorage.getItem('psychology_app_selected_organization_id')).toBe(
+      'organization-a',
+    );
     expect(authStore.user()).toEqual(user);
     expect(authStore.isAuthenticated()).toBe(true);
   });
@@ -645,6 +638,25 @@ describe('TenantContextStore', () => {
     expect(store.switchGeneration()).toBe(1);
     expect(store.contextVersion()).toBe(2);
     expect(store.snapshot()?.organization?.displayName).toBe('Organization A updated');
+  });
+
+  it('applies a same-tenant capability reduction without treating it as total access loss', async () => {
+    const contextWithOperationalCapability: AuthContextResponseV1 = {
+      ...activeContext,
+      capabilities: ['organization.read', 'patient.read'],
+    };
+    contextService.getContext
+      .mockReturnValueOnce(of(contextWithOperationalCapability))
+      .mockReturnValueOnce(of(activeContext));
+
+    await store.bootstrap();
+    await store.refreshContext();
+
+    expect(store.state()).toBe('ACTIVE_TENANT_READY');
+    expect(store.selectedOrganizationId()).toBe('organization-a');
+    expect(store.capabilities()).toEqual(['organization.read']);
+    expect(store.switchGeneration()).toBe(1);
+    expect(store.contextVersion()).toBe(2);
   });
 
   it('emits one invalidation for an idempotent reset generation', async () => {
