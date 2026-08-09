@@ -10,13 +10,13 @@ This document describes the frontend architecture and explains how the different
 
 It documents:
 
-- Angular architecture
-- Project structure
-- Routing strategy
-- State management
-- Layout organization
-- Theme organization
-- Design decisions
+* Angular architecture
+* Project structure
+* Routing strategy
+* State management
+* Layout organization
+* Theme organization
+* Design decisions
 
 Business rules are documented in `PROJECT.md`.
 
@@ -34,12 +34,12 @@ The application consumes an existing NestJS backend and follows a **backend-firs
 
 Main architectural principles:
 
-- Standalone Components
-- Feature-based organization
-- Angular Signals
-- Lazy-loaded routes
-- Reusable UI components
-- Backend as source of truth
+* Standalone Components
+* Feature-based organization
+* Angular Signals
+* Lazy-loaded routes
+* Reusable UI components
+* Backend as source of truth
 
 ---
 
@@ -47,16 +47,16 @@ Main architectural principles:
 
 Current technologies:
 
-- Angular 21
-- TypeScript
-- SCSS
-- Angular Signals
-- Angular Router
-- HttpClient
-- Reactive Forms
-- Angular Material
-- Angular CDK
-- RxJS
+* Angular 21
+* TypeScript
+* SCSS
+* Angular Signals
+* Angular Router
+* HttpClient
+* Reactive Forms
+* Angular Material
+* Angular CDK
+* RxJS
 
 ---
 
@@ -96,12 +96,12 @@ core/
 
 Responsibilities:
 
-- Authentication
-- Authorization
-- Route protection
-- HTTP interception
-- Application shell
-- Global theme configuration
+* Authentication
+* Authorization
+* Route protection
+* HTTP interception
+* Application shell
+* Global theme configuration
 
 ---
 
@@ -120,10 +120,10 @@ shared/
 
 Responsibilities:
 
-- Reusable UI components
-- Shared models
-- Utility functions
-- Generic presentation logic
+* Reusable UI components
+* Shared models
+* Utility functions
+* Generic presentation logic
 
 Shared components should not contain business logic.
 
@@ -147,17 +147,16 @@ appointments/
 financial-transactions/
 reports/
 organization-administration/
-membership-administration/
 ```
 
 Each feature owns:
 
-- Pages
-- Components
-- Models
-- Services
-- Dialogs
-- Feature-specific logic
+* Pages
+* Components
+* Models
+* Services
+* Dialogs
+* Feature-specific logic
 
 Dependencies between features should be minimized.
 
@@ -180,36 +179,26 @@ actions fail closed, without synthesizing capabilities or lifecycle state in
 the frontend. The feature does not own membership, invitation,
 ownership-transfer, signup or organization-creation workflows.
 
-## Membership Administration Module
-
-`membership-administration` is a dedicated lazy feature for membership list
-and administration UX in the confirmed tenant. It consumes the backend-owned
-`allowedActions` projection for row mutations, captures tenant request scope
-through `organizationId` and `switchGeneration`, and reconciles canonical
-membership/auth-context state after mutations. It does not infer authorization
-from roles or statuses and is unavailable when the server does not project
-`membership.read`, including suspended organization context.
-
 ## Reports Module
 
 The frontend now includes a lazy-loaded `reports` feature.
 
 Current characteristics:
 
-- `reports` now works as a reusable reporting engine for the frontend
-- current internal layers are `Catalog`, `Runner`, `Preview` and `Export`
-- `reports` owns report navigation, catalog, filters, preview and export UX
-- individual business features remain owners of their own data services
-- `reports` does not own financial business logic, appointments business logic or dedicated backend reporting rules
-- report execution is orchestrated through feature-owned services instead of direct `HttpClient` calls
-- current delivered reports are `Financial Report`, `Agenda Report`, `Clinical Summary` and `Clinical Record`
-- `ReportPreviewShell` supports tabular, grouped and `clinical` preview strategies
-- `previewMode: clinical` is used for patient-centered clinical documents with narrative sections, timeline, summarized notes, complete notes and related documents
-- export infrastructure is centralized in the `reports` feature while data ownership remains in the source feature
-- CSV exports prepend a UTF-8 BOM for Excel compatibility while keeping the `text/csv;charset=utf-8` MIME type and existing formula protection
-- `ReportResult` now includes `pdfFileName` so each report can provide a descriptive export filename without changing the shared print-based `PDF` flow
-- a small `report-formatters` utility now centralizes presentational helpers such as readable MIME labels for report-owned clinical document surfaces
-- recent hardening keeps error presentation centralized in `ReportPreviewShell` and preserves explicit frontend feedback when `PDF` popup opening is blocked by the browser
+* `reports` now works as a reusable reporting engine for the frontend
+* current internal layers are `Catalog`, `Runner`, `Preview` and `Export`
+* `reports` owns report navigation, catalog, filters, preview and export UX
+* individual business features remain owners of their own data services
+* `reports` does not own financial business logic, appointments business logic or dedicated backend reporting rules
+* report execution is orchestrated through feature-owned services instead of direct `HttpClient` calls
+* current delivered reports are `Financial Report`, `Agenda Report`, `Clinical Summary` and `Clinical Record`
+* `ReportPreviewShell` supports tabular, grouped and `clinical` preview strategies
+* `previewMode: clinical` is used for patient-centered clinical documents with narrative sections, timeline, summarized notes, complete notes and related documents
+* export infrastructure is centralized in the `reports` feature while data ownership remains in the source feature
+* CSV exports prepend a UTF-8 BOM for Excel compatibility while keeping the `text/csv;charset=utf-8` MIME type and existing formula protection
+* `ReportResult` now includes `pdfFileName` so each report can provide a descriptive export filename without changing the shared print-based `PDF` flow
+* a small `report-formatters` utility now centralizes presentational helpers such as readable MIME labels for report-owned clinical document surfaces
+* recent hardening keeps error presentation centralized in `ReportPreviewShell` and preserves explicit frontend feedback when `PDF` popup opening is blocked by the browser
 
 This keeps the architecture aligned with the backend-first principle and avoids creating a parallel business domain for reporting.
 
@@ -223,11 +212,11 @@ This workspace is implemented as a composed detail surface that orchestrates exi
 
 Current characteristics:
 
-- Implemented through `PatientDetailDialogComponent`
-- Reached from both `patients` and `case-files`
-- Uses shared presentational components from `shared/components`
-- Reuses existing feature dialogs for create, edit and delete flows
-- Loads feature data through feature-owned services only
+* Implemented through `PatientDetailDialogComponent`
+* Reached from both `patients` and `case-files`
+* Uses shared presentational components from `shared/components`
+* Reuses existing feature dialogs for create, edit and delete flows
+* Loads feature data through feature-owned services only
 
 This is intentionally an orchestration pattern and not a new business module.
 
@@ -241,10 +230,10 @@ Routing is centralized in `app.routes.ts`.
 
 Main principles:
 
-- Standalone Components
-- Lazy loading where appropriate
-- Guards for protected routes
-- Feature isolation
+* Standalone Components
+* Lazy loading where appropriate
+* Guards for protected routes
+* Feature isolation
 
 Authentication is required before accessing protected areas.
 
@@ -264,10 +253,10 @@ The application uses Angular Signals for local and application state.
 
 Current state responsibilities include:
 
-- Authentication state
-- Current user
-- Loading indicators
-- UI state
+* Authentication state
+* Current user
+* Loading indicators
+* UI state
 
 Business data continues to be provided by the backend.
 
@@ -279,12 +268,12 @@ NgRx is intentionally not used.
 
 Current isolation responsibilities are:
 
-- `TenantContextStore` clears the confirmed organization, context snapshot, capabilities, errors and persisted session hint before resolving a replacement tenant
-- `TenantStateInvalidationCoordinator` closes Angular Material dialogs and leaves tenant-aware routes during switch or unsafe context recovery; confirmed suspension redirects operational routes to the suspended-safe organization administration surface
-- `tenantStateInterceptor` captures the request generation, organization and context version for every `TENANT_REQUIRED` request, then cancels or discards work after the tenant identity becomes stale
-- an operational `403` triggers one coalesced V1 context refresh for the captured tenant; only the canonical refresh result can confirm access loss
-- organization lifecycle reconciliation starts a distinct forced V1 refresh, superseding any pre-commit refresh for the same tenant; a lifecycle mismatch keeps operational routes and navigation fail-closed until synchronization succeeds or the tenant changes
-- the main layout removes its routed tenant surface whenever no confirmed context is ready
+* `TenantContextStore` clears the confirmed organization, context snapshot, capabilities, errors and persisted session hint before resolving a replacement tenant
+* `TenantStateInvalidationCoordinator` closes Angular Material dialogs and leaves tenant-aware routes during switch or unsafe context recovery; confirmed suspension redirects operational routes to the suspended-safe organization administration surface
+* `tenantStateInterceptor` captures the request generation, organization and context version for every `TENANT_REQUIRED` request, then cancels or discards work after the tenant identity becomes stale
+* an operational `403` triggers one coalesced V1 context refresh for the captured tenant; only the canonical refresh result can confirm access loss
+* organization lifecycle reconciliation starts a distinct forced V1 refresh, superseding any pre-commit refresh for the same tenant; a lifecycle mismatch keeps operational routes and navigation fail-closed until synchronization succeeds or the tenant changes
+* the main layout removes its routed tenant surface whenever no confirmed context is ready
 
 Feature services remain stateless HTTP adapters. Tenant data, filters, forms and selections are route- or dialog-scoped and are discarded when the coordinator leaves the invalid route or closes overlays.
 
@@ -304,11 +293,11 @@ The application layout is composed of reusable structural components.
 
 Current layout includes:
 
-- Application shell
-- Navbar
-- Sidebar
-- Header
-- Content area
+* Application shell
+* Navbar
+* Sidebar
+* Header
+* Content area
 
 The layout is independent from business features.
 
@@ -320,11 +309,11 @@ Global styling is centralized through the `theme` layer.
 
 Responsibilities include:
 
-- Global variables
-- Typography
-- Colors
-- Layout spacing
-- Shared styles
+* Global variables
+* Typography
+* Colors
+* Layout spacing
+* Shared styles
 
 Feature-specific styling remains inside each feature.
 
@@ -338,19 +327,19 @@ Responsibilities:
 
 Frontend
 
-- UI
-- Navigation
-- Forms
-- Client-side validation
-- User interaction
+* UI
+* Navigation
+* Forms
+* Client-side validation
+* User interaction
 
 Backend
 
-- Authentication
-- Authorization
-- Ownership
-- Business rules
-- Data persistence
+* Authentication
+* Authorization
+* Ownership
+* Business rules
+* Data persistence
 
 ---
 
@@ -390,13 +379,13 @@ To provide a maintained Angular UI foundation while allowing customization throu
 
 Future architecture may include:
 
-- Feature libraries
-- Shared design system
-- Theme switching
-- Internationalization
-- Offline support
-- Progressive Web App
-- Performance optimizations
+* Feature libraries
+* Shared design system
+* Theme switching
+* Internationalization
+* Offline support
+* Progressive Web App
+* Performance optimizations
 
 These features should extend the existing architecture without changing its foundations.
 
@@ -406,11 +395,11 @@ These features should extend the existing architecture without changing its foun
 
 Related documentation:
 
-- PROJECT.md
-- STANDARDS.md
-- CLINICAL_WORKSPACE.md
-- API_INTEGRATION.md
-- DECISION_LOG.md
-- ROADMAP.md
+* PROJECT.md
+* STANDARDS.md
+* CLINICAL_WORKSPACE.md
+* API_INTEGRATION.md
+* DECISION_LOG.md
+* ROADMAP.md
 
 End of document.

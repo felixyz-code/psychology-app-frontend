@@ -91,7 +91,7 @@ export class MembershipAdministrationPage implements OnDestroy {
     this.mutationSubscription?.unsubscribe();
   }
 
-  loadMemberships(): void {
+  loadMemberships(preserveSuccessMessage = false): void {
     const scope = this.captureScope();
     const sequence = ++this.loadSequence;
 
@@ -99,7 +99,9 @@ export class MembershipAdministrationPage implements OnDestroy {
     this.viewState.set('loading');
     this.errorMessage.set('');
     this.contextWarning.set('');
-    this.successMessage.set('');
+    if (!preserveSuccessMessage) {
+      this.successMessage.set('');
+    }
 
     if (!scope || !this.tenantContextStore.hasCapability('membership.read')) {
       this.memberships.set([]);
@@ -275,8 +277,6 @@ export class MembershipAdministrationPage implements OnDestroy {
     this.isMutating.set(true);
     this.errorMessage.set('');
     this.successMessage.set('');
-    this.memberships.set([]);
-    this.viewState.set('loading');
     this.mutationSubscription?.unsubscribe();
     this.mutationSubscription = this.membershipsService
       .leave(scope.organizationId, { expectedUpdatedAt: membership.updatedAt })
@@ -302,8 +302,6 @@ export class MembershipAdministrationPage implements OnDestroy {
           }
 
           this.isMutating.set(false);
-          this.memberships.set([membership]);
-          this.viewState.set('loaded');
           this.handleMutationError(error, scope);
         },
       });
@@ -335,7 +333,7 @@ export class MembershipAdministrationPage implements OnDestroy {
 
           this.isMutating.set(false);
           this.successMessage.set(successMessage);
-          this.loadMemberships();
+          this.loadMemberships(true);
         },
         error: (error: HttpErrorResponse) => {
           if (!this.isScopeCurrent(scope)) {

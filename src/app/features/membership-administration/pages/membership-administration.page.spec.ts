@@ -211,6 +211,45 @@ describe('MembershipAdministrationPage', () => {
     expect(tenantStore.refreshContext).toHaveBeenCalledOnce();
     expect(tenantStore.resetTenantState).toHaveBeenCalledWith('membership-left', 2);
   });
+
+  it('preserves every canonical membership when self-leave fails', () => {
+    const currentMembership = createMembership();
+    const otherMembership = createMembership({
+      id: 'membership-b',
+      userId: 'user-b',
+      displayName: 'Bruno Psychologist',
+      email: 'bruno@example.com',
+    });
+    const pendingLeave = new Subject<ReturnType<typeof createMutationResponse>>();
+    membershipsService.leave.mockReturnValue(pendingLeave.asObservable());
+    canLeaveCapability = true;
+    capabilities.set(['membership.leave']);
+    currentLoad.next([currentMembership, otherMembership]);
+
+    component.openActionConfirmation(currentMembership, 'LEAVE');
+    dialogClosed.next(true);
+    pendingLeave.error(
+      new HttpErrorResponse({ status: 409, error: { code: 'LAST_OWNER_PROTECTED' } }),
+    );
+
+    expect(component.memberships()).toEqual([currentMembership, otherMembership]);
+    expect(component.viewState()).toBe('loaded');
+    expect(component.isMutating()).toBe(false);
+  });
+
+  it('keeps successful mutation feedback visible during canonical reconciliation', () => {
+    const membership = createMembership({ allowedActions: ['REMOVE'] });
+    const pendingLoad = new Subject<MembershipListItem[]>();
+    membershipsService.list.mockReturnValueOnce(of([membership])).mockReturnValueOnce(pendingLoad);
+    currentLoad.next([membership]);
+
+    component.openActionConfirmation(membership, 'REMOVE');
+    dialogClosed.next(true);
+
+    expect(component.successMessage()).toContain('revocada');
+    pendingLoad.next([createMembership({ status: 'REVOKED', allowedActions: [] })]);
+    expect(component.successMessage()).toContain('revocada');
+  });
 });
 
 function createMembership(overrides: Partial<MembershipListItem> = {}): MembershipListItem {
