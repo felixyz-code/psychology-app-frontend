@@ -60,7 +60,9 @@ describe('capabilityGuard', () => {
 
     const result = TestBed.runInInjectionContext(() =>
       capabilityGuard(
-        { data: { requiredCapability: 'organization.manage' } } as unknown as ActivatedRouteSnapshot,
+        {
+          data: { requiredCapability: 'organization.manage' },
+        } as unknown as ActivatedRouteSnapshot,
         {} as RouterStateSnapshot,
       ),
     );
@@ -75,5 +77,20 @@ describe('capabilityGuard', () => {
     );
 
     expect(clinicalResult).toBe(false);
+  });
+
+  it('denies membership administration in suspended context when membership.read is absent', () => {
+    tenantStore.isActiveTenantReady.mockReturnValue(false);
+    tenantStore.isAdminSuspendedContext.mockReturnValue(true);
+    tenantStore.hasCapability.mockReturnValue(false);
+
+    const result = TestBed.runInInjectionContext(() =>
+      capabilityGuard(
+        { data: { requiredCapability: 'membership.read' } } as unknown as ActivatedRouteSnapshot,
+        {} as RouterStateSnapshot,
+      ),
+    );
+
+    expect(result).toBe(false);
   });
 });

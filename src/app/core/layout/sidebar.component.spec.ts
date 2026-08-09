@@ -21,7 +21,8 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
           useValue: {
             isActiveTenantReady: () => true,
             isCanonicalContextSynchronizationPending: synchronizationPending,
-            hasCapability: (capability: string) => capability === 'organization.read',
+            hasCapability: (capability: string) =>
+              capability === 'organization.read' || capability === 'membership.read',
           },
         },
       ],
@@ -43,5 +44,9 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Dashboard');
     expect(fixture.nativeElement.textContent).not.toContain('Pacientes');
     expect(fixture.nativeElement.textContent).toContain('Organización');
+  });
+
+  it('shows membership administration when membership.read is projected', () => {
+    expect(fixture.nativeElement.textContent).toContain('Miembros');
   });
 });

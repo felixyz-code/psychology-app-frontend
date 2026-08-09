@@ -78,5 +78,9 @@ describe('app routes', () => {
         data: { requiredCapability: 'organization.read' },
       },
     );
+    expect(childRoutes.find((route) => route.path === 'membership-administration')).toMatchObject({
+      canActivate: [capabilityGuard],
+      data: { requiredCapability: 'membership.read' },
+    });
   });
 });

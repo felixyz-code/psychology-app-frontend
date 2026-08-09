@@ -18,7 +18,7 @@ export class TenantStateInvalidationCoordinator {
       .subscribe(({ reason }) => {
         this.dialog.closeAll();
 
-        if (reason === 'tenant-switch') {
+        if (reason === 'tenant-switch' || reason === 'membership-left') {
           this.navigateToOrganizationSelection();
           return;
         }
