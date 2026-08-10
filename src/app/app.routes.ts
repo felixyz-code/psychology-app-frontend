@@ -88,6 +88,15 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'invitation-administration',
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'invitation.read' },
+        loadChildren: () =>
+          import('./features/invitation-administration/invitation-administration.routes').then(
+            (m) => m.invitationAdministrationRoutes,
+          ),
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',

@@ -1,0 +1,169 @@
+<div class="invitation-admin-page">
+  <app-page-header
+    heading="Invitaciones"
+    subtitle="Administra invitaciones de acceso a la organización actual."
+    [breadcrumbs]="[{ label: 'Invitaciones' }]"
+  />
+
+  <div class="invitation-admin-toolbar">
+    @if (tenantContextStore.snapshot()?.organization; as organization) {
+      <p>
+        <span>Organización actual</span><strong>{{ organization.displayName }}</strong>
+      </p>
+    }
+    <div>
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="loadInvitations()"
+        [disabled]="viewState() === 'loading' || isMutating()"
+      >
+        <mat-icon>refresh</mat-icon>Actualizar
+      </button>
+      @if (canCreate()) {
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          (click)="openCreateDialog()"
+          [disabled]="isMutating()"
+        >
+          <mat-icon>person_add</mat-icon>Crear invitación
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (contextWarning()) {
+    <div class="invitation-admin-alert invitation-admin-alert--warning" role="status">
+      <mat-icon aria-hidden="true">sync_problem</mat-icon>{{ contextWarning() }}
+    </div>
+  }
+  @if (successMessage()) {
+    <div class="invitation-admin-alert invitation-admin-alert--success" role="status">
+      <mat-icon aria-hidden="true">check_circle</mat-icon>{{ successMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="invitation-admin-alert invitation-admin-alert--error" role="alert">
+      <mat-icon aria-hidden="true">error_outline</mat-icon>{{ errorMessage() }}
+    </div>
+  }
+
+  @if (viewState() === 'loading') {
+    <section class="invitation-admin-state" aria-live="polite">
+      <mat-spinner diameter="36" />
+      <div>
+        <h2>Cargando invitaciones</h2>
+        <p>Estamos consultando la información canónica.</p>
+      </div>
+    </section>
+  } @else if (viewState() === 'forbidden') {
+    <section class="invitation-admin-state" role="alert">
+      <mat-icon aria-hidden="true">lock</mat-icon>
+      <div>
+        <h2>Acceso no disponible</h2>
+        <p>
+          La administración de invitaciones requiere una organización activa y el permiso
+          correspondiente.
+        </p>
+      </div>
+    </section>
+  } @else if (viewState() === 'tenant-context') {
+    <section class="invitation-admin-state" role="alert">
+      <mat-icon aria-hidden="true">account_tree</mat-icon>
+      <div>
+        <h2>Necesitamos recuperar el contexto</h2>
+        <p>Actualiza la sesión antes de continuar.</p>
+      </div>
+      <button mat-flat-button color="primary" type="button" (click)="retry()">Reintentar</button>
+    </section>
+  } @else if (viewState() === 'error') {
+    <section class="invitation-admin-state" role="alert">
+      <mat-icon aria-hidden="true">cloud_off</mat-icon>
+      <div>
+        <h2>No fue posible cargar las invitaciones</h2>
+        <p>El problema puede ser temporal.</p>
+      </div>
+      <button mat-flat-button color="primary" type="button" (click)="retry()">Reintentar</button>
+    </section>
+  } @else if (viewState() === 'empty') {
+    <section class="invitation-admin-state">
+      <mat-icon aria-hidden="true">mark_email_unread</mat-icon>
+      <div>
+        <h2>No hay invitaciones</h2>
+        <p>Crea la primera invitación para incorporar a una persona.</p>
+      </div>
+    </section>
+  } @else {
+    <app-section-card
+      title="Invitaciones de la organización"
+      subtitle="El estado y las acciones reflejan la información canónica más reciente."
+    >
+      <div class="invitation-admin-table-wrap">
+        <table class="invitation-admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Correo</th>
+              <th scope="col">Rol</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Creada</th>
+              <th scope="col">Vigencia / cierre</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (invitation of invitations(); track invitation.id) {
+              <tr>
+                <td data-label="Correo">
+                  <span class="invitation-admin-email">{{ invitation.email }}</span>
+                </td>
+                <td data-label="Rol">{{ roleLabel(invitation.role) }}</td>
+                <td data-label="Estado">
+                  <app-status-badge
+                    [label]="statusLabel(effectiveStatus(invitation))"
+                    [variant]="statusVariant(effectiveStatus(invitation))"
+                  />
+                </td>
+                <td data-label="Creada">{{ dateLabel(invitation.createdAt) }}</td>
+                <td [attr.data-label]="relevantDateLabel(invitation)">
+                  {{ dateLabel(relevantDate(invitation)) }}
+                </td>
+                <td data-label="Acciones">
+                  <div class="invitation-admin-actions">
+                    @if (canRevoke(invitation)) {
+                      <button
+                        mat-button
+                        color="warn"
+                        type="button"
+                        (click)="openConfirmation(invitation, 'REVOKE')"
+                        [disabled]="isMutating()"
+                        [attr.aria-label]="'Revocar invitación de ' + invitation.email"
+                      >
+                        Revocar
+                      </button>
+                    }
+                    @if (canResend(invitation)) {
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="openConfirmation(invitation, 'RESEND')"
+                        [disabled]="isMutating()"
+                        [attr.aria-label]="'Reenviar invitación a ' + invitation.email"
+                      >
+                        Reenviar
+                      </button>
+                    }
+                    @if (!canRevoke(invitation) && !canResend(invitation)) {
+                      <span class="invitation-admin-no-actions">Sin acciones</span>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </app-section-card>
+  }
+</div>
