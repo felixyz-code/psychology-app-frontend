@@ -44,7 +44,7 @@
   flex: 1;
 }
 
-.organization-menu-trigger {
+.organization-control {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -56,18 +56,52 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.1);
   color: inherit;
-  cursor: pointer;
   font: inherit;
 }
 
-.organization-menu-trigger span {
+.organization-control span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.organization-menu-trigger {
+  cursor: pointer;
+}
+
 .organization-menu-trigger:hover {
   background: rgba(255, 255, 255, 0.18);
+}
+
+.organization-menu-trigger:focus-visible {
+  outline: 3px solid rgba(219, 234, 254, 0.35);
+  outline-offset: 2px;
+}
+
+.organization-menu-trigger:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.organization-identity {
+  cursor: default;
+}
+
+.organization-control__chevron {
+  flex: 0 0 auto;
+}
+
+.organization-switch-menu__heading {
+  padding: 0.7rem 1rem 0.4rem;
+  color: var(--app-color-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.organization-switch-menu__item[aria-current='true'] {
+  font-weight: 700;
 }
 
 .organization-preference-warning {
@@ -82,6 +116,28 @@
   width: 18px;
   height: 18px;
   font-size: 18px;
+}
+
+.organization-switch-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 13rem;
+  color: #fecaca;
+  font-size: 0.75rem;
+}
+
+.organization-switch-error mat-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.organization-switch-error span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-menu-trigger {
@@ -195,7 +251,7 @@
     display: none;
   }
 
-  .organization-menu-trigger {
+  .organization-control {
     max-width: 10rem;
   }
 
@@ -208,6 +264,20 @@
     min-width: 0;
     max-width: none;
     padding: 0 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .navbar__brand {
+    display: none;
+  }
+
+  .organization-control {
+    max-width: min(10rem, 46vw);
+  }
+
+  .organization-switch-error > span {
+    display: none;
   }
 }
 

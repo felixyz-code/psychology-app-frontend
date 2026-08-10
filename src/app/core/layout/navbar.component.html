@@ -17,16 +17,51 @@
   <div class="navbar__spacer"></div>
 
   @if (tenantContextStore.snapshot()?.organization; as organization) {
-    <button
-      class="organization-menu-trigger"
-      type="button"
-      (click)="openOrganizationSelection()"
-      aria-label="Cambiar organizacion"
-    >
-      <mat-icon aria-hidden="true">business</mat-icon>
-      <span>{{ organization.displayName }}</span>
-      <mat-icon aria-hidden="true">expand_more</mat-icon>
-    </button>
+    @if (canSwitchOrganization()) {
+      <button
+        class="organization-control organization-menu-trigger"
+        type="button"
+        [matMenuTriggerFor]="organizationMenu"
+        [disabled]="isSwitchingOrganization()"
+        [attr.aria-busy]="isSwitchingOrganization()"
+        aria-label="Cambiar organización"
+      >
+        @if (isSwitchingOrganization()) {
+          <mat-spinner diameter="18" aria-label="Cambiando organización" />
+        } @else {
+          <mat-icon aria-hidden="true">business</mat-icon>
+        }
+        <span>{{ organization.displayName }}</span>
+        <mat-icon class="organization-control__chevron" aria-hidden="true">expand_more</mat-icon>
+      </button>
+
+      <mat-menu #organizationMenu="matMenu" xPosition="before">
+        <div class="organization-switch-menu__heading">Cambiar organización</div>
+        @for (
+          membership of tenantContextStore.selectableMemberships();
+          track membership.organizationId
+        ) {
+          <button
+            mat-menu-item
+            type="button"
+            class="organization-switch-menu__item"
+            [disabled]="isSwitchingOrganization() || membership.organizationId === organization.id"
+            [attr.aria-current]="membership.organizationId === organization.id ? 'true' : null"
+            (click)="switchOrganization(membership.organizationId)"
+          >
+            <mat-icon aria-hidden="true">
+              {{ membership.organizationId === organization.id ? 'check' : 'business' }}
+            </mat-icon>
+            <span>{{ membership.organizationDisplayName }}</span>
+          </button>
+        }
+      </mat-menu>
+    } @else {
+      <div class="organization-control organization-identity" aria-label="Organización actual">
+        <mat-icon aria-hidden="true">business</mat-icon>
+        <span>{{ organization.displayName }}</span>
+      </div>
+    }
   }
 
   @if (tenantContextStore.preferredPersistenceState() === 'ERROR') {
@@ -37,6 +72,13 @@
     >
       <mat-icon aria-hidden="true">warning_amber</mat-icon>
       <span>No se guardo como preferida</span>
+    </span>
+  }
+
+  @if (organizationSwitchError()) {
+    <span class="organization-switch-error" role="alert" [title]="organizationSwitchError()">
+      <mat-icon aria-hidden="true">error_outline</mat-icon>
+      <span>{{ organizationSwitchError() }}</span>
     </span>
   }
 

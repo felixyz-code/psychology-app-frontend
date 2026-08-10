@@ -1,9 +1,9 @@
-import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Observable, finalize, Subscription } from 'rxjs';
 
@@ -42,10 +42,10 @@ interface RequestScope {
   selector: 'app-membership-administration-page',
   standalone: true,
   imports: [
-    DatePipe,
     MatButtonModule,
     MatDialogModule,
     MatIconModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
     PageHeaderComponent,
     SectionCardComponent,
@@ -80,6 +80,11 @@ export class MembershipAdministrationPage implements OnDestroy {
       this.tenantContextStore.capabilities().includes('membership.leave') &&
       this.currentMembership() !== null,
   );
+  readonly membershipSummary = computed(() => ({
+    total: this.memberships().length,
+    active: this.memberships().filter((membership) => membership.status === 'ACTIVE').length,
+    suspended: this.memberships().filter((membership) => membership.status === 'SUSPENDED').length,
+  }));
 
   constructor() {
     this.loadMemberships();
@@ -160,6 +165,21 @@ export class MembershipAdministrationPage implements OnDestroy {
 
   hasAllowedAction(membership: MembershipListItem, action: MembershipAllowedAction): boolean {
     return membership.allowedActions.includes(action);
+  }
+
+  hasSecondaryActions(membership: MembershipListItem): boolean {
+    return membership.allowedActions.some((action) =>
+      ['SUSPEND', 'REACTIVATE', 'REMOVE'].includes(action),
+    );
+  }
+
+  joinedDateLabel(joinedAt: string | null): string {
+    if (!joinedAt) {
+      return '—';
+    }
+
+    const date = new Date(joinedAt);
+    return Number.isNaN(date.getTime()) ? '—' : JOINED_DATE_FORMATTER.format(date);
   }
 
   openRoleDialog(membership: MembershipListItem): void {
@@ -451,3 +471,9 @@ const statusVariants: Record<MembershipStatus, StatusBadgeVariant> = {
   SUSPENDED: 'warning',
   REVOKED: 'danger',
 };
+
+const JOINED_DATE_FORMATTER = new Intl.DateTimeFormat('es-MX', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});

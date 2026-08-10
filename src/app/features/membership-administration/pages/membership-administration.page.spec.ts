@@ -49,7 +49,10 @@ describe('MembershipAdministrationPage', () => {
           (capability === 'membership.leave' && canLeaveCapability),
       ),
       capabilities: vi.fn(() => capabilities()),
-      snapshot: vi.fn(() => ({ membership: { id: 'membership-a' } })),
+      snapshot: vi.fn(() => ({
+        membership: { id: 'membership-a' },
+        organization: { id: 'organization-a', displayName: 'Consultorio Rivera' },
+      })),
       refreshContext: vi.fn(() => Promise.resolve()),
       resetTenantState: vi.fn(),
     };
@@ -88,6 +91,74 @@ describe('MembershipAdministrationPage', () => {
     expect(fixture.nativeElement.textContent).toContain('Cambiar rol');
     expect(fixture.nativeElement.textContent).not.toContain('Suspender');
     expect(fixture.nativeElement.textContent).not.toContain('Revocar');
+  });
+
+  it('removes technical server-authority copy from the user-facing directory', () => {
+    currentLoad.next([createMembership()]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain(
+      'Las acciones disponibles en cada fila provienen del servidor.',
+    );
+    expect(fixture.nativeElement.textContent).toContain('Directorio de miembros');
+  });
+
+  it('derives the membership overview from the canonical loaded list', () => {
+    currentLoad.next([
+      createMembership(),
+      createMembership({
+        id: 'membership-b',
+        userId: 'user-b',
+        status: 'SUSPENDED',
+        allowedActions: ['REACTIVATE'],
+      }),
+    ]);
+    fixture.detectChanges();
+
+    const summaryValues = Array.from<HTMLElement>(
+      fixture.nativeElement.querySelectorAll('.membership-admin-summary dd'),
+    ).map((element) => element.textContent.trim());
+    expect(summaryValues).toEqual(['2', '1', '1']);
+  });
+
+  it('moves only backend-allowed secondary actions into the contextual menu', async () => {
+    const membership = createMembership({ allowedActions: ['SUSPEND', 'REMOVE'] });
+    currentLoad.next([membership]);
+    fixture.detectChanges();
+
+    const trigger = fixture.nativeElement.querySelector(
+      '.membership-admin-more-actions',
+    ) as HTMLButtonElement;
+    expect(trigger).not.toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('Suspender');
+    trigger.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const overlayText = document.body.textContent ?? '';
+    expect(overlayText).toContain('Suspender');
+    expect(overlayText).toContain('Revocar acceso');
+    expect(overlayText).not.toContain('Reactivar');
+  });
+
+  it('exposes no forbidden row actions for an owner without allowedActions', () => {
+    currentLoad.next([
+      createMembership({ role: 'OWNER', allowedActions: [], displayName: 'Olivia Owner' }),
+    ]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.membership-admin-more-actions')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('Cambiar rol');
+  });
+
+  it('renders joined dates with Spanish-friendly month names', () => {
+    currentLoad.next([
+      createMembership({ joinedAt: '2026-01-15T12:00:00.000Z', allowedActions: [] }),
+    ]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent.toLocaleLowerCase('es-MX')).toContain('ene');
+    expect(fixture.nativeElement.textContent).not.toContain('Jan');
   });
 
   it('captures the observed row version when confirming a role change', () => {

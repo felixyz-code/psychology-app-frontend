@@ -137,6 +137,18 @@ describe('OrganizationSelectionPage', () => {
     );
   });
 
+  it('surfaces a navigation failure after canonical tenant selection succeeds', async () => {
+    component.organizationControl.setValue('organization-b');
+    router.navigate.mockResolvedValueOnce(false);
+
+    component.selectOrganization();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(component.errorMessage()).toContain('no fue posible abrir el panel');
+    expect(component.isSubmitting()).toBe(false);
+  });
+
   it('shows the empty state only for NO_ACTIVE_TENANT', () => {
     tenantState = 'NO_ACTIVE_TENANT';
     memberships = [];

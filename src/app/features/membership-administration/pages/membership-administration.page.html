@@ -73,9 +73,42 @@
       </div>
     </section>
   } @else {
+    @if (tenantContextStore.snapshot()?.organization; as organization) {
+      <section class="membership-admin-context" aria-label="Resumen de la organización">
+        <div class="membership-admin-context__identity">
+          <div class="membership-admin-context__icon" aria-hidden="true">
+            <mat-icon>groups</mat-icon>
+          </div>
+          <div>
+            <span>Organización actual</span>
+            <h2>{{ organization.displayName }}</h2>
+            <p>Directorio de acceso y colaboración</p>
+          </div>
+        </div>
+
+        <dl class="membership-admin-summary" aria-label="Resumen de miembros">
+          <div>
+            <mat-icon aria-hidden="true">group</mat-icon>
+            <dt>Total</dt>
+            <dd>{{ membershipSummary().total }}</dd>
+          </div>
+          <div>
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <dt>Activos</dt>
+            <dd>{{ membershipSummary().active }}</dd>
+          </div>
+          <div>
+            <mat-icon aria-hidden="true">pause_circle</mat-icon>
+            <dt>Suspendidos</dt>
+            <dd>{{ membershipSummary().suspended }}</dd>
+          </div>
+        </dl>
+      </section>
+    }
+
     <app-section-card
-      title="Miembros"
-      subtitle="Las acciones disponibles en cada fila provienen del servidor."
+      title="Directorio de miembros"
+      subtitle="Consulta quién forma parte de la organización y gestiona sus accesos disponibles."
     >
       <div class="membership-admin-table-wrap">
         <table class="membership-admin-table">
@@ -105,7 +138,7 @@
                   />
                 </td>
                 <td data-label="Alta">
-                  {{ membership.joinedAt ? (membership.joinedAt | date: 'mediumDate') : '—' }}
+                  {{ joinedDateLabel(membership.joinedAt) }}
                 </td>
                 <td data-label="Acciones" class="membership-admin-table__actions">
                   <div class="membership-admin-actions">
@@ -119,36 +152,55 @@
                         Cambiar rol
                       </button>
                     }
-                    @if (hasAllowedAction(membership, 'SUSPEND')) {
+
+                    @if (hasSecondaryActions(membership)) {
                       <button
-                        mat-button
+                        mat-icon-button
                         type="button"
+                        class="membership-admin-more-actions"
+                        [matMenuTriggerFor]="membershipActions"
                         [disabled]="isMutating()"
-                        (click)="openActionConfirmation(membership, 'SUSPEND')"
+                        [attr.aria-label]="'Más acciones para ' + membership.displayName"
                       >
-                        Suspender
+                        <mat-icon aria-hidden="true">more_vert</mat-icon>
                       </button>
-                    }
-                    @if (hasAllowedAction(membership, 'REACTIVATE')) {
-                      <button
-                        mat-button
-                        type="button"
-                        [disabled]="isMutating()"
-                        (click)="openActionConfirmation(membership, 'REACTIVATE')"
-                      >
-                        Reactivar
-                      </button>
-                    }
-                    @if (hasAllowedAction(membership, 'REMOVE')) {
-                      <button
-                        mat-button
-                        color="warn"
-                        type="button"
-                        [disabled]="isMutating()"
-                        (click)="openActionConfirmation(membership, 'REMOVE')"
-                      >
-                        Revocar
-                      </button>
+
+                      <mat-menu #membershipActions="matMenu" xPosition="before">
+                        @if (hasAllowedAction(membership, 'SUSPEND')) {
+                          <button
+                            mat-menu-item
+                            type="button"
+                            [disabled]="isMutating()"
+                            (click)="openActionConfirmation(membership, 'SUSPEND')"
+                          >
+                            <mat-icon aria-hidden="true">pause_circle</mat-icon>
+                            <span>Suspender</span>
+                          </button>
+                        }
+                        @if (hasAllowedAction(membership, 'REACTIVATE')) {
+                          <button
+                            mat-menu-item
+                            type="button"
+                            [disabled]="isMutating()"
+                            (click)="openActionConfirmation(membership, 'REACTIVATE')"
+                          >
+                            <mat-icon aria-hidden="true">play_circle</mat-icon>
+                            <span>Reactivar</span>
+                          </button>
+                        }
+                        @if (hasAllowedAction(membership, 'REMOVE')) {
+                          <button
+                            mat-menu-item
+                            type="button"
+                            class="membership-admin-menu-danger"
+                            [disabled]="isMutating()"
+                            (click)="openActionConfirmation(membership, 'REMOVE')"
+                          >
+                            <mat-icon aria-hidden="true">person_remove</mat-icon>
+                            <span>Revocar acceso</span>
+                          </button>
+                        }
+                      </mat-menu>
                     }
                   </div>
                 </td>
@@ -157,27 +209,31 @@
           </tbody>
         </table>
       </div>
-
-      @if (canLeave() && currentMembership(); as ownMembership) {
-        <div class="membership-admin-leave">
-          <div>
-            <strong>¿Ya no colaboras en esta organización?</strong>
-            <p>
-              Puedes salir con tu membresía actual. Se te pedirá seleccionar otra organización
-              después.
-            </p>
-          </div>
-          <button
-            mat-stroked-button
-            color="warn"
-            type="button"
-            [disabled]="isMutating()"
-            (click)="openActionConfirmation(ownMembership, 'LEAVE')"
-          >
-            Salir de la organización
-          </button>
-        </div>
-      }
     </app-section-card>
+
+    @if (canLeave() && currentMembership(); as ownMembership) {
+      <section class="membership-admin-leave" aria-labelledby="membership-leave-title">
+        <div class="membership-admin-leave__icon" aria-hidden="true">
+          <mat-icon>logout</mat-icon>
+        </div>
+        <div class="membership-admin-leave__copy">
+          <span>Acción de cuenta</span>
+          <strong id="membership-leave-title">Salir de la organización</strong>
+          <p>
+            Tu acceso a esta organización terminará y tendrás que seleccionar otro espacio de
+            trabajo disponible.
+          </p>
+        </div>
+        <button
+          mat-stroked-button
+          color="warn"
+          type="button"
+          [disabled]="isMutating()"
+          (click)="openActionConfirmation(ownMembership, 'LEAVE')"
+        >
+          Salir de la organización
+        </button>
+      </section>
+    }
   }
 </div>

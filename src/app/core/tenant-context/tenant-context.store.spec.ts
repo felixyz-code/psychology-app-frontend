@@ -263,6 +263,33 @@ describe('TenantContextStore', () => {
     expect(contextService.updatePreferredOrganization).toHaveBeenCalledWith('organization-b');
   });
 
+  it('applies canonical A to B and B to A selections in distinct generations', async () => {
+    contextService.getContext
+      .mockReturnValueOnce(of(contextForOrganization('organization-a', 'organization-a')))
+      .mockReturnValueOnce(of(contextForOrganization('organization-b', 'organization-a')))
+      .mockReturnValueOnce(of(contextForOrganization('organization-a', 'organization-b')));
+    contextService.updatePreferredOrganization
+      .mockReturnValueOnce(of({ preferredOrganizationId: 'organization-b' }))
+      .mockReturnValueOnce(of({ preferredOrganizationId: 'organization-a' }));
+
+    await store.bootstrap();
+    await store.selectOrganization('organization-b');
+
+    expect(store.state()).toBe('ACTIVE_TENANT_READY');
+    expect(store.selectedOrganizationId()).toBe('organization-b');
+    expect(store.snapshot()?.organization?.id).toBe('organization-b');
+    expect(store.switchGeneration()).toBe(2);
+
+    await store.selectOrganization('organization-a');
+
+    expect(store.state()).toBe('ACTIVE_TENANT_READY');
+    expect(store.selectedOrganizationId()).toBe('organization-a');
+    expect(store.snapshot()?.organization?.id).toBe('organization-a');
+    expect(store.switchGeneration()).toBe(3);
+    expect(contextService.getContext).toHaveBeenNthCalledWith(2, 'organization-b');
+    expect(contextService.getContext).toHaveBeenNthCalledWith(3, 'organization-a');
+  });
+
   it('does not block confirmed tenant readiness while the preferred PUT is pending', async () => {
     const preferenceWrite = new Subject<AuthContextPreferenceResponse>();
     contextService.getContext.mockReturnValueOnce(

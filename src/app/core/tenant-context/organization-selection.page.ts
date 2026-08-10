@@ -61,7 +61,7 @@ export class OrganizationSelectionPage {
       return;
     }
 
-    this.submitSelection(this.organizationControl.getRawValue());
+    void this.submitSelection(this.organizationControl.getRawValue());
   }
 
   retrySelection(): void {
@@ -72,30 +72,33 @@ export class OrganizationSelectionPage {
     }
 
     this.organizationControl.setValue(organizationId);
-    this.submitSelection(organizationId);
+    void this.submitSelection(organizationId);
   }
 
-  private submitSelection(organizationId: string): void {
+  private async submitSelection(organizationId: string): Promise<void> {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    this.tenantContextStore
-      .selectOrganization(organizationId)
-      .then(() => {
-        if (
-          this.tenantContextStore.isActiveTenantReady() ||
-          this.tenantContextStore.isAdminSuspendedContext()
-        ) {
-          void this.router.navigate(['/dashboard'], { replaceUrl: true });
-          return;
-        }
+    try {
+      await this.tenantContextStore.selectOrganization(organizationId);
 
+      if (
+        !this.tenantContextStore.isActiveTenantReady() &&
+        !this.tenantContextStore.isAdminSuspendedContext()
+      ) {
         this.errorMessage.set('No fue posible activar la organizacion seleccionada.');
-      })
-      .catch(() => {
-        this.errorMessage.set('No fue posible activar la organizacion seleccionada.');
-      })
-      .finally(() => this.isSubmitting.set(false));
+        return;
+      }
+
+      const navigated = await this.router.navigate(['/dashboard'], { replaceUrl: true });
+      if (!navigated) {
+        this.errorMessage.set('La organizacion se activo, pero no fue posible abrir el panel.');
+      }
+    } catch {
+      this.errorMessage.set('No fue posible activar la organizacion seleccionada.');
+    } finally {
+      this.isSubmitting.set(false);
+    }
   }
 
   logout(): void {
