@@ -32,8 +32,8 @@ describe('InvitationsService', () => {
     expect(JSON.stringify(value)).not.toContain('secret');
   });
 
-  it('creates an invitation and explicitly discards token and normalized email properties', () => {
-    let value: unknown;
+  it('creates an invitation and discards all response properties', () => {
+    let value: unknown = 'not-emitted';
     service
       .create('organization-a', { email: 'ana@example.com', role: 'ADMIN' })
       .subscribe((response) => (value = response));
@@ -41,26 +41,49 @@ describe('InvitationsService', () => {
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ email: 'ana@example.com', role: 'ADMIN' });
     expectTenant(request.request.context, 'organization-a');
-    request.flush({ ...invitation(), token: 'usable-token', normalizedEmail: 'ana@example.com' });
-    expect(value).toEqual(invitation());
-    expect(value).not.toHaveProperty('token');
-    expect(value).not.toHaveProperty('normalizedEmail');
+    request.flush({
+      ...invitation(),
+      token: 'usable-token',
+      normalizedEmail: 'ana@example.com',
+      invitedUserId: 'user-a',
+      acceptedByUserId: 'user-b',
+    });
+    expect(value).toBeUndefined();
   });
 
-  it.each([
-    ['revoke', 'revoke'],
-    ['resend', 'resend'],
-  ] as const)('posts %s and sanitizes its mutation response', (method, suffix) => {
-    let value: unknown;
-    service[method]('organization-a', 'invitation/a').subscribe((response) => (value = response));
+  it('accepts the real partial revoke response and exposes no payload', () => {
+    let value: unknown = 'not-emitted';
+    service.revoke('organization-a', 'invitation/a').subscribe((response) => (value = response));
     const request = http.expectOne(
-      `/api/organizations/organization-a/invitations/invitation%2Fa/${suffix}`,
+      '/api/organizations/organization-a/invitations/invitation%2Fa/revoke',
     );
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({});
     expectTenant(request.request.context, 'organization-a');
-    request.flush({ ...invitation(), token: 'never-store', normalizedEmail: 'ana@example.com' });
-    expect(value).toEqual(invitation());
+    request.flush({
+      id: 'invitation/a',
+      logicalStatus: 'REVOKED',
+      revokedAt: '2026-08-10T01:00:00.000Z',
+    });
+    expect(value).toBeUndefined();
+  });
+
+  it('discards a resend replacement response including its new id and sensitive extras', () => {
+    let value: unknown = 'not-emitted';
+    service.resend('organization-a', 'invitation/a').subscribe((response) => (value = response));
+    const request = http.expectOne(
+      '/api/organizations/organization-a/invitations/invitation%2Fa/resend',
+    );
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({});
+    expectTenant(request.request.context, 'organization-a');
+    request.flush({
+      ...invitation(),
+      id: 'replacement-id',
+      token: 'never-store',
+      normalizedEmail: 'ana@example.com',
+    });
+    expect(value).toBeUndefined();
   });
 });
 

@@ -13,8 +13,11 @@ describe('InvitationAdministrationPage', () => {
   let component: InvitationAdministrationPage;
   let currentLoad: Subject<InvitationListItem[]>;
   let dialogClosed: Subject<unknown>;
+  let dialog: { open: ReturnType<typeof vi.fn> };
   let scope: { organizationId: string | null; generation: number; active: boolean };
+  let activeTenantReady: ReturnType<typeof signal<boolean>>;
   let capabilities: ReturnType<typeof signal<string[]>>;
+  let synchronizationPending: ReturnType<typeof signal<boolean>>;
   let service: {
     list: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
@@ -26,6 +29,8 @@ describe('InvitationAdministrationPage', () => {
     currentLoad = new Subject<InvitationListItem[]>();
     dialogClosed = new Subject<unknown>();
     scope = { organizationId: 'organization-a', generation: 1, active: true };
+    activeTenantReady = signal(true);
+    synchronizationPending = signal(false);
     capabilities = signal([
       'invitation.read',
       'invitation.create',
@@ -34,21 +39,22 @@ describe('InvitationAdministrationPage', () => {
     ]);
     service = {
       list: vi.fn(() => currentLoad.asObservable()),
-      create: vi.fn(() => of(invitation())),
-      revoke: vi.fn(() => of(invitation({ logicalStatus: 'REVOKED' }))),
-      resend: vi.fn(() => of(invitation({ id: 'replacement-id' }))),
+      create: vi.fn(() => of(undefined)),
+      revoke: vi.fn(() => of(undefined)),
+      resend: vi.fn(() => of(undefined)),
     };
     const tenantStore = {
       selectedOrganizationId: vi.fn(() => scope.organizationId),
       switchGeneration: vi.fn(() => scope.generation),
-      isActiveTenantReady: vi.fn(() => scope.active),
+      isActiveTenantReady: vi.fn(() => activeTenantReady()),
+      isCanonicalContextSynchronizationPending: vi.fn(() => synchronizationPending()),
       hasCapability: vi.fn((capability: string) => capabilities().includes(capability)),
       snapshot: vi.fn(() => ({
         organization: { id: 'organization-a', displayName: 'Consultorio Rivera' },
       })),
       refreshContext: vi.fn(() => Promise.resolve()),
     };
-    const dialog = { open: vi.fn(() => ({ afterClosed: () => dialogClosed.asObservable() })) };
+    dialog = { open: vi.fn(() => ({ afterClosed: () => dialogClosed.asObservable() })) };
     await TestBed.configureTestingModule({
       imports: [InvitationAdministrationPage],
       providers: [
@@ -130,6 +136,47 @@ describe('InvitationAdministrationPage', () => {
     expect(component.invitations()).toEqual([]);
   });
 
+  it('reactively clears invitation data and fails closed when read capability is lost', () => {
+    currentLoad.next([invitation({ email: 'visible@example.com' })]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('visible@example.com');
+
+    capabilities.set(['invitation.create', 'invitation.revoke', 'invitation.resend']);
+    fixture.detectChanges();
+
+    expect(component.invitations()).toEqual([]);
+    expect(component.viewState()).toBe('forbidden');
+    expect(fixture.nativeElement.textContent).not.toContain('visible@example.com');
+    component.openCreateDialog();
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(service.create).not.toHaveBeenCalled();
+  });
+
+  it('fails closed during canonical synchronization and reloads after it settles', () => {
+    currentLoad.next([invitation({ email: 'visible@example.com' })]);
+    synchronizationPending.set(true);
+    fixture.detectChanges();
+    expect(component.viewState()).toBe('forbidden');
+    expect(component.invitations()).toEqual([]);
+
+    synchronizationPending.set(false);
+    fixture.detectChanges();
+    expect(component.viewState()).toBe('loading');
+    expect(service.list).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['invitation.create', 'invitation.read'])(
+    'does not create after %s is lost while the dialog is open',
+    (capability) => {
+      currentLoad.next([]);
+      component.openCreateDialog();
+      capabilities.update((values) => values.filter((value) => value !== capability));
+      fixture.detectChanges();
+      dialogClosed.next({ email: 'new@example.com', role: 'ADMIN' });
+      expect(service.create).not.toHaveBeenCalled();
+    },
+  );
+
   it('confirms revoke and refreshes after success', () => {
     const row = invitation();
     currentLoad.next([row]);
@@ -139,8 +186,32 @@ describe('InvitationAdministrationPage', () => {
     expect(service.list).toHaveBeenCalledTimes(2);
   });
 
+  it.each([
+    ['REVOKE', 'invitation.revoke'],
+    ['RESEND', 'invitation.resend'],
+  ] as const)(
+    'does not execute %s after its capability is lost in the dialog',
+    (action, capability) => {
+      const row = invitation();
+      currentLoad.next([row]);
+      component.openConfirmation(row, action);
+      capabilities.update((values) => values.filter((value) => value !== capability));
+      dialogClosed.next(true);
+      expect(action === 'REVOKE' ? service.revoke : service.resend).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rechecks local status eligibility after confirmation closes', () => {
+    const row = invitation();
+    currentLoad.next([row]);
+    component.openConfirmation(row, 'REVOKE');
+    component.invitations.set([invitation({ id: row.id, logicalStatus: 'ACCEPTED' })]);
+    dialogClosed.next(true);
+    expect(service.revoke).not.toHaveBeenCalled();
+  });
+
   it.each([404, 409])('refreshes canonical state after revoke status %s', (status) => {
-    const mutation = new Subject<InvitationListItem>();
+    const mutation = new Subject<void>();
     service.revoke.mockReturnValue(mutation.asObservable());
     const row = invitation();
     currentLoad.next([row]);
@@ -167,9 +238,9 @@ describe('InvitationAdministrationPage', () => {
   });
 
   it('refreshes after create conflict without parsing backend messages', () => {
-    service.create.mockReturnValue(new Subject<InvitationListItem>().asObservable());
-    const mutation = new Subject<InvitationListItem>();
+    const mutation = new Subject<void>();
     service.create.mockReturnValue(mutation.asObservable());
+    currentLoad.next([]);
     component.openCreateDialog();
     dialogClosed.next({ email: 'new@example.com', role: 'ADMIN' });
     mutation.error(
@@ -179,8 +250,33 @@ describe('InvitationAdministrationPage', () => {
     expect(component.errorMessage()).toContain('lista canónica');
   });
 
+  it('locks create until an uncertain outcome finishes canonical reconciliation', () => {
+    const mutation = new Subject<void>();
+    service.create.mockReturnValue(mutation.asObservable());
+    currentLoad.next([]);
+    component.openCreateDialog();
+    dialogClosed.next({ email: 'new@example.com', role: 'ADMIN' });
+    mutation.error(new HttpErrorResponse({ status: 0 }));
+
+    expect(component.viewState()).toBe('loading');
+    expect(component.interactionLocked()).toBe(true);
+    component.openCreateDialog();
+    component['createInvitation'](
+      { organizationId: 'organization-a', generation: 1 },
+      { email: 'second@example.com', role: 'ADMIN' },
+    );
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    expect(service.create).toHaveBeenCalledTimes(1);
+
+    currentLoad.next([]);
+    expect(component.viewState()).toBe('empty');
+    expect(component.interactionLocked()).toBe(false);
+    component.openCreateDialog();
+    expect(dialog.open).toHaveBeenCalledTimes(2);
+  });
+
   it('refreshes an uncertain resend and never retries the old invitation id', () => {
-    const mutation = new Subject<InvitationListItem>();
+    const mutation = new Subject<void>();
     service.resend.mockReturnValue(mutation.asObservable());
     const row = invitation();
     currentLoad.next([row]);
@@ -200,22 +296,21 @@ describe('InvitationAdministrationPage', () => {
   });
 
   it('ignores stale mutation completion after a tenant switch', () => {
-    const mutation = new Subject<InvitationListItem>();
+    const mutation = new Subject<void>();
     service.revoke.mockReturnValue(mutation.asObservable());
     const row = invitation();
     currentLoad.next([row]);
     component.openConfirmation(row, 'REVOKE');
     dialogClosed.next(true);
     scope = { organizationId: 'organization-b', generation: 2, active: true };
-    mutation.next(invitation({ logicalStatus: 'REVOKED' }));
+    mutation.next();
     mutation.complete();
     expect(service.list).toHaveBeenCalledTimes(1);
     expect(component.successMessage()).toBe('');
   });
 
   it('fails closed when the organization is suspended', () => {
-    scope.active = false;
-    component.loadInvitations();
+    activeTenantReady.set(false);
     fixture.detectChanges();
     expect(component.viewState()).toBe('forbidden');
     expect(component.invitations()).toEqual([]);

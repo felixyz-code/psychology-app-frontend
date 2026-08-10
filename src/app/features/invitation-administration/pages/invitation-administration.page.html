@@ -16,7 +16,7 @@
         mat-stroked-button
         type="button"
         (click)="loadInvitations()"
-        [disabled]="viewState() === 'loading' || isMutating()"
+        [disabled]="interactionLocked()"
       >
         <mat-icon>refresh</mat-icon>Actualizar
       </button>
@@ -26,7 +26,7 @@
           color="primary"
           type="button"
           (click)="openCreateDialog()"
-          [disabled]="isMutating()"
+          [disabled]="interactionLocked()"
         >
           <mat-icon>person_add</mat-icon>Crear invitación
         </button>
@@ -137,7 +137,7 @@
                         color="warn"
                         type="button"
                         (click)="openConfirmation(invitation, 'REVOKE')"
-                        [disabled]="isMutating()"
+                        [disabled]="interactionLocked()"
                         [attr.aria-label]="'Revocar invitación de ' + invitation.email"
                       >
                         Revocar
@@ -148,7 +148,7 @@
                         mat-button
                         type="button"
                         (click)="openConfirmation(invitation, 'RESEND')"
-                        [disabled]="isMutating()"
+                        [disabled]="interactionLocked()"
                         [attr.aria-label]="'Reenviar invitación a ' + invitation.email"
                       >
                         Reenviar

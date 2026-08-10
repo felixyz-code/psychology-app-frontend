@@ -22,15 +22,15 @@ export class InvitationsService {
       .pipe(map((items) => items.map(sanitizeInvitation)));
   }
 
-  create(organizationId: string, payload: CreateInvitationDto): Observable<InvitationListItem> {
+  create(organizationId: string, payload: CreateInvitationDto): Observable<void> {
     return this.http
       .post<unknown>(this.invitationsPath(organizationId), payload, {
         context: this.tenantContext(organizationId),
       })
-      .pipe(map(sanitizeInvitation));
+      .pipe(map(() => undefined));
   }
 
-  revoke(organizationId: string, invitationId: string): Observable<InvitationListItem> {
+  revoke(organizationId: string, invitationId: string): Observable<void> {
     return this.http
       .post<unknown>(
         `${this.invitationPath(organizationId, invitationId)}/revoke`,
@@ -39,10 +39,10 @@ export class InvitationsService {
           context: this.tenantContext(organizationId),
         },
       )
-      .pipe(map(sanitizeInvitation));
+      .pipe(map(() => undefined));
   }
 
-  resend(organizationId: string, invitationId: string): Observable<InvitationListItem> {
+  resend(organizationId: string, invitationId: string): Observable<void> {
     return this.http
       .post<unknown>(
         `${this.invitationPath(organizationId, invitationId)}/resend`,
@@ -51,7 +51,7 @@ export class InvitationsService {
           context: this.tenantContext(organizationId),
         },
       )
-      .pipe(map(sanitizeInvitation));
+      .pipe(map(() => undefined));
   }
 
   private invitationsPath(organizationId: string): string {

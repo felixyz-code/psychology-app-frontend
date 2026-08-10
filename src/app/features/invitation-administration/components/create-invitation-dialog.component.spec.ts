@@ -26,12 +26,23 @@ describe('CreateInvitationDialogComponent', () => {
     expect(component.roleOptions).not.toContain('OWNER');
     component.form.setValue({ email: 'invalid', role: 'ADMIN' });
     expect(component.form.invalid).toBe(true);
+    component.form.setValue({ email: `${'a'.repeat(244)}@example.com`, role: 'ADMIN' });
+    expect(component.form.controls.email.hasError('maxlength')).toBe(true);
   });
 
-  it('trims valid input and prevents double submission', () => {
-    component.form.setValue({ email: ' ana@example.com ', role: 'PSYCHOLOGIST' });
-    component.submit();
-    component.submit();
+  it('normalizes whitespace early enough to submit through the rendered form', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="email"]');
+    const submitButton: HTMLButtonElement =
+      fixture.nativeElement.querySelector('button[type="submit"]');
+    input.value = '  ana@example.com  ';
+    input.dispatchEvent(new Event('input'));
+    component.form.controls.role.setValue('PSYCHOLOGIST');
+    fixture.detectChanges();
+
+    expect(component.form.controls.email.value).toBe('ana@example.com');
+    expect(submitButton.disabled).toBe(false);
+    submitButton.click();
+    submitButton.click();
     expect(close).toHaveBeenCalledTimes(1);
     expect(close).toHaveBeenCalledWith({ email: 'ana@example.com', role: 'PSYCHOLOGIST' });
   });

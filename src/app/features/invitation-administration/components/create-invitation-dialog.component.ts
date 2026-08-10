@@ -36,7 +36,13 @@ const INVITATION_ROLES: readonly InvitationRole[] = [
       <mat-dialog-content class="invitation-dialog__content">
         <mat-form-field appearance="outline">
           <mat-label>Correo electr&oacute;nico</mat-label>
-          <input matInput type="email" formControlName="email" maxlength="255" />
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            maxlength="255"
+            (input)="normalizeEmail($event)"
+          />
           @if (form.controls.email.hasError('required')) {
             <mat-error>El correo es obligatorio.</mat-error>
           } @else if (form.controls.email.hasError('email')) {
@@ -98,6 +104,12 @@ export class CreateInvitationDialogComponent {
     }),
     role: new FormControl<InvitationRole | null>(null, Validators.required),
   });
+  normalizeEmail(event: Event): void {
+    const email = (event.target as HTMLInputElement).value.trim();
+    if (email !== this.form.controls.email.value) {
+      this.form.controls.email.setValue(email);
+    }
+  }
   submit(): void {
     const email = this.form.controls.email.value.trim();
     if (email !== this.form.controls.email.value) {

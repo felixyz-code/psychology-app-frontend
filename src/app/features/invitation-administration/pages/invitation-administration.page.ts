@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -55,6 +55,7 @@ export class InvitationAdministrationPage implements OnDestroy {
   private expiryTimer?: ReturnType<typeof setTimeout>;
   private loadSequence = 0;
   private destroyed = false;
+  private accessWasAvailable: boolean | null = null;
 
   readonly viewState = signal<ViewState>('loading');
   readonly invitations = signal<InvitationListItem[]>([]);
@@ -63,9 +64,30 @@ export class InvitationAdministrationPage implements OnDestroy {
   readonly errorMessage = signal('');
   readonly contextWarning = signal('');
   readonly now = signal(Date.now());
-  readonly canCreate = computed(() => this.tenantContextStore.hasCapability('invitation.create'));
+  readonly hasReadAccess = computed(
+    () =>
+      this.tenantContextStore.isActiveTenantReady() &&
+      !this.tenantContextStore.isCanonicalContextSynchronizationPending() &&
+      this.tenantContextStore.hasCapability('invitation.read'),
+  );
+  readonly interactionLocked = computed(
+    () => this.isMutating() || this.viewState() === 'loading' || !this.hasReadAccess(),
+  );
+  readonly canCreate = computed(
+    () => this.hasReadAccess() && this.tenantContextStore.hasCapability('invitation.create'),
+  );
 
   constructor() {
+    effect(() => {
+      const hasReadAccess = this.hasReadAccess();
+      const accessWasAvailable = this.accessWasAvailable;
+      this.accessWasAvailable = hasReadAccess;
+      if (!hasReadAccess) {
+        this.failClosed();
+      } else if (accessWasAvailable === false) {
+        this.loadInvitations();
+      }
+    });
     this.loadInvitations();
   }
 
@@ -87,11 +109,7 @@ export class InvitationAdministrationPage implements OnDestroy {
       this.errorMessage.set('');
     }
 
-    if (
-      !scope ||
-      !this.tenantContextStore.isActiveTenantReady() ||
-      !this.tenantContextStore.hasCapability('invitation.read')
-    ) {
+    if (!scope || !this.hasReadAccess()) {
       this.invitations.set([]);
       this.viewState.set('forbidden');
       return;
@@ -131,7 +149,7 @@ export class InvitationAdministrationPage implements OnDestroy {
   }
 
   openCreateDialog(): void {
-    if (!this.canCreate() || this.isMutating()) return;
+    if (!this.canCreate() || this.interactionLocked()) return;
     const scope = this.captureScope();
     if (!scope) return;
     const ref = this.dialog.open(CreateInvitationDialogComponent, {
@@ -140,13 +158,13 @@ export class InvitationAdministrationPage implements OnDestroy {
       autoFocus: 'first-tabbable',
     });
     ref.afterClosed().subscribe((result: CreateInvitationDialogResult | undefined) => {
-      if (result && this.isScopeCurrent(scope)) this.createInvitation(scope, result);
+      if (result && this.canCreateForScope(scope)) this.createInvitation(scope, result);
     });
   }
 
   openConfirmation(invitation: InvitationListItem, action: InvitationConfirmationAction): void {
     if (
-      this.isMutating() ||
+      this.interactionLocked() ||
       (action === 'REVOKE' ? !this.canRevoke(invitation) : !this.canResend(invitation))
     )
       return;
@@ -159,11 +177,19 @@ export class InvitationAdministrationPage implements OnDestroy {
       data: { action, invitation },
     });
     ref.afterClosed().subscribe((confirmed) => {
-      if (!confirmed || !this.isScopeCurrent(scope)) return;
+      if (!confirmed || this.interactionLocked() || !this.isScopeCurrent(scope)) return;
+      const currentInvitation = this.invitations().find((item) => item.id === invitation.id);
+      if (
+        !currentInvitation ||
+        (action === 'REVOKE'
+          ? !this.canRevoke(currentInvitation)
+          : !this.canResend(currentInvitation))
+      )
+        return;
       const request =
         action === 'REVOKE'
-          ? this.invitationsService.revoke(scope.organizationId, invitation.id)
-          : this.invitationsService.resend(scope.organizationId, invitation.id);
+          ? this.invitationsService.revoke(scope.organizationId, currentInvitation.id)
+          : this.invitationsService.resend(scope.organizationId, currentInvitation.id);
       this.runMutation(scope, request, action === 'REVOKE' ? 'revoke' : 'resend');
     });
   }
@@ -178,6 +204,7 @@ export class InvitationAdministrationPage implements OnDestroy {
 
   canRevoke(invitation: InvitationListItem): boolean {
     return (
+      this.hasReadAccess() &&
       this.tenantContextStore.hasCapability('invitation.revoke') &&
       this.effectiveStatus(invitation) === 'PENDING'
     );
@@ -186,6 +213,7 @@ export class InvitationAdministrationPage implements OnDestroy {
   canResend(invitation: InvitationListItem): boolean {
     const status = this.effectiveStatus(invitation);
     return (
+      this.hasReadAccess() &&
       this.tenantContextStore.hasCapability('invitation.resend') &&
       (status === 'PENDING' || status === 'EXPIRED')
     );
@@ -218,16 +246,12 @@ export class InvitationAdministrationPage implements OnDestroy {
   }
 
   private createInvitation(scope: RequestScope, result: CreateInvitationDialogResult): void {
-    if (this.isMutating() || !this.canCreate()) return;
+    if (this.interactionLocked() || !this.canCreateForScope(scope)) return;
     this.runMutation(scope, this.invitationsService.create(scope.organizationId, result), 'create');
   }
 
-  private runMutation(
-    scope: RequestScope,
-    request: Observable<InvitationListItem>,
-    kind: MutationKind,
-  ): void {
-    if (this.isMutating()) return;
+  private runMutation(scope: RequestScope, request: Observable<void>, kind: MutationKind): void {
+    if (this.interactionLocked() || !this.canMutateForScope(scope, kind)) return;
     this.isMutating.set(true);
     this.errorMessage.set('');
     this.successMessage.set('');
@@ -319,6 +343,34 @@ export class InvitationAdministrationPage implements OnDestroy {
     );
   }
 
+  private failClosed(): void {
+    ++this.loadSequence;
+    this.loadSubscription?.unsubscribe();
+    this.mutationSubscription?.unsubscribe();
+    this.isMutating.set(false);
+    this.invitations.set([]);
+    if (this.expiryTimer) clearTimeout(this.expiryTimer);
+    this.viewState.set('forbidden');
+  }
+
+  private canCreateForScope(scope: RequestScope): boolean {
+    return this.isScopeCurrent(scope) && this.canCreate() && !this.interactionLocked();
+  }
+
+  private canMutateForScope(scope: RequestScope, kind: MutationKind): boolean {
+    const capability =
+      kind === 'create'
+        ? 'invitation.create'
+        : kind === 'revoke'
+          ? 'invitation.revoke'
+          : 'invitation.resend';
+    return (
+      this.isScopeCurrent(scope) &&
+      this.hasReadAccess() &&
+      this.tenantContextStore.hasCapability(capability)
+    );
+  }
+
   private captureScope(): RequestScope | null {
     const organizationId = this.tenantContextStore.selectedOrganizationId();
     return organizationId
@@ -328,7 +380,7 @@ export class InvitationAdministrationPage implements OnDestroy {
   private isScopeCurrent(scope: RequestScope): boolean {
     return (
       !this.destroyed &&
-      this.tenantContextStore.isActiveTenantReady() &&
+      this.hasReadAccess() &&
       this.tenantContextStore.selectedOrganizationId() === scope.organizationId &&
       this.tenantContextStore.switchGeneration() === scope.generation
     );
