@@ -1,0 +1,239 @@
+<div class="membership-admin-page">
+  <app-page-header
+    heading="Miembros de la organización"
+    subtitle="Administra el acceso y los roles de las personas que colaboran en esta organización."
+    [breadcrumbs]="[{ label: 'Miembros' }]"
+  />
+
+  @if (contextWarning()) {
+    <div class="membership-admin-alert membership-admin-alert--warning" role="status">
+      <mat-icon aria-hidden="true">sync_problem</mat-icon>
+      <span>{{ contextWarning() }}</span>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="membership-admin-alert membership-admin-alert--success" role="status">
+      <mat-icon aria-hidden="true">check_circle</mat-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="membership-admin-alert membership-admin-alert--error" role="alert">
+      <mat-icon aria-hidden="true">error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (viewState() === 'loading') {
+    <section class="membership-admin-state" aria-live="polite">
+      <mat-spinner diameter="36" />
+      <div>
+        <h2>Cargando miembros</h2>
+        <p>Estamos consultando la información canónica.</p>
+      </div>
+    </section>
+  } @else if (viewState() === 'forbidden') {
+    <section class="membership-admin-state" role="alert">
+      <mat-icon aria-hidden="true">lock</mat-icon>
+      <div>
+        <h2>Acceso no disponible</h2>
+        <p>
+          La administración de miembros requiere el permiso membership.read en esta organización.
+        </p>
+      </div>
+    </section>
+  } @else if (viewState() === 'tenant-context') {
+    <section class="membership-admin-state" role="alert">
+      <mat-icon aria-hidden="true">account_tree</mat-icon>
+      <div>
+        <h2>Necesitamos recuperar el contexto</h2>
+        <p>
+          La organización seleccionada ya no está confirmada. Reintenta para actualizar la sesión.
+        </p>
+      </div>
+      <button mat-flat-button color="primary" type="button" (click)="retry()">Reintentar</button>
+    </section>
+  } @else if (viewState() === 'error') {
+    <section class="membership-admin-state" role="alert">
+      <mat-icon aria-hidden="true">cloud_off</mat-icon>
+      <div>
+        <h2>No fue posible cargar los miembros</h2>
+        <p>El problema puede ser temporal. Puedes intentarlo otra vez.</p>
+      </div>
+      <button mat-flat-button color="primary" type="button" (click)="retry()">Reintentar</button>
+    </section>
+  } @else if (viewState() === 'empty') {
+    <section class="membership-admin-state">
+      <mat-icon aria-hidden="true">group</mat-icon>
+      <div>
+        <h2>No hay miembros para mostrar</h2>
+        <p>La organización no tiene membresías visibles en este momento.</p>
+      </div>
+    </section>
+  } @else {
+    @if (tenantContextStore.snapshot()?.organization; as organization) {
+      <section class="membership-admin-context" aria-label="Resumen de la organización">
+        <div class="membership-admin-context__identity">
+          <div class="membership-admin-context__icon" aria-hidden="true">
+            <mat-icon>groups</mat-icon>
+          </div>
+          <div>
+            <span>Organización actual</span>
+            <h2>{{ organization.displayName }}</h2>
+            <p>Directorio de acceso y colaboración</p>
+          </div>
+        </div>
+
+        <dl class="membership-admin-summary" aria-label="Resumen de miembros">
+          <div>
+            <mat-icon aria-hidden="true">group</mat-icon>
+            <dt>Total</dt>
+            <dd>{{ membershipSummary().total }}</dd>
+          </div>
+          <div>
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <dt>Activos</dt>
+            <dd>{{ membershipSummary().active }}</dd>
+          </div>
+          <div>
+            <mat-icon aria-hidden="true">pause_circle</mat-icon>
+            <dt>Suspendidos</dt>
+            <dd>{{ membershipSummary().suspended }}</dd>
+          </div>
+        </dl>
+      </section>
+    }
+
+    <app-section-card
+      title="Directorio de miembros"
+      subtitle="Consulta quién forma parte de la organización y gestiona sus accesos disponibles."
+    >
+      <div class="membership-admin-table-wrap">
+        <table class="membership-admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Persona</th>
+              <th scope="col">Rol</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Alta</th>
+              <th scope="col" class="membership-admin-table__actions">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (membership of memberships(); track membership.id) {
+              <tr>
+                <td data-label="Persona">
+                  <div class="membership-admin-person">
+                    <strong>{{ membership.displayName }}</strong
+                    ><span>{{ membership.email }}</span>
+                  </div>
+                </td>
+                <td data-label="Rol">{{ roleLabel(membership.role) }}</td>
+                <td data-label="Estado">
+                  <app-status-badge
+                    [label]="statusLabel(membership.status)"
+                    [variant]="statusVariant(membership.status)"
+                  />
+                </td>
+                <td data-label="Alta">
+                  {{ joinedDateLabel(membership.joinedAt) }}
+                </td>
+                <td data-label="Acciones" class="membership-admin-table__actions">
+                  <div class="membership-admin-actions">
+                    @if (hasAllowedAction(membership, 'CHANGE_ROLE')) {
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        [disabled]="isMutating()"
+                        (click)="openRoleDialog(membership)"
+                      >
+                        Cambiar rol
+                      </button>
+                    }
+
+                    @if (hasSecondaryActions(membership)) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="membership-admin-more-actions"
+                        [matMenuTriggerFor]="membershipActions"
+                        [disabled]="isMutating()"
+                        [attr.aria-label]="'Más acciones para ' + membership.displayName"
+                      >
+                        <mat-icon aria-hidden="true">more_vert</mat-icon>
+                      </button>
+
+                      <mat-menu #membershipActions="matMenu" xPosition="before">
+                        @if (hasAllowedAction(membership, 'SUSPEND')) {
+                          <button
+                            mat-menu-item
+                            type="button"
+                            [disabled]="isMutating()"
+                            (click)="openActionConfirmation(membership, 'SUSPEND')"
+                          >
+                            <mat-icon aria-hidden="true">pause_circle</mat-icon>
+                            <span>Suspender</span>
+                          </button>
+                        }
+                        @if (hasAllowedAction(membership, 'REACTIVATE')) {
+                          <button
+                            mat-menu-item
+                            type="button"
+                            [disabled]="isMutating()"
+                            (click)="openActionConfirmation(membership, 'REACTIVATE')"
+                          >
+                            <mat-icon aria-hidden="true">play_circle</mat-icon>
+                            <span>Reactivar</span>
+                          </button>
+                        }
+                        @if (hasAllowedAction(membership, 'REMOVE')) {
+                          <button
+                            mat-menu-item
+                            type="button"
+                            class="membership-admin-menu-danger"
+                            [disabled]="isMutating()"
+                            (click)="openActionConfirmation(membership, 'REMOVE')"
+                          >
+                            <mat-icon aria-hidden="true">person_remove</mat-icon>
+                            <span>Revocar acceso</span>
+                          </button>
+                        }
+                      </mat-menu>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </app-section-card>
+
+    @if (canLeave() && currentMembership(); as ownMembership) {
+      <section class="membership-admin-leave" aria-labelledby="membership-leave-title">
+        <div class="membership-admin-leave__icon" aria-hidden="true">
+          <mat-icon>logout</mat-icon>
+        </div>
+        <div class="membership-admin-leave__copy">
+          <span>Acción de cuenta</span>
+          <strong id="membership-leave-title">Salir de la organización</strong>
+          <p>
+            Tu acceso a esta organización terminará y tendrás que seleccionar otro espacio de
+            trabajo disponible.
+          </p>
+        </div>
+        <button
+          mat-stroked-button
+          color="warn"
+          type="button"
+          [disabled]="isMutating()"
+          (click)="openActionConfirmation(ownMembership, 'LEAVE')"
+        >
+          Salir de la organización
+        </button>
+      </section>
+    }
+  }
+</div>

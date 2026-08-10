@@ -43,8 +43,15 @@ describe('Cross-Tenant State Invalidation coordinator', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('closes tenant-sensitive overlays and leaves the old tenant route on switch', () => {
+  it('closes tenant-sensitive overlays and leaves successful switch navigation to the caller', () => {
     invalidations.next({ reason: 'tenant-switch', generation: 2 });
+
+    expect(closeAll).toHaveBeenCalledOnce();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('routes a completed self-leave to organization selection', () => {
+    invalidations.next({ reason: 'membership-left', generation: 2 });
 
     expect(closeAll).toHaveBeenCalledOnce();
     expect(navigate).toHaveBeenCalledWith(['/organization-selection'], { replaceUrl: true });

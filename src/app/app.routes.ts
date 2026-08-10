@@ -79,6 +79,15 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'membership-administration',
+        canActivate: [capabilityGuard],
+        data: { requiredCapability: 'membership.read' },
+        loadChildren: () =>
+          import('./features/membership-administration/membership-administration.routes').then(
+            (m) => m.membershipAdministrationRoutes,
+          ),
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',
