@@ -13,6 +13,8 @@ import {
   MembershipListItem,
   MembershipMutationPreconditionDto,
   MembershipMutationResponse,
+  OwnershipTransferResponse,
+  TransferOwnershipDto,
 } from '../models/membership.models';
 
 @Injectable({ providedIn: 'root' })
@@ -77,6 +79,21 @@ export class MembershipsService {
   ): Observable<MembershipMutationResponse> {
     return this.http.post<MembershipMutationResponse>(
       `${this.basePath}/${encodeURIComponent(organizationId)}/memberships/leave`,
+      payload,
+      {
+        context: this.tenantContext(organizationId),
+      },
+    );
+  }
+
+  transferOwnership(
+    organizationId: string,
+    targetMembershipId: string,
+  ): Observable<OwnershipTransferResponse> {
+    const payload: TransferOwnershipDto = { targetMembershipId };
+
+    return this.http.post<OwnershipTransferResponse>(
+      `${this.basePath}/${encodeURIComponent(organizationId)}/ownership-transfer`,
       payload,
       {
         context: this.tenantContext(organizationId),

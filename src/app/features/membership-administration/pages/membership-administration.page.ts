@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnDestroy, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,7 +8,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Observable, finalize, Subscription } from 'rxjs';
 
+import { TenantAuthorityChangeService } from '../../../core/tenant-context/tenant-authority-change.service';
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
+import { TenantStateInvalidationCoordinator } from '../../../core/tenant-context/tenant-state-invalidation.coordinator';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import {
@@ -23,12 +26,17 @@ import {
   MembershipRoleDialogResult,
 } from '../components/membership-role-dialog.component';
 import {
+  OwnershipTransferConfirmDialogComponent,
+  OwnershipTransferConfirmDialogData,
+} from '../components/ownership-transfer-confirm-dialog.component';
+import {
   AssignableMembershipRole,
   MembershipAllowedAction,
   MembershipListItem,
   MembershipMutationResponse,
   MembershipRole,
   MembershipStatus,
+  OwnershipTransferResponse,
 } from '../models/membership.models';
 import { MembershipsService } from '../services/memberships.service';
 
@@ -37,6 +45,16 @@ interface RequestScope {
   organizationId: string;
   generation: number;
 }
+
+interface OwnershipTransferScope extends RequestScope {
+  contextVersion: number;
+  actorMembershipId: string;
+  actorUserId: string;
+  targetMembershipId: string;
+  targetUserId: string;
+}
+
+type MembershipReloadResult = 'loaded' | 'failed' | 'stale';
 
 @Component({
   selector: 'app-membership-administration-page',
@@ -56,16 +74,23 @@ interface RequestScope {
 })
 export class MembershipAdministrationPage implements OnDestroy {
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly membershipsService = inject(MembershipsService);
+  private readonly tenantAuthorityChangeService = inject(TenantAuthorityChangeService);
+  private readonly tenantStateInvalidationCoordinator = inject(TenantStateInvalidationCoordinator);
   readonly tenantContextStore = inject(TenantContextStore);
   private loadSubscription?: Subscription;
   private mutationSubscription?: Subscription;
   private loadSequence = 0;
+  private ownershipOperationSequence = 0;
+  private activeOwnershipOperationId: number | null = null;
   private destroyed = false;
 
   readonly viewState = signal<ViewState>('loading');
   readonly memberships = signal<MembershipListItem[]>([]);
   readonly isMutating = signal(false);
+  readonly ownershipReconciliationPending = signal(false);
+  readonly actionMenuMembership = signal<MembershipListItem | null>(null);
   readonly successMessage = signal('');
   readonly errorMessage = signal('');
   readonly contextWarning = signal('');
@@ -80,6 +105,13 @@ export class MembershipAdministrationPage implements OnDestroy {
       this.tenantContextStore.capabilities().includes('membership.leave') &&
       this.currentMembership() !== null,
   );
+  readonly interactionLocked = computed(
+    () =>
+      this.isMutating() ||
+      this.ownershipReconciliationPending() ||
+      this.tenantContextStore.isCanonicalContextSynchronizationPending() ||
+      this.viewState() === 'loading',
+  );
   readonly membershipSummary = computed(() => ({
     total: this.memberships().length,
     active: this.memberships().filter((membership) => membership.status === 'ACTIVE').length,
@@ -87,6 +119,19 @@ export class MembershipAdministrationPage implements OnDestroy {
   }));
 
   constructor() {
+    this.tenantStateInvalidationCoordinator.authorityReconciled
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ organizationId, generation }) => {
+        if (
+          this.tenantContextStore.selectedOrganizationId() !== organizationId ||
+          this.tenantContextStore.switchGeneration() !== generation
+        ) {
+          return;
+        }
+
+        this.loadMemberships(true);
+      });
+
     this.loadMemberships();
   }
 
@@ -151,6 +196,61 @@ export class MembershipAdministrationPage implements OnDestroy {
     this.loadMemberships();
   }
 
+  private reloadMembershipsForScope(scope: RequestScope): Promise<MembershipReloadResult> {
+    const sequence = ++this.loadSequence;
+    this.loadSubscription?.unsubscribe();
+    this.viewState.set('loading');
+    this.errorMessage.set('');
+
+    return new Promise<MembershipReloadResult>((resolve) => {
+      let settled = false;
+      const settle = (result: MembershipReloadResult): void => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        resolve(result);
+      };
+
+      this.loadSubscription = this.membershipsService.list(scope.organizationId).subscribe({
+        next: (memberships) => {
+          if (sequence !== this.loadSequence || !this.isScopeCurrent(scope)) {
+            settle('stale');
+            return;
+          }
+
+          this.memberships.set(memberships);
+          this.viewState.set(memberships.length ? 'loaded' : 'empty');
+          settle('loaded');
+        },
+        error: (error: HttpErrorResponse) => {
+          if (sequence !== this.loadSequence || !this.isScopeCurrent(scope)) {
+            settle('stale');
+            return;
+          }
+
+          this.memberships.set([]);
+          this.viewState.set(this.getLoadErrorState(error));
+          settle('failed');
+        },
+        complete: () => {
+          if (settled) {
+            return;
+          }
+
+          if (sequence !== this.loadSequence || !this.isScopeCurrent(scope)) {
+            settle('stale');
+            return;
+          }
+
+          this.viewState.set('error');
+          settle('failed');
+        },
+      });
+    });
+  }
+
   roleLabel(role: MembershipRole): string {
     return roleLabels[role];
   }
@@ -168,8 +268,29 @@ export class MembershipAdministrationPage implements OnDestroy {
   }
 
   hasSecondaryActions(membership: MembershipListItem): boolean {
-    return membership.allowedActions.some((action) =>
-      ['SUSPEND', 'REACTIVATE', 'REMOVE'].includes(action),
+    return (
+      membership.allowedActions.some((action) =>
+        ['SUSPEND', 'REACTIVATE', 'REMOVE'].includes(action),
+      ) || this.isOwnershipTransferEligible(membership)
+    );
+  }
+
+  isOwnershipTransferEligible(target: MembershipListItem): boolean {
+    const actor = this.tenantContextStore.snapshot()?.membership;
+
+    return (
+      !this.interactionLocked() &&
+      this.tenantContextStore.isActiveTenantReady() &&
+      !this.tenantContextStore.isCanonicalContextSynchronizationPending() &&
+      this.tenantContextStore.hasCapability('ownership.transfer') &&
+      actor !== undefined &&
+      actor !== null &&
+      actor.status === 'ACTIVE' &&
+      actor.role === 'OWNER' &&
+      target.status === 'ACTIVE' &&
+      target.role !== 'OWNER' &&
+      target.id !== actor.id &&
+      target.userId !== actor.userId
     );
   }
 
@@ -183,7 +304,7 @@ export class MembershipAdministrationPage implements OnDestroy {
   }
 
   openRoleDialog(membership: MembershipListItem): void {
-    if (!this.hasAllowedAction(membership, 'CHANGE_ROLE') || this.isMutating()) {
+    if (!this.hasAllowedAction(membership, 'CHANGE_ROLE') || this.interactionLocked()) {
       return;
     }
 
@@ -201,6 +322,36 @@ export class MembershipAdministrationPage implements OnDestroy {
     });
   }
 
+  openOwnershipTransferDialog(target: MembershipListItem): void {
+    const scope = this.captureOwnershipTransferScope(target);
+    const organizationName = this.tenantContextStore.snapshot()?.organization?.displayName;
+
+    if (!scope || !organizationName) {
+      return;
+    }
+
+    const data: OwnershipTransferConfirmDialogData = {
+      target,
+      organizationName,
+    };
+    const dialogRef = this.dialog.open(OwnershipTransferConfirmDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data,
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (confirmed) {
+        this.transferOwnership(scope);
+      }
+    });
+  }
+
+  setActionMenuMembership(membership: MembershipListItem): void {
+    this.actionMenuMembership.set(membership);
+  }
+
   openActionConfirmation(
     membership: MembershipListItem,
     action: MembershipConfirmationAction,
@@ -209,7 +360,7 @@ export class MembershipAdministrationPage implements OnDestroy {
     if (
       (allowedAction && !this.hasAllowedAction(membership, allowedAction)) ||
       (action === 'LEAVE' && !this.canLeave()) ||
-      this.isMutating()
+      this.interactionLocked()
     ) {
       return;
     }
@@ -242,7 +393,7 @@ export class MembershipAdministrationPage implements OnDestroy {
     expectedUpdatedAt: string,
   ): void {
     const scope = this.captureScope();
-    if (!scope || !this.hasAllowedAction(membership, 'CHANGE_ROLE') || this.isMutating()) {
+    if (!scope || !this.hasAllowedAction(membership, 'CHANGE_ROLE') || this.interactionLocked()) {
       return;
     }
 
@@ -259,7 +410,7 @@ export class MembershipAdministrationPage implements OnDestroy {
   private changeStatus(membership: MembershipListItem, status: 'ACTIVE' | 'SUSPENDED'): void {
     const action: MembershipAllowedAction = status === 'ACTIVE' ? 'REACTIVATE' : 'SUSPEND';
     const scope = this.captureScope();
-    if (!scope || !this.hasAllowedAction(membership, action) || this.isMutating()) {
+    if (!scope || !this.hasAllowedAction(membership, action) || this.interactionLocked()) {
       return;
     }
 
@@ -275,7 +426,7 @@ export class MembershipAdministrationPage implements OnDestroy {
 
   private removeMembership(membership: MembershipListItem): void {
     const scope = this.captureScope();
-    if (!scope || !this.hasAllowedAction(membership, 'REMOVE') || this.isMutating()) {
+    if (!scope || !this.hasAllowedAction(membership, 'REMOVE') || this.interactionLocked()) {
       return;
     }
 
@@ -290,7 +441,7 @@ export class MembershipAdministrationPage implements OnDestroy {
 
   private leaveOrganization(membership: MembershipListItem): void {
     const scope = this.captureScope();
-    if (!scope || !this.canLeave() || this.isMutating()) {
+    if (!scope || !this.canLeave() || this.interactionLocked()) {
       return;
     }
 
@@ -325,6 +476,300 @@ export class MembershipAdministrationPage implements OnDestroy {
           this.handleMutationError(error, scope);
         },
       });
+  }
+
+  private transferOwnership(scope: OwnershipTransferScope): void {
+    if (!this.isOwnershipTransferScopeCurrent(scope) || this.interactionLocked()) {
+      return;
+    }
+
+    const operationId = ++this.ownershipOperationSequence;
+    this.activeOwnershipOperationId = operationId;
+    this.isMutating.set(true);
+    this.ownershipReconciliationPending.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.mutationSubscription?.unsubscribe();
+    let handedOffToReconciliation = false;
+    this.mutationSubscription = this.membershipsService
+      .transferOwnership(scope.organizationId, scope.targetMembershipId)
+      .subscribe({
+        next: (response) => {
+          handedOffToReconciliation = true;
+          void this.reconcileOwnershipTransfer(operationId, scope, response).catch(() => {
+            this.handleUnexpectedOwnershipFailure(operationId, scope);
+          });
+        },
+        error: (error: HttpErrorResponse) => {
+          handedOffToReconciliation = true;
+          void this.reconcileOwnershipFailure(operationId, scope, error).catch(() => {
+            this.handleUnexpectedOwnershipFailure(operationId, scope);
+          });
+        },
+        complete: () => {
+          if (!handedOffToReconciliation) {
+            this.finishOwnershipTransfer(operationId, false);
+          }
+        },
+      });
+  }
+
+  private async reconcileOwnershipTransfer(
+    operationId: number,
+    scope: OwnershipTransferScope,
+    response: OwnershipTransferResponse,
+  ): Promise<void> {
+    if (!this.isOwnershipOperationCurrent(operationId, scope)) {
+      this.finishOwnershipTransfer(operationId, false);
+      return;
+    }
+
+    if (!this.isOwnershipTransferResponseValid(scope, response)) {
+      await this.reconcileOwnershipFailure(
+        operationId,
+        scope,
+        new HttpErrorResponse({ status: 0, error: { code: 'UNEXPECTED_ERROR' } }),
+      );
+      return;
+    }
+
+    this.tenantAuthorityChangeService.emitOwnershipTransferred(scope.organizationId);
+    const synchronization = await this.tenantContextStore.synchronizeCanonicalContext(
+      scope.generation,
+      scope.organizationId,
+      true,
+    );
+
+    if (
+      !this.isOwnershipOperationTokenCurrent(operationId) ||
+      !this.isScopeCurrent(scope) ||
+      synchronization === 'stale'
+    ) {
+      this.finishOwnershipTransfer(operationId, false);
+      return;
+    }
+
+    const reloaded = await this.reloadMembershipsForScope(scope);
+    if (
+      !this.isOwnershipOperationTokenCurrent(operationId) ||
+      !this.isScopeCurrent(scope) ||
+      reloaded === 'stale'
+    ) {
+      this.finishOwnershipTransfer(operationId, false);
+      return;
+    }
+
+    if (synchronization === 'failed') {
+      this.errorMessage.set(
+        'La transferencia se completó, pero no fue posible confirmar el contexto actualizado. Revisa la organización antes de intentarlo de nuevo.',
+      );
+      this.finishOwnershipTransfer(operationId, true);
+      return;
+    }
+
+    if (reloaded === 'failed') {
+      this.errorMessage.set(
+        'La propiedad se transfirió y tus permisos se actualizaron, pero no fue posible actualizar la lista de miembros. Recarga la lista antes de continuar.',
+      );
+      this.finishOwnershipTransfer(operationId, true);
+      return;
+    }
+
+    this.successMessage.set(
+      'La propiedad se transfirió. Tus permisos y la lista de miembros se actualizaron.',
+    );
+    this.finishOwnershipTransfer(operationId, true);
+  }
+
+  private async reconcileOwnershipFailure(
+    operationId: number,
+    scope: OwnershipTransferScope,
+    error: HttpErrorResponse,
+  ): Promise<void> {
+    if (!this.isOwnershipOperationTokenCurrent(operationId) || !this.isScopeCurrent(scope)) {
+      this.finishOwnershipTransfer(operationId, false);
+      return;
+    }
+
+    const requiresReconciliation = error.status === 0 || [403, 404, 409].includes(error.status);
+    if (requiresReconciliation) {
+      const synchronization = await this.tenantContextStore.synchronizeCanonicalContext(
+        scope.generation,
+        scope.organizationId,
+        true,
+      );
+
+      if (
+        !this.isOwnershipOperationTokenCurrent(operationId) ||
+        !this.isScopeCurrent(scope) ||
+        synchronization === 'stale'
+      ) {
+        this.finishOwnershipTransfer(operationId, false);
+        return;
+      }
+
+      const reloaded = await this.reloadMembershipsForScope(scope);
+      if (
+        !this.isOwnershipOperationTokenCurrent(operationId) ||
+        !this.isScopeCurrent(scope) ||
+        reloaded === 'stale'
+      ) {
+        this.finishOwnershipTransfer(operationId, false);
+        return;
+      }
+    }
+
+    if (this.isOwnershipOperationTokenCurrent(operationId) && this.isScopeCurrent(scope)) {
+      this.errorMessage.set(this.ownershipTransferErrorMessage(error));
+      this.finishOwnershipTransfer(operationId, true);
+    } else {
+      this.finishOwnershipTransfer(operationId, false);
+    }
+  }
+
+  private handleUnexpectedOwnershipFailure(
+    operationId: number,
+    scope: OwnershipTransferScope,
+  ): void {
+    if (!this.isOwnershipOperationTokenCurrent(operationId)) {
+      return;
+    }
+
+    if (this.isScopeCurrent(scope)) {
+      this.errorMessage.set(
+        this.ownershipTransferErrorMessage(new HttpErrorResponse({ status: 0 })),
+      );
+      this.finishOwnershipTransfer(operationId, true);
+      return;
+    }
+
+    this.finishOwnershipTransfer(operationId, false);
+  }
+
+  private ownershipTransferErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 403) {
+      return 'El servidor rechazó esta acción. Tus permisos pudieron haber cambiado.';
+    }
+    if (error.status === 404) {
+      return 'No fue posible completar la transferencia con los datos disponibles.';
+    }
+    if (error.status === 409) {
+      return 'La organización o el miembro cambiaron. Revisa la lista y confirma de nuevo.';
+    }
+    if (error.status === 0) {
+      return 'No se pudo confirmar el resultado de la transferencia. Revisa la lista antes de intentarlo de nuevo.';
+    }
+    if (error.status === 400) {
+      return 'Los datos de la transferencia no son válidos. Revisa el miembro seleccionado.';
+    }
+    return 'No fue posible completar la transferencia. Intenta de nuevo cuando la organización esté disponible.';
+  }
+
+  private isOwnershipOperationTokenCurrent(operationId: number): boolean {
+    return this.activeOwnershipOperationId === operationId;
+  }
+
+  private isOwnershipOperationCurrent(
+    operationId: number,
+    scope: OwnershipTransferScope,
+  ): boolean {
+    return (
+      this.isOwnershipOperationTokenCurrent(operationId) &&
+      this.isOwnershipTransferScopeCurrent(scope)
+    );
+  }
+
+  private finishOwnershipTransfer(operationId: number, publishFeedback: boolean): void {
+    if (!this.isOwnershipOperationTokenCurrent(operationId)) {
+      return;
+    }
+
+    this.activeOwnershipOperationId = null;
+    this.ownershipReconciliationPending.set(false);
+    this.isMutating.set(false);
+
+    if (!publishFeedback) {
+      this.successMessage.set('');
+      this.errorMessage.set('');
+    }
+  }
+
+  private captureOwnershipTransferScope(target: MembershipListItem): OwnershipTransferScope | null {
+    if (!this.isOwnershipTransferEligible(target)) {
+      return null;
+    }
+
+    const snapshot = this.tenantContextStore.snapshot();
+    const organizationId = this.tenantContextStore.selectedOrganizationId();
+    const actor = snapshot?.membership;
+    if (!organizationId || !actor) {
+      return null;
+    }
+
+    return {
+      organizationId,
+      generation: this.tenantContextStore.switchGeneration(),
+      contextVersion: this.tenantContextStore.contextVersion(),
+      actorMembershipId: actor.id,
+      actorUserId: actor.userId,
+      targetMembershipId: target.id,
+      targetUserId: target.userId,
+    };
+  }
+
+  private isOwnershipTransferScopeCurrent(scope: OwnershipTransferScope): boolean {
+    if (!this.isScopeCurrent(scope)) {
+      return false;
+    }
+
+    const snapshot = this.tenantContextStore.snapshot();
+    const actor = snapshot?.membership;
+    const target = this.memberships().find(
+      (membership) => membership.id === scope.targetMembershipId,
+    );
+
+    return (
+      this.tenantContextStore.isActiveTenantReady() &&
+      !this.tenantContextStore.isCanonicalContextSynchronizationPending() &&
+      this.tenantContextStore.hasCapability('ownership.transfer') &&
+      actor?.id === scope.actorMembershipId &&
+      actor.userId === scope.actorUserId &&
+      actor.role === 'OWNER' &&
+      actor.status === 'ACTIVE' &&
+      target?.id === scope.targetMembershipId &&
+      target.userId === scope.targetUserId &&
+      target.status === 'ACTIVE' &&
+      target.role !== 'OWNER' &&
+      target.id !== actor.id &&
+      target.userId !== actor.userId
+    );
+  }
+
+  private isOwnershipTransferResponseValid(
+    scope: OwnershipTransferScope,
+    response: OwnershipTransferResponse,
+  ): boolean {
+    if (
+      !response ||
+      typeof response !== 'object' ||
+      !response.sourceMembership ||
+      !response.targetMembership
+    ) {
+      return false;
+    }
+
+    return (
+      response.organizationId === scope.organizationId &&
+      response.sourceMembership.id === scope.actorMembershipId &&
+      response.sourceMembership.userId === scope.actorUserId &&
+      response.sourceMembership.role === 'ADMIN' &&
+      response.sourceMembership.status === 'ACTIVE' &&
+      response.targetMembership.id === scope.targetMembershipId &&
+      response.targetMembership.userId === scope.targetUserId &&
+      response.targetMembership.role === 'OWNER' &&
+      response.targetMembership.status === 'ACTIVE' &&
+      typeof response.transferredAt === 'string'
+    );
   }
 
   private runMutation(

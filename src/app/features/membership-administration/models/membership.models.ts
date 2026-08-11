@@ -36,6 +36,24 @@ export interface MembershipMutationResponse {
   updatedAt: string;
 }
 
+export interface TransferOwnershipDto {
+  targetMembershipId: string;
+}
+
+export interface OwnershipTransferMembership {
+  id: string;
+  userId: string;
+  role: MembershipRole;
+  status: MembershipStatus;
+}
+
+export interface OwnershipTransferResponse {
+  organizationId: string;
+  sourceMembership: OwnershipTransferMembership;
+  targetMembership: OwnershipTransferMembership;
+  transferredAt: string;
+}
+
 export interface ChangeMembershipRoleDto {
   role: AssignableMembershipRole;
   expectedUpdatedAt: string;
