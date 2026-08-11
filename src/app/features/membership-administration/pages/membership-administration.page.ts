@@ -235,6 +235,10 @@ export class MembershipAdministrationPage implements OnDestroy {
           settle('failed');
         },
         complete: () => {
+          if (settled) {
+            return;
+          }
+
           if (sequence !== this.loadSequence || !this.isScopeCurrent(scope)) {
             settle('stale');
             return;

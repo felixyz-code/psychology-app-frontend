@@ -416,11 +416,35 @@ describe('MembershipAdministrationPage', () => {
     expect(tenantStore.synchronizeCanonicalContext).toHaveBeenCalledWith(1, 'organization-a', true);
     expect(membershipsService.list).toHaveBeenCalledTimes(2);
     expect(component.memberships()).toEqual([updatedSource, updatedTarget]);
+    expect(component.viewState()).toBe('loaded');
     expect(component.tenantContextStore.selectedOrganizationId()).toBe('organization-a');
     expect(component.tenantContextStore.hasCapability('ownership.transfer')).toBe(false);
     expect(component.isMutating()).toBe(false);
     expect(component.successMessage()).toContain('propiedad se transfirió');
+    expect(component.errorMessage()).not.toContain('No fue posible cargar los miembros');
+    expect(component.ownershipReconciliationPending()).toBe(false);
     expect(component.isOwnershipTransferEligible(updatedTarget)).toBe(false);
+  });
+
+  it('preserves empty state when a successful membership reload completes', async () => {
+    actorRole = 'OWNER';
+    ownershipTransferCapability = true;
+    const target = createTargetMembership();
+    currentLoad.next([createMembership({ role: 'OWNER' }), target]);
+    membershipsService.transferOwnership.mockReturnValueOnce(
+      of(createOwnershipTransferResponse('membership-target', 'user-target')),
+    );
+    membershipsService.list.mockReturnValueOnce(of([]));
+
+    component.openOwnershipTransferDialog(target);
+    dialogClosed.next(true);
+
+    await vi.waitFor(() => expect(component.isMutating()).toBe(false));
+
+    expect(component.memberships()).toEqual([]);
+    expect(component.viewState()).toBe('empty');
+    expect(component.errorMessage()).not.toContain('No fue posible cargar los miembros');
+    expect(component.ownershipReconciliationPending()).toBe(false);
   });
 
   it('rejects targets that are current, same-user, owner or non-active', () => {
