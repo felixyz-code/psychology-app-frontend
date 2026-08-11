@@ -1,11 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
 import { TenantAuthorityChangeService } from '../../../core/tenant-context/tenant-authority-change.service';
+import {
+  TenantAuthorityReconciled,
+  TenantStateInvalidationCoordinator,
+} from '../../../core/tenant-context/tenant-state-invalidation.coordinator';
 import { MembershipListItem } from '../models/membership.models';
 import { MembershipsService } from '../services/memberships.service';
 import { MembershipAdministrationPage } from './membership-administration.page';
@@ -45,6 +49,7 @@ describe('MembershipAdministrationPage', () => {
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let authorityChange: { emitOwnershipTransferred: ReturnType<typeof vi.fn> };
+  let authorityReconciled: Subject<TenantAuthorityReconciled>;
 
   beforeEach(async () => {
     currentLoad = new Subject<MembershipListItem[]>();
@@ -91,6 +96,7 @@ describe('MembershipAdministrationPage', () => {
     };
     dialog = { open: vi.fn(() => ({ afterClosed: () => dialogClosed.asObservable() })) };
     authorityChange = { emitOwnershipTransferred: vi.fn() };
+    authorityReconciled = new Subject<TenantAuthorityReconciled>();
     capabilities = signal<string[]>([]);
 
     await TestBed.configureTestingModule({
@@ -99,6 +105,10 @@ describe('MembershipAdministrationPage', () => {
         { provide: TenantContextStore, useValue: tenantStore },
         { provide: MembershipsService, useValue: membershipsService },
         { provide: TenantAuthorityChangeService, useValue: authorityChange },
+        {
+          provide: TenantStateInvalidationCoordinator,
+          useValue: { authorityReconciled: authorityReconciled.asObservable() },
+        },
         { provide: MatDialog, useValue: dialog },
       ],
     }).compileComponents();
@@ -520,6 +530,137 @@ describe('MembershipAdministrationPage', () => {
 
     expect(membershipsService.transferOwnership).toHaveBeenCalledOnce();
     expect(tenantStore.synchronizeCanonicalContext).toHaveBeenCalledWith(1, 'organization-a', true);
+    expect(membershipsService.list).toHaveBeenCalledTimes(2);
+  });
+
+  it('releases ownership locks when the transfer observable completes without an emission', () => {
+    actorRole = 'OWNER';
+    ownershipTransferCapability = true;
+    const target = createTargetMembership();
+    const pendingTransfer = new Subject<ReturnType<typeof createOwnershipTransferResponse>>();
+    currentLoad.next([createMembership({ role: 'OWNER' }), target]);
+    membershipsService.transferOwnership.mockReturnValueOnce(pendingTransfer.asObservable());
+
+    component.openOwnershipTransferDialog(target);
+    dialogClosed.next(true);
+    pendingTransfer.complete();
+
+    expect(component.isMutating()).toBe(false);
+    expect(component.ownershipReconciliationPending()).toBe(false);
+    expect(tenantStore.synchronizeCanonicalContext).not.toHaveBeenCalled();
+    expect(component.successMessage()).toBe('');
+    expect(component.errorMessage()).toBe('');
+  });
+
+  it('keeps the lock through normal next-then-complete while reconciliation is pending', async () => {
+    actorRole = 'OWNER';
+    ownershipTransferCapability = true;
+    const target = createTargetMembership();
+    const pendingTransfer = new Subject<ReturnType<typeof createOwnershipTransferResponse>>();
+    const pendingReload = new Subject<MembershipListItem[]>();
+    let resolveSynchronization!: (result: 'synchronized') => void;
+    const synchronization = new Promise<'synchronized'>((resolve) => {
+      resolveSynchronization = resolve;
+    });
+    currentLoad.next([createMembership({ role: 'OWNER' }), target]);
+    membershipsService.transferOwnership.mockReturnValueOnce(pendingTransfer.asObservable());
+    membershipsService.list.mockReturnValueOnce(pendingReload.asObservable());
+    tenantStore.synchronizeCanonicalContext.mockReturnValueOnce(synchronization);
+
+    component.openOwnershipTransferDialog(target);
+    dialogClosed.next(true);
+    pendingTransfer.next(createOwnershipTransferResponse('membership-target', 'user-target'));
+    pendingTransfer.complete();
+    await Promise.resolve();
+
+    expect(component.isMutating()).toBe(true);
+    expect(component.ownershipReconciliationPending()).toBe(true);
+
+    resolveSynchronization('synchronized');
+    await vi.waitFor(() => expect(membershipsService.list).toHaveBeenCalledTimes(2));
+    pendingReload.next([createTargetMembership({ role: 'OWNER', allowedActions: [] })]);
+    await vi.waitFor(() => expect(component.isMutating()).toBe(false));
+  });
+
+  it('settles a membership reload that completes without an emission', async () => {
+    actorRole = 'OWNER';
+    ownershipTransferCapability = true;
+    const target = createTargetMembership();
+    const pendingReload = new Subject<MembershipListItem[]>();
+    currentLoad.next([createMembership({ role: 'OWNER' }), target]);
+    membershipsService.transferOwnership.mockReturnValueOnce(
+      of(createOwnershipTransferResponse('membership-target', 'user-target')),
+    );
+    membershipsService.list.mockReturnValueOnce(pendingReload.asObservable());
+
+    component.openOwnershipTransferDialog(target);
+    dialogClosed.next(true);
+    await vi.waitFor(() => expect(membershipsService.list).toHaveBeenCalledTimes(2));
+    pendingReload.complete();
+
+    await vi.waitFor(() => expect(component.isMutating()).toBe(false));
+    expect(component.ownershipReconciliationPending()).toBe(false);
+    expect(component.successMessage()).toBe('');
+  });
+
+  it('shows a refresh warning instead of all-clear success when membership reload fails', async () => {
+    actorRole = 'OWNER';
+    ownershipTransferCapability = true;
+    const target = createTargetMembership();
+    currentLoad.next([createMembership({ role: 'OWNER' }), target]);
+    membershipsService.transferOwnership.mockReturnValueOnce(
+      of(createOwnershipTransferResponse('membership-target', 'user-target')),
+    );
+    membershipsService.list.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 500 })),
+    );
+
+    component.openOwnershipTransferDialog(target);
+    dialogClosed.next(true);
+
+    await vi.waitFor(() =>
+      expect(component.errorMessage()).toContain('actualizar la lista de miembros'),
+    );
+    expect(component.successMessage()).not.toContain('lista de miembros');
+    expect(component.isMutating()).toBe(false);
+    expect(component.ownershipReconciliationPending()).toBe(false);
+    expect(membershipsService.transferOwnership).toHaveBeenCalledOnce();
+  });
+
+  it('does not let a stale operation token unlock the active operation', () => {
+    actorRole = 'OWNER';
+    ownershipTransferCapability = true;
+    const target = createTargetMembership();
+    const pendingTransfer = new Subject<ReturnType<typeof createOwnershipTransferResponse>>();
+    currentLoad.next([createMembership({ role: 'OWNER' }), target]);
+    membershipsService.transferOwnership.mockReturnValueOnce(pendingTransfer.asObservable());
+
+    component.openOwnershipTransferDialog(target);
+    dialogClosed.next(true);
+
+    const internal = component as unknown as {
+      activeOwnershipOperationId: number | null;
+      finishOwnershipTransfer: (operationId: number, publishFeedback: boolean) => void;
+    };
+    const activeOperationId = internal.activeOwnershipOperationId;
+    internal.activeOwnershipOperationId = (activeOperationId ?? 0) + 1;
+    internal.finishOwnershipTransfer(activeOperationId ?? 0, false);
+
+    expect(component.isMutating()).toBe(true);
+    expect(component.ownershipReconciliationPending()).toBe(true);
+  });
+
+  it('reloads receiving-tab membership rows only for the current reconciled scope', () => {
+    const updatedTarget = createTargetMembership({ role: 'OWNER', allowedActions: [] });
+    currentLoad.next([createMembership({ role: 'OWNER' }), createTargetMembership()]);
+    membershipsService.list.mockReturnValueOnce(of([createMembership({ role: 'ADMIN' }), updatedTarget]));
+
+    authorityReconciled.next({ organizationId: 'organization-a', generation: 1 });
+
+    expect(membershipsService.list).toHaveBeenCalledTimes(2);
+    expect(component.memberships()).toEqual([createMembership({ role: 'ADMIN' }), updatedTarget]);
+
+    authorityReconciled.next({ organizationId: 'organization-b', generation: 2 });
     expect(membershipsService.list).toHaveBeenCalledTimes(2);
   });
 });

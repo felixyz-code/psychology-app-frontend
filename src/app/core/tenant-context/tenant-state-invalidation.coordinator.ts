@@ -2,9 +2,15 @@ import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
 
 import { TenantContextStore } from './tenant-context.store';
 import { TenantAuthorityChangeService } from './tenant-authority-change.service';
+
+export interface TenantAuthorityReconciled {
+  readonly organizationId: string;
+  readonly generation: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class TenantStateInvalidationCoordinator {
@@ -13,6 +19,9 @@ export class TenantStateInvalidationCoordinator {
   private readonly router = inject(Router);
   private readonly tenantContextStore = inject(TenantContextStore);
   private readonly tenantAuthorityChangeService = inject(TenantAuthorityChangeService);
+  private readonly authorityReconciledSubject = new Subject<TenantAuthorityReconciled>();
+
+  readonly authorityReconciled = this.authorityReconciledSubject.asObservable();
 
   constructor() {
     this.tenantContextStore.invalidations
@@ -50,19 +59,40 @@ export class TenantStateInvalidationCoordinator {
 
     this.tenantAuthorityChangeService.changes
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((change) => {
-        if (this.tenantContextStore.selectedOrganizationId() !== change.organizationId) {
-          return;
-        }
+      .subscribe((change) => void this.reconcileAuthorityChange(change));
+  }
 
-        this.dialog.closeAll();
-        const generation = this.tenantContextStore.switchGeneration();
-        void this.tenantContextStore.synchronizeCanonicalContext(
-          generation,
-          change.organizationId,
-          true,
-        );
+  private async reconcileAuthorityChange(change: {
+    readonly organizationId: string;
+  }): Promise<void> {
+    if (this.tenantContextStore.selectedOrganizationId() !== change.organizationId) {
+      return;
+    }
+
+    this.dialog.closeAll();
+    const generation = this.tenantContextStore.switchGeneration();
+
+    try {
+      const synchronization = await this.tenantContextStore.synchronizeCanonicalContext(
+        generation,
+        change.organizationId,
+        true,
+      );
+
+      if (
+        synchronization !== 'synchronized' ||
+        !this.tenantContextStore.isRequestContextCurrent(generation, change.organizationId)
+      ) {
+        return;
+      }
+
+      this.authorityReconciledSubject.next({
+        organizationId: change.organizationId,
+        generation,
       });
+    } catch {
+      // Fail closed. The canonical context store owns the recovery path.
+    }
   }
 
   private navigateToOrganizationSelection(): void {

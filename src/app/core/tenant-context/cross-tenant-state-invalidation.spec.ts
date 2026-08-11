@@ -8,7 +8,10 @@ import {
   TenantAuthorityChangeService,
   TenantAuthorityChange,
 } from './tenant-authority-change.service';
-import { TenantStateInvalidationCoordinator } from './tenant-state-invalidation.coordinator';
+import {
+  TenantAuthorityReconciled,
+  TenantStateInvalidationCoordinator,
+} from './tenant-state-invalidation.coordinator';
 
 describe('Cross-Tenant State Invalidation coordinator', () => {
   let invalidations: Subject<TenantStateInvalidation>;
@@ -35,6 +38,7 @@ describe('Cross-Tenant State Invalidation coordinator', () => {
             invalidations: invalidations.asObservable(),
             selectedOrganizationId: vi.fn(() => 'organization-a'),
             switchGeneration: vi.fn(() => 3),
+            isRequestContextCurrent: vi.fn(() => true),
             synchronizeCanonicalContext,
           },
         },
@@ -130,6 +134,44 @@ describe('Cross-Tenant State Invalidation coordinator', () => {
 
     expect(closeAll).toHaveBeenCalledOnce();
     expect(synchronizeCanonicalContext).toHaveBeenCalledWith(3, 'organization-a', true);
+  });
+
+  it('publishes row reconciliation only after synchronized V1 context remains current', async () => {
+    const reconciled: TenantAuthorityReconciled[] = [];
+    const coordinator = TestBed.inject(TenantStateInvalidationCoordinator);
+    coordinator.authorityReconciled.subscribe((event) => reconciled.push(event));
+
+    authorityChanges.next({
+      schemaVersion: 1,
+      type: 'OWNERSHIP_TRANSFERRED',
+      organizationId: 'organization-a',
+      eventId: 'event-a',
+    });
+    await vi.waitFor(() => expect(reconciled).toHaveLength(1));
+
+    expect(reconciled).toEqual([{ organizationId: 'organization-a', generation: 3 }]);
+  });
+
+  it.each([
+    ['failed', () => Promise.resolve('failed')],
+    ['stale', () => Promise.resolve('stale')],
+    ['rejected', () => Promise.reject(new Error('refresh failed'))],
+  ])('does not publish row reconciliation when V1 synchronization is %s', async (_label, result) => {
+    synchronizeCanonicalContext.mockImplementationOnce(result);
+    const reconciled: TenantAuthorityReconciled[] = [];
+    const coordinator = TestBed.inject(TenantStateInvalidationCoordinator);
+    coordinator.authorityReconciled.subscribe((event) => reconciled.push(event));
+
+    authorityChanges.next({
+      schemaVersion: 1,
+      type: 'OWNERSHIP_TRANSFERRED',
+      organizationId: 'organization-a',
+      eventId: `event-${_label}`,
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(reconciled).toEqual([]);
   });
 
   it('ignores an authority-change signal for a different selected tenant', () => {
