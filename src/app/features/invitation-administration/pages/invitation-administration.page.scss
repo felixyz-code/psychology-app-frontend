@@ -1,0 +1,172 @@
+.invitation-admin-page {
+  display: grid;
+  gap: 1.25rem;
+}
+.invitation-admin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 16px;
+  background: var(--app-color-surface);
+}
+.invitation-admin-toolbar p {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  min-width: 0;
+}
+.invitation-admin-toolbar p span {
+  color: var(--app-color-text-secondary);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.invitation-admin-toolbar p strong {
+  overflow-wrap: anywhere;
+}
+.invitation-admin-toolbar > div {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.invitation-admin-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+}
+.invitation-admin-alert--success {
+  background: var(--app-color-success-soft);
+  color: var(--app-color-success-text);
+}
+.invitation-admin-alert--error {
+  background: var(--app-color-danger-soft);
+  color: var(--app-color-danger-text);
+}
+.invitation-admin-alert--warning {
+  background: color-mix(in srgb, var(--app-color-warning) 12%, var(--app-color-card-bg));
+  color: var(--app-color-warning-text);
+}
+.invitation-admin-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 220px;
+  padding: 2rem;
+  border: 1px dashed var(--app-color-border);
+  border-radius: 16px;
+  text-align: left;
+}
+.invitation-admin-state h2,
+.invitation-admin-state p {
+  margin: 0.15rem 0;
+}
+.invitation-admin-table-wrap {
+  overflow-x: auto;
+}
+.invitation-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.invitation-admin-table th,
+.invitation-admin-table td {
+  padding: 0.85rem 0.7rem;
+  border-bottom: 1px solid var(--app-color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+.invitation-admin-table th {
+  color: var(--app-color-text-secondary);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.invitation-admin-email {
+  display: block;
+  max-width: 26rem;
+  overflow-wrap: anywhere;
+}
+.invitation-admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+.invitation-admin-no-actions {
+  color: var(--app-color-text-secondary);
+  font-size: 0.86rem;
+}
+@media (max-width: 900px) {
+  .invitation-admin-table-wrap {
+    overflow: visible;
+  }
+  .invitation-admin-table,
+  .invitation-admin-table thead,
+  .invitation-admin-table tbody,
+  .invitation-admin-table tr,
+  .invitation-admin-table td {
+    display: block;
+  }
+  .invitation-admin-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .invitation-admin-table tbody {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+  .invitation-admin-table tr {
+    padding: 0.85rem;
+    border: 1px solid var(--app-color-border);
+    border-radius: 14px;
+  }
+  .invitation-admin-table td {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    border: 0;
+  }
+  .invitation-admin-table td::before {
+    content: attr(data-label);
+    color: var(--app-color-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .invitation-admin-email {
+    max-width: 100%;
+  }
+}
+@media (max-width: 600px) {
+  .invitation-admin-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .invitation-admin-toolbar > div {
+    display: grid;
+  }
+  .invitation-admin-table tbody {
+    grid-template-columns: 1fr;
+  }
+  .invitation-admin-table td {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+  .invitation-admin-actions button {
+    flex: 1;
+  }
+  .invitation-admin-state {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

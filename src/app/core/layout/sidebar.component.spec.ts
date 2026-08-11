@@ -8,9 +8,13 @@ import { SidebarComponent } from './sidebar.component';
 describe('SidebarComponent tenant lifecycle navigation', () => {
   let fixture: ComponentFixture<SidebarComponent>;
   let synchronizationPending: WritableSignal<boolean>;
+  let activeTenantReady: WritableSignal<boolean>;
+  let capabilities: WritableSignal<string[]>;
 
   beforeEach(async () => {
     synchronizationPending = signal(false);
+    activeTenantReady = signal(true);
+    capabilities = signal(['organization.read', 'membership.read', 'invitation.read']);
 
     await TestBed.configureTestingModule({
       imports: [SidebarComponent],
@@ -19,10 +23,9 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
         {
           provide: TenantContextStore,
           useValue: {
-            isActiveTenantReady: () => true,
+            isActiveTenantReady: activeTenantReady,
             isCanonicalContextSynchronizationPending: synchronizationPending,
-            hasCapability: (capability: string) =>
-              capability === 'organization.read' || capability === 'membership.read',
+            hasCapability: (capability: string) => capabilities().includes(capability),
           },
         },
       ],
@@ -48,5 +51,18 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
 
   it('shows membership administration when membership.read is projected', () => {
     expect(fixture.nativeElement.textContent).toContain('Miembros');
+  });
+
+  it('shows invitation administration only for an active tenant with invitation.read', async () => {
+    expect(fixture.nativeElement.textContent).toContain('Invitaciones');
+
+    capabilities.set(['organization.read', 'membership.read']);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.textContent).not.toContain('Invitaciones');
+
+    capabilities.set(['organization.read', 'membership.read', 'invitation.read']);
+    activeTenantReady.set(false);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.textContent).not.toContain('Invitaciones');
   });
 });

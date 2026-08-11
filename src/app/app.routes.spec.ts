@@ -82,5 +82,9 @@ describe('app routes', () => {
       canActivate: [capabilityGuard],
       data: { requiredCapability: 'membership.read' },
     });
+    expect(childRoutes.find((route) => route.path === 'invitation-administration')).toMatchObject({
+      canActivate: [activeTenantGuard, capabilityGuard],
+      data: { requiredCapability: 'invitation.read' },
+    });
   });
 });
