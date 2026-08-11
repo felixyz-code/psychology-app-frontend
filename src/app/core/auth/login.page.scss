@@ -36,6 +36,17 @@
   min-height: 3rem;
 }
 
+.login-form__alternate {
+  margin: 0;
+  color: var(--app-color-text-secondary);
+  text-align: center;
+}
+
+.login-form__alternate a {
+  color: var(--app-color-link);
+  font-weight: 700;
+}
+
 .login-form__submit .mdc-button__label {
   display: inline-flex;
   align-items: center;

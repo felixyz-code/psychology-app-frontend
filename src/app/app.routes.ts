@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
+import { anonymousOnlyGuard } from './core/guards/anonymous-only.guard';
 import { capabilityGuard } from './core/guards/capability.guard';
 import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
 
@@ -8,6 +9,11 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./core/auth/login.page').then((m) => m.LoginPage),
+  },
+  {
+    path: 'signup',
+    canActivate: [anonymousOnlyGuard],
+    loadComponent: () => import('./core/auth/signup.page').then((m) => m.SignupPage),
   },
   {
     path: 'organization-selection',

@@ -1,0 +1,108 @@
+.signup-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background:
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.2), transparent 34rem),
+    linear-gradient(180deg, var(--app-color-app-bg) 0%, var(--app-color-surface-muted) 100%);
+}
+
+.signup-card {
+  width: min(100%, 44rem);
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 18px;
+  box-shadow: var(--app-shadow-surface);
+}
+
+.signup-card__header {
+  display: grid;
+  gap: 0.35rem;
+  padding-bottom: 1.25rem;
+}
+
+.signup-card__eyebrow {
+  color: var(--app-color-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.signup-form {
+  display: grid;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.signup-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.signup-form__feedback {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--app-color-danger-text) 32%, transparent);
+  border-radius: 12px;
+  background: var(--app-color-danger-soft);
+  color: var(--app-color-danger-text);
+}
+
+.signup-form__feedback--partial {
+  border-color: color-mix(in srgb, var(--app-color-warning-text) 35%, transparent);
+  background: color-mix(in srgb, var(--app-color-warning) 10%, var(--app-color-card-bg));
+  color: var(--app-color-warning-text);
+}
+
+.signup-form__feedback p,
+.signup-form__alternate {
+  margin: 0;
+}
+
+.signup-form__feedback button,
+.signup-form__submit,
+.signup-form__feedback button .mdc-button__label,
+.signup-form__submit .mdc-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.signup-form__submit {
+  min-height: 3rem;
+}
+
+.signup-form__alternate {
+  color: var(--app-color-text-secondary);
+  text-align: center;
+}
+
+.signup-form__alternate a {
+  color: var(--app-color-link);
+  font-weight: 700;
+}
+
+:host ::ng-deep .signup-form .mat-mdc-progress-spinner circle {
+  stroke: currentColor;
+}
+
+@media (max-width: 680px) {
+  .signup-page {
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .signup-form__grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .signup-card {
+    border-radius: 16px;
+  }
+}

@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,6 +24,7 @@ import { TenantContextStore } from '../tenant-context/tenant-context.store';
     MatInputModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    RouterLink,
   ],
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
@@ -37,6 +38,7 @@ export class LoginPage {
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
   readonly hidePassword = signal(true);
+  readonly signupRoute = '/signup';
 
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],

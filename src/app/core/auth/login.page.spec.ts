@@ -74,4 +74,8 @@ describe('LoginPage', () => {
     expect(router.navigate).not.toHaveBeenCalled();
     expect(page.loginForm.touched).toBe(true);
   });
+
+  it('exposes signup navigation without raw location changes', () => {
+    expect(page.signupRoute).toBe('/signup');
+  });
 });

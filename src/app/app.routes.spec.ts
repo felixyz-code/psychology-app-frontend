@@ -1,4 +1,5 @@
 import { authGuard } from './core/guards/auth.guard';
+import { anonymousOnlyGuard } from './core/guards/anonymous-only.guard';
 import { capabilityGuard } from './core/guards/capability.guard';
 import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
 import { routes } from './app.routes';
@@ -9,6 +10,13 @@ describe('app routes', () => {
 
     expect(loginRoute?.canActivate).toBeUndefined();
     expect(loginRoute?.loadComponent).toBeDefined();
+  });
+
+  it('exposes signup to anonymous users through the narrowly scoped anonymous-only policy', () => {
+    const signupRoute = routes.find((route) => route.path === 'signup');
+
+    expect(signupRoute?.canActivate).toEqual([anonymousOnlyGuard]);
+    expect(signupRoute?.loadComponent).toBeDefined();
   });
 
   it('exposes organization selection behind authentication but outside tenant resolution', () => {
@@ -41,6 +49,10 @@ describe('app routes', () => {
       path: '**',
       redirectTo: '',
     });
+    expect(routes.find((route) => route.path === 'login')?.loadComponent).toBeDefined();
+    expect(
+      routes.find((route) => route.path === 'organization-selection')?.loadComponent,
+    ).toBeDefined();
     expect(
       childRoutes.some((route) => route.path === 'financial-transactions' && route.loadChildren),
     ).toBe(true);
