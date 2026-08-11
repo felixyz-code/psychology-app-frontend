@@ -16,7 +16,7 @@ import { AuthStore } from './auth.store';
 export class BootstrapSessionConflictError extends Error {
   readonly code = 'BOOTSTRAP_SESSION_CONFLICT';
 
-  constructor() {
+  constructor(readonly mutationCommitted: boolean) {
     super('A newer authenticated session became active while signup was in progress.');
     this.name = 'BootstrapSessionConflictError';
   }
@@ -58,7 +58,7 @@ export class AuthService {
 
     return defer(() => {
       if (this.authStore.isAuthenticated()) {
-        return throwError(() => new BootstrapSessionConflictError());
+        return throwError(() => new BootstrapSessionConflictError(false));
       }
 
       return this.http.post<FreelancerBootstrapResponse>(
@@ -80,7 +80,7 @@ export class AuthService {
             this.authStore.isAuthenticated() ||
             this.authStore.sessionVersion() !== requestSessionVersion
           ) {
-            return throwError(() => new BootstrapSessionConflictError());
+            return throwError(() => new BootstrapSessionConflictError(true));
           }
 
           this.authStore.setSession(response.accessToken, response.user);
@@ -91,7 +91,7 @@ export class AuthService {
               this.authStore.sessionVersion() === installedSessionVersion &&
               this.authStore.user()?.id === response.user.id
                 ? of(response)
-                : throwError(() => new BootstrapSessionConflictError()),
+                : throwError(() => new BootstrapSessionConflictError(true)),
             ),
           );
         }),

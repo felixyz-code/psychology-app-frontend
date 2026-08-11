@@ -235,6 +235,7 @@ describe('AuthService', () => {
 
     expect(receivedError).toHaveBeenCalledOnce();
     expect(receivedError.mock.calls[0][0].name).toBe('BootstrapSessionConflictError');
+    expect(receivedError.mock.calls[0][0].mutationCommitted).toBe(true);
     expect(store.token()).toBe('newer-token');
     expect(tenantContextStore.startForIdentity).not.toHaveBeenCalled();
   });
@@ -247,7 +248,35 @@ describe('AuthService', () => {
 
     httpTesting.expectNone(`${environment.apiUrl}/auth/freelancer-bootstrap`);
     expect(receivedError).toHaveBeenCalledOnce();
+    expect(receivedError.mock.calls[0][0].mutationCommitted).toBe(false);
     expect(store.token()).toBe('existing-token');
+  });
+
+  it('reports a committed conflict when the session changes during V1 context bootstrap', async () => {
+    let resolveContext: (() => void) | undefined;
+    const contextReady = new Promise<void>((resolve) => {
+      resolveContext = resolve;
+    });
+    tenantContextStore.startForIdentity.mockReturnValue(contextReady);
+    const receivedError = vi.fn();
+
+    service.freelancerBootstrap(bootstrapRequest).subscribe({ error: receivedError });
+    const request = httpTesting.expectOne(`${environment.apiUrl}/auth/freelancer-bootstrap`);
+    request.flush(bootstrapResponse);
+    await Promise.resolve();
+
+    expect(tenantContextStore.startForIdentity).toHaveBeenCalledWith(bootstrapResponse.user.id);
+
+    store.setSession('newer-token', user);
+    resolveContext?.();
+    await contextReady;
+    await Promise.resolve();
+
+    expect(receivedError).toHaveBeenCalledOnce();
+    expect(receivedError.mock.calls[0][0].name).toBe('BootstrapSessionConflictError');
+    expect(receivedError.mock.calls[0][0].mutationCommitted).toBe(true);
+    expect(store.token()).toBe('newer-token');
+    expect(tenantContextStore.startForIdentity).toHaveBeenCalledOnce();
   });
 
   it('rejects the legacy timestamp bootstrap contract', async () => {

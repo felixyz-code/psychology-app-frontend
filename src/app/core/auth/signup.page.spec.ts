@@ -261,8 +261,7 @@ describe('SignupPage', () => {
   it.each([
     [400, 'Revisa los datos', true],
     [404, 'no está disponible', false],
-    [409, 'Si ya tienes una cuenta', false],
-    [201, 'pudo haberse creado', false],
+    [409, 'No fue posible completar', false],
     [429, 'demasiados intentos', false],
     [0, 'No pudimos confirmar', false],
     [500, 'No fue posible completar', false],
@@ -284,11 +283,15 @@ describe('SignupPage', () => {
 
       expect(page.errorMessage()).toContain(expectedMessage);
       expect(page.submissionLocked()).toBe(!unlocks);
+      expect(page.accountCreated()).toBe(false);
       expect(authService.freelancerBootstrap).toHaveBeenCalledOnce();
       expect(router.navigate).not.toHaveBeenCalled();
 
       if (status === 409) {
-        expect(page.errorMessage().toLowerCase()).not.toContain('correo ya está registrado');
+        expect(page.errorMessage().toLowerCase()).not.toContain('correo');
+        expect(page.errorMessage().toLowerCase()).not.toContain('email');
+        expect(page.errorMessage().toLowerCase()).not.toContain('usuario');
+        expect(tenantContextStore.refreshContext).not.toHaveBeenCalled();
       }
 
       if (status === 404) {
@@ -300,7 +303,7 @@ describe('SignupPage', () => {
 
   it('keeps a newer authenticated session and offers context-only recovery', () => {
     authService.freelancerBootstrap.mockReturnValue(
-      throwError(() => new BootstrapSessionConflictError()),
+      throwError(() => new BootstrapSessionConflictError(true)),
     );
     page.signupForm.setValue(validForm);
 
@@ -308,7 +311,21 @@ describe('SignupPage', () => {
 
     expect(page.accountCreated()).toBe(true);
     expect(page.submissionLocked()).toBe(true);
-    expect(page.errorMessage()).toContain('no volveremos a enviar');
+    expect(page.errorMessage()).toContain('La cuenta fue creada');
+    expect(tenantContextStore.refreshContext).not.toHaveBeenCalled();
+  });
+
+  it('does not treat a pre-request session conflict as account creation', () => {
+    authService.freelancerBootstrap.mockReturnValue(
+      throwError(() => new BootstrapSessionConflictError(false)),
+    );
+    page.signupForm.setValue(validForm);
+
+    page.submit();
+
+    expect(page.accountCreated()).toBe(false);
+    expect(page.submissionLocked()).toBe(true);
+    expect(page.errorMessage()).toContain('sesi');
     expect(tenantContextStore.refreshContext).not.toHaveBeenCalled();
   });
 

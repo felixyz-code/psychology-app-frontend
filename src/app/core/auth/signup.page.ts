@@ -210,9 +210,17 @@ export class SignupPage {
 
   private handleBootstrapError(error: unknown): void {
     if (error instanceof BootstrapSessionConflictError) {
+      if (!error.mutationCommitted) {
+        this.accountCreated.set(false);
+        this.errorMessage.set(
+          'Ya existe una sesión activa en esta pestaña. Inicia sesión o continúa desde tu espacio de trabajo.',
+        );
+        return;
+      }
+
       this.accountCreated.set(true);
       this.errorMessage.set(
-        'La cuenta pudo haberse creado, pero otra sesión inició mientras preparábamos tu espacio de trabajo. Intenta continuar o inicia sesión; no volveremos a enviar el registro.',
+        'La cuenta fue creada, pero otra sesión inició mientras preparábamos tu espacio de trabajo. Cierra la sesión actual e inicia sesión con la nueva cuenta para continuar.',
       );
       return;
     }
@@ -230,10 +238,10 @@ export class SignupPage {
       return;
     }
 
-    if (status === 409 || status === 201) {
-      this.accountCreated.set(true);
+    if (status === 409) {
+      this.accountCreated.set(false);
       this.errorMessage.set(
-        'La cuenta pudo haberse creado, pero no pudimos confirmar la sesión. Si ya tienes una cuenta, inicia sesión; también puedes intentar continuar. No volveremos a enviar el registro.',
+        'No fue posible completar el registro. Si ya tienes una cuenta, intenta iniciar sesión.',
       );
       return;
     }
