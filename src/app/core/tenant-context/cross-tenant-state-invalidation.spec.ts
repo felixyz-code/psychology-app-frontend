@@ -4,6 +4,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 
 import { TenantContextStore, TenantStateInvalidation } from './tenant-context.store';
+import {
+  TenantAuthorityChangeService,
+  TenantAuthorityChange,
+} from './tenant-authority-change.service';
 import { TenantStateInvalidationCoordinator } from './tenant-state-invalidation.coordinator';
 
 describe('Cross-Tenant State Invalidation coordinator', () => {
@@ -11,19 +15,32 @@ describe('Cross-Tenant State Invalidation coordinator', () => {
   let closeAll: ReturnType<typeof vi.fn>;
   let navigate: ReturnType<typeof vi.fn>;
   let routerUrl: string;
+  let authorityChanges: Subject<TenantAuthorityChange>;
+  let synchronizeCanonicalContext: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     invalidations = new Subject<TenantStateInvalidation>();
     closeAll = vi.fn();
     navigate = vi.fn(() => Promise.resolve(true));
     routerUrl = '/patients';
+    authorityChanges = new Subject<TenantAuthorityChange>();
+    synchronizeCanonicalContext = vi.fn(() => Promise.resolve('synchronized'));
 
     TestBed.configureTestingModule({
       providers: [
         TenantStateInvalidationCoordinator,
         {
           provide: TenantContextStore,
-          useValue: { invalidations: invalidations.asObservable() },
+          useValue: {
+            invalidations: invalidations.asObservable(),
+            selectedOrganizationId: vi.fn(() => 'organization-a'),
+            switchGeneration: vi.fn(() => 3),
+            synchronizeCanonicalContext,
+          },
+        },
+        {
+          provide: TenantAuthorityChangeService,
+          useValue: { changes: authorityChanges.asObservable() },
         },
         { provide: MatDialog, useValue: { closeAll } },
         {
@@ -101,5 +118,29 @@ describe('Cross-Tenant State Invalidation coordinator', () => {
 
     expect(closeAll).toHaveBeenCalledOnce();
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('revalidates the same tenant after a valid authority-change signal', () => {
+    authorityChanges.next({
+      schemaVersion: 1,
+      type: 'OWNERSHIP_TRANSFERRED',
+      organizationId: 'organization-a',
+      eventId: 'event-a',
+    });
+
+    expect(closeAll).toHaveBeenCalledOnce();
+    expect(synchronizeCanonicalContext).toHaveBeenCalledWith(3, 'organization-a', true);
+  });
+
+  it('ignores an authority-change signal for a different selected tenant', () => {
+    authorityChanges.next({
+      schemaVersion: 1,
+      type: 'OWNERSHIP_TRANSFERRED',
+      organizationId: 'organization-b',
+      eventId: 'event-b',
+    });
+
+    expect(closeAll).not.toHaveBeenCalled();
+    expect(synchronizeCanonicalContext).not.toHaveBeenCalled();
   });
 });

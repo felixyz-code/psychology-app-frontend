@@ -6,7 +6,7 @@ import {
   TENANT_HTTP_MODE,
   TENANT_ORGANIZATION_ID,
 } from '../../../core/tenant-context/tenant-http-context';
-import { MembershipListItem } from '../models/membership.models';
+import { MembershipListItem, OwnershipTransferResponse } from '../models/membership.models';
 import { MembershipsService } from './memberships.service';
 
 describe('MembershipsService', () => {
@@ -115,6 +115,37 @@ describe('MembershipsService', () => {
     expectTenantContext(request.request.context, 'organization-a');
 
     request.flush(createMutationResponse({ status: 'REVOKED' }));
+  });
+
+  it('transfers ownership with the dedicated endpoint and exact response contract', () => {
+    const response: OwnershipTransferResponse = {
+      organizationId: 'organization-a',
+      sourceMembership: {
+        id: 'membership-source',
+        userId: 'user-source',
+        role: 'ADMIN',
+        status: 'ACTIVE',
+      },
+      targetMembership: {
+        id: 'membership-target',
+        userId: 'user-target',
+        role: 'OWNER',
+        status: 'ACTIVE',
+      },
+      transferredAt: '2026-08-10T12:00:00.000Z',
+    };
+
+    service.transferOwnership('organization-a', 'membership-target').subscribe((result) => {
+      expect(result).toEqual(response);
+    });
+
+    const request = httpTesting.expectOne('/api/organizations/organization-a/ownership-transfer');
+
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ targetMembershipId: 'membership-target' });
+    expectTenantContext(request.request.context, 'organization-a');
+
+    request.flush(response);
   });
 });
 

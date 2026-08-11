@@ -146,7 +146,7 @@
                       <button
                         mat-stroked-button
                         type="button"
-                        [disabled]="isMutating()"
+                        [disabled]="interactionLocked()"
                         (click)="openRoleDialog(membership)"
                       >
                         Cambiar rol
@@ -159,48 +159,12 @@
                         type="button"
                         class="membership-admin-more-actions"
                         [matMenuTriggerFor]="membershipActions"
-                        [disabled]="isMutating()"
+                        (mousedown)="setActionMenuMembership(membership)"
+                        [disabled]="interactionLocked()"
                         [attr.aria-label]="'Más acciones para ' + membership.displayName"
                       >
                         <mat-icon aria-hidden="true">more_vert</mat-icon>
                       </button>
-
-                      <mat-menu #membershipActions="matMenu" xPosition="before">
-                        @if (hasAllowedAction(membership, 'SUSPEND')) {
-                          <button
-                            mat-menu-item
-                            type="button"
-                            [disabled]="isMutating()"
-                            (click)="openActionConfirmation(membership, 'SUSPEND')"
-                          >
-                            <mat-icon aria-hidden="true">pause_circle</mat-icon>
-                            <span>Suspender</span>
-                          </button>
-                        }
-                        @if (hasAllowedAction(membership, 'REACTIVATE')) {
-                          <button
-                            mat-menu-item
-                            type="button"
-                            [disabled]="isMutating()"
-                            (click)="openActionConfirmation(membership, 'REACTIVATE')"
-                          >
-                            <mat-icon aria-hidden="true">play_circle</mat-icon>
-                            <span>Reactivar</span>
-                          </button>
-                        }
-                        @if (hasAllowedAction(membership, 'REMOVE')) {
-                          <button
-                            mat-menu-item
-                            type="button"
-                            class="membership-admin-menu-danger"
-                            [disabled]="isMutating()"
-                            (click)="openActionConfirmation(membership, 'REMOVE')"
-                          >
-                            <mat-icon aria-hidden="true">person_remove</mat-icon>
-                            <span>Revocar acceso</span>
-                          </button>
-                        }
-                      </mat-menu>
                     }
                   </div>
                 </td>
@@ -209,6 +173,56 @@
           </tbody>
         </table>
       </div>
+
+      <mat-menu #membershipActions="matMenu" xPosition="before">
+        @if (actionMenuMembership(); as membership) {
+          @if (hasAllowedAction(membership, 'SUSPEND')) {
+            <button
+              mat-menu-item
+              type="button"
+              [disabled]="interactionLocked()"
+              (click)="openActionConfirmation(membership, 'SUSPEND')"
+            >
+              <mat-icon aria-hidden="true">pause_circle</mat-icon>
+              <span>Suspender</span>
+            </button>
+          }
+          @if (hasAllowedAction(membership, 'REACTIVATE')) {
+            <button
+              mat-menu-item
+              type="button"
+              [disabled]="interactionLocked()"
+              (click)="openActionConfirmation(membership, 'REACTIVATE')"
+            >
+              <mat-icon aria-hidden="true">play_circle</mat-icon>
+              <span>Reactivar</span>
+            </button>
+          }
+          @if (hasAllowedAction(membership, 'REMOVE')) {
+            <button
+              mat-menu-item
+              type="button"
+              class="membership-admin-menu-danger"
+              [disabled]="interactionLocked()"
+              (click)="openActionConfirmation(membership, 'REMOVE')"
+            >
+              <mat-icon aria-hidden="true">person_remove</mat-icon>
+              <span>Revocar acceso</span>
+            </button>
+          }
+          @if (isOwnershipTransferEligible(membership)) {
+            <button
+              mat-menu-item
+              type="button"
+              [disabled]="interactionLocked()"
+              (click)="openOwnershipTransferDialog(membership)"
+            >
+              <mat-icon aria-hidden="true">swap_horiz</mat-icon>
+              <span>Transferir propiedad</span>
+            </button>
+          }
+        }
+      </mat-menu>
     </app-section-card>
 
     @if (canLeave() && currentMembership(); as ownMembership) {
@@ -228,7 +242,7 @@
           mat-stroked-button
           color="warn"
           type="button"
-          [disabled]="isMutating()"
+          [disabled]="interactionLocked()"
           (click)="openActionConfirmation(ownMembership, 'LEAVE')"
         >
           Salir de la organización
