@@ -51,17 +51,14 @@ const bootstrapResponse: FreelancerBootstrapResponse = {
     timezone: 'UTC',
     locale: 'es-MX',
     currency: 'MXN',
-    createdAt: '2026-08-11T00:00:00.000Z',
-    updatedAt: '2026-08-11T00:00:00.000Z',
   },
   membership: {
     id: 'membership-new',
-    userId: 'user-new',
     organizationId: 'organization-new',
+    userId: 'user-new',
     role: 'OWNER',
     status: 'ACTIVE',
-    createdAt: '2026-08-11T00:00:00.000Z',
-    updatedAt: '2026-08-11T00:00:00.000Z',
+    joinedAt: '2026-08-11T00:00:00.000Z',
   },
 };
 
@@ -223,6 +220,60 @@ describe('AuthService', () => {
     requests[0].flush({}, { status: 500, statusText: 'Server Error' });
 
     expect(receivedError).toHaveBeenCalledOnce();
+    expect(tenantContextStore.startForIdentity).not.toHaveBeenCalled();
+  });
+
+  it('does not overwrite a newer authenticated session when bootstrap resolves late', async () => {
+    const receivedError = vi.fn();
+
+    service.freelancerBootstrap(bootstrapRequest).subscribe({ error: receivedError });
+    const request = httpTesting.expectOne(`${environment.apiUrl}/auth/freelancer-bootstrap`);
+
+    store.setSession('newer-token', user);
+    request.flush(bootstrapResponse);
+    await Promise.resolve();
+
+    expect(receivedError).toHaveBeenCalledOnce();
+    expect(receivedError.mock.calls[0][0].name).toBe('BootstrapSessionConflictError');
+    expect(store.token()).toBe('newer-token');
+    expect(tenantContextStore.startForIdentity).not.toHaveBeenCalled();
+  });
+
+  it('fails closed before posting when a session is already authenticated', () => {
+    store.setSession('existing-token', user);
+    const receivedError = vi.fn();
+
+    service.freelancerBootstrap(bootstrapRequest).subscribe({ error: receivedError });
+
+    httpTesting.expectNone(`${environment.apiUrl}/auth/freelancer-bootstrap`);
+    expect(receivedError).toHaveBeenCalledOnce();
+    expect(store.token()).toBe('existing-token');
+  });
+
+  it('rejects the legacy timestamp bootstrap contract', async () => {
+    const receivedError = vi.fn();
+    const legacyResponse = {
+      ...bootstrapResponse,
+      organization: {
+        ...bootstrapResponse.organization,
+        createdAt: '2026-08-11T00:00:00.000Z',
+        updatedAt: '2026-08-11T00:00:00.000Z',
+      },
+      membership: {
+        ...bootstrapResponse.membership,
+        createdAt: '2026-08-11T00:00:00.000Z',
+        updatedAt: '2026-08-11T00:00:00.000Z',
+      },
+    };
+
+    service.freelancerBootstrap(bootstrapRequest).subscribe({ error: receivedError });
+    httpTesting
+      .expectOne(`${environment.apiUrl}/auth/freelancer-bootstrap`)
+      .flush(legacyResponse);
+    await Promise.resolve();
+
+    expect(receivedError).toHaveBeenCalledOnce();
+    expect(store.isAuthenticated()).toBe(false);
     expect(tenantContextStore.startForIdentity).not.toHaveBeenCalled();
   });
 

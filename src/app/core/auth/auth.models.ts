@@ -33,18 +33,15 @@ export interface FreelancerBootstrapOrganization {
   timezone: string;
   locale: string;
   currency: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface FreelancerBootstrapMembership {
   id: string;
-  userId: string;
   organizationId: string;
+  userId: string;
   role: 'OWNER';
   status: 'ACTIVE';
-  createdAt: string;
-  updatedAt: string;
+  joinedAt: string;
 }
 
 export interface FreelancerBootstrapResponse {

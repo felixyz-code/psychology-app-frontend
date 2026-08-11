@@ -7,7 +7,8 @@ import { of, Subject, throwError } from 'rxjs';
 import { TenantContextState } from '../tenant-context/tenant-context.models';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { FreelancerBootstrapResponse } from './auth.models';
-import { AuthService } from './auth.service';
+import { AuthService, BootstrapSessionConflictError } from './auth.service';
+import { AuthStore } from './auth.store';
 import { SignupPage, utf8ByteLength } from './signup.page';
 
 const bootstrapResponse: FreelancerBootstrapResponse = {
@@ -27,17 +28,14 @@ const bootstrapResponse: FreelancerBootstrapResponse = {
     timezone: 'UTC',
     locale: 'es-MX',
     currency: 'MXN',
-    createdAt: '2026-08-11T00:00:00.000Z',
-    updatedAt: '2026-08-11T00:00:00.000Z',
   },
   membership: {
     id: 'membership-new',
-    userId: 'user-new',
     organizationId: 'organization-new',
+    userId: 'user-new',
     role: 'OWNER',
     status: 'ACTIVE',
-    createdAt: '2026-08-11T00:00:00.000Z',
-    updatedAt: '2026-08-11T00:00:00.000Z',
+    joinedAt: '2026-08-11T00:00:00.000Z',
   },
 };
 
@@ -57,6 +55,7 @@ describe('SignupPage', () => {
     state: ReturnType<typeof vi.fn>;
     refreshContext: ReturnType<typeof vi.fn>;
   };
+  let authStore: { isAuthenticated: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     authService = { freelancerBootstrap: vi.fn() };
@@ -65,6 +64,7 @@ describe('SignupPage', () => {
       state: vi.fn(() => 'ACTIVE_TENANT_READY' as TenantContextState),
       refreshContext: vi.fn(() => Promise.resolve()),
     };
+    authStore = { isAuthenticated: vi.fn(() => false) };
 
     TestBed.configureTestingModule({
       providers: [
@@ -72,6 +72,7 @@ describe('SignupPage', () => {
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
         { provide: TenantContextStore, useValue: tenantContextStore },
+        { provide: AuthStore, useValue: authStore },
       ],
     });
 
@@ -194,6 +195,17 @@ describe('SignupPage', () => {
     expect(page.isSubmitting()).toBe(true);
   });
 
+  it('fails closed for a stale signup page after authentication and sends no bootstrap POST', () => {
+    authStore.isAuthenticated.mockReturnValue(true);
+    page.signupForm.setValue(validForm);
+
+    page.submit();
+
+    expect(authService.freelancerBootstrap).not.toHaveBeenCalled();
+    expect(page.submissionLocked()).toBe(true);
+    expect(page.errorMessage()).toContain('sesión activa');
+  });
+
   it('routes ACTIVE_TENANT_READY to the dashboard exactly once', () => {
     authService.freelancerBootstrap.mockReturnValue(of(bootstrapResponse));
     page.signupForm.setValue(validForm);
@@ -250,6 +262,7 @@ describe('SignupPage', () => {
     [400, 'Revisa los datos', true],
     [404, 'no está disponible', false],
     [409, 'Si ya tienes una cuenta', false],
+    [201, 'pudo haberse creado', false],
     [429, 'demasiados intentos', false],
     [0, 'No pudimos confirmar', false],
     [500, 'No fue posible completar', false],
@@ -284,6 +297,20 @@ describe('SignupPage', () => {
       }
     },
   );
+
+  it('keeps a newer authenticated session and offers context-only recovery', () => {
+    authService.freelancerBootstrap.mockReturnValue(
+      throwError(() => new BootstrapSessionConflictError()),
+    );
+    page.signupForm.setValue(validForm);
+
+    page.submit();
+
+    expect(page.accountCreated()).toBe(true);
+    expect(page.submissionLocked()).toBe(true);
+    expect(page.errorMessage()).toContain('no volveremos a enviar');
+    expect(tenantContextStore.refreshContext).not.toHaveBeenCalled();
+  });
 
   it('exposes login navigation for deliberate recovery', () => {
     expect(page.loginRoute).toBe('/login');

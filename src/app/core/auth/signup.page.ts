@@ -20,7 +20,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TenantContextState } from '../tenant-context/tenant-context.models';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { FreelancerBootstrapRequest } from './auth.models';
-import { AuthService } from './auth.service';
+import { AuthService, BootstrapSessionConflictError } from './auth.service';
+import { AuthStore } from './auth.store';
 
 const trimmedRequired: ValidatorFn = (control: AbstractControl): ValidationErrors | null =>
   typeof control.value === 'string' && control.value.trim().length > 0
@@ -70,6 +71,7 @@ export function utf8MaxBytes(maxBytes: number): ValidatorFn {
 export class SignupPage {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly authStore = inject(AuthStore);
   private readonly tenantContextStore = inject(TenantContextStore);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -103,6 +105,14 @@ export class SignupPage {
 
     if (this.signupForm.invalid) {
       this.signupForm.markAllAsTouched();
+      return;
+    }
+
+    if (this.authStore.isAuthenticated()) {
+      this.submissionLocked.set(true);
+      this.errorMessage.set(
+        'Ya existe una sesión activa en esta pestaña. Inicia sesión o continúa desde tu espacio de trabajo.',
+      );
       return;
     }
 
@@ -199,6 +209,14 @@ export class SignupPage {
   }
 
   private handleBootstrapError(error: unknown): void {
+    if (error instanceof BootstrapSessionConflictError) {
+      this.accountCreated.set(true);
+      this.errorMessage.set(
+        'La cuenta pudo haberse creado, pero otra sesión inició mientras preparábamos tu espacio de trabajo. Intenta continuar o inicia sesión; no volveremos a enviar el registro.',
+      );
+      return;
+    }
+
     const status = error instanceof HttpErrorResponse ? error.status : 0;
 
     if (status === 400) {
@@ -212,9 +230,10 @@ export class SignupPage {
       return;
     }
 
-    if (status === 409) {
+    if (status === 409 || status === 201) {
+      this.accountCreated.set(true);
       this.errorMessage.set(
-        'No fue posible completar el registro. Si ya tienes una cuenta, intenta iniciar sesión.',
+        'La cuenta pudo haberse creado, pero no pudimos confirmar la sesión. Si ya tienes una cuenta, inicia sesión; también puedes intentar continuar. No volveremos a enviar el registro.',
       );
       return;
     }

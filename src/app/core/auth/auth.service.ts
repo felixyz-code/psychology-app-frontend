@@ -1,6 +1,6 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { from, map, Observable, switchMap } from 'rxjs';
+import { defer, from, map, Observable, of, switchMap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
@@ -12,6 +12,15 @@ import {
   LoginResponse,
 } from './auth.models';
 import { AuthStore } from './auth.store';
+
+export class BootstrapSessionConflictError extends Error {
+  readonly code = 'BOOTSTRAP_SESSION_CONFLICT';
+
+  constructor() {
+    super('A newer authenticated session became active while signup was in progress.');
+    this.name = 'BootstrapSessionConflictError';
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -39,6 +48,7 @@ export class AuthService {
     request: FreelancerBootstrapRequest,
   ): Observable<FreelancerBootstrapResponse> {
     const context = new HttpContext().set(TENANT_HTTP_MODE, 'PUBLIC');
+    const requestSessionVersion = this.authStore.sessionVersion();
     const body: FreelancerBootstrapRequest = {
       email: request.email,
       password: request.password,
@@ -46,10 +56,17 @@ export class AuthService {
       organizationName: request.organizationName,
     };
 
-    return this.http
-      .post<FreelancerBootstrapResponse>(this.apiUrl + '/auth/freelancer-bootstrap', body, {
-        context,
-      })
+    return defer(() => {
+      if (this.authStore.isAuthenticated()) {
+        return throwError(() => new BootstrapSessionConflictError());
+      }
+
+      return this.http.post<FreelancerBootstrapResponse>(
+        this.apiUrl + '/auth/freelancer-bootstrap',
+        body,
+        { context },
+      );
+    })
       .pipe(
         map((response) => {
           if (!isValidBootstrapResponse(response)) {
@@ -59,9 +76,23 @@ export class AuthService {
           return response;
         }),
         switchMap((response) => {
+          if (
+            this.authStore.isAuthenticated() ||
+            this.authStore.sessionVersion() !== requestSessionVersion
+          ) {
+            return throwError(() => new BootstrapSessionConflictError());
+          }
+
           this.authStore.setSession(response.accessToken, response.user);
+          const installedSessionVersion = this.authStore.sessionVersion();
+
           return from(this.tenantContextStore.startForIdentity(response.user.id)).pipe(
-            map(() => response),
+            switchMap(() =>
+              this.authStore.sessionVersion() === installedSessionVersion &&
+              this.authStore.user()?.id === response.user.id
+                ? of(response)
+                : throwError(() => new BootstrapSessionConflictError()),
+            ),
           );
         }),
       );
@@ -91,16 +122,79 @@ function isValidBootstrapResponse(response: unknown): response is FreelancerBoot
     typeof user.name === 'string' &&
     typeof user.email === 'string' &&
     user.role === 'PSYCHOLOGIST' &&
-    !!organization &&
-    typeof organization.id === 'string' &&
-    organization.id.trim().length > 0 &&
-    organization.status === 'ACTIVE' &&
-    !!membership &&
-    typeof membership.id === 'string' &&
-    membership.id.trim().length > 0 &&
+    isBootstrapOrganization(organization) &&
+    isBootstrapMembership(membership) &&
     membership.userId === user.id &&
-    membership.organizationId === organization.id &&
-    membership.role === 'OWNER' &&
-    membership.status === 'ACTIVE'
+    membership.organizationId === organization.id
   );
+}
+
+function isBootstrapOrganization(
+  value: unknown,
+): value is FreelancerBootstrapResponse['organization'] {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const organization = value as Record<string, unknown>;
+  return (
+    hasExactKeys(organization, [
+      'id',
+      'slug',
+      'legalName',
+      'displayName',
+      'status',
+      'timezone',
+      'locale',
+      'currency',
+    ]) &&
+    isNonEmptyString(organization['id']) &&
+    isNonEmptyString(organization['slug']) &&
+    isNonEmptyString(organization['legalName']) &&
+    isNonEmptyString(organization['displayName']) &&
+    organization['status'] === 'ACTIVE' &&
+    isNonEmptyString(organization['timezone']) &&
+    isNonEmptyString(organization['locale']) &&
+    isNonEmptyString(organization['currency'])
+  );
+}
+
+function isBootstrapMembership(
+  value: unknown,
+): value is FreelancerBootstrapResponse['membership'] {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const membership = value as Record<string, unknown>;
+  return (
+    hasExactKeys(membership, [
+      'id',
+      'organizationId',
+      'userId',
+      'role',
+      'status',
+      'joinedAt',
+    ]) &&
+    isNonEmptyString(membership['id']) &&
+    isNonEmptyString(membership['organizationId']) &&
+    isNonEmptyString(membership['userId']) &&
+    membership['role'] === 'OWNER' &&
+    membership['status'] === 'ACTIVE' &&
+    isNonEmptyString(membership['joinedAt'])
+  );
+}
+
+function hasExactKeys(record: Record<string, unknown>, keys: readonly string[]): boolean {
+  const actualKeys = Object.keys(record).sort();
+  const expectedKeys = [...keys].sort();
+
+  return (
+    actualKeys.length === expectedKeys.length &&
+    actualKeys.every((key, index) => key === expectedKeys[index])
+  );
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
 }

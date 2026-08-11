@@ -10,11 +10,13 @@ const AUTH_USER_KEY = 'psychology_app_auth_user';
 export class AuthStore {
   private readonly accessTokenSignal = signal<string | null>(null);
   private readonly currentUserSignal = signal<AuthUser | null>(null);
+  private readonly sessionVersionSignal = signal(0);
   private readonly sessionChangeSubject = new Subject<AuthUser | null>();
 
   readonly token = computed(() => this.accessTokenSignal());
   readonly user = computed(() => this.currentUserSignal());
   readonly isAuthenticated = computed(() => !!this.accessTokenSignal());
+  readonly sessionVersion = computed(() => this.sessionVersionSignal());
   readonly userRole = computed(() => this.currentUserSignal()?.role ?? null);
   readonly isAdmin = computed(() => this.userRole() === 'ADMIN');
   readonly isPsychologist = computed(() => this.userRole() === 'PSYCHOLOGIST');
@@ -35,6 +37,7 @@ export class AuthStore {
   setSession(accessToken: string, user: AuthUser): void {
     this.accessTokenSignal.set(accessToken);
     this.currentUserSignal.set(user);
+    this.sessionVersionSignal.update((version) => version + 1);
 
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
@@ -46,6 +49,10 @@ export class AuthStore {
 
     this.accessTokenSignal.set(null);
     this.currentUserSignal.set(null);
+
+    if (hadSession) {
+      this.sessionVersionSignal.update((version) => version + 1);
+    }
 
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
