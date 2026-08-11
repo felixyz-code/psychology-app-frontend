@@ -201,13 +201,12 @@ describe('AuthService', () => {
       tenantContextStore.startForIdentity.mock.invocationCallOrder[0],
     );
     expect(tenantContextStore.switchTenant).not.toHaveBeenCalled();
-    expect(localStorage.getItem('psychology_app_auth_user')).toBe(
-      JSON.stringify(bootstrapResponse.user),
+    expect(localStorage.getItem('psychology_app_auth_session')).toBe(
+      JSON.stringify({ accessToken: bootstrapResponse.accessToken, user: bootstrapResponse.user }),
     );
-    expect(localStorage.getItem('psychology_app_access_token')).toBe(bootstrapResponse.accessToken);
     expect(
       Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index)).sort(),
-    ).toEqual(['psychology_app_access_token', 'psychology_app_auth_user']);
+    ).toEqual(['psychology_app_auth_session']);
     expect(sessionStorage.length).toBe(0);
   });
 
