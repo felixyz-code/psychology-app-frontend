@@ -141,7 +141,7 @@
             role="alert"
           >
             <p>{{ errorMessage() }}</p>
-            @if (accountCreated()) {
+            @if (canRetryContext()) {
               <button
                 mat-stroked-button
                 type="button"

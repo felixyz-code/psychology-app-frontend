@@ -81,6 +81,7 @@ export class SignupPage {
   readonly isRecoveringContext = signal(false);
   readonly submissionLocked = signal(false);
   readonly accountCreated = signal(false);
+  readonly canRetryContext = signal(false);
   readonly errorMessage = signal('');
   readonly hidePassword = signal(true);
   readonly hideConfirmPassword = signal(true);
@@ -129,6 +130,7 @@ export class SignupPage {
         next: () => {
           this.isSubmitting.set(false);
           this.accountCreated.set(true);
+          this.canRetryContext.set(true);
           this.routeFromCanonicalState();
         },
         error: (error: unknown) => {
@@ -139,7 +141,7 @@ export class SignupPage {
   }
 
   async retryContext(): Promise<void> {
-    if (!this.accountCreated() || this.isRecoveringContext()) {
+    if (!this.accountCreated() || !this.canRetryContext() || this.isRecoveringContext()) {
       return;
     }
 
@@ -212,6 +214,7 @@ export class SignupPage {
     if (error instanceof BootstrapSessionConflictError) {
       if (!error.mutationCommitted) {
         this.accountCreated.set(false);
+        this.canRetryContext.set(false);
         this.errorMessage.set(
           'Ya existe una sesión activa en esta pestaña. Inicia sesión o continúa desde tu espacio de trabajo.',
         );
@@ -219,6 +222,7 @@ export class SignupPage {
       }
 
       this.accountCreated.set(true);
+      this.canRetryContext.set(false);
       this.errorMessage.set(
         'La cuenta fue creada, pero otra sesión inició mientras preparábamos tu espacio de trabajo. Cierra la sesión actual e inicia sesión con la nueva cuenta para continuar.',
       );
@@ -228,18 +232,23 @@ export class SignupPage {
     const status = error instanceof HttpErrorResponse ? error.status : 0;
 
     if (status === 400) {
+      this.accountCreated.set(false);
+      this.canRetryContext.set(false);
       this.submissionLocked.set(false);
       this.errorMessage.set('Revisa los datos ingresados e intenta nuevamente.');
       return;
     }
 
     if (status === 404) {
+      this.accountCreated.set(false);
+      this.canRetryContext.set(false);
       this.errorMessage.set('El registro no está disponible en este momento.');
       return;
     }
 
     if (status === 409) {
       this.accountCreated.set(false);
+      this.canRetryContext.set(false);
       this.errorMessage.set(
         'No fue posible completar el registro. Si ya tienes una cuenta, intenta iniciar sesión.',
       );
@@ -247,17 +256,23 @@ export class SignupPage {
     }
 
     if (status === 429) {
+      this.accountCreated.set(false);
+      this.canRetryContext.set(false);
       this.errorMessage.set('Se realizaron demasiados intentos. Intenta de nuevo más tarde.');
       return;
     }
 
     if (status === 0) {
+      this.accountCreated.set(false);
+      this.canRetryContext.set(false);
       this.errorMessage.set(
         'No pudimos confirmar si el registro terminó correctamente. Intenta iniciar sesión antes de volver a registrarte.',
       );
       return;
     }
 
+    this.accountCreated.set(false);
+    this.canRetryContext.set(false);
     this.errorMessage.set(
       'No fue posible completar el registro. Intenta iniciar sesión antes de volver a intentarlo.',
     );

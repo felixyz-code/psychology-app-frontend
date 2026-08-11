@@ -239,6 +239,7 @@ describe('SignupPage', () => {
 
       expect(router.navigate).not.toHaveBeenCalled();
       expect(page.accountCreated()).toBe(true);
+      expect(page.canRetryContext()).toBe(true);
       expect(page.submissionLocked()).toBe(true);
       expect(page.errorMessage()).toContain('Tu cuenta fue creada');
       expect(authService.freelancerBootstrap).toHaveBeenCalledOnce();
@@ -251,6 +252,8 @@ describe('SignupPage', () => {
     page.signupForm.setValue(validForm);
     page.submit();
 
+    expect(page.accountCreated()).toBe(true);
+    expect(page.canRetryContext()).toBe(true);
     await page.retryContext();
 
     expect(tenantContextStore.refreshContext).toHaveBeenCalledOnce();
@@ -284,6 +287,7 @@ describe('SignupPage', () => {
       expect(page.errorMessage()).toContain(expectedMessage);
       expect(page.submissionLocked()).toBe(!unlocks);
       expect(page.accountCreated()).toBe(false);
+      expect(page.canRetryContext()).toBe(false);
       expect(authService.freelancerBootstrap).toHaveBeenCalledOnce();
       expect(router.navigate).not.toHaveBeenCalled();
 
@@ -301,19 +305,24 @@ describe('SignupPage', () => {
     },
   );
 
-  it('keeps a newer authenticated session and offers context-only recovery', () => {
-    authService.freelancerBootstrap.mockReturnValue(
-      throwError(() => new BootstrapSessionConflictError(true)),
-    );
-    page.signupForm.setValue(validForm);
+  it.each(['post-bootstrap', 'post-context'] as const)(
+    'keeps a newer authenticated session without offering context recovery after a %s conflict',
+    async () => {
+      authService.freelancerBootstrap.mockReturnValue(
+        throwError(() => new BootstrapSessionConflictError(true)),
+      );
+      page.signupForm.setValue(validForm);
 
-    page.submit();
+      page.submit();
+      await page.retryContext();
 
-    expect(page.accountCreated()).toBe(true);
-    expect(page.submissionLocked()).toBe(true);
-    expect(page.errorMessage()).toContain('La cuenta fue creada');
-    expect(tenantContextStore.refreshContext).not.toHaveBeenCalled();
-  });
+      expect(page.accountCreated()).toBe(true);
+      expect(page.canRetryContext()).toBe(false);
+      expect(page.submissionLocked()).toBe(true);
+      expect(page.errorMessage()).toContain('La cuenta fue creada');
+      expect(tenantContextStore.refreshContext).not.toHaveBeenCalled();
+    },
+  );
 
   it('does not treat a pre-request session conflict as account creation', () => {
     authService.freelancerBootstrap.mockReturnValue(
@@ -324,6 +333,7 @@ describe('SignupPage', () => {
     page.submit();
 
     expect(page.accountCreated()).toBe(false);
+    expect(page.canRetryContext()).toBe(false);
     expect(page.submissionLocked()).toBe(true);
     expect(page.errorMessage()).toContain('sesi');
     expect(tenantContextStore.refreshContext).not.toHaveBeenCalled();
