@@ -38,14 +38,16 @@
         <mat-icon>arrow_back</mat-icon>
         <span>Volver al listado</span>
       </a>
-      <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']">
-        <mat-icon>edit</mat-icon>
-        <span>Editar transaccion</span>
-      </a>
-      <button mat-stroked-button type="button" (click)="openDeleteDialog()">
-        <mat-icon>delete</mat-icon>
-        <span>Eliminar transaccion</span>
-      </button>
+      @if (canManage()) {
+        <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']">
+          <mat-icon>edit</mat-icon>
+          <span>Editar transaccion</span>
+        </a>
+        <button mat-stroked-button type="button" (click)="openDeleteDialog()">
+          <mat-icon>delete</mat-icon>
+          <span>Eliminar transaccion</span>
+        </button>
+      }
     </div>
 
     <app-financial-transaction-detail-content [transaction]="transaction" />

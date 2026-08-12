@@ -51,7 +51,8 @@ export const routes: Routes = [
       },
       {
         path: 'financial-transactions',
-        canActivate: [activeTenantGuard],
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'finance.read' },
         loadChildren: () =>
           import('./features/financial-transactions/financial-transactions.routes').then(
             (m) => m.financialTransactionsRoutes,

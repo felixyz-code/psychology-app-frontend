@@ -64,13 +64,15 @@
 
     <section class="dashboard-metrics app-page__metrics" aria-label="Metricas principales">
       @for (metric of vm.kpiStrip; track metric.id) {
-        <app-metric-card
-          [icon]="metric.icon"
-          [title]="metric.label"
-          [value]="metric.value"
-          [supportingText]="metric.supportingText"
-          [variant]="metric.variant"
-        />
+        @if (metric.id !== 'monthly-balance' || canReadFinancialSummary()) {
+          <app-metric-card
+            [icon]="metric.icon"
+            [title]="metric.label"
+            [value]="metric.value"
+            [supportingText]="metric.supportingText"
+            [variant]="metric.variant"
+          />
+        }
       }
     </section>
 
@@ -190,17 +192,18 @@
         }
       </app-section-card>
 
-      <app-section-card
-        class="dashboard-widget dashboard-widget--finance"
-        [title]="vm.financeSummary.title"
-        [subtitle]="vm.financeSummary.subtitle"
-      >
+      @if (canReadFinancialSummary() && vm.financeSummary; as financeSummary) {
+        <app-section-card
+          class="dashboard-widget dashboard-widget--finance"
+          [title]="financeSummary.title"
+          [subtitle]="financeSummary.subtitle"
+        >
         <div class="dashboard-finance__meta">
-          <span>{{ vm.financeSummary.periodLabel }}</span>
+          <span>{{ financeSummary.periodLabel }}</span>
         </div>
 
         <div class="dashboard-finance-list">
-          @for (metric of vm.financeSummary.metrics; track metric.id) {
+          @for (metric of financeSummary.metrics; track metric.id) {
             <article class="dashboard-finance-row" [attr.data-metric]="metric.id">
               <div class="dashboard-finance-row__label">
                 <div class="dashboard-finance-row__labelline">
@@ -216,10 +219,13 @@
           }
         </div>
 
-        <div sectionCardFooter class="dashboard-footer-end">
-          <button mat-stroked-button type="button" (click)="navigateToFinance()">Ir a finanzas</button>
-        </div>
-      </app-section-card>
+        @if (canReadFinance() && vm.financeNavigationAvailable) {
+          <div sectionCardFooter class="dashboard-footer-end">
+            <button mat-stroked-button type="button" (click)="navigateToFinance()">Ir a finanzas</button>
+          </div>
+        }
+        </app-section-card>
+      }
 
       <app-section-card
         class="dashboard-widget dashboard-widget--quick-actions"
@@ -228,12 +234,14 @@
       >
         <div class="quick-actions">
           @for (action of vm.quickActions.items; track action.id) {
-            <app-action-card
-              [icon]="action.icon"
-              [label]="action.label"
-              [variant]="action.variant"
-              (triggered)="handleQuickAction(action.id)"
-            />
+            @if (action.id !== 'open-finance' || canReadFinance()) {
+              <app-action-card
+                [icon]="action.icon"
+                [label]="action.label"
+                [variant]="action.variant"
+                (triggered)="handleQuickAction(action.id)"
+              />
+            }
           }
         </div>
       </app-section-card>

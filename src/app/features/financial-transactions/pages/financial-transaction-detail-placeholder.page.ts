@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +13,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { FinancialTransactionResponse } from '../models/financial-transaction.models';
 import { FinancialTransactionsService } from '../services/financial-transactions.service';
+import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
 
 @Component({
   selector: 'app-financial-transaction-detail-placeholder-page',
@@ -35,11 +36,13 @@ export class FinancialTransactionDetailPlaceholderPage {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly financialTransactionsService = inject(FinancialTransactionsService);
+  private readonly tenantContextStore = inject(TenantContextStore);
 
   readonly transactionId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
   readonly transaction = signal<FinancialTransactionResponse | null>(null);
+  readonly canManage = computed(() => this.tenantContextStore.hasCapability('finance.manage'));
 
   constructor() {
     this.loadTransaction();
@@ -52,7 +55,7 @@ export class FinancialTransactionDetailPlaceholderPage {
   openDeleteDialog(): void {
     const transaction = this.transaction();
 
-    if (!transaction) {
+    if (!transaction || !this.canManage()) {
       return;
     }
 

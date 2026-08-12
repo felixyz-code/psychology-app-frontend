@@ -14,7 +14,12 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
   beforeEach(async () => {
     synchronizationPending = signal(false);
     activeTenantReady = signal(true);
-    capabilities = signal(['organization.read', 'membership.read', 'invitation.read']);
+    capabilities = signal([
+      'finance.read',
+      'organization.read',
+      'membership.read',
+      'invitation.read',
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [SidebarComponent],
@@ -64,5 +69,17 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
     activeTenantReady.set(false);
     await fixture.whenStable();
     expect(fixture.nativeElement.textContent).not.toContain('Invitaciones');
+  });
+
+  it('reacts to the current tenant finance.read capability', async () => {
+    expect(fixture.nativeElement.textContent).toContain('Finanzas');
+
+    capabilities.update((current) => current.filter((capability) => capability !== 'finance.read'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('Finanzas');
+
+    capabilities.update((current) => [...current, 'finance.read']);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Finanzas');
   });
 });

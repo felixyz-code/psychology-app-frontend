@@ -7,31 +7,35 @@
       { label: 'Finanzas' },
     ]"
   >
-    <a mat-flat-button routerLink="/financial-transactions/new" class="app-page-header-action">
-      <mat-icon>payments</mat-icon>
-      <span>Registrar movimiento</span>
-    </a>
+    @if (canManage()) {
+      <a mat-flat-button routerLink="/financial-transactions/new" class="app-page-header-action">
+        <mat-icon>payments</mat-icon>
+        <span>Registrar movimiento</span>
+      </a>
+    }
   </app-page-header>
 
-  <section class="financial-transactions-summary app-page__metrics" aria-label="Resumen financiero">
-    @for (card of summaryCards(); track card.label) {
-      <app-metric-card
-        [icon]="card.icon"
-        [title]="card.label"
-        [value]="card.value"
-        [supportingText]="card.supportingText"
-        [variant]="card.tone"
-        [loading]="isSummaryLoading()"
-        [compact]="true"
-      />
-    }
-  </section>
+  @if (canReadSummary()) {
+    <section class="financial-transactions-summary app-page__metrics" aria-label="Resumen financiero">
+      @for (card of summaryCards(); track card.label) {
+        <app-metric-card
+          [icon]="card.icon"
+          [title]="card.label"
+          [value]="card.value"
+          [supportingText]="card.supportingText"
+          [variant]="card.tone"
+          [loading]="isSummaryLoading()"
+          [compact]="true"
+        />
+      }
+    </section>
 
-  @if (summaryErrorMessage()) {
-    <div class="financial-transactions-summary-error" role="status">
-      <p>{{ summaryErrorMessage() }}</p>
-      <button mat-stroked-button type="button" (click)="retrySummary()">Reintentar resumen</button>
-    </div>
+    @if (summaryErrorMessage()) {
+      <div class="financial-transactions-summary-error" role="status">
+        <p>{{ summaryErrorMessage() }}</p>
+        <button mat-stroked-button type="button" (click)="retrySummary()">Reintentar resumen</button>
+      </div>
+    }
   }
 
   <app-section-card
@@ -201,27 +205,29 @@
                 >
                   <mat-icon>visibility</mat-icon>
                 </button>
-                <a
-                  mat-icon-button
-                  [routerLink]="['/financial-transactions', transaction.id, 'edit']"
-                  [attr.aria-label]="'Editar transaccion ' + transaction.concept"
-                  matTooltip="Editar transaccion"
-                  [matTooltipShowDelay]="150"
-                  (click)="stopRowClick($event)"
-                >
-                  <mat-icon>edit</mat-icon>
-                </a>
-                <button
-                  mat-icon-button
-                  class="app-table-action--danger"
-                  type="button"
-                  [attr.aria-label]="'Eliminar transaccion ' + transaction.concept"
-                  matTooltip="Eliminar transaccion"
-                  [matTooltipShowDelay]="150"
-                  (click)="stopRowClick($event); openDeleteDialog(transaction)"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
+                @if (canManage()) {
+                  <a
+                    mat-icon-button
+                    [routerLink]="['/financial-transactions', transaction.id, 'edit']"
+                    [attr.aria-label]="'Editar transaccion ' + transaction.concept"
+                    matTooltip="Editar transaccion"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </a>
+                  <button
+                    mat-icon-button
+                    class="app-table-action--danger"
+                    type="button"
+                    [attr.aria-label]="'Eliminar transaccion ' + transaction.concept"
+                    matTooltip="Eliminar transaccion"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); openDeleteDialog(transaction)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
               </div>
             </td>
           </ng-container>

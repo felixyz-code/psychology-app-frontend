@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
+import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
 import { getAppointmentStatusLabel, getAppointmentStatusVariant } from '../../appointments/utils/appointment-presenters';
 import {
   getLocalDayDifference,
@@ -46,6 +47,7 @@ export interface DashboardAnalyticsResult {
 
 @Injectable({ providedIn: 'root' })
 export class DashboardAnalyticsService {
+  private readonly tenantContextStore = inject(TenantContextStore);
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly caseFilesService = inject(CaseFilesService);
   private readonly documentsService = inject(DocumentsService);
@@ -75,6 +77,11 @@ export class DashboardAnalyticsService {
   loadSnapshot(): Observable<DashboardSnapshot> {
     const failedSources: string[] = [];
     const monthRange = buildCurrentMonthDateRange();
+    const financialSummaryRequest = this.tenantContextStore.hasCapability('finance.summary_read')
+      ? this.financialTransactionsService.findSummary(monthRange).pipe(
+          catchError(() => this.fallback(null, failedSources, 'resumen financiero'))
+        )
+      : of(null);
 
     return forkJoin({
       patients: this.patientsService.getPatients().pipe(
@@ -92,9 +99,7 @@ export class DashboardAnalyticsService {
       documents: this.documentsService.getAll().pipe(
         catchError(() => this.fallback<ClinicalDocument[]>([], failedSources, 'documentos'))
       ),
-      financialSummary: this.financialTransactionsService.findSummary(monthRange).pipe(
-        catchError(() => this.fallback(null, failedSources, 'resumen financiero'))
-      ),
+      financialSummary: financialSummaryRequest,
     }).pipe(
       map((result) => ({
         ...result,
@@ -105,21 +110,28 @@ export class DashboardAnalyticsService {
   }
 
   buildViewModel(snapshot: DashboardSnapshot): DashboardViewModel {
+    const canReadFinancialSummary = this.tenantContextStore.hasCapability('finance.summary_read');
+    const canReadFinance = this.tenantContextStore.hasCapability('finance.read');
+
     return {
       generatedAt: snapshot.generatedAt,
       currentDateLabel: this.formatCurrentDate(snapshot.generatedAt),
-      kpiStrip: this.buildKpiStrip(snapshot),
+      kpiStrip: this.buildKpiStrip(snapshot, canReadFinancialSummary),
       agendaToday: this.buildAgendaToday(snapshot),
       upcomingAppointments: this.buildUpcomingAppointments(snapshot),
-      financeSummary: this.buildFinanceSummary(snapshot),
+      financeSummary: canReadFinancialSummary ? this.buildFinanceSummary(snapshot) : null,
+      financeNavigationAvailable: canReadFinance,
       clinicalActivity: this.buildClinicalActivity(snapshot),
       operationalAlerts: this.buildOperationalAlerts(snapshot),
-      quickActions: this.buildQuickActions(),
+      quickActions: this.buildQuickActions(canReadFinance),
       warnings: this.buildWarnings(snapshot),
     };
   }
 
-  buildKpiStrip(snapshot: DashboardSnapshot): DashboardKpiItem[] {
+  buildKpiStrip(
+    snapshot: DashboardSnapshot,
+    canReadFinancialSummary = this.tenantContextStore.hasCapability('finance.summary_read')
+  ): DashboardKpiItem[] {
     const now = this.parseSnapshotDate(snapshot.generatedAt);
     const totalPatients = snapshot.patients.length;
     const todayAppointments = this.getTodayAppointments(snapshot, now);
@@ -155,7 +167,7 @@ export class DashboardAnalyticsService {
           : 'No hay atenciones futuras programadas.',
         variant: 'amber',
       },
-      {
+      ...(canReadFinancialSummary ? [{
         id: 'monthly-balance',
         icon: 'account_balance_wallet',
         label: 'Balance del mes',
@@ -166,7 +178,7 @@ export class DashboardAnalyticsService {
           ? 'Diferencia neta entre ingresos y egresos del rango mensual activo.'
           : 'No fue posible obtener el resumen financiero del mes.',
         variant: 'violet',
-      },
+      } satisfies DashboardKpiItem] : []),
     ];
 
     return metrics.slice(0, DashboardAnalyticsService.KPI_TOTAL);
@@ -333,7 +345,7 @@ export class DashboardAnalyticsService {
     };
   }
 
-  buildQuickActions() {
+  buildQuickActions(canReadFinance = this.tenantContextStore.hasCapability('finance.read')) {
     const items: DashboardQuickActionItem[] = [
       {
         id: 'create-patient',
@@ -353,12 +365,12 @@ export class DashboardAnalyticsService {
         label: 'Buscar paciente',
         variant: 'secondary',
       },
-      {
+      ...(canReadFinance ? [{
         id: 'open-finance',
         icon: 'payments',
         label: 'Ir a finanzas',
         variant: 'secondary',
-      },
+      } satisfies DashboardQuickActionItem] : []),
     ];
 
     return {
