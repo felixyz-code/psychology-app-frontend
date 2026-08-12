@@ -58,18 +58,20 @@
           </span>
         </a>
 
-        <a
-          routerLink="/financial-transactions"
-          routerLinkActive="sidebar__link--active"
-          [routerLinkActiveOptions]="{ exact: false }"
-          class="sidebar__link"
-          (click)="navSelected.emit()"
-        >
-          <mat-icon>payments</mat-icon>
-          <span class="sidebar__content">
-            <span class="sidebar__title">Finanzas</span>
-          </span>
-        </a>
+        @if (tenantContextStore.hasCapability('finance.read')) {
+          <a
+            routerLink="/financial-transactions"
+            routerLinkActive="sidebar__link--active"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="sidebar__link"
+            (click)="navSelected.emit()"
+          >
+            <mat-icon>payments</mat-icon>
+            <span class="sidebar__content">
+              <span class="sidebar__title">Finanzas</span>
+            </span>
+          </a>
+        }
 
         <a
           routerLink="/case-files"

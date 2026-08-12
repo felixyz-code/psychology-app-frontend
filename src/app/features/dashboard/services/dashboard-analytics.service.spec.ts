@@ -1,3 +1,4 @@
+import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of, throwError } from 'rxjs';
 
@@ -15,6 +16,7 @@ import { SessionNote } from '../../session-notes/models/session-note.models';
 import { SessionNotesService } from '../../session-notes/services/session-notes.service';
 import { DashboardSnapshot } from '../models/dashboard-analytics.models';
 import { DashboardAnalyticsService } from './dashboard-analytics.service';
+import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
 
 describe('DashboardAnalyticsService', () => {
   let appointmentsService: { getAppointments: ReturnType<typeof vi.fn> };
@@ -23,6 +25,7 @@ describe('DashboardAnalyticsService', () => {
   let financialTransactionsService: { findSummary: ReturnType<typeof vi.fn> };
   let patientsService: { getPatients: ReturnType<typeof vi.fn> };
   let sessionNotesService: { getSessionNotes: ReturnType<typeof vi.fn> };
+  let capabilities: WritableSignal<string[]>;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -34,6 +37,7 @@ describe('DashboardAnalyticsService', () => {
     financialTransactionsService = { findSummary: vi.fn(() => of(financialSummary())) };
     patientsService = { getPatients: vi.fn(() => of([patient()])) };
     sessionNotesService = { getSessionNotes: vi.fn(() => of([sessionNote()])) };
+    capabilities = signal(['finance.manage', 'finance.read', 'finance.summary_read']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -44,6 +48,12 @@ describe('DashboardAnalyticsService', () => {
         { provide: FinancialTransactionsService, useValue: financialTransactionsService },
         { provide: PatientsService, useValue: patientsService },
         { provide: SessionNotesService, useValue: sessionNotesService },
+        {
+          provide: TenantContextStore,
+          useValue: {
+            hasCapability: (capability: string) => capabilities().includes(capability),
+          },
+        },
       ],
     });
   });
@@ -70,7 +80,7 @@ describe('DashboardAnalyticsService', () => {
       'monthly-balance',
     ]);
     expect(result.viewModel.agendaToday.items.map((item) => item.id)).toEqual(['today']);
-    expect(result.viewModel.financeSummary.metrics.find((metric) => metric.id === 'movements')?.value).toBe('3 transacciones');
+    expect(result.viewModel.financeSummary?.metrics.find((metric) => metric.id === 'movements')?.value).toBe('3 transacciones');
     expect(result.viewModel.clinicalActivity.items.map((item) => item.id)).toEqual([
       'document-document-1',
       'note-note-1',
@@ -97,9 +107,38 @@ describe('DashboardAnalyticsService', () => {
 
     const viewModel = await firstValueFrom(TestBed.inject(DashboardAnalyticsService).loadDashboardViewModel());
 
-    expect(viewModel.financeSummary.metrics.every((metric) => metric.value === '--')).toBe(true);
+    expect(viewModel.financeSummary?.metrics.every((metric) => metric.value === '--')).toBe(true);
     expect(viewModel.agendaToday.totalCount).toBe(1);
     expect(viewModel.warnings).toEqual(['Algunos bloques se cargaron con datos parciales: resumen financiero.']);
+  });
+
+  it('omits unauthorized finance data and presentation without reporting a failed source', async () => {
+    capabilities.set([]);
+
+    const result = await firstValueFrom(TestBed.inject(DashboardAnalyticsService).loadDashboardData());
+
+    expect(financialTransactionsService.findSummary).not.toHaveBeenCalled();
+    expect(result.snapshot.financialSummary).toBeNull();
+    expect(result.snapshot.failedSources).toEqual([]);
+    expect(result.viewModel.warnings).toEqual([]);
+    expect(result.viewModel.financeSummary).toBeNull();
+    expect(result.viewModel.kpiStrip.some((metric) => metric.id === 'monthly-balance')).toBe(false);
+    expect(result.viewModel.quickActions.items.some((action) => action.id === 'open-finance')).toBe(false);
+  });
+
+  it('uses the current tenant capabilities after they change', async () => {
+    const service = TestBed.inject(DashboardAnalyticsService);
+
+    const allowed = await firstValueFrom(service.loadDashboardData());
+    capabilities.set([]);
+    const denied = await firstValueFrom(service.loadDashboardData());
+
+    expect(financialTransactionsService.findSummary).toHaveBeenCalledTimes(1);
+    expect(allowed.viewModel.financeSummary).not.toBeNull();
+    expect(allowed.viewModel.financeNavigationAvailable).toBe(true);
+    expect(denied.viewModel.financeSummary).toBeNull();
+    expect(denied.viewModel.financeNavigationAvailable).toBe(false);
+    expect(denied.viewModel.warnings).toEqual([]);
   });
 
   it('classifies today and upcoming appointments from the fixed generated date in chronological order', () => {

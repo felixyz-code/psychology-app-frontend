@@ -72,7 +72,6 @@ describe('app routes', () => {
       'dashboard',
       'patients',
       'appointments',
-      'financial-transactions',
       'case-files',
       'documents',
       'reports',
@@ -83,6 +82,11 @@ describe('app routes', () => {
         activeTenantGuard,
       ]);
     }
+
+    expect(childRoutes.find((route) => route.path === 'financial-transactions')).toMatchObject({
+      canActivate: [activeTenantGuard, capabilityGuard],
+      data: { requiredCapability: 'finance.read' },
+    });
 
     expect(childRoutes.find((route) => route.path === 'organization-administration')).toMatchObject(
       {

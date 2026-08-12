@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReactiveFormsModule, NonNullableFormBuilder } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { FilterToolbarComponent } from '../../../shared/components/filter-toolbar/filter-toolbar.component';
 import { MetricCardComponent, MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
@@ -78,6 +79,7 @@ export class FinancialTransactionsListPage {
   private readonly dialog = inject(MatDialog);
   private readonly financialTransactionsService = inject(FinancialTransactionsService);
   private readonly formBuilder = inject(NonNullableFormBuilder);
+  private readonly tenantContextStore = inject(TenantContextStore);
   private readonly defaultDateRange = buildCurrentMonthDateRange();
   private transactionsLoadSubscription?: Subscription;
   private summaryLoadSubscription?: Subscription;
@@ -94,6 +96,10 @@ export class FinancialTransactionsListPage {
   readonly errorMessage = signal('');
   readonly summaryErrorMessage = signal('');
   readonly appliedFilters = signal<FindFinancialTransactionsQueryDto>(this.defaultDateRange);
+  readonly canReadSummary = computed(() =>
+    this.tenantContextStore.hasCapability('finance.summary_read')
+  );
+  readonly canManage = computed(() => this.tenantContextStore.hasCapability('finance.manage'));
   readonly filtersForm = this.formBuilder.group({
     type: '',
     status: '',
@@ -162,9 +168,15 @@ export class FinancialTransactionsListPage {
 
   loadSummary(query: FindFinancialTransactionsQueryDto = this.appliedFilters()): void {
     this.summaryLoadSubscription?.unsubscribe();
-    this.isSummaryLoading.set(true);
+    this.summary.set(null);
     this.summaryErrorMessage.set('');
 
+    if (!this.canReadSummary()) {
+      this.isSummaryLoading.set(false);
+      return;
+    }
+
+    this.isSummaryLoading.set(true);
     this.summaryLoadSubscription = this.financialTransactionsService.findSummary(query).subscribe({
       next: (summary) => {
         this.summary.set(summary);
@@ -198,6 +210,10 @@ export class FinancialTransactionsListPage {
   }
 
   openDeleteDialog(transaction: FinancialTransactionResponse): void {
+    if (!this.canManage()) {
+      return;
+    }
+
     const dialogRef = this.dialog.open(FinancialTransactionDeleteDialogComponent, {
       width: '520px',
       maxWidth: '95vw',
