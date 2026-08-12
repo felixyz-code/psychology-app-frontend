@@ -28,9 +28,9 @@ PR metadata is recorded only where proven by the integrated Git history.
 | 4.2 | Organization Selection & Preferred Organization | `be640aa9b9b50fcdb1a358d21474bf65da434b9e` | #26 | Complete / integrated |
 | 4.3 | Cross-Tenant State Invalidation | `bee30457b2ec298d39970216e1ddfe6c9204c3df` | #27 | Complete / integrated |
 | 4.4 | Organization Administration UX | `cbb211fc3b963d896c95c0f4e1ad695cf7921a07` | #29 | Complete / integrated |
-| 4.5 | Membership Administration UX | `411aea8f72920564bfd2ff814475d99160354073` | Unavailable in proven squash metadata | Complete / integrated |
-| 4.6 | Invitation Administration UX | `c976c8e4ae28407829971381715a4855701e1adc` | Unavailable in proven squash metadata | Complete / integrated |
-| 4.7 | Ownership Transfer UX | `b8dc95ded2f6af3d4c6c5cfa6ebf475bbf62f321` | Unavailable in proven squash metadata | Complete / integrated |
+| 4.5 | Membership Administration UX | `411aea8f72920564bfd2ff814475d99160354073` | #30 | Complete / integrated |
+| 4.6 | Invitation Administration UX | `c976c8e4ae28407829971381715a4855701e1adc` | #31 | Complete / integrated |
+| 4.7 | Ownership Transfer UX | `b8dc95ded2f6af3d4c6c5cfa6ebf475bbf62f321` | #32 | Complete / integrated |
 | 4.8 | Public freelancer signup / bootstrap UX | `eb853d1b16a95ad18a181ceb9e98f03abab1390e` | #33 | Complete / integrated |
 | 4.P | UX Polish | `43c8ac9eee053ac0966ac936d1e4f8282adb4b19` | #34 | Complete / integrated |
 | 4.9 | Integration Certification / capability-aware Finance UX | `092eca3a1f9ed236586d9c0bb1b5f1c59f1e2a7c` | #35 | Functional certification complete |
