@@ -261,6 +261,7 @@
   }
 
   .user-menu-trigger {
+    flex: 0 0 auto;
     width: 76px;
     min-width: 0;
     max-width: none;
@@ -274,11 +275,11 @@
   }
 
   .navbar__spacer {
-    flex: 0 1 0;
+    display: none;
   }
 
   .organization-control {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     max-width: none;
   }
 
