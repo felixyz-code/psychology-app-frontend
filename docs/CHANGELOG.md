@@ -6,6 +6,25 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 
 ---
 
+# POST-GO-LIVE.4 Final Closeout
+
+## Status
+
+* Phase 4 functional scope is complete and integrated at frontend baseline
+  `092eca3a1f9ed236586d9c0bb1b5f1c59f1e2a7c` (PR #35); the supporting backend
+  baseline is `ef4c1f7cefa9d5ab5bfc3b27e59ed51c8ea72fee`.
+* 4.9-A technical pass, 4.9-MU `PASS — 10/10`, closed MU-001/MU-002 findings,
+  4.9-SEC pass, 4.9-R2 certification, PR #35 merge, CI #92 success, and 4.9-R
+  pass complete the certification record.
+* Dependency triage found no production, build, or CI release blocker. Angular
+  patching, dependency/toolchain hardening, and existing budget warnings remain
+  non-blocking follow-ups.
+* This entry is documentation-only: no backend/runtime/dependency change,
+  schema/migration change, deployment, or production action is included.
+* `PHASE 4 FUNCTIONAL COMPLETE / FORMAL CLOSEOUT REVIEW PENDING`.
+
+---
+
 # POST-GO-LIVE.4 Roadmap Continuation
 
 ## Status
@@ -13,8 +32,8 @@ No documenta cambios menores de estilo, refactors internos sin impacto funcional
 * `POST-GO-LIVE.4.3 Cross-Tenant State Invalidation` is certified and complete
   at frontend merge baseline `bee30457b2ec298d39970216e1ddfe6c9204c3df` (PR
   `#27`).
-* `POST-GO-LIVE.4.4 Organization Administration UX` is authorized and not
-  started. This authorization is roadmap-only and does not start runtime work.
+* Historical checkpoint: this entry recorded the pre-implementation roadmap
+  state; Phase 4 is now functionally complete through 4.9.
 
 ## Scope
 
