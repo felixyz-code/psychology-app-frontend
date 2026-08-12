@@ -43,23 +43,27 @@ Completed - Reports foundation generalized for multiple professional reports
 POST-GO-LIVE.4 status:
 
 ```text
-STATUS: ROADMAP CONTINUATION AUTHORIZED
-CONTRACT VERSION: 1
-DATE: 2026-08-02
-DOCUMENTATION BRANCH: codex/post-go-live-4-0-saas-ux-contract
-CONTRACT COMMIT: 722ff910acc85b9c31d00d57b4655064c85f7458
-RELATED PR: #24
-POST-GO-LIVE.4.1: CERTIFIED AND MERGED
-POST-GO-LIVE.4.2: CERTIFIED AND MERGED
-POST-GO-LIVE.4.3: CROSS-TENANT STATE INVALIDATION - CERTIFIED / COMPLETE
-POST-GO-LIVE.4.4: ORGANIZATION ADMINISTRATION UX - IMPLEMENTED / PENDING INDEPENDENT REVIEW
+POST-GO-LIVE.4: FUNCTIONAL COMPLETE / FORMAL CLOSEOUT REVIEW PENDING
+POST-GO-LIVE.4.0: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.1: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.2: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.3: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.4: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.5: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.6: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.7: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.8: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.P: COMPLETE / INTEGRATED
+POST-GO-LIVE.4.9: FUNCTIONAL CERTIFICATION COMPLETE
+FRONTEND BASELINE: 092eca3a1f9ed236586d9c0bb1b5f1c59f1e2a7c
+BACKEND SUPPORTING BASELINE: ef4c1f7cefa9d5ab5bfc3b27e59ed51c8ea72fee
+NEXT PHASE REQUIRES ROADMAP DECISION
 ```
 
-## POST-GO-LIVE.4.4 - Organization Administration UX
+## POST-GO-LIVE.4.4 - Organization Administration UX (Historical capability record)
 
-**Status:** `IMPLEMENTED / PENDING INDEPENDENT REVIEW`. The frontend
-implementation and local validation are complete; certification and completion
-remain reserved for the independent review gates.
+**Status:** `COMPLETE / INTEGRATED`. This historical capability record remains
+accurate; the Phase 4 functional sequence subsequently completed through 4.9.
 
 **Goal:** provide the first organization-domain administration experience for
 the confirmed tenant, using the certified backend organization read, identity
