@@ -252,6 +252,7 @@
   }
 
   .organization-control {
+    min-width: 0;
     max-width: 10rem;
   }
 
@@ -272,8 +273,17 @@
     display: none;
   }
 
+  .navbar__spacer {
+    flex: 0 1 0;
+  }
+
   .organization-control {
-    max-width: min(10rem, 46vw);
+    flex: 1 1 auto;
+    max-width: none;
+  }
+
+  .organization-control__chevron {
+    display: none;
   }
 
   .organization-switch-error > span {

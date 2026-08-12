@@ -111,6 +111,9 @@ describe('NavbarComponent', () => {
     );
     expect(fixture.nativeElement.querySelector('.organization-menu-trigger')).toBeNull();
     expect(fixture.nativeElement.querySelector('.organization-control__chevron')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.organization-identity')?.getAttribute('aria-label')).toBe(
+      'Organización actual: Organization A',
+    );
   });
 
   it('shows no switch affordance when the current context has no selectable organizations', () => {
@@ -142,6 +145,7 @@ describe('NavbarComponent', () => {
     ) as HTMLButtonElement;
 
     expect(trigger).not.toBeNull();
+    expect(trigger.getAttribute('aria-label')).toBe('Cambiar organización: Organization A');
     trigger.click();
     await fixture.whenStable();
     fixture.detectChanges();

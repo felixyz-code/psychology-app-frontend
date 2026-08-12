@@ -30,8 +30,8 @@ describe('CreateInvitationDialogComponent', () => {
     expect(component.form.controls.email.hasError('maxlength')).toBe(true);
   });
 
-  it('normalizes whitespace early enough to submit through the rendered form', () => {
-    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="email"]');
+  it('keeps whitespace while editing, normalizes on blur, and submits the trimmed email once', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[formControlName="email"]');
     const submitButton: HTMLButtonElement =
       fixture.nativeElement.querySelector('button[type="submit"]');
     input.value = '  ana@example.com  ';
@@ -39,11 +39,22 @@ describe('CreateInvitationDialogComponent', () => {
     component.form.controls.role.setValue('PSYCHOLOGIST');
     fixture.detectChanges();
 
+    expect(component.form.controls.email.value).toBe('  ana@example.com  ');
+    input.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+
     expect(component.form.controls.email.value).toBe('ana@example.com');
-    expect(submitButton.disabled).toBe(false);
     submitButton.click();
     submitButton.click();
     expect(close).toHaveBeenCalledTimes(1);
+    expect(close).toHaveBeenCalledWith({ email: 'ana@example.com', role: 'PSYCHOLOGIST' });
+  });
+
+  it('trims the email during submit when blur did not occur', () => {
+    component.form.setValue({ email: '  ana@example.com  ', role: 'PSYCHOLOGIST' });
+
+    component.submit();
+
     expect(close).toHaveBeenCalledWith({ email: 'ana@example.com', role: 'PSYCHOLOGIST' });
   });
 });

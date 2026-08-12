@@ -38,10 +38,11 @@ const INVITATION_ROLES: readonly InvitationRole[] = [
           <mat-label>Correo electr&oacute;nico</mat-label>
           <input
             matInput
-            type="email"
+            type="text"
+            inputmode="email"
             formControlName="email"
             maxlength="255"
-            (input)="normalizeEmail($event)"
+            (blur)="normalizeEmail()"
           />
           @if (form.controls.email.hasError('required')) {
             <mat-error>El correo es obligatorio.</mat-error>
@@ -104,17 +105,16 @@ export class CreateInvitationDialogComponent {
     }),
     role: new FormControl<InvitationRole | null>(null, Validators.required),
   });
-  normalizeEmail(event: Event): void {
-    const email = (event.target as HTMLInputElement).value.trim();
-    if (email !== this.form.controls.email.value) {
-      this.form.controls.email.setValue(email);
+  normalizeEmail(): void {
+    const control = this.form.controls.email;
+    const email = control.value.trim();
+    if (email !== control.value) {
+      control.setValue(email);
     }
   }
   submit(): void {
-    const email = this.form.controls.email.value.trim();
-    if (email !== this.form.controls.email.value) {
-      this.form.controls.email.setValue(email);
-    }
+    this.normalizeEmail();
+    const email = this.form.controls.email.value;
     if (this.submitted || this.form.invalid || !this.form.controls.role.value) {
       this.form.markAllAsTouched();
       return;

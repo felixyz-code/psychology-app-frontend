@@ -1,4 +1,4 @@
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
@@ -30,10 +30,12 @@ describe('LoginPage', () => {
     };
 
     TestBed.configureTestingModule({
+      imports: [LoginPage],
       providers: [
         FormBuilder,
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
+        { provide: ActivatedRoute, useValue: {} },
         { provide: TenantContextStore, useValue: tenantContextStore },
       ],
     });
@@ -77,5 +79,18 @@ describe('LoginPage', () => {
 
   it('exposes signup navigation without raw location changes', () => {
     expect(page.signupRoute).toBe('/signup');
+  });
+
+  it('renders the product eyebrow and one login task heading', () => {
+    const fixture = TestBed.createComponent(LoginPage);
+    fixture.detectChanges();
+
+    const nativeElement = fixture.nativeElement as HTMLElement;
+    expect(nativeElement.querySelector('.login-card__eyebrow')?.textContent?.trim()).toBe(
+      'Psicologia App',
+    );
+    const headings = nativeElement.querySelectorAll('h1');
+    expect(headings).toHaveLength(1);
+    expect(headings[0].textContent?.trim()).toBe('Inicia sesión');
   });
 });
