@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder } from '@angular/forms';
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 
 import { TenantContextState } from '../tenant-context/tenant-context.models';
@@ -67,10 +67,12 @@ describe('SignupPage', () => {
     authStore = { isAuthenticated: vi.fn(() => false) };
 
     TestBed.configureTestingModule({
+      imports: [SignupPage],
       providers: [
         FormBuilder,
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
+        { provide: ActivatedRoute, useValue: {} },
         { provide: TenantContextStore, useValue: tenantContextStore },
         { provide: AuthStore, useValue: authStore },
       ],
@@ -341,5 +343,18 @@ describe('SignupPage', () => {
 
   it('exposes login navigation for deliberate recovery', () => {
     expect(page.loginRoute).toBe('/login');
+  });
+
+  it('renders the product eyebrow and one signup task heading', () => {
+    const fixture = TestBed.createComponent(SignupPage);
+    fixture.detectChanges();
+
+    const nativeElement = fixture.nativeElement as HTMLElement;
+    expect(nativeElement.querySelector('.signup-card__eyebrow')?.textContent?.trim()).toBe(
+      'Psicologia App',
+    );
+    const headings = nativeElement.querySelectorAll('h1');
+    expect(headings).toHaveLength(1);
+    expect(headings[0].textContent?.trim()).toBe('Crea tu cuenta');
   });
 });

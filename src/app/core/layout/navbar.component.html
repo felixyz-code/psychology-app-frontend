@@ -24,7 +24,7 @@
         [matMenuTriggerFor]="organizationMenu"
         [disabled]="isSwitchingOrganization()"
         [attr.aria-busy]="isSwitchingOrganization()"
-        aria-label="Cambiar organización"
+        [attr.aria-label]="'Cambiar organización: ' + organization.displayName"
       >
         @if (isSwitchingOrganization()) {
           <mat-spinner diameter="18" aria-label="Cambiando organización" />
@@ -57,7 +57,10 @@
         }
       </mat-menu>
     } @else {
-      <div class="organization-control organization-identity" aria-label="Organización actual">
+      <div
+        class="organization-control organization-identity"
+        [attr.aria-label]="'Organización actual: ' + organization.displayName"
+      >
         <mat-icon aria-hidden="true">business</mat-icon>
         <span>{{ organization.displayName }}</span>
       </div>

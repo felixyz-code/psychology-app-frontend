@@ -252,6 +252,7 @@
   }
 
   .organization-control {
+    min-width: 0;
     max-width: 10rem;
   }
 
@@ -260,6 +261,7 @@
   }
 
   .user-menu-trigger {
+    flex: 0 0 auto;
     width: 76px;
     min-width: 0;
     max-width: none;
@@ -272,8 +274,17 @@
     display: none;
   }
 
+  .navbar__spacer {
+    display: none;
+  }
+
   .organization-control {
-    max-width: min(10rem, 46vw);
+    flex: 1 1 0;
+    max-width: none;
+  }
+
+  .organization-control__chevron {
+    display: none;
   }
 
   .organization-switch-error > span {
