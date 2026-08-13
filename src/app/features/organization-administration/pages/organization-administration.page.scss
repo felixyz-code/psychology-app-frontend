@@ -248,7 +248,6 @@
 }
 
 .organization-logo__constraints,
-.organization-logo__controls p,
 .organization-logo__conflict {
   margin: 0;
   color: var(--app-color-text-secondary);
@@ -278,7 +277,7 @@
   color: var(--app-color-text-secondary);
 }
 
-.organization-logo__controls p {
+.organization-logo__controls .organization-configuration-error {
   flex: 1 1 15rem;
   overflow-wrap: anywhere;
 }

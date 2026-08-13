@@ -209,7 +209,7 @@ describe('OrganizationAdministrationPage', () => {
     expect(dialog.open).not.toHaveBeenCalled();
   });
 
-  it('renders the ABSENT logo placeholder and an accessible constrained file input', () => {
+  it('renders the ABSENT logo placeholder and an accessible constrained file input without duplicate status', () => {
     currentLoad.next(createOrganization());
     publishLogo(absentLogo());
     fixture.detectChanges();
@@ -225,6 +225,11 @@ describe('OrganizationAdministrationPage', () => {
     expect(label.textContent).toContain('Seleccionar archivo');
     expect(input.accept).toContain('image/png');
     expect(input.getAttribute('aria-describedby')).toContain('organization-logo-constraints');
+    expect(fixture.nativeElement.querySelector('#organization-logo-file-feedback')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('Ning\u00fan archivo seleccionado.');
+    expect(
+      fixture.nativeElement.querySelector('.organization-configuration-actions button').disabled,
+    ).toBe(true);
   });
 
   it('renders a protected PRESENT preview with canonical metadata and meaningful alt text', () => {
@@ -255,7 +260,7 @@ describe('OrganizationAdministrationPage', () => {
     expect(fixture.nativeElement.textContent).toContain('subir, reemplazar o eliminar requiere');
   });
 
-  it('delegates file selection and upload while presenting selected-file and success feedback', () => {
+  it('delegates file selection and upload without duplicating the selected filename', () => {
     currentLoad.next(createOrganization());
     publishLogo(absentLogo());
     const file = new File(['png'], 'practice-logo.png', { type: 'image/png' });
@@ -268,8 +273,32 @@ describe('OrganizationAdministrationPage', () => {
 
     expect(logoStore.selectFile).toHaveBeenCalledWith(file);
     expect(logoStore.uploadSelected).toHaveBeenCalledOnce();
-    expect(fixture.nativeElement.textContent).toContain('practice-logo.png');
+    expect(fixture.nativeElement.querySelector('#organization-logo-file-feedback')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('Archivo seleccionado:');
     expect(fixture.nativeElement.textContent).toContain('se actualiz\u00f3');
+    expect(
+      fixture.nativeElement.querySelector('.organization-configuration-actions button').disabled,
+    ).toBe(false);
+  });
+
+  it('keeps visible file validation feedback associated with the input', () => {
+    currentLoad.next(createOrganization());
+    publishLogo(absentLogo());
+    logoStore.fileError.set('Selecciona un archivo PNG o JPEG.');
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector(
+      '#organization-logo-file',
+    ) as HTMLInputElement;
+    const feedback = fixture.nativeElement.querySelector(
+      '#organization-logo-file-feedback',
+    ) as HTMLParagraphElement;
+
+    expect(feedback.textContent).toContain('Selecciona un archivo PNG o JPEG.');
+    expect(feedback.getAttribute('role')).toBe('alert');
+    expect(input.getAttribute('aria-describedby')).toContain('organization-logo-file-feedback');
+    expect(input.getAttribute('aria-errormessage')).toBe('organization-logo-file-feedback');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
   });
 
   it('delegates an explicit PRESENT replacement and renders canonical success feedback', () => {

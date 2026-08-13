@@ -565,21 +565,29 @@
                           id="organization-logo-file"
                           type="file"
                           accept=".png,.jpg,.jpeg,image/png,image/jpeg"
-                          aria-describedby="organization-logo-constraints organization-logo-file-feedback"
+                          [attr.aria-describedby]="
+                            organizationLogoStore.fileError()
+                              ? 'organization-logo-constraints organization-logo-file-feedback'
+                              : 'organization-logo-constraints'
+                          "
+                          [attr.aria-errormessage]="
+                            organizationLogoStore.fileError()
+                              ? 'organization-logo-file-feedback'
+                              : null
+                          "
+                          [attr.aria-invalid]="organizationLogoStore.fileError() ? 'true' : null"
                           [disabled]="organizationLogoStore.mutationState() !== 'IDLE'"
                           (change)="selectLogoFile($event)"
                         />
-                        <p id="organization-logo-file-feedback" aria-live="polite">
-                          @if (organizationLogoStore.fileError()) {
-                            <span class="organization-configuration-error">{{
-                              organizationLogoStore.fileError()
-                            }}</span>
-                          } @else if (organizationLogoStore.selectedFile(); as selectedFile) {
-                            <span>Archivo seleccionado: {{ selectedFile.name }}</span>
-                          } @else {
-                            <span>Ning&uacute;n archivo seleccionado.</span>
-                          }
-                        </p>
+                        @if (organizationLogoStore.fileError()) {
+                          <p
+                            id="organization-logo-file-feedback"
+                            class="organization-configuration-error"
+                            role="alert"
+                          >
+                            {{ organizationLogoStore.fileError() }}
+                          </p>
+                        }
                       </div>
 
                       <div class="organization-configuration-actions">
