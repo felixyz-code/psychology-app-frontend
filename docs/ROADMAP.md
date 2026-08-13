@@ -60,6 +60,31 @@ BACKEND SUPPORTING BASELINE: ef4c1f7cefa9d5ab5bfc3b27e59ed51c8ea72fee
 NEXT PHASE REQUIRES ROADMAP DECISION
 ```
 
+## POST-GO-LIVE.5.5 - Organization Logo UX
+
+**Status:** `IMPLEMENTED / INDEPENDENT R1 AND MANUAL UX REVIEW REQUIRED`.
+
+**Goal:** expose the certified protected organization-logo contract inside
+Organization Administration without weakening tenant or authentication
+boundaries.
+
+**Implementation:** typed metadata and mutation API adapter; dedicated
+tenant-generation-owned signal store; authenticated Blob loading; deterministic
+object URL cleanup; capability-aware upload, replacement, and confirmed removal
+UX; exact `ABSENT`/`PRESENT` compare-and-swap preconditions; one-reload conflict
+reconciliation; accessible preview and file input; and direct API, store, and
+page regression coverage.
+
+**Security invariants:** logo content remains protected and non-public; the
+existing request pipeline supplies bearer and tenant headers; Blob state is
+runtime-only; stale cross-tenant reads and mutations cannot publish; and the
+backend remains authoritative for image validation, tenant ownership,
+capabilities, concurrency, and persistence.
+
+**Next gate:** independent R1 plus the required desktop, dark-theme, mobile,
+mutation, read-only, tenant-switch, conflict, and reload-persistence manual UX
+review. The implementation PR remains draft and must not be merged during 5.5.
+
 ## POST-GO-LIVE.4.4 - Organization Administration UX (Historical capability record)
 
 **Status:** `COMPLETE / INTEGRATED`. This historical capability record remains

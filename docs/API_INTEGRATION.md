@@ -190,6 +190,34 @@ only cause. Runtime `403`, redacted `404`, validation `400`, network and server
 failures remain distinct visible states; transient failures are not converted
 into empty organization data.
 
+## Protected Organization Logo Requests
+
+Organization Administration consumes the dedicated protected logo contract:
+
+- `GET /organizations/:organizationId/logo` with `organization.read` returns
+  canonical `ABSENT` or `PRESENT` metadata
+- `GET /organizations/:organizationId/logo/content` with `organization.read`
+  returns protected PNG or JPEG bytes
+- `PUT /organizations/:organizationId/logo` with `organization.manage` sends
+  `multipart/form-data` containing `file` and exactly one compare-and-swap
+  precondition: `expectedRowState=ABSENT` or canonical `expectedUpdatedAt`
+- `DELETE /organizations/:organizationId/logo` with `organization.manage`
+  sends canonical `expectedUpdatedAt` in the JSON body
+
+Every request uses `TENANT_REQUIRED` and an explicit
+`TENANT_ORGANIZATION_ID`, so the existing interceptors supply bearer and tenant
+headers and discard stale cross-tenant responses. Protected content is never
+used as a raw `<img>` URL. `OrganizationLogoService` obtains a `Blob` through
+`HttpClient`, and `OrganizationLogoStore` accepts only PNG/JPEG content that
+matches canonical metadata before creating a runtime object URL. Object URLs
+are revoked on replacement, removal, tenant invalidation, logout, stale
+acceptance, and store destruction; neither bytes nor URLs are persisted.
+
+Logo mutation `409` responses are not retried. The store performs one canonical
+metadata reload, reloads content only when the new state is `PRESENT`, and
+requires a new explicit user decision. Failed reconciliation enters a
+recoverable error state and blocks stale mutation attempts.
+
 # Route Guards
 
 Protected routes use Angular Guards.

@@ -142,6 +142,147 @@
   background: var(--app-org-brand-accent);
 }
 
+.organization-logo-card {
+  grid-column: 1 / -1;
+}
+
+.organization-logo {
+  display: grid;
+  gap: 1rem;
+}
+
+.organization-logo__state,
+.organization-logo__present,
+.organization-logo__preview,
+.organization-logo__controls {
+  display: flex;
+  align-items: center;
+}
+
+.organization-logo__state {
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-height: 7rem;
+  justify-content: center;
+  color: var(--app-color-text-secondary);
+}
+
+.organization-logo__state--error {
+  color: var(--app-color-danger-text);
+}
+
+.organization-logo__present {
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.organization-logo__preview {
+  flex: 0 0 auto;
+  justify-content: center;
+  width: 11rem;
+  height: 11rem;
+  overflow: hidden;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 16px;
+  background: var(--app-color-surface-muted);
+}
+
+.organization-logo__preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.organization-logo__preview--empty {
+  width: 100%;
+  height: auto;
+  min-height: 8.5rem;
+  gap: 0.85rem;
+  border-style: dashed;
+  color: var(--app-color-muted);
+}
+
+.organization-logo__preview--empty mat-icon {
+  width: 2rem;
+  height: 2rem;
+  font-size: 2rem;
+}
+
+.organization-logo__preview--empty div,
+.organization-logo__metadata div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.organization-logo__preview--empty strong {
+  color: var(--app-color-heading);
+}
+
+.organization-logo__metadata {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(7rem, 1fr));
+  gap: 1rem;
+  width: 100%;
+  margin: 0;
+}
+
+.organization-logo__metadata div {
+  padding: 0.75rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 12px;
+}
+
+.organization-logo__metadata dt {
+  color: var(--app-color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.organization-logo__metadata dd {
+  margin: 0;
+  color: var(--app-color-heading);
+  font-weight: 600;
+}
+
+.organization-logo__constraints,
+.organization-logo__controls p,
+.organization-logo__conflict {
+  margin: 0;
+  color: var(--app-color-text-secondary);
+  line-height: 1.5;
+}
+
+.organization-logo__conflict {
+  color: var(--app-color-warning-text);
+}
+
+.organization-logo__controls {
+  flex-wrap: wrap;
+  gap: 0.55rem 0.8rem;
+  padding: 0.85rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 12px;
+}
+
+.organization-logo__controls label {
+  flex: 0 0 100%;
+  color: var(--app-color-heading);
+  font-weight: 600;
+}
+
+.organization-logo__controls input {
+  max-width: 100%;
+  color: var(--app-color-text-secondary);
+}
+
+.organization-logo__controls p {
+  flex: 1 1 15rem;
+  overflow-wrap: anywhere;
+}
+
 .organization-admin-form {
   gap: 1rem;
 }
@@ -272,5 +413,18 @@
   .organization-admin-lifecycle button,
   .organization-configuration-actions button {
     width: 100%;
+  }
+
+  .organization-logo__present {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .organization-logo__preview {
+    width: 100%;
+  }
+
+  .organization-logo__metadata {
+    grid-template-columns: 1fr;
   }
 }
