@@ -190,6 +190,45 @@ describe('OrganizationAdministrationPage', () => {
     expect(fixture.nativeElement.textContent).toContain('Identidad visual');
   });
 
+  it('keeps Settings and Branding helpers and feedback in dynamic document flow', () => {
+    currentLoad.next(createOrganization());
+    publishConfiguration(createSettings(), createBranding());
+    configurationStore.settingsSuccess.set('La duración predeterminada se actualizó.');
+    configurationStore.settingsError.set(
+      'La configuración cambió en otra sesión. Se cargó la versión más reciente; revísala antes de volver a guardar.',
+    );
+    configurationStore.brandingSuccess.set('La identidad visual se actualizó.');
+    fixture.detectChanges();
+
+    const configurationForms = Array.from(
+      fixture.nativeElement.querySelectorAll('.organization-configuration-form'),
+    ) as HTMLElement[];
+    const settingsField = configurationForms[0].querySelector('mat-form-field');
+    const settingsHelper = configurationForms[0].querySelector('mat-hint');
+    const settingsSuccess = configurationForms[0].querySelector(
+      '.organization-configuration-success',
+    );
+    const settingsError = configurationForms[0].querySelector('.organization-configuration-error');
+    const brandingField = configurationForms[1].querySelector('mat-form-field');
+    const brandingSuccess = configurationForms[1].querySelector(
+      '.organization-configuration-success',
+    );
+
+    expect(
+      settingsField?.querySelector('.mat-mdc-form-field-subscript-dynamic-size'),
+    ).not.toBeNull();
+    expect(
+      brandingField?.querySelector('.mat-mdc-form-field-subscript-dynamic-size'),
+    ).not.toBeNull();
+    expect(settingsHelper?.textContent).toContain('Valor efectivo:');
+    expect(settingsSuccess?.textContent).toContain('se actualizó');
+    expect(settingsError?.textContent).toContain('antes de volver a guardar');
+    expect(brandingSuccess?.textContent).toContain('se actualizó');
+    expect(configurationForms[0].children[0]).toBe(settingsField);
+    expect(configurationForms[0].children[1]).toBe(settingsSuccess);
+    expect(configurationForms[0].children[2]).toBe(settingsError);
+  });
+
   it('delegates Settings and Branding save and reset values', () => {
     currentLoad.next(createOrganization());
     publishConfiguration(createSettings(), createBranding());
