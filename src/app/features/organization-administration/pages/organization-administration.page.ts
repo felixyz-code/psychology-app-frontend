@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -11,6 +11,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
 
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
+import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
+import {
+  canonicalOrganizationBrandColor,
+  isSafeOrganizationBrandColor,
+} from '../../../core/organization-configuration/organization-brand-color';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
@@ -55,10 +60,12 @@ export class OrganizationAdministrationPage implements OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly organizationsService = inject(OrganizationsService);
   readonly tenantContextStore = inject(TenantContextStore);
+  readonly organizationConfigurationStore = inject(OrganizationConfigurationStore);
   private loadSubscription?: Subscription;
   private mutationSubscription?: Subscription;
   private loadSequence = 0;
   private destroyed = false;
+  private configurationFormScope = '';
 
   readonly viewState = signal<ViewState>('loading');
   readonly organization = signal<OrganizationDetails | null>(null);
@@ -106,9 +113,77 @@ export class OrganizationAdministrationPage implements OnDestroy {
       validators: [Validators.required, Validators.pattern(/^[A-Z]{3}$/)],
     }),
   });
+  readonly settingsForm = new FormGroup({
+    defaultAppointmentDuration: new FormControl<number | null>(null, [
+      Validators.min(1),
+      Validators.max(1440),
+    ]),
+  });
+  readonly brandingForm = new FormGroup({
+    primaryColor: new FormControl<string | null>(null, [
+      (control) =>
+        control.value === null || isSafeOrganizationBrandColor(control.value)
+          ? null
+          : { unsafeColor: true },
+    ]),
+  });
 
   constructor() {
     this.loadOrganization();
+    effect(() => {
+      const organizationId = this.tenantContextStore.selectedOrganizationId();
+      const generation = this.tenantContextStore.switchGeneration();
+      const formScope = `${organizationId ?? 'none'}:${generation}`;
+
+      if (formScope !== this.configurationFormScope) {
+        this.configurationFormScope = formScope;
+        this.settingsForm.reset({ defaultAppointmentDuration: null });
+        this.brandingForm.reset({ primaryColor: null });
+      }
+    });
+    effect(() => {
+      const organizationId = this.tenantContextStore.selectedOrganizationId();
+      const generation = this.tenantContextStore.switchGeneration();
+
+      const settings = this.organizationConfigurationStore.settings();
+      const settingsOwner = this.organizationConfigurationStore.settingsOwner();
+      if (
+        settings &&
+        settingsOwner?.organizationId === organizationId &&
+        settingsOwner.generation === generation
+      ) {
+        this.settingsForm.reset({
+          defaultAppointmentDuration: settings.persistedDefaultAppointmentDuration,
+        });
+      }
+    });
+    effect(() => {
+      const organizationId = this.tenantContextStore.selectedOrganizationId();
+      const generation = this.tenantContextStore.switchGeneration();
+
+      const branding = this.organizationConfigurationStore.branding();
+      const brandingOwner = this.organizationConfigurationStore.brandingOwner();
+      if (
+        branding &&
+        brandingOwner?.organizationId === organizationId &&
+        brandingOwner.generation === generation
+      ) {
+        this.brandingForm.reset({ primaryColor: branding.primaryColor });
+      }
+    });
+    effect(() => {
+      if (this.organizationConfigurationStore.settingsSaving()) {
+        this.settingsForm.disable({ emitEvent: false });
+      } else {
+        this.settingsForm.enable({ emitEvent: false });
+      }
+
+      if (this.organizationConfigurationStore.brandingSaving()) {
+        this.brandingForm.disable({ emitEvent: false });
+      } else {
+        this.brandingForm.enable({ emitEvent: false });
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -266,6 +341,54 @@ export class OrganizationAdministrationPage implements OnDestroy {
     }
 
     return 'Usa un código ISO de tres letras, por ejemplo MXN.';
+  }
+
+  saveAppointmentDefault(): void {
+    if (!this.canManage() || this.settingsForm.invalid) {
+      this.settingsForm.markAllAsTouched();
+      return;
+    }
+    const value = this.settingsForm.controls.defaultAppointmentDuration.value;
+    this.organizationConfigurationStore.saveSettings(value);
+    if (
+      this.organizationConfigurationStore.settings()?.persistedDefaultAppointmentDuration === value
+    ) {
+      this.settingsForm.markAsPristine();
+    }
+  }
+
+  resetAppointmentDefault(): void {
+    if (!this.canManage()) return;
+    this.settingsForm.controls.defaultAppointmentDuration.setValue(null);
+    this.organizationConfigurationStore.saveSettings(null);
+    if (
+      this.organizationConfigurationStore.settings()?.persistedDefaultAppointmentDuration === null
+    ) {
+      this.settingsForm.markAsPristine();
+    }
+  }
+
+  saveBranding(): void {
+    if (!this.canManage() || this.brandingForm.invalid) {
+      this.brandingForm.markAllAsTouched();
+      return;
+    }
+    const value = this.brandingForm.controls.primaryColor.value;
+    const normalized =
+      value === null || value === '' ? null : canonicalOrganizationBrandColor(value);
+    this.organizationConfigurationStore.saveBranding(normalized);
+    if (this.organizationConfigurationStore.branding()?.primaryColor === normalized) {
+      this.brandingForm.markAsPristine();
+    }
+  }
+
+  resetBranding(): void {
+    if (!this.canManage()) return;
+    this.brandingForm.controls.primaryColor.setValue(null);
+    this.organizationConfigurationStore.saveBranding(null);
+    if (this.organizationConfigurationStore.branding()?.primaryColor === null) {
+      this.brandingForm.markAsPristine();
+    }
   }
 
   private changeStatus(targetStatus: OrganizationStatus): void {

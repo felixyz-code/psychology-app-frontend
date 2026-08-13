@@ -9,12 +9,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 
 import { AuthStore } from '../../../core/auth/auth.store';
+import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
-import {
-  localDateTimeValueToIso,
-  toDateTimeLocalValue,
-} from '../utils/appointment-datetime';
+import { localDateTimeValueToIso, toDateTimeLocalValue } from '../utils/appointment-datetime';
 import {
   Appointment,
   AppointmentStatus,
@@ -51,6 +49,7 @@ export class AppointmentFormDialogComponent {
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly patientsService = inject(PatientsService);
   private readonly authStore = inject(AuthStore);
+  private readonly organizationConfigurationStore = inject(OrganizationConfigurationStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<AppointmentFormDialogComponent, boolean>);
 
@@ -64,7 +63,7 @@ export class AppointmentFormDialogComponent {
   readonly appointmentForm = this.formBuilder.nonNullable.group({
     patientId: [this.data.patientId ?? '', [Validators.required]],
     scheduledAt: [this.getInitialScheduledAtValue(), [Validators.required]],
-    durationMinutes: [60, [Validators.required, Validators.min(1)]],
+    durationMinutes: [this.initialDurationMinutes(), [Validators.required, Validators.min(1)]],
     status: ['SCHEDULED' as AppointmentStatus, [Validators.required]],
     notes: [''],
   });
@@ -158,7 +157,9 @@ export class AppointmentFormDialogComponent {
     this.dialogRef.close(false);
   }
 
-  hasRequiredError(controlName: 'patientId' | 'scheduledAt' | 'durationMinutes' | 'status'): boolean {
+  hasRequiredError(
+    controlName: 'patientId' | 'scheduledAt' | 'durationMinutes' | 'status',
+  ): boolean {
     const control = this.appointmentForm.controls[controlName];
     return control.touched && control.hasError('required');
   }
@@ -223,7 +224,7 @@ export class AppointmentFormDialogComponent {
       .subscribe({
         next: (patients) => {
           const sortedPatients = [...patients].sort((first, second) =>
-            this.getPatientLabel(first).localeCompare(this.getPatientLabel(second))
+            this.getPatientLabel(first).localeCompare(this.getPatientLabel(second)),
           );
 
           this.availablePatients.set(sortedPatients);
@@ -244,5 +245,11 @@ export class AppointmentFormDialogComponent {
     }
 
     return this.getCurrentDateTimeLocal();
+  }
+
+  private initialDurationMinutes(): number {
+    return this.data.mode === 'edit'
+      ? (this.data.appointment?.durationMinutes ?? 60)
+      : this.organizationConfigurationStore.effectiveAppointmentDuration();
   }
 }

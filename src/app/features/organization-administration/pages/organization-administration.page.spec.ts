@@ -1,10 +1,16 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { of, Subject } from 'rxjs';
 
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
+import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
 import { OrganizationDetails } from '../models/organization.models';
+import {
+  OrganizationBrandingResponse,
+  OrganizationSettingsResponse,
+} from '../models/organization-configuration.models';
 import { OrganizationsService } from '../services/organizations.service';
 import { OrganizationAdministrationPage } from './organization-administration.page';
 
@@ -13,7 +19,8 @@ describe('OrganizationAdministrationPage', () => {
   let component: OrganizationAdministrationPage;
   let currentLoad: Subject<OrganizationDetails>;
   let dialogClosed: Subject<boolean | undefined>;
-  let scope: { organizationId: string | null; generation: number };
+  let selectedOrganizationId: WritableSignal<string | null>;
+  let switchGeneration: WritableSignal<number>;
   let canManage: boolean;
   let canonicalContextStatus: 'ACTIVE' | 'SUSPENDED';
   let synchronizationPending: boolean;
@@ -23,8 +30,8 @@ describe('OrganizationAdministrationPage', () => {
     changeStatus: ReturnType<typeof vi.fn>;
   };
   let tenantStore: {
-    selectedOrganizationId: ReturnType<typeof vi.fn>;
-    switchGeneration: ReturnType<typeof vi.fn>;
+    selectedOrganizationId: WritableSignal<string | null>;
+    switchGeneration: WritableSignal<number>;
     hasCapability: ReturnType<typeof vi.fn>;
     synchronizeCanonicalContext: ReturnType<typeof vi.fn>;
     isCanonicalContextSynchronizationPending: ReturnType<typeof vi.fn>;
@@ -32,11 +39,30 @@ describe('OrganizationAdministrationPage', () => {
     error: ReturnType<typeof vi.fn>;
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
+  let configurationStore: {
+    settings: WritableSignal<OrganizationSettingsResponse | null>;
+    branding: WritableSignal<OrganizationBrandingResponse | null>;
+    settingsOwner: WritableSignal<{ organizationId: string; generation: number } | null>;
+    brandingOwner: WritableSignal<{ organizationId: string; generation: number } | null>;
+    settingsState: WritableSignal<string>;
+    brandingState: WritableSignal<string>;
+    settingsError: WritableSignal<string>;
+    brandingError: WritableSignal<string>;
+    settingsSaving: WritableSignal<boolean>;
+    brandingSaving: WritableSignal<boolean>;
+    settingsSuccess: WritableSignal<string>;
+    brandingSuccess: WritableSignal<string>;
+    effectiveAppointmentDuration: ReturnType<typeof vi.fn>;
+    loadCurrent: ReturnType<typeof vi.fn>;
+    saveSettings: ReturnType<typeof vi.fn>;
+    saveBranding: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     currentLoad = new Subject<OrganizationDetails>();
     dialogClosed = new Subject<boolean | undefined>();
-    scope = { organizationId: 'organization-a', generation: 1 };
+    selectedOrganizationId = signal<string | null>('organization-a');
+    switchGeneration = signal(1);
     canManage = true;
     canonicalContextStatus = 'ACTIVE';
     synchronizationPending = false;
@@ -46,8 +72,8 @@ describe('OrganizationAdministrationPage', () => {
       changeStatus: vi.fn(),
     };
     tenantStore = {
-      selectedOrganizationId: vi.fn(() => scope.organizationId),
-      switchGeneration: vi.fn(() => scope.generation),
+      selectedOrganizationId,
+      switchGeneration,
       hasCapability: vi.fn(
         (capability: string) =>
           capability === 'organization.read' || (capability === 'organization.manage' && canManage),
@@ -60,6 +86,24 @@ describe('OrganizationAdministrationPage', () => {
     dialog = {
       open: vi.fn(() => ({ afterClosed: () => dialogClosed.asObservable() })),
     };
+    configurationStore = {
+      settings: signal<OrganizationSettingsResponse | null>(null),
+      branding: signal<OrganizationBrandingResponse | null>(null),
+      settingsOwner: signal(null),
+      brandingOwner: signal(null),
+      settingsState: signal<string>('NOT_LOADED'),
+      brandingState: signal<string>('NOT_LOADED'),
+      settingsError: signal(''),
+      brandingError: signal(''),
+      settingsSaving: signal(false),
+      brandingSaving: signal(false),
+      settingsSuccess: signal(''),
+      brandingSuccess: signal(''),
+      effectiveAppointmentDuration: vi.fn(() => 60),
+      loadCurrent: vi.fn(),
+      saveSettings: vi.fn(),
+      saveBranding: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       imports: [OrganizationAdministrationPage],
@@ -67,6 +111,7 @@ describe('OrganizationAdministrationPage', () => {
         { provide: OrganizationsService, useValue: organizationsService },
         { provide: TenantContextStore, useValue: tenantStore },
         { provide: MatDialog, useValue: dialog },
+        { provide: OrganizationConfigurationStore, useValue: configurationStore },
       ],
     });
     TestBed.overrideProvider(MatDialog, { useValue: dialog });
@@ -129,6 +174,214 @@ describe('OrganizationAdministrationPage', () => {
     component.openStatusConfirmation();
     expect(organizationsService.update).not.toHaveBeenCalled();
     expect(dialog.open).not.toHaveBeenCalled();
+  });
+
+  it('renders loaded Settings and Branding canonical values', () => {
+    currentLoad.next(createOrganization());
+    publishConfiguration(
+      createSettings({ defaultAppointmentDuration: 45, persistedDefaultAppointmentDuration: 45 }),
+      createBranding({ primaryColor: '#2563EB' }),
+    );
+    fixture.detectChanges();
+
+    expect(component.settingsForm.controls.defaultAppointmentDuration.value).toBe(45);
+    expect(component.brandingForm.controls.primaryColor.value).toBe('#2563EB');
+    expect(fixture.nativeElement.textContent).toContain('Duración predeterminada');
+    expect(fixture.nativeElement.textContent).toContain('Identidad visual');
+  });
+
+  it('keeps Settings and Branding helpers and feedback in dynamic document flow', () => {
+    currentLoad.next(createOrganization());
+    publishConfiguration(createSettings(), createBranding());
+    configurationStore.settingsSuccess.set('La duración predeterminada se actualizó.');
+    configurationStore.settingsError.set(
+      'La configuración cambió en otra sesión. Se cargó la versión más reciente; revísala antes de volver a guardar.',
+    );
+    configurationStore.brandingSuccess.set('La identidad visual se actualizó.');
+    fixture.detectChanges();
+
+    const configurationForms = Array.from(
+      fixture.nativeElement.querySelectorAll('.organization-configuration-form'),
+    ) as HTMLElement[];
+    const settingsField = configurationForms[0].querySelector('mat-form-field');
+    const settingsHelper = configurationForms[0].querySelector('mat-hint');
+    const settingsSuccess = configurationForms[0].querySelector(
+      '.organization-configuration-success',
+    );
+    const settingsError = configurationForms[0].querySelector('.organization-configuration-error');
+    const brandingField = configurationForms[1].querySelector('mat-form-field');
+    const brandingSuccess = configurationForms[1].querySelector(
+      '.organization-configuration-success',
+    );
+
+    expect(
+      settingsField?.querySelector('.mat-mdc-form-field-subscript-dynamic-size'),
+    ).not.toBeNull();
+    expect(
+      brandingField?.querySelector('.mat-mdc-form-field-subscript-dynamic-size'),
+    ).not.toBeNull();
+    expect(settingsHelper?.textContent).toContain('Valor efectivo:');
+    expect(settingsSuccess?.textContent).toContain('se actualizó');
+    expect(settingsError?.textContent).toContain('antes de volver a guardar');
+    expect(brandingSuccess?.textContent).toContain('se actualizó');
+    expect(configurationForms[0].children[0]).toBe(settingsField);
+    expect(configurationForms[0].children[1]).toBe(settingsSuccess);
+    expect(configurationForms[0].children[2]).toBe(settingsError);
+  });
+
+  it('delegates Settings and Branding save and reset values', () => {
+    currentLoad.next(createOrganization());
+    publishConfiguration(createSettings(), createBranding());
+    fixture.detectChanges();
+
+    component.settingsForm.controls.defaultAppointmentDuration.setValue(45);
+    component.saveAppointmentDefault();
+    component.resetAppointmentDefault();
+    component.brandingForm.controls.primaryColor.setValue('#7C3AED');
+    component.saveBranding();
+    component.resetBranding();
+
+    expect(configurationStore.saveSettings).toHaveBeenNthCalledWith(1, 45);
+    expect(configurationStore.saveSettings).toHaveBeenNthCalledWith(2, null);
+    expect(configurationStore.saveBranding).toHaveBeenNthCalledWith(1, '#7C3AED');
+    expect(configurationStore.saveBranding).toHaveBeenNthCalledWith(2, null);
+  });
+
+  it('invalidates dirty Settings and Branding drafts when tenant A switches to B', () => {
+    currentLoad.next(createOrganization());
+    publishConfiguration(
+      createSettings({ defaultAppointmentDuration: 45, persistedDefaultAppointmentDuration: 45 }),
+      createBranding({ primaryColor: '#2563EB' }),
+    );
+    fixture.detectChanges();
+    component.settingsForm.controls.defaultAppointmentDuration.setValue(90);
+    component.settingsForm.controls.defaultAppointmentDuration.markAsDirty();
+    component.settingsForm.controls.defaultAppointmentDuration.markAsTouched();
+    component.brandingForm.controls.primaryColor.setValue('#7C3AED');
+    component.brandingForm.controls.primaryColor.markAsDirty();
+    component.brandingForm.controls.primaryColor.setErrors({ server: true });
+
+    selectedOrganizationId.set('organization-b');
+    switchGeneration.set(2);
+    fixture.detectChanges();
+
+    expect(component.settingsForm.controls.defaultAppointmentDuration.value).toBeNull();
+    expect(component.brandingForm.controls.primaryColor.value).toBeNull();
+    expect(component.settingsForm.pristine).toBe(true);
+    expect(component.settingsForm.untouched).toBe(true);
+    expect(component.brandingForm.pristine).toBe(true);
+    expect(component.brandingForm.controls.primaryColor.hasError('server')).toBe(false);
+
+    publishConfiguration(
+      createSettings({ defaultAppointmentDuration: 30, persistedDefaultAppointmentDuration: 30 }),
+      createBranding({ primaryColor: '#7C3AED' }),
+      'organization-b',
+      2,
+    );
+    fixture.detectChanges();
+    expect(component.settingsForm.controls.defaultAppointmentDuration.value).toBe(30);
+    expect(component.brandingForm.controls.primaryColor.value).toBe('#7C3AED');
+
+    component.saveAppointmentDefault();
+    component.saveBranding();
+    expect(configurationStore.saveSettings).toHaveBeenCalledWith(30);
+    expect(configurationStore.saveSettings).not.toHaveBeenCalledWith(90);
+    expect(configurationStore.saveBranding).toHaveBeenCalledWith('#7C3AED');
+    expect(configurationStore.saveBranding).not.toHaveBeenCalledWith('#2563EB');
+  });
+
+  it('allows only C canonical responses to populate forms after A to B to C', () => {
+    currentLoad.next(createOrganization());
+    component.settingsForm.controls.defaultAppointmentDuration.setValue(90);
+    component.settingsForm.controls.defaultAppointmentDuration.markAsDirty();
+    component.brandingForm.controls.primaryColor.setValue('#7C3AED');
+    component.brandingForm.controls.primaryColor.markAsTouched();
+
+    selectedOrganizationId.set('organization-b');
+    switchGeneration.set(2);
+    fixture.detectChanges();
+    selectedOrganizationId.set('organization-c');
+    switchGeneration.set(3);
+    fixture.detectChanges();
+
+    publishConfiguration(
+      createSettings({ persistedDefaultAppointmentDuration: 45, defaultAppointmentDuration: 45 }),
+      createBranding({ primaryColor: '#2563EB' }),
+      'organization-b',
+      2,
+    );
+    fixture.detectChanges();
+    expect(component.settingsForm.controls.defaultAppointmentDuration.value).toBeNull();
+    expect(component.brandingForm.controls.primaryColor.value).toBeNull();
+
+    publishConfiguration(
+      createSettings({ persistedDefaultAppointmentDuration: 60, defaultAppointmentDuration: 60 }),
+      createBranding({ primaryColor: '#2563EB' }),
+      'organization-a',
+      1,
+    );
+    fixture.detectChanges();
+    expect(component.settingsForm.controls.defaultAppointmentDuration.value).toBeNull();
+
+    publishConfiguration(
+      createSettings({ persistedDefaultAppointmentDuration: 30, defaultAppointmentDuration: 30 }),
+      createBranding({ primaryColor: '#7C3AED' }),
+      'organization-c',
+      3,
+    );
+    fixture.detectChanges();
+    expect(component.settingsForm.controls.defaultAppointmentDuration.value).toBe(30);
+    expect(component.brandingForm.controls.primaryColor.value).toBe('#7C3AED');
+    expect(component.settingsForm.pristine).toBe(true);
+    expect(component.brandingForm.untouched).toBe(true);
+  });
+
+  it('replaces in-flight dirty drafts with successful conflict reconciliation responses', () => {
+    currentLoad.next(createOrganization());
+    publishConfiguration(
+      createSettings({ persistedDefaultAppointmentDuration: 45, defaultAppointmentDuration: 45 }),
+      createBranding({ primaryColor: '#2563EB' }),
+    );
+    fixture.detectChanges();
+    component.settingsForm.controls.defaultAppointmentDuration.setValue(90);
+    component.settingsForm.controls.defaultAppointmentDuration.markAsDirty();
+    component.brandingForm.controls.primaryColor.setValue('#7C3AED');
+    component.brandingForm.controls.primaryColor.markAsDirty();
+
+    publishConfiguration(
+      createSettings({
+        rowState: 'PRESENT',
+        updatedAt: 'settings-v2',
+        persistedDefaultAppointmentDuration: 30,
+        defaultAppointmentDuration: 30,
+      }),
+      createBranding({ rowState: 'PRESENT', updatedAt: 'branding-v2', primaryColor: '#2563EB' }),
+    );
+    configurationStore.settingsError.set('Se cargó la versión más reciente; revísala.');
+    configurationStore.brandingError.set('Se cargó la versión más reciente; revísala.');
+    fixture.detectChanges();
+
+    expect(component.settingsForm.controls.defaultAppointmentDuration.value).toBe(30);
+    expect(component.brandingForm.controls.primaryColor.value).toBe('#2563EB');
+    expect(component.settingsForm.pristine).toBe(true);
+    expect(component.brandingForm.pristine).toBe(true);
+  });
+
+  it('shows reconciliation reload failure without stale success language', () => {
+    currentLoad.next(createOrganization());
+    configurationStore.settingsState.set('ERROR');
+    configurationStore.settingsSuccess.set('');
+    configurationStore.settingsError.set(
+      'La configuración cambió, pero no fue posible cargar la versión más reciente. Reintenta antes de guardar.',
+    );
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'no fue posible cargar la versión más reciente',
+    );
+    expect(fixture.nativeElement.textContent).not.toContain(
+      'La duración predeterminada se actualizó',
+    );
   });
 
   it('validates the certified DTO constraints before submitting', () => {
@@ -313,7 +566,8 @@ describe('OrganizationAdministrationPage', () => {
   });
 
   it('discards an out-of-order organization A response after switching to B', () => {
-    scope = { organizationId: 'organization-b', generation: 2 };
+    selectedOrganizationId.set('organization-b');
+    switchGeneration.set(2);
 
     currentLoad.next(createOrganization({ displayName: 'Stale A' }));
 
@@ -328,12 +582,27 @@ describe('OrganizationAdministrationPage', () => {
     organizationsService.update.mockReturnValue(update.asObservable());
     component.save();
 
-    scope = { organizationId: 'organization-b', generation: 2 };
+    selectedOrganizationId.set('organization-b');
+    switchGeneration.set(2);
     update.next(createOrganization({ displayName: 'Late A' }));
 
     expect(component.organization()?.displayName).toBe('Practice A');
     expect(tenantStore.synchronizeCanonicalContext).not.toHaveBeenCalled();
   });
+
+  function publishConfiguration(
+    settings: OrganizationSettingsResponse,
+    branding: OrganizationBrandingResponse,
+    organizationId = 'organization-a',
+    generation = 1,
+  ): void {
+    configurationStore.settings.set(settings);
+    configurationStore.settingsOwner.set({ organizationId, generation });
+    configurationStore.branding.set(branding);
+    configurationStore.brandingOwner.set({ organizationId, generation });
+    configurationStore.settingsState.set('LOADED');
+    configurationStore.brandingState.set('LOADED');
+  }
 });
 
 function createOrganization(overrides: Partial<OrganizationDetails> = {}): OrganizationDetails {
@@ -350,4 +619,22 @@ function createOrganization(overrides: Partial<OrganizationDetails> = {}): Organ
     updatedAt: '2026-01-02T00:00:00.000Z',
     ...overrides,
   };
+}
+
+function createSettings(
+  overrides: Partial<OrganizationSettingsResponse> = {},
+): OrganizationSettingsResponse {
+  return {
+    rowState: 'ABSENT',
+    updatedAt: null,
+    defaultAppointmentDuration: 60,
+    persistedDefaultAppointmentDuration: null,
+    ...overrides,
+  };
+}
+
+function createBranding(
+  overrides: Partial<OrganizationBrandingResponse> = {},
+): OrganizationBrandingResponse {
+  return { rowState: 'ABSENT', updatedAt: null, primaryColor: null, ...overrides };
 }

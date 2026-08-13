@@ -5,6 +5,7 @@
 .organization-admin-page,
 .organization-admin-aside,
 .organization-admin-form,
+.organization-configuration-form,
 .organization-admin-lifecycle,
 .organization-admin-metadata {
   display: grid;
@@ -85,6 +86,60 @@
 
 .organization-admin-aside {
   gap: 1.25rem;
+}
+
+.organization-configuration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.organization-configuration-form {
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.organization-configuration-form mat-form-field {
+  min-width: 0;
+  width: 100%;
+}
+
+.organization-configuration-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.organization-configuration-state,
+.organization-configuration-success,
+.organization-configuration-error {
+  margin: 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.organization-configuration-error {
+  color: var(--app-color-danger-text);
+}
+.organization-configuration-success {
+  color: var(--app-color-success-text);
+}
+
+.organization-brand-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--app-color-text-secondary);
+}
+
+.organization-brand-preview__swatch {
+  display: inline-block;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 2px solid var(--app-color-card-border);
+  border-radius: 0.65rem;
+  background: var(--app-org-brand-accent);
 }
 
 .organization-admin-form {
@@ -200,6 +255,7 @@
 
 @media (max-width: 900px) {
   .organization-admin-grid,
+  .organization-configuration-grid,
   .organization-admin-form__grid {
     grid-template-columns: 1fr;
   }
@@ -213,7 +269,8 @@
   }
 
   .organization-admin-form__actions button,
-  .organization-admin-lifecycle button {
+  .organization-admin-lifecycle button,
+  .organization-configuration-actions button {
     width: 100%;
   }
 }

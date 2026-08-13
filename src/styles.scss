@@ -63,6 +63,7 @@ body {
 }
 
 :root {
+  --app-org-brand-accent: #2563eb;
   --app-navbar-height: 4.25rem;
   --app-page-gap: 1.25rem;
   --app-page-gap-tight: 1rem;
@@ -220,8 +221,16 @@ button[mat-button] {
 }
 
 .app-secondary-button:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--app-color-surface-muted) 78%, var(--app-color-border) 22%) !important;
-  border-color: color-mix(in srgb, var(--app-color-border) 82%, var(--app-color-muted) 18%) !important;
+  background: color-mix(
+    in srgb,
+    var(--app-color-surface-muted) 78%,
+    var(--app-color-border) 22%
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-border) 82%,
+    var(--app-color-muted) 18%
+  ) !important;
 }
 
 .app-secondary-button:disabled {
@@ -251,8 +260,16 @@ button[mat-button] {
 }
 
 .app-action-button:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--app-color-primary-soft) 72%, var(--app-color-primary) 28%) !important;
-  border-color: color-mix(in srgb, var(--app-color-primary-border) 55%, var(--app-color-primary) 45%) !important;
+  background: color-mix(
+    in srgb,
+    var(--app-color-primary-soft) 72%,
+    var(--app-color-primary) 28%
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-primary-border) 55%,
+    var(--app-color-primary) 45%
+  ) !important;
 }
 
 .app-action-button:active:not(:disabled) {
@@ -914,12 +931,18 @@ body.dark-theme .app-status-badge--no-show {
   border-top: 1px solid color-mix(in srgb, var(--app-color-border) 82%, transparent);
 }
 
-.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__actions'] button:last-child.mat-mdc-unelevated-button:not(:disabled) {
+.mat-mdc-dialog-container
+  [class$='-delete-dialog']
+  [class$='__actions']
+  button:last-child.mat-mdc-unelevated-button:not(:disabled) {
   background: var(--app-color-danger);
   color: #fff;
 }
 
-.mat-mdc-dialog-container [class$='-delete-dialog'] [class$='__actions'] button:last-child.mat-mdc-unelevated-button:not(:disabled):hover {
+.mat-mdc-dialog-container
+  [class$='-delete-dialog']
+  [class$='__actions']
+  button:last-child.mat-mdc-unelevated-button:not(:disabled):hover {
   filter: brightness(0.97);
 }
 
@@ -1089,7 +1112,9 @@ body.dark-theme .app-status-badge--no-show {
     box-shadow 150ms ease;
 }
 
-.mat-mdc-button-toggle:hover:not(.mat-mdc-button-toggle-checked):not(.mat-mdc-button-toggle-disabled) {
+.mat-mdc-button-toggle:hover:not(.mat-mdc-button-toggle-checked):not(
+    .mat-mdc-button-toggle-disabled
+  ) {
   background: color-mix(in srgb, var(--app-color-primary-soft) 72%, transparent);
 }
 
@@ -1366,9 +1391,17 @@ app-dashboard-page {
 
   .dashboard-widget--alerts .section-card {
     background:
-      linear-gradient(180deg, color-mix(in srgb, var(--app-color-primary-soft) 20%, transparent) 0%, transparent 100%),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-color-primary-soft) 20%, transparent) 0%,
+        transparent 100%
+      ),
       var(--app-color-card-bg);
-    border-color: color-mix(in srgb, var(--dashboard-border) 66%, var(--app-color-primary-border) 34%);
+    border-color: color-mix(
+      in srgb,
+      var(--dashboard-border) 66%,
+      var(--app-color-primary-border) 34%
+    );
     box-shadow: none;
     height: fit-content;
   }
@@ -1404,7 +1437,11 @@ app-dashboard-page {
 
   .dashboard-widget--upcoming .section-card {
     background:
-      linear-gradient(180deg, color-mix(in srgb, var(--app-color-card-soft-bg) 62%, transparent) 0%, transparent 100%),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-color-card-soft-bg) 62%, transparent) 0%,
+        transparent 100%
+      ),
       var(--app-color-card-bg);
   }
 
@@ -1419,7 +1456,11 @@ app-dashboard-page {
 
   .dashboard-widget--activity .section-card {
     background:
-      linear-gradient(180deg, color-mix(in srgb, var(--app-color-card-soft-bg) 56%, transparent) 0%, transparent 100%),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-color-card-soft-bg) 56%, transparent) 0%,
+        transparent 100%
+      ),
       var(--app-color-card-bg);
   }
 
@@ -1744,7 +1785,11 @@ app-report-preview-shell {
   .report-preview-shell__clinical-data-card,
   .report-preview-shell__clinical-list-item {
     background:
-      linear-gradient(180deg, color-mix(in srgb, var(--app-color-card-soft-bg) 88%, transparent) 0%, transparent 100%),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-color-card-soft-bg) 88%, transparent) 0%,
+        transparent 100%
+      ),
       var(--app-color-card-bg);
   }
 
@@ -1805,8 +1850,16 @@ app-report-preview-shell {
     gap: 1rem;
     padding: 1.15rem;
     background:
-      radial-gradient(circle at top right, color-mix(in srgb, var(--app-color-primary-soft) 26%, transparent) 0%, transparent 42%),
-      linear-gradient(180deg, color-mix(in srgb, var(--app-color-card-soft-bg) 82%, transparent) 0%, transparent 100%),
+      radial-gradient(
+        circle at top right,
+        color-mix(in srgb, var(--app-color-primary-soft) 26%, transparent) 0%,
+        transparent 42%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-color-card-soft-bg) 82%, transparent) 0%,
+        transparent 100%
+      ),
       var(--app-color-card-bg);
   }
 
