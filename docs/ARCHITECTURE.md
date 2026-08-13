@@ -281,6 +281,14 @@ Organization Administration applies the same rule: a switch closes its
 lifecycle dialog, destroys the old form route and prevents late detail or
 mutation responses from publishing into the replacement tenant.
 
+Settings and Branding drafts are additionally owned by the selected
+organization and switch generation. A scope change immediately resets their
+reactive forms to a neutral state, and only canonical responses tagged with the
+current scope may populate them. The affected form is disabled while its PATCH
+is pending. A successful PATCH or 409 reconciliation GET replaces the form with
+the exact canonical response; a failed reconciliation hides the stale draft and
+requires a successful reload before another save is allowed.
+
 This mechanism does not add a second generation system, a tenant data cache, or browser persistence.
 
 Capability denial remains distinct from tenant loss: the confirmed tenant surface stays mounted while operational revalidation is pending, and when V1 still confirms the active tenant, the original `403` reaches its consumer without erasing route- or dialog-scoped data. Transient refresh failures also remain distinct from confirmed loss; the store retains the last confirmed snapshot without granting any new capability.

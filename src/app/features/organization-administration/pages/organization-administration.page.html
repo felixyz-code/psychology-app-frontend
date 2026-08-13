@@ -301,7 +301,10 @@
               title="Duración predeterminada de citas"
               subtitle="Se aplica al crear nuevas citas de esta organización."
             >
-              @if (organizationConfigurationStore.settingsState() === 'LOADING') {
+              @if (
+                organizationConfigurationStore.settingsState() === 'LOADING' ||
+                organizationConfigurationStore.settingsState() === 'NOT_LOADED'
+              ) {
                 <p class="organization-configuration-state" role="status">Cargando ajustes…</p>
               } @else if (organizationConfigurationStore.settingsState() === 'ERROR') {
                 <div class="organization-configuration-state" role="alert">
@@ -387,7 +390,10 @@
               title="Identidad visual de la organización"
               subtitle="Un acento limitado; no cambia el tema ni los controles de la aplicación."
             >
-              @if (organizationConfigurationStore.brandingState() === 'LOADING') {
+              @if (
+                organizationConfigurationStore.brandingState() === 'LOADING' ||
+                organizationConfigurationStore.brandingState() === 'NOT_LOADED'
+              ) {
                 <p class="organization-configuration-state" role="status">
                   Cargando identidad visual…
                 </p>

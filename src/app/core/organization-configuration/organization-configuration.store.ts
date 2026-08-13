@@ -17,6 +17,11 @@ import {
 
 export type ConfigurationLoadState = 'NOT_LOADED' | 'LOADING' | 'LOADED' | 'ERROR';
 
+export interface ConfigurationCanonicalScope {
+  readonly organizationId: string;
+  readonly generation: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OrganizationConfigurationStore {
   private readonly destroyRef = inject(DestroyRef);
@@ -26,6 +31,8 @@ export class OrganizationConfigurationStore {
 
   readonly settings = signal<OrganizationSettingsResponse | null>(null);
   readonly branding = signal<OrganizationBrandingResponse | null>(null);
+  readonly settingsOwner = signal<ConfigurationCanonicalScope | null>(null);
+  readonly brandingOwner = signal<ConfigurationCanonicalScope | null>(null);
   readonly settingsState = signal<ConfigurationLoadState>('NOT_LOADED');
   readonly brandingState = signal<ConfigurationLoadState>('NOT_LOADED');
   readonly settingsError = signal('');
@@ -59,7 +66,14 @@ export class OrganizationConfigurationStore {
   saveSettings(value: number | null): void {
     const scope = this.scope();
     const canonical = this.settings();
-    if (!scope || !canonical || this.settingsSaving()) return;
+    if (
+      !scope ||
+      !canonical ||
+      this.settingsState() !== 'LOADED' ||
+      !this.ownedBy(this.settingsOwner(), scope) ||
+      this.settingsSaving()
+    )
+      return;
     if (canonical.persistedDefaultAppointmentDuration === value) return;
     this.settingsSaving.set(true);
     this.settingsError.set('');
@@ -69,7 +83,7 @@ export class OrganizationConfigurationStore {
       .subscribe({
         next: (response) => {
           if (this.current(scope)) {
-            this.settings.set(response);
+            this.applySettings(response, scope);
             this.settingsSuccess.set('La duración predeterminada se actualizó.');
             this.settingsSaving.set(false);
           }
@@ -81,7 +95,14 @@ export class OrganizationConfigurationStore {
   saveBranding(value: string | null): void {
     const scope = this.scope();
     const canonical = this.branding();
-    if (!scope || !canonical || this.brandingSaving()) return;
+    if (
+      !scope ||
+      !canonical ||
+      this.brandingState() !== 'LOADED' ||
+      !this.ownedBy(this.brandingOwner(), scope) ||
+      this.brandingSaving()
+    )
+      return;
     const normalized = value === null ? null : canonicalOrganizationBrandColor(value);
     if (value !== null && !normalized) {
       this.brandingError.set('Usa un color hexadecimal #RRGGBB con contraste suficiente.');
@@ -96,7 +117,7 @@ export class OrganizationConfigurationStore {
       .subscribe({
         next: (response) => {
           if (this.current(scope)) {
-            this.applyBranding(response);
+            this.applyBranding(response, scope);
             this.brandingSuccess.set('El acento de la organización se actualizó.');
             this.brandingSaving.set(false);
           }
@@ -110,10 +131,14 @@ export class OrganizationConfigurationStore {
     const scope = { organizationId, generation, version };
     this.settingsState.set('LOADING');
     this.brandingState.set('LOADING');
+    this.settingsError.set('');
+    this.brandingError.set('');
+    this.settingsSuccess.set('');
+    this.brandingSuccess.set('');
     this.api.getSettings(organizationId).subscribe({
       next: (response) => {
         if (this.current(scope)) {
-          this.settings.set(response);
+          this.applySettings(response, scope);
           this.settingsState.set('LOADED');
         }
       },
@@ -127,7 +152,7 @@ export class OrganizationConfigurationStore {
     this.api.getBranding(organizationId).subscribe({
       next: (response) => {
         if (this.current(scope)) {
-          this.applyBranding(response);
+          this.applyBranding(response, scope);
           this.brandingState.set('LOADED');
         }
       },
@@ -144,8 +169,9 @@ export class OrganizationConfigurationStore {
     if (!this.current(scope)) return;
     this.settingsSaving.set(false);
     if (error.status === 409) {
+      this.settingsState.set('LOADING');
       this.settingsError.set(
-        'La configuración cambió en otra sesión. Se cargó la versión más reciente; revísala antes de volver a guardar.',
+        'La configuración cambió en otra sesión. Cargando la versión más reciente…',
       );
       this.reloadSettings(scope);
       return;
@@ -160,8 +186,9 @@ export class OrganizationConfigurationStore {
     if (!this.current(scope)) return;
     this.brandingSaving.set(false);
     if (error.status === 409) {
+      this.brandingState.set('LOADING');
       this.brandingError.set(
-        'La configuración cambió en otra sesión. Se cargó la versión más reciente; revísala antes de volver a guardar.',
+        'La configuración cambió en otra sesión. Cargando la versión más reciente…',
       );
       this.reloadBranding(scope);
       return;
@@ -176,8 +203,19 @@ export class OrganizationConfigurationStore {
     this.api.getSettings(scope.organizationId).subscribe({
       next: (value) => {
         if (this.current(scope)) {
-          this.settings.set(value);
+          this.applySettings(value, scope);
           this.settingsState.set('LOADED');
+          this.settingsError.set(
+            'La configuración cambió en otra sesión. Se cargó la versión más reciente; revísala antes de volver a guardar.',
+          );
+        }
+      },
+      error: () => {
+        if (this.current(scope)) {
+          this.settingsState.set('ERROR');
+          this.settingsError.set(
+            'La configuración cambió, pero no fue posible cargar la versión más reciente. Reintenta antes de guardar.',
+          );
         }
       },
     });
@@ -186,14 +224,30 @@ export class OrganizationConfigurationStore {
     this.api.getBranding(scope.organizationId).subscribe({
       next: (value) => {
         if (this.current(scope)) {
-          this.applyBranding(value);
+          this.applyBranding(value, scope);
           this.brandingState.set('LOADED');
+          this.brandingError.set(
+            'La configuración cambió en otra sesión. Se cargó la versión más reciente; revísala antes de volver a guardar.',
+          );
+        }
+      },
+      error: () => {
+        if (this.current(scope)) {
+          this.brandingState.set('ERROR');
+          this.brandingError.set(
+            'La configuración cambió, pero no fue posible cargar la versión más reciente. Reintenta antes de guardar.',
+          );
         }
       },
     });
   }
-  private applyBranding(value: OrganizationBrandingResponse): void {
+  private applySettings(value: OrganizationSettingsResponse, scope: Scope): void {
+    this.settings.set(value);
+    this.settingsOwner.set(this.canonicalScope(scope));
+  }
+  private applyBranding(value: OrganizationBrandingResponse, scope: Scope): void {
     this.branding.set(value);
+    this.brandingOwner.set(this.canonicalScope(scope));
     this.applyAccent(value.primaryColor);
   }
   private applyAccent(value: string | null): void {
@@ -206,6 +260,8 @@ export class OrganizationConfigurationStore {
     ++this.requestVersion;
     this.settings.set(null);
     this.branding.set(null);
+    this.settingsOwner.set(null);
+    this.brandingOwner.set(null);
     this.settingsState.set('NOT_LOADED');
     this.brandingState.set('NOT_LOADED');
     this.settingsError.set('');
@@ -228,6 +284,12 @@ export class OrganizationConfigurationStore {
       scope.organizationId === this.tenant.selectedOrganizationId() &&
       scope.generation === this.tenant.switchGeneration()
     );
+  }
+  private canonicalScope(scope: Scope): ConfigurationCanonicalScope {
+    return { organizationId: scope.organizationId, generation: scope.generation };
+  }
+  private ownedBy(owner: ConfigurationCanonicalScope | null, scope: Scope): boolean {
+    return owner?.organizationId === scope.organizationId && owner.generation === scope.generation;
   }
   private settingsRequest(
     c: OrganizationSettingsResponse,

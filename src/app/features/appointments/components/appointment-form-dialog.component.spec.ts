@@ -108,12 +108,73 @@ describe('AppointmentFormDialogComponent', () => {
     expect(dialogRef.close).not.toHaveBeenCalled();
   });
 
-  function createComponent(data: {
-    mode: 'create' | 'edit';
-    patients?: Patient[];
-    patientId?: string;
-    appointment?: Appointment;
-  }): {
+  it('initializes CREATE duration from the effective organization default', () => {
+    const { component } = createComponent(
+      { mode: 'create', patients: [createPatient()] },
+      () => 45,
+    );
+
+    expect(component.appointmentForm.controls.durationMinutes.value).toBe(45);
+  });
+
+  it('initializes CREATE duration with the effective platform fallback', () => {
+    const { component } = createComponent(
+      { mode: 'create', patients: [createPatient()] },
+      () => 60,
+    );
+
+    expect(component.appointmentForm.controls.durationMinutes.value).toBe(60);
+  });
+
+  it('keeps the existing EDIT duration instead of the organization default', () => {
+    const appointment = createAppointment({ durationMinutes: 75 });
+    const { component } = createComponent(
+      { mode: 'edit', appointment, patientId: appointment.patientId },
+      () => 45,
+    );
+
+    expect(component.appointmentForm.controls.durationMinutes.value).toBe(75);
+  });
+
+  it('does not clobber an open CREATE draft when configuration loads later', () => {
+    let effectiveDuration = 60;
+    const { component } = createComponent(
+      { mode: 'create', patients: [createPatient()] },
+      () => effectiveDuration,
+    );
+    component.appointmentForm.controls.durationMinutes.setValue(75);
+
+    effectiveDuration = 45;
+
+    expect(component.appointmentForm.controls.durationMinutes.value).toBe(75);
+  });
+
+  it('submits the actual CREATE form duration rather than a later organization default', () => {
+    let effectiveDuration = 45;
+    appointmentsService.createAppointment.mockReturnValue(of(createAppointment()));
+    const { component } = createComponent(
+      { mode: 'create', patients: [createPatient()] },
+      () => effectiveDuration,
+    );
+    component.appointmentForm.patchValue({ patientId: 'patient-1', durationMinutes: 75 });
+    effectiveDuration = 30;
+
+    component.submit();
+
+    expect(appointmentsService.createAppointment).toHaveBeenCalledWith(
+      expect.objectContaining({ durationMinutes: 75 }),
+    );
+  });
+
+  function createComponent(
+    data: {
+      mode: 'create' | 'edit';
+      patients?: Patient[];
+      patientId?: string;
+      appointment?: Appointment;
+    },
+    getEffectiveDuration: () => number = () => 60,
+  ): {
     component: AppointmentFormDialogComponent;
     dialogRef: { close: ReturnType<typeof vi.fn> };
   } {
@@ -128,7 +189,7 @@ describe('AppointmentFormDialogComponent', () => {
         { provide: AuthStore, useValue: { user: () => ({ id: 'psychologist-1' }) } },
         {
           provide: OrganizationConfigurationStore,
-          useValue: { effectiveAppointmentDuration: () => 60 },
+          useValue: { effectiveAppointmentDuration: getEffectiveDuration },
         },
       ],
     });
@@ -148,7 +209,7 @@ function createPatient(): Patient {
   };
 }
 
-function createAppointment(): Appointment {
+function createAppointment(overrides: Partial<Appointment> = {}): Appointment {
   return {
     id: 'appointment-1',
     patientId: 'patient-1',
@@ -159,5 +220,6 @@ function createAppointment(): Appointment {
     notes: null,
     createdAt: '',
     updatedAt: '',
+    ...overrides,
   };
 }
