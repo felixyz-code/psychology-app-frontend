@@ -295,6 +295,178 @@
               </dl>
             </app-section-card>
           </div>
+
+          <div class="organization-configuration-grid">
+            <app-section-card
+              title="Duración predeterminada de citas"
+              subtitle="Se aplica al crear nuevas citas de esta organización."
+            >
+              @if (organizationConfigurationStore.settingsState() === 'LOADING') {
+                <p class="organization-configuration-state" role="status">Cargando ajustes…</p>
+              } @else if (organizationConfigurationStore.settingsState() === 'ERROR') {
+                <div class="organization-configuration-state" role="alert">
+                  <span>{{ organizationConfigurationStore.settingsError() }}</span>
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="organizationConfigurationStore.loadCurrent()"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              } @else {
+                <form
+                  class="organization-configuration-form"
+                  [formGroup]="settingsForm"
+                  (ngSubmit)="saveAppointmentDefault()"
+                >
+                  <mat-form-field appearance="outline">
+                    <mat-label>Duración predeterminada (minutos)</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      min="1"
+                      max="1440"
+                      formControlName="defaultAppointmentDuration"
+                      [readonly]="!canManage()"
+                    />
+                    <mat-hint
+                      >Valor efectivo:
+                      {{ organizationConfigurationStore.effectiveAppointmentDuration() }} minutos.
+                      El valor predeterminado de la plataforma es 60 minutos.</mat-hint
+                    >
+                    @if (
+                      settingsForm.controls.defaultAppointmentDuration.hasError('min') ||
+                      settingsForm.controls.defaultAppointmentDuration.hasError('max')
+                    ) {
+                      <mat-error>Usa un valor entre 1 y 1440 minutos.</mat-error>
+                    }
+                  </mat-form-field>
+                  @if (organizationConfigurationStore.settingsSuccess()) {
+                    <p class="organization-configuration-success" role="status">
+                      {{ organizationConfigurationStore.settingsSuccess() }}
+                    </p>
+                  }
+                  @if (organizationConfigurationStore.settingsError()) {
+                    <p class="organization-configuration-error" role="alert">
+                      {{ organizationConfigurationStore.settingsError() }}
+                    </p>
+                  }
+                  @if (canManage()) {
+                    <div class="organization-configuration-actions">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="
+                          settingsForm.invalid || organizationConfigurationStore.settingsSaving()
+                        "
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="resetAppointmentDefault()"
+                        [disabled]="organizationConfigurationStore.settingsSaving()"
+                      >
+                        Usar valor predeterminado
+                      </button>
+                    </div>
+                  } @else {
+                    <p class="organization-admin-readonly">
+                      Tienes acceso de consulta; la edición requiere
+                      <code>organization.manage</code>.
+                    </p>
+                  }
+                </form>
+              }
+            </app-section-card>
+
+            <app-section-card
+              title="Identidad visual de la organización"
+              subtitle="Un acento limitado; no cambia el tema ni los controles de la aplicación."
+            >
+              @if (organizationConfigurationStore.brandingState() === 'LOADING') {
+                <p class="organization-configuration-state" role="status">
+                  Cargando identidad visual…
+                </p>
+              } @else if (organizationConfigurationStore.brandingState() === 'ERROR') {
+                <div class="organization-configuration-state" role="alert">
+                  <span>{{ organizationConfigurationStore.brandingError() }}</span
+                  ><button
+                    mat-button
+                    type="button"
+                    (click)="organizationConfigurationStore.loadCurrent()"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              } @else {
+                <form
+                  class="organization-configuration-form"
+                  [formGroup]="brandingForm"
+                  (ngSubmit)="saveBranding()"
+                >
+                  <div class="organization-brand-preview">
+                    <span class="organization-brand-preview__swatch" aria-hidden="true"></span
+                    ><span>Vista previa del acento de la organización</span>
+                  </div>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Color de acento (#RRGGBB)</mat-label>
+                    <input
+                      matInput
+                      formControlName="primaryColor"
+                      placeholder="#2563EB"
+                      maxlength="7"
+                      autocomplete="off"
+                      [readonly]="!canManage()"
+                    />
+                    <mat-hint>Debe contrastar con superficies claras y oscuras.</mat-hint>
+                    @if (brandingForm.controls.primaryColor.hasError('unsafeColor')) {
+                      <mat-error>Usa #RRGGBB con contraste suficiente.</mat-error>
+                    }
+                  </mat-form-field>
+                  @if (organizationConfigurationStore.brandingSuccess()) {
+                    <p class="organization-configuration-success" role="status">
+                      {{ organizationConfigurationStore.brandingSuccess() }}
+                    </p>
+                  }
+                  @if (organizationConfigurationStore.brandingError()) {
+                    <p class="organization-configuration-error" role="alert">
+                      {{ organizationConfigurationStore.brandingError() }}
+                    </p>
+                  }
+                  @if (canManage()) {
+                    <div class="organization-configuration-actions">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="
+                          brandingForm.invalid || organizationConfigurationStore.brandingSaving()
+                        "
+                      >
+                        Guardar</button
+                      ><button
+                        mat-stroked-button
+                        type="button"
+                        (click)="resetBranding()"
+                        [disabled]="organizationConfigurationStore.brandingSaving()"
+                      >
+                        Usar valor predeterminado
+                      </button>
+                    </div>
+                  } @else {
+                    <p class="organization-admin-readonly">
+                      Tienes acceso de consulta; la edición requiere
+                      <code>organization.manage</code>.
+                    </p>
+                  }
+                </form>
+              }
+            </app-section-card>
+          </div>
         </div>
       }
     }

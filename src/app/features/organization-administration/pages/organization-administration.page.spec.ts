@@ -1,9 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { of, Subject } from 'rxjs';
 
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
+import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
 import { OrganizationDetails } from '../models/organization.models';
 import { OrganizationsService } from '../services/organizations.service';
 import { OrganizationAdministrationPage } from './organization-administration.page';
@@ -60,6 +62,22 @@ describe('OrganizationAdministrationPage', () => {
     dialog = {
       open: vi.fn(() => ({ afterClosed: () => dialogClosed.asObservable() })),
     };
+    const configurationStore = {
+      settings: signal(null),
+      branding: signal(null),
+      settingsState: signal('NOT_LOADED'),
+      brandingState: signal('NOT_LOADED'),
+      settingsError: signal(''),
+      brandingError: signal(''),
+      settingsSaving: signal(false),
+      brandingSaving: signal(false),
+      settingsSuccess: signal(''),
+      brandingSuccess: signal(''),
+      effectiveAppointmentDuration: () => 60,
+      loadCurrent: vi.fn(),
+      saveSettings: vi.fn(),
+      saveBranding: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       imports: [OrganizationAdministrationPage],
@@ -67,6 +85,7 @@ describe('OrganizationAdministrationPage', () => {
         { provide: OrganizationsService, useValue: organizationsService },
         { provide: TenantContextStore, useValue: tenantStore },
         { provide: MatDialog, useValue: dialog },
+        { provide: OrganizationConfigurationStore, useValue: configurationStore },
       ],
     });
     TestBed.overrideProvider(MatDialog, { useValue: dialog });

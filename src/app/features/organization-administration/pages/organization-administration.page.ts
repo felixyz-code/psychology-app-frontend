@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -11,6 +11,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
 
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
+import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
+import {
+  canonicalOrganizationBrandColor,
+  isSafeOrganizationBrandColor,
+} from '../../../core/organization-configuration/organization-brand-color';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
@@ -55,6 +60,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly organizationsService = inject(OrganizationsService);
   readonly tenantContextStore = inject(TenantContextStore);
+  readonly organizationConfigurationStore = inject(OrganizationConfigurationStore);
   private loadSubscription?: Subscription;
   private mutationSubscription?: Subscription;
   private loadSequence = 0;
@@ -106,9 +112,35 @@ export class OrganizationAdministrationPage implements OnDestroy {
       validators: [Validators.required, Validators.pattern(/^[A-Z]{3}$/)],
     }),
   });
+  readonly settingsForm = new FormGroup({
+    defaultAppointmentDuration: new FormControl<number | null>(null, [
+      Validators.min(1),
+      Validators.max(1440),
+    ]),
+  });
+  readonly brandingForm = new FormGroup({
+    primaryColor: new FormControl<string | null>(null, [
+      (control) =>
+        control.value === null || isSafeOrganizationBrandColor(control.value)
+          ? null
+          : { unsafeColor: true },
+    ]),
+  });
 
   constructor() {
     this.loadOrganization();
+    effect(() => {
+      const settings = this.organizationConfigurationStore.settings();
+      if (settings && !this.settingsForm.dirty) {
+        this.settingsForm.reset({
+          defaultAppointmentDuration: settings.persistedDefaultAppointmentDuration,
+        });
+      }
+      const branding = this.organizationConfigurationStore.branding();
+      if (branding && !this.brandingForm.dirty) {
+        this.brandingForm.reset({ primaryColor: branding.primaryColor });
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -266,6 +298,43 @@ export class OrganizationAdministrationPage implements OnDestroy {
     }
 
     return 'Usa un código ISO de tres letras, por ejemplo MXN.';
+  }
+
+  saveAppointmentDefault(): void {
+    if (!this.canManage() || this.settingsForm.invalid) {
+      this.settingsForm.markAllAsTouched();
+      return;
+    }
+    this.organizationConfigurationStore.saveSettings(
+      this.settingsForm.controls.defaultAppointmentDuration.value,
+    );
+    this.settingsForm.markAsPristine();
+  }
+
+  resetAppointmentDefault(): void {
+    if (!this.canManage()) return;
+    this.settingsForm.controls.defaultAppointmentDuration.setValue(null);
+    this.organizationConfigurationStore.saveSettings(null);
+    this.settingsForm.markAsPristine();
+  }
+
+  saveBranding(): void {
+    if (!this.canManage() || this.brandingForm.invalid) {
+      this.brandingForm.markAllAsTouched();
+      return;
+    }
+    const value = this.brandingForm.controls.primaryColor.value;
+    this.organizationConfigurationStore.saveBranding(
+      value === null || value === '' ? null : canonicalOrganizationBrandColor(value),
+    );
+    this.brandingForm.markAsPristine();
+  }
+
+  resetBranding(): void {
+    if (!this.canManage()) return;
+    this.brandingForm.controls.primaryColor.setValue(null);
+    this.organizationConfigurationStore.saveBranding(null);
+    this.brandingForm.markAsPristine();
   }
 
   private changeStatus(targetStatus: OrganizationStatus): void {
