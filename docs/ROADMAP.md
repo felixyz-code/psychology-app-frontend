@@ -43,47 +43,43 @@ Completed - Reports foundation generalized for multiple professional reports
 POST-GO-LIVE.4 status:
 
 ```text
-POST-GO-LIVE.4: FUNCTIONAL COMPLETE / FORMAL CLOSEOUT REVIEW PENDING
-POST-GO-LIVE.4.0: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.1: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.2: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.3: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.4: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.5: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.6: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.7: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.8: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.P: COMPLETE / INTEGRATED
-POST-GO-LIVE.4.9: FUNCTIONAL CERTIFICATION COMPLETE
+POST-GO-LIVE.4: CLOSED / INTEGRATED
+POST-GO-LIVE.4.0 through 4.9: COMPLETE / INTEGRATED
 FRONTEND BASELINE: 092eca3a1f9ed236586d9c0bb1b5f1c59f1e2a7c
 BACKEND SUPPORTING BASELINE: ef4c1f7cefa9d5ab5bfc3b27e59ed51c8ea72fee
-NEXT PHASE REQUIRES ROADMAP DECISION
+```
+
+POST-GO-LIVE.5 status:
+
+```text
+POST-GO-LIVE.5 (Organization Branding & Configuration): CLOSED / INTEGRATED
+POST-GO-LIVE.5.0: COMPLETE / INTEGRATED (Organization Branding & Configuration Architecture)
+POST-GO-LIVE.5.1: COMPLETE / INTEGRATED (Backend Organization Configuration Runtime)
+POST-GO-LIVE.5.2: COMPLETE / INTEGRATED (Backend Protected Logo Storage & API Runtime)
+POST-GO-LIVE.5.3: COMPLETE / INTEGRATED (Backend Hardening, Verification & Audit)
+POST-GO-LIVE.5.4: COMPLETE / INTEGRATED (Frontend Organization Configuration & Branding UX - PR #37)
+POST-GO-LIVE.5.5: COMPLETE / INTEGRATED (Frontend Protected Organization Logo UX - PR #38)
+POST-GO-LIVE.5.6: COMPLETE / INTEGRATED (Manual UX Certification & Accessibility)
+POST-GO-LIVE.5.7: COMPLETE / INTEGRATED (Cross-Repository Integration Certification)
+POST-GO-LIVE.5.8: COMPLETE / INTEGRATED (Phase 5 Normative Closeout)
+FRONTEND MERGED BASELINE: 5ebf23e74786698f77af046966f3153bec27fdd6
+BACKEND SUPPORTING BASELINE: development (synced)
+PHASE 5 FORMALLY CLOSED
 ```
 
 ## POST-GO-LIVE.5.5 - Organization Logo UX
 
-**Status:** `IMPLEMENTED / INDEPENDENT R1 AND MANUAL UX REVIEW REQUIRED`.
+**Status:** `COMPLETE / CERTIFIED AND INTEGRATED IN PR #38 (Commit 5ebf23e74786698f77af046966f3153bec27fdd6)`.
 
 **Goal:** expose the certified protected organization-logo contract inside
 Organization Administration without weakening tenant or authentication
 boundaries.
 
-**Implementation:** typed metadata and mutation API adapter; dedicated
-tenant-generation-owned signal store; authenticated Blob loading; deterministic
-object URL cleanup; capability-aware upload, replacement, and confirmed removal
-UX; exact `ABSENT`/`PRESENT` compare-and-swap preconditions; one-reload conflict
-reconciliation; accessible preview and file input; and direct API, store, and
-page regression coverage.
-
-**Security invariants:** logo content remains protected and non-public; the
-existing request pipeline supplies bearer and tenant headers; Blob state is
-runtime-only; stale cross-tenant reads and mutations cannot publish; and the
-backend remains authoritative for image validation, tenant ownership,
-capabilities, concurrency, and persistence.
-
-**Next gate:** independent R1 plus the required desktop, dark-theme, mobile,
-mutation, read-only, tenant-switch, conflict, and reload-persistence manual UX
-review. The implementation PR remains draft and must not be merged during 5.5.
+**Implementation & Architecture:**
+- **Storage Namespace & Protected Streaming:** Dedicated `/organizations/:organizationId/logo` metadata and `/organizations/:organizationId/logo/content` protected byte endpoints with strict tenant scoping and MIME validation.
+- **Blob-Based Object URL Lifecycle:** Client-side runtime-only Object URL management via `OrganizationLogoStore` with deterministic URL revocation on replacement, removal, tenant invalidation/logout, stale acceptance, and store destruction (zero leak risk).
+- **Concurrency & CAS Conflict Reconciliation:** Compare-and-swap (CAS) preconditions (`expectedRowState=ABSENT` or canonical `expectedUpdatedAt`). HTTP `409 Conflict` errors are never retried; they trigger exactly one canonical metadata refresh and reload content only when the reconciled state is `PRESENT`.
+- **Tenant Boundary Isolation:** Tenant-generation-owned state scoped by `organizationId`, `switchGeneration`, and monotonic `requestVersion` to prevent late cross-tenant reads or mutations from publishing.
 
 ## POST-GO-LIVE.4.4 - Organization Administration UX (Historical capability record)
 
