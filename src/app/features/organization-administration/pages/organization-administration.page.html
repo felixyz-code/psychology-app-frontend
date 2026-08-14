@@ -472,6 +472,169 @@
                 </form>
               }
             </app-section-card>
+
+            <div class="organization-logo-card">
+              <app-section-card
+                title="Logotipo de la organizaci&oacute;n"
+                subtitle="Imagen protegida disponible solo mediante el contexto autenticado de la organizaci&oacute;n."
+              >
+                <div class="organization-logo">
+                  @if (
+                    organizationLogoStore.state() === 'LOADING' ||
+                    organizationLogoStore.state() === 'NOT_LOADED'
+                  ) {
+                    <div class="organization-logo__state" role="status">
+                      <mat-spinner diameter="32" />
+                      <span>Cargando logotipo&hellip;</span>
+                    </div>
+                  } @else if (organizationLogoStore.state() === 'ERROR') {
+                    <div
+                      class="organization-logo__state organization-logo__state--error"
+                      role="alert"
+                    >
+                      <mat-icon aria-hidden="true">broken_image</mat-icon>
+                      <span>{{ organizationLogoStore.errorMessage() }}</span>
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="organizationLogoStore.loadCurrent()"
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  } @else {
+                    @if (organizationLogoStore.state() === 'ABSENT') {
+                      <div class="organization-logo__preview organization-logo__preview--empty">
+                        <mat-icon aria-hidden="true">image_not_supported</mat-icon>
+                        <div>
+                          <strong>Sin logotipo</strong>
+                          <span>La organizaci&oacute;n no tiene una imagen configurada.</span>
+                        </div>
+                      </div>
+                    } @else if (presentLogo(); as logo) {
+                      <div class="organization-logo__present">
+                        <div class="organization-logo__preview">
+                          <img
+                            [src]="organizationLogoStore.previewUrl()"
+                            [alt]="'Logotipo de ' + currentOrganization.displayName"
+                          />
+                        </div>
+                        <dl class="organization-logo__metadata">
+                          <div>
+                            <dt>Dimensiones</dt>
+                            <dd>{{ logo.width }} &times; {{ logo.height }} px</dd>
+                          </div>
+                          <div>
+                            <dt>Tipo</dt>
+                            <dd>{{ logoTypeLabel(logo) }}</dd>
+                          </div>
+                          <div>
+                            <dt>Tama&ntilde;o</dt>
+                            <dd>{{ logoSizeLabel(logo.byteSize) }}</dd>
+                          </div>
+                        </dl>
+                      </div>
+                    }
+
+                    <p id="organization-logo-constraints" class="organization-logo__constraints">
+                      PNG o JPEG, m&aacute;ximo 1 MiB y dimensiones entre 64 y 2048 px. El servidor
+                      valida el archivo de forma definitiva.
+                    </p>
+
+                    @if (organizationLogoStore.successMessage()) {
+                      <p class="organization-configuration-success" role="status">
+                        {{ organizationLogoStore.successMessage() }}
+                      </p>
+                    }
+                    @if (organizationLogoStore.conflictMessage()) {
+                      <p class="organization-logo__conflict" role="alert">
+                        {{ organizationLogoStore.conflictMessage() }}
+                      </p>
+                    }
+                    @if (organizationLogoStore.errorMessage()) {
+                      <p class="organization-configuration-error" role="alert">
+                        {{ organizationLogoStore.errorMessage() }}
+                      </p>
+                    }
+
+                    @if (canManage()) {
+                      <div class="organization-logo__controls">
+                        <label for="organization-logo-file">Seleccionar archivo</label>
+                        <input
+                          #logoFileInput
+                          id="organization-logo-file"
+                          type="file"
+                          accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                          [attr.aria-describedby]="
+                            organizationLogoStore.fileError()
+                              ? 'organization-logo-constraints organization-logo-file-feedback'
+                              : 'organization-logo-constraints'
+                          "
+                          [attr.aria-errormessage]="
+                            organizationLogoStore.fileError()
+                              ? 'organization-logo-file-feedback'
+                              : null
+                          "
+                          [attr.aria-invalid]="organizationLogoStore.fileError() ? 'true' : null"
+                          [disabled]="organizationLogoStore.mutationState() !== 'IDLE'"
+                          (change)="selectLogoFile($event)"
+                        />
+                        @if (organizationLogoStore.fileError()) {
+                          <p
+                            id="organization-logo-file-feedback"
+                            class="organization-configuration-error"
+                            role="alert"
+                          >
+                            {{ organizationLogoStore.fileError() }}
+                          </p>
+                        }
+                      </div>
+
+                      <div class="organization-configuration-actions">
+                        <button
+                          mat-flat-button
+                          color="primary"
+                          type="button"
+                          [disabled]="
+                            !organizationLogoStore.selectedFile() ||
+                            organizationLogoStore.mutationState() !== 'IDLE'
+                          "
+                          (click)="uploadLogo()"
+                        >
+                          @if (organizationLogoStore.mutationState() === 'UPLOADING') {
+                            <mat-spinner diameter="20" />
+                          }
+                          <span>{{
+                            organizationLogoStore.state() === 'PRESENT'
+                              ? 'Reemplazar logotipo'
+                              : 'Subir logotipo'
+                          }}</span>
+                        </button>
+                        @if (organizationLogoStore.state() === 'PRESENT') {
+                          <button
+                            mat-stroked-button
+                            color="warn"
+                            type="button"
+                            [disabled]="organizationLogoStore.mutationState() !== 'IDLE'"
+                            (click)="openLogoRemoveConfirmation()"
+                          >
+                            @if (organizationLogoStore.mutationState() === 'REMOVING') {
+                              <mat-spinner diameter="20" />
+                            }
+                            <span>Eliminar logotipo</span>
+                          </button>
+                        }
+                      </div>
+                    } @else {
+                      <p class="organization-admin-readonly">
+                        Tienes acceso de consulta; subir, reemplazar o eliminar requiere
+                        <code>organization.manage</code>.
+                      </p>
+                    }
+                  }
+                </div>
+              </app-section-card>
+            </div>
           </div>
         </div>
       }

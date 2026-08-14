@@ -289,6 +289,16 @@ is pending. A successful PATCH or 409 reconciliation GET replaces the form with
 the exact canonical response; a failed reconciliation hides the stale draft and
 requires a successful reload before another save is allowed.
 
+Protected organization logo presentation follows the same tenant-generation
+ownership rule through `OrganizationLogoStore`. The store owns canonical
+`ABSENT`/`PRESENT` metadata, selected-file and mutation state, and the only
+runtime object URL used by the UI. Metadata and protected bytes are loaded
+through tenant-required HTTP requests. A tenant change immediately revokes the
+current object URL and clears all logo state; request-version plus
+`switchGeneration` checks prevent late metadata, content, upload, delete, or
+conflict-reconciliation responses from publishing under another tenant. Logo
+bytes and object URLs are never persisted.
+
 This mechanism does not add a second generation system, a tenant data cache, or browser persistence.
 
 Capability denial remains distinct from tenant loss: the confirmed tenant surface stays mounted while operational revalidation is pending, and when V1 still confirms the active tenant, the original `403` reaches its consumer without erasing route- or dialog-scoped data. Transient refresh failures also remain distinct from confirmed loss; the store retains the last confirmed snapshot without granting any new capability.

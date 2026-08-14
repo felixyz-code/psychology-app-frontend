@@ -696,6 +696,42 @@ Current tenant-sensitive state is owned primarily by routed components, Angular 
 
 ---
 
+# ADR-028 - Protected Organization Logo Runtime State
+
+## Decision
+
+Protected organization logos are rendered only from authenticated
+tenant-required `HttpClient` Blob responses. A dedicated
+`OrganizationLogoStore` owns canonical metadata, mutation state, selected-file
+state, and the single browser object URL for the current organization and
+`TenantContextStore.switchGeneration`.
+
+The logo content endpoint is never assigned directly to an image source, and
+logo bytes or object URLs are never persisted. Upload and delete use only the
+canonical backend compare-and-swap precondition. A `409` triggers one canonical
+reload and never an automatic mutation retry.
+
+## Rationale
+
+A raw image navigation cannot reliably carry the application's bearer identity
+and tenant request metadata. Centralizing Blob ownership also makes URL
+revocation and out-of-order response handling deterministic across tenant
+switches, logout, replacement, removal, and conflict recovery.
+
+## Implications
+
+- `organization.read` can load metadata and protected content, while mutation
+  affordances require `organization.manage`
+- only PNG/JPEG Blob types matching canonical metadata can become previews
+- late A/B responses cannot publish after a later tenant generation becomes
+  current
+- client file checks remain UX guidance; backend validation remains
+  authoritative
+- no public, signed, filesystem, clinical-document, or persisted logo URL is
+  introduced
+
+---
+
 # Future Decisions
 
 Future ADRs may document decisions regarding:

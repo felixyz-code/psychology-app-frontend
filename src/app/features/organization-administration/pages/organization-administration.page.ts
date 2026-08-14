@@ -1,6 +1,15 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  OnDestroy,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -12,6 +21,7 @@ import { Subscription } from 'rxjs';
 
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
 import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
+import { OrganizationLogoStore } from '../../../core/organization-logo/organization-logo.store';
 import {
   canonicalOrganizationBrandColor,
   isSafeOrganizationBrandColor,
@@ -20,9 +30,14 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import {
+  OrganizationLogoRemoveConfirmDialogComponent,
+  OrganizationLogoRemoveConfirmDialogData,
+} from '../components/organization-logo-remove-confirm-dialog.component';
+import {
   OrganizationStatusConfirmDialogComponent,
   OrganizationStatusConfirmDialogData,
 } from '../components/organization-status-confirm-dialog.component';
+import { PresentOrganizationLogoResponse } from '../models/organization-logo.models';
 import {
   OrganizationDetails,
   OrganizationStatus,
@@ -61,6 +76,8 @@ export class OrganizationAdministrationPage implements OnDestroy {
   private readonly organizationsService = inject(OrganizationsService);
   readonly tenantContextStore = inject(TenantContextStore);
   readonly organizationConfigurationStore = inject(OrganizationConfigurationStore);
+  readonly organizationLogoStore = inject(OrganizationLogoStore);
+  private readonly logoFileInput = viewChild<ElementRef<HTMLInputElement>>('logoFileInput');
   private loadSubscription?: Subscription;
   private mutationSubscription?: Subscription;
   private loadSequence = 0;
@@ -76,6 +93,10 @@ export class OrganizationAdministrationPage implements OnDestroy {
   readonly contextWarning = signal('');
   readonly canManage = computed(() => this.tenantContextStore.hasCapability('organization.manage'));
   readonly isSuspended = computed(() => this.organization()?.status === 'SUSPENDED');
+  readonly presentLogo = computed(() => {
+    const logo = this.organizationLogoStore.logo();
+    return logo?.rowState === 'PRESENT' ? logo : null;
+  });
   readonly isCanonicalContextSynchronizationPending =
     this.tenantContextStore.isCanonicalContextSynchronizationPending;
 
@@ -183,6 +204,11 @@ export class OrganizationAdministrationPage implements OnDestroy {
       } else {
         this.brandingForm.enable({ emitEvent: false });
       }
+    });
+    effect(() => {
+      const selectedFile = this.organizationLogoStore.selectedFile();
+      const input = this.logoFileInput()?.nativeElement;
+      if (!selectedFile && input) input.value = '';
     });
   }
 
@@ -389,6 +415,61 @@ export class OrganizationAdministrationPage implements OnDestroy {
     if (this.organizationConfigurationStore.branding()?.primaryColor === null) {
       this.brandingForm.markAsPristine();
     }
+  }
+
+  selectLogoFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.organizationLogoStore.selectFile(input.files?.item(0) ?? null);
+    if (!this.organizationLogoStore.selectedFile()) input.value = '';
+  }
+
+  uploadLogo(): void {
+    if (!this.canManage()) return;
+    this.organizationLogoStore.uploadSelected();
+  }
+
+  openLogoRemoveConfirmation(): void {
+    const organization = this.organization();
+    const scope = this.captureScope();
+    if (
+      !organization ||
+      !scope ||
+      !this.canManage() ||
+      this.organizationLogoStore.state() !== 'PRESENT' ||
+      this.organizationLogoStore.mutationState() !== 'IDLE'
+    ) {
+      return;
+    }
+
+    const data: OrganizationLogoRemoveConfirmDialogData = {
+      displayName: organization.displayName,
+    };
+    const dialogRef = this.dialog.open(OrganizationLogoRemoveConfirmDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      data,
+    });
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (
+        confirmed &&
+        this.canManage() &&
+        this.isScopeCurrent(scope) &&
+        this.organizationLogoStore.state() === 'PRESENT' &&
+        this.organizationLogoStore.mutationState() === 'IDLE'
+      ) {
+        this.organizationLogoStore.remove();
+      }
+    });
+  }
+
+  logoTypeLabel(logo: PresentOrganizationLogoResponse): string {
+    return logo.mimeType === 'image/png' ? 'PNG' : 'JPEG';
+  }
+
+  logoSizeLabel(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KiB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`;
   }
 
   private changeStatus(targetStatus: OrganizationStatus): void {

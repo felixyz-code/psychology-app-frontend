@@ -1,0 +1,22 @@
+<div class="logo-remove-dialog">
+  <div class="logo-remove-dialog__icon">
+    <mat-icon aria-hidden="true">delete_outline</mat-icon>
+  </div>
+
+  <div class="logo-remove-dialog__copy">
+    <h2 mat-dialog-title>Eliminar logotipo</h2>
+    <mat-dialog-content>
+      <p>
+        Se eliminar&aacute; el logotipo actual de <strong>{{ data.displayName }}</strong
+        >. La organizaci&oacute;n volver&aacute; a mostrar el estado sin logotipo.
+      </p>
+    </mat-dialog-content>
+  </div>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="cancel()">Cancelar</button>
+    <button mat-flat-button color="warn" type="button" (click)="confirm()">
+      Eliminar logotipo
+    </button>
+  </mat-dialog-actions>
+</div>
