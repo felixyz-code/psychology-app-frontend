@@ -1,0 +1,136 @@
+<div class="branch-dialog app-dialog">
+  <div class="branch-dialog__header app-dialog__header">
+    <h2>{{ getTitle() }}</h2>
+    <p>{{ getSubtitle() }}</p>
+  </div>
+
+  <form
+    class="branch-dialog__form app-dialog__form app-form"
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+  >
+    <div class="branch-dialog__body">
+      @if (planLimitReached()) {
+        <div class="branch-dialog__plan-banner" role="alert">
+          <div class="branch-dialog__plan-banner-icon">
+            <mat-icon>workspace_premium</mat-icon>
+          </div>
+          <div class="branch-dialog__plan-banner-text">
+            <strong>Límite de sedes alcanzado</strong>
+            <p>Tu plan actual ha alcanzado la cuota máxima de sedes disponibles.</p>
+          </div>
+        </div>
+      }
+
+      <section class="branch-dialog__section app-form-section">
+        <div class="app-form-section__header">
+          <h3>Identificación de la sede</h3>
+          <p>Define el nombre público y el código único de referencia interna.</p>
+        </div>
+
+        <div class="branch-dialog__grid app-dialog__grid app-form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre de la sede</mat-label>
+            <input matInput formControlName="name" placeholder="Ej. Sede Central (Matriz)" />
+            @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+              <mat-error>El nombre es obligatorio.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Código único</mat-label>
+            <input
+              matInput
+              formControlName="code"
+              placeholder="Ej. CDMX-CENTRO"
+              (input)="onCodeInput($event)"
+            />
+            <mat-hint>Solo letras, números, guiones (- y _)</mat-hint>
+            @if (form.controls.code.hasError('required') && form.controls.code.touched) {
+              <mat-error>El código es obligatorio.</mat-error>
+            } @else if (form.controls.code.hasError('pattern') && form.controls.code.touched) {
+              <mat-error>Formato inválido (ej. SEDE-01).</mat-error>
+            } @else if (form.controls.code.hasError('codeExists')) {
+              <mat-error>Este código ya está en uso.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </section>
+
+      <section class="branch-dialog__section app-form-section">
+        <div class="app-form-section__header">
+          <h3>Ubicación y Operación</h3>
+          <p>Configura la dirección física, teléfono de contacto y zona horaria.</p>
+        </div>
+
+        <div class="branch-dialog__grid app-dialog__grid app-form-grid">
+          <mat-form-field appearance="outline" class="app-form-field--full">
+            <mat-label>Dirección física</mat-label>
+            <input
+              matInput
+              formControlName="address"
+              placeholder="Ej. Av. Insurgentes Sur 1234, Col. Del Valle"
+            />
+            <mat-hint>Opcional</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono de contacto</mat-label>
+            <input matInput formControlName="phone" placeholder="Ej. +52 55 1234 5678" />
+            <mat-hint>Opcional</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Zona Horaria</mat-label>
+            <mat-select formControlName="timezone">
+              @for (tz of timezones; track tz) {
+                <mat-option [value]="tz">{{ tz }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <section class="branch-dialog__section app-form-section">
+        <div class="branch-dialog__toggle-row">
+          <div>
+            <span class="branch-dialog__toggle-title">Estado operativo</span>
+            <p class="branch-dialog__toggle-desc">
+              Las sedes activas están disponibles para agendar citas y asignar expedientes.
+            </p>
+          </div>
+          <mat-slide-toggle formControlName="isActive" color="primary">
+            {{ form.controls.isActive.value ? 'Activa' : 'Inactiva' }}
+          </mat-slide-toggle>
+        </div>
+      </section>
+
+      @if (errorMessage()) {
+        <p class="branch-dialog__error app-dialog__error app-form-error" role="alert">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      @if (isSaving()) {
+        <div class="branch-dialog__saving app-dialog__saving app-form-saving" aria-live="polite">
+          <mat-spinner diameter="20" />
+          <span>Guardando datos de la sede...</span>
+        </div>
+      }
+    </div>
+
+    <div class="branch-dialog__actions app-dialog__actions">
+      <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>
+      <div class="app-dialog__actions-group app-form-actions__group">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="isSaving() || planLimitReached()"
+        >
+          {{ getSubmitLabel() }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

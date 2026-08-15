@@ -1,0 +1,52 @@
+@if (isVisible()) {
+  @if (hasMultipleBranches()) {
+    <button
+      class="branch-control branch-menu-trigger"
+      type="button"
+      [matMenuTriggerFor]="branchMenu"
+      [disabled]="isLoading()"
+      [attr.aria-label]="'Cambiar sede: ' + (currentBranch()?.name ?? 'Seleccionar sede')"
+    >
+      @if (isLoading()) {
+        <mat-spinner diameter="18" aria-label="Cargando sedes" />
+      } @else {
+        <mat-icon aria-hidden="true">apartment</mat-icon>
+      }
+      <span class="branch-name">{{ currentBranch()?.name ?? 'Seleccionar sede' }}</span>
+      @if (currentBranch()?.isPrimary) {
+        <span class="branch-pill-badge" title="Sede principal / Matriz">Matriz</span>
+      }
+      <mat-icon class="branch-control__chevron" aria-hidden="true">expand_more</mat-icon>
+    </button>
+
+    <mat-menu #branchMenu="matMenu" xPosition="before" class="branch-switch-menu">
+      <div class="branch-switch-menu__heading">Sedes disponibles</div>
+      @for (branch of availableBranches(); track branch.id) {
+        <button
+          mat-menu-item
+          type="button"
+          class="branch-switch-menu__item"
+          [disabled]="isLoading() || branch.id === currentBranch()?.id"
+          [attr.aria-current]="branch.id === currentBranch()?.id ? 'true' : null"
+          (click)="selectBranch(branch)"
+        >
+          <mat-icon aria-hidden="true">
+            {{ branch.id === currentBranch()?.id ? 'check' : 'apartment' }}
+          </mat-icon>
+          <span class="branch-menu-label">{{ branch.name }}</span>
+          @if (branch.isPrimary) {
+            <span class="branch-menu-badge">Matriz</span>
+          }
+        </button>
+      }
+    </mat-menu>
+  } @else if (currentBranch(); as branch) {
+    <div class="branch-control branch-identity" [attr.aria-label]="'Sede activa: ' + branch.name">
+      <mat-icon aria-hidden="true">apartment</mat-icon>
+      <span class="branch-name">{{ branch.name }}</span>
+      @if (branch.isPrimary) {
+        <span class="branch-pill-badge" title="Sede principal / Matriz">Matriz</span>
+      }
+    </div>
+  }
+}

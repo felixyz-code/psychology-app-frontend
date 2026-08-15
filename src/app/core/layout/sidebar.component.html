@@ -126,6 +126,19 @@
             <span class="sidebar__title">Organizaci&oacute;n</span>
           </span>
         </a>
+
+        <a
+          routerLink="/branches"
+          routerLinkActive="sidebar__link--active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="sidebar__link"
+          (click)="navSelected.emit()"
+        >
+          <mat-icon>apartment</mat-icon>
+          <span class="sidebar__content">
+            <span class="sidebar__title">Sedes</span>
+          </span>
+        </a>
       }
 
       @if (tenantContextStore.hasCapability('membership.read')) {

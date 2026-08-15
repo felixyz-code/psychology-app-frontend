@@ -1,0 +1,109 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+}
+
+.branch-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 15rem;
+  min-height: 40px;
+  padding: 0.4rem 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(191, 219, 254, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  font: inherit;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.branch-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.branch-menu-trigger {
+  cursor: pointer;
+}
+
+.branch-menu-trigger:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(191, 219, 254, 0.5);
+}
+
+.branch-menu-trigger:focus-visible {
+  outline: 3px solid rgba(219, 234, 254, 0.35);
+  outline-offset: 2px;
+}
+
+.branch-menu-trigger:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.branch-identity {
+  cursor: default;
+}
+
+.branch-control__chevron {
+  flex: 0 0 auto;
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.branch-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.3);
+  border: 1px solid rgba(147, 197, 253, 0.4);
+  color: #eff6ff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.branch-switch-menu__heading {
+  padding: 0.7rem 1rem 0.4rem;
+  color: var(--app-color-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.branch-switch-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 13rem;
+  font-size: 0.88rem;
+}
+
+.branch-menu-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-menu-badge {
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  background: var(--app-color-primary-soft);
+  color: var(--app-color-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}

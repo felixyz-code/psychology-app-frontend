@@ -8,6 +8,7 @@
 html {
   height: 100%;
   background: #f8fafc;
+  font-family: var(--app-font-family, 'Roboto', sans-serif);
   @include mat.theme(
     (
       color: (
@@ -24,14 +25,45 @@ body {
   color-scheme: light;
   background-color: var(--app-color-app-bg);
   color: var(--app-color-heading);
-  font: var(--mat-sys-body-medium);
+  font-family: var(--app-font-family, 'Roboto', sans-serif);
+  font-size: 0.9375rem;
+  line-height: 1.5;
   margin: 0;
   height: 100%;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   transition:
     background-color 180ms ease,
     color 180ms ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+a,
+label,
+button,
+input,
+optgroup,
+select,
+textarea,
+table,
+th,
+td,
+.mat-typography,
+.mat-mdc-dialog-container,
+.app-dialog,
+.branch-dialog,
+.branch-assign-dialog,
+.branch-delete-dialog,
+[class*='-dialog'] {
+  font-family: var(--app-font-family, 'Roboto', sans-serif);
 }
 
 .material-icons,
@@ -63,6 +95,7 @@ body {
 }
 
 :root {
+  --app-font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   --app-org-brand-accent: #2563eb;
   --app-navbar-height: 4.25rem;
   --app-page-gap: 1.25rem;
