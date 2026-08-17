@@ -677,7 +677,9 @@ describe('MembershipAdministrationPage', () => {
   it('reloads receiving-tab membership rows only for the current reconciled scope', () => {
     const updatedTarget = createTargetMembership({ role: 'OWNER', allowedActions: [] });
     currentLoad.next([createMembership({ role: 'OWNER' }), createTargetMembership()]);
-    membershipsService.list.mockReturnValueOnce(of([createMembership({ role: 'ADMIN' }), updatedTarget]));
+    membershipsService.list.mockReturnValueOnce(
+      of([createMembership({ role: 'ADMIN' }), updatedTarget]),
+    );
 
     authorityReconciled.next({ organizationId: 'organization-a', generation: 1 });
 

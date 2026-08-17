@@ -3,9 +3,18 @@
     <section class="dashboard-skeleton" aria-label="Cargando dashboard ejecutivo" aria-busy="true">
       <mat-card class="dashboard-hero dashboard-hero--skeleton">
         <div class="dashboard-hero__copy">
-          <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--eyebrow" aria-hidden="true"></span>
-          <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--title" aria-hidden="true"></span>
-          <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--subtitle" aria-hidden="true"></span>
+          <span
+            class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--eyebrow"
+            aria-hidden="true"
+          ></span>
+          <span
+            class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--title"
+            aria-hidden="true"
+          ></span>
+          <span
+            class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--subtitle"
+            aria-hidden="true"
+          ></span>
         </div>
       </mat-card>
 
@@ -19,14 +28,29 @@
         @for (item of dashboardSkeletonSections; track $index) {
           <mat-card class="dashboard-panel dashboard-panel--skeleton">
             <div class="dashboard-panel__header">
-              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-title" aria-hidden="true"></span>
-              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-subtitle" aria-hidden="true"></span>
+              <span
+                class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-title"
+                aria-hidden="true"
+              ></span>
+              <span
+                class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--panel-subtitle"
+                aria-hidden="true"
+              ></span>
             </div>
 
             <div class="dashboard-list">
-              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-title" aria-hidden="true"></span>
-              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-meta" aria-hidden="true"></span>
-              <span class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-body" aria-hidden="true"></span>
+              <span
+                class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-title"
+                aria-hidden="true"
+              ></span>
+              <span
+                class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-meta"
+                aria-hidden="true"
+              ></span>
+              <span
+                class="app-skeleton-line dashboard-skeleton-line dashboard-skeleton-line--item-body"
+                aria-hidden="true"
+              ></span>
             </div>
           </mat-card>
         }
@@ -122,7 +146,9 @@
         }
 
         <div sectionCardFooter class="dashboard-footer-end">
-          <button mat-stroked-button type="button" (click)="navigateToAppointments()">Ver agenda completa</button>
+          <button mat-stroked-button type="button" (click)="navigateToAppointments()">
+            Ver agenda completa
+          </button>
         </div>
       </app-section-card>
 
@@ -198,32 +224,34 @@
           [title]="financeSummary.title"
           [subtitle]="financeSummary.subtitle"
         >
-        <div class="dashboard-finance__meta">
-          <span>{{ financeSummary.periodLabel }}</span>
-        </div>
+          <div class="dashboard-finance__meta">
+            <span>{{ financeSummary.periodLabel }}</span>
+          </div>
 
-        <div class="dashboard-finance-list">
-          @for (metric of financeSummary.metrics; track metric.id) {
-            <article class="dashboard-finance-row" [attr.data-metric]="metric.id">
-              <div class="dashboard-finance-row__label">
-                <div class="dashboard-finance-row__labelline">
-                  <mat-icon class="dashboard-finance-row__icon">{{ metric.icon }}</mat-icon>
-                  <span class="dashboard-finance-row__name">{{ metric.label }}</span>
+          <div class="dashboard-finance-list">
+            @for (metric of financeSummary.metrics; track metric.id) {
+              <article class="dashboard-finance-row" [attr.data-metric]="metric.id">
+                <div class="dashboard-finance-row__label">
+                  <div class="dashboard-finance-row__labelline">
+                    <mat-icon class="dashboard-finance-row__icon">{{ metric.icon }}</mat-icon>
+                    <span class="dashboard-finance-row__name">{{ metric.label }}</span>
+                  </div>
+
+                  <span class="dashboard-finance-row__supporting">{{ metric.supportingText }}</span>
                 </div>
 
-                <span class="dashboard-finance-row__supporting">{{ metric.supportingText }}</span>
-              </div>
-
-              <strong class="dashboard-finance-row__value">{{ metric.value }}</strong>
-            </article>
-          }
-        </div>
-
-        @if (canReadFinance() && vm.financeNavigationAvailable) {
-          <div sectionCardFooter class="dashboard-footer-end">
-            <button mat-stroked-button type="button" (click)="navigateToFinance()">Ir a finanzas</button>
+                <strong class="dashboard-finance-row__value">{{ metric.value }}</strong>
+              </article>
+            }
           </div>
-        }
+
+          @if (canReadFinance() && vm.financeNavigationAvailable) {
+            <div sectionCardFooter class="dashboard-footer-end">
+              <button mat-stroked-button type="button" (click)="navigateToFinance()">
+                Ir a finanzas
+              </button>
+            </div>
+          }
         </app-section-card>
       }
 

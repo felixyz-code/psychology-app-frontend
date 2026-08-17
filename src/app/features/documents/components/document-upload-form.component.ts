@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -201,7 +210,10 @@ export class DocumentUploadFormComponent {
   }
 
   hasValidCaseFileSelection(): boolean {
-    return !!this.uploadForm.controls.caseFileId.value.trim() && this.uploadForm.controls.caseFileId.valid;
+    return (
+      !!this.uploadForm.controls.caseFileId.value.trim() &&
+      this.uploadForm.controls.caseFileId.valid
+    );
   }
 
   isSubmitDisabled(): boolean {

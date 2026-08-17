@@ -2,10 +2,17 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  StatusBadgeComponent,
+  StatusBadgeVariant,
+} from '../../../shared/components/status-badge/status-badge.component';
 
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
-import { isSameLocalDay, parseAppointmentDate, startOfLocalDay } from '../utils/appointment-datetime';
+import {
+  isSameLocalDay,
+  parseAppointmentDate,
+  startOfLocalDay,
+} from '../utils/appointment-datetime';
 
 interface CalendarDay {
   date: Date;
@@ -36,7 +43,9 @@ export class AppointmentsCalendarComponent {
 
   readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   readonly monthLabel = computed(() => this.formatMonthLabel(this.visibleMonth()));
-  readonly calendarDays = computed(() => this.buildCalendarDays(this.visibleMonth(), this.appointments()));
+  readonly calendarDays = computed(() =>
+    this.buildCalendarDays(this.visibleMonth(), this.appointments()),
+  );
 
   openPreviousMonth(): void {
     this.previousMonth.emit();
@@ -109,15 +118,22 @@ export class AppointmentsCalendarComponent {
     const today = startOfLocalDay(new Date());
 
     return Array.from({ length: 42 }, (_, index) => {
-      const date = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + index);
+      const date = new Date(
+        gridStart.getFullYear(),
+        gridStart.getMonth(),
+        gridStart.getDate() + index,
+      );
       const isVisibleMonth =
-        date.getMonth() === monthStart.getMonth() && date.getFullYear() === monthStart.getFullYear();
+        date.getMonth() === monthStart.getMonth() &&
+        date.getFullYear() === monthStart.getFullYear();
 
       return {
         date,
         isCurrentMonth: isVisibleMonth,
         isToday: isVisibleMonth && isSameLocalDay(date, today),
-        appointments: appointments.filter((appointment) => isSameLocalDay(appointment.scheduledAt, date)),
+        appointments: appointments.filter((appointment) =>
+          isSameLocalDay(appointment.scheduledAt, date),
+        ),
       };
     });
   }
@@ -126,7 +142,11 @@ export class AppointmentsCalendarComponent {
     const dayOfWeek = monthStart.getDay();
     const mondayBasedOffset = (dayOfWeek + 6) % 7;
 
-    return new Date(monthStart.getFullYear(), monthStart.getMonth(), monthStart.getDate() - mondayBasedOffset);
+    return new Date(
+      monthStart.getFullYear(),
+      monthStart.getMonth(),
+      monthStart.getDate() - mondayBasedOffset,
+    );
   }
 
   private formatMonthLabel(value: Date): string {

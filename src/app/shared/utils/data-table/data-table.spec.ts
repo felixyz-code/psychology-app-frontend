@@ -26,7 +26,7 @@ describe('data-table utilities', () => {
     expect(normalizeSearchText('  ÁLVARO  ')).toBe('alvaro');
 
     const result = rows.filter((row) =>
-      matchesSearchTerm(row, 'alv', (item) => [item.name, item.age])
+      matchesSearchTerm(row, 'alv', (item) => [item.name, item.age]),
     );
 
     expect(result.map((row) => row.id)).toEqual(['a']);
@@ -50,12 +50,14 @@ describe('data-table utilities', () => {
     const ascending = sortItems(input, {
       sortBy: 'name',
       sortDirection: 'asc',
-      getSortValue: (row, sortBy) => row[sortBy as keyof Row] as string | number | Date | null | undefined,
+      getSortValue: (row, sortBy) =>
+        row[sortBy as keyof Row] as string | number | Date | null | undefined,
     });
     const descending = sortItems(input, {
       sortBy: 'age',
       sortDirection: 'desc',
-      getSortValue: (row, sortBy) => row[sortBy as keyof Row] as string | number | Date | null | undefined,
+      getSortValue: (row, sortBy) =>
+        row[sortBy as keyof Row] as string | number | Date | null | undefined,
     });
 
     expect(ascending.map((row) => row.id)).toEqual(['d', 'b', 'c', 'a']);
@@ -81,9 +83,15 @@ describe('data-table utilities', () => {
   });
 
   it('paginates valid, empty, and lower-bound page requests with the real page size', () => {
-    expect(paginateItems(rows, { pageIndex: 1, pageSize: 2 }).map((row) => row.id)).toEqual(['c', 'd']);
+    expect(paginateItems(rows, { pageIndex: 1, pageSize: 2 }).map((row) => row.id)).toEqual([
+      'c',
+      'd',
+    ]);
     expect(paginateItems(rows, { pageIndex: 2, pageSize: 2 })).toEqual([]);
-    expect(paginateItems(rows, { pageIndex: -1, pageSize: 2 }).map((row) => row.id)).toEqual(['a', 'b']);
+    expect(paginateItems(rows, { pageIndex: -1, pageSize: 2 }).map((row) => row.id)).toEqual([
+      'a',
+      'b',
+    ]);
     expect(paginateItems(rows, { pageIndex: 0, pageSize: 0 }).map((row) => row.id)).toEqual(['a']);
   });
 });

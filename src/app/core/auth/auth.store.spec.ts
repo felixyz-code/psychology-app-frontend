@@ -32,10 +32,7 @@ describe('AuthStore', () => {
   });
 
   it('restores a complete persisted session', () => {
-    localStorage.setItem(
-      AUTH_SESSION_KEY,
-      JSON.stringify({ accessToken: 'stored-token', user }),
-    );
+    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({ accessToken: 'stored-token', user }));
 
     const store = new AuthStore();
 
@@ -174,7 +171,11 @@ describe('AuthStore', () => {
     ['corrupt user JSON', 'active-token', '{not-json'],
     ['a null user', 'active-token', 'null'],
     ['an incomplete user', 'active-token', JSON.stringify({ id: user.id, name: user.name })],
-    ['a user with an unsupported role', 'active-token', JSON.stringify({ ...user, role: 'ASSISTANT' })],
+    [
+      'a user with an unsupported role',
+      'active-token',
+      JSON.stringify({ ...user, role: 'ASSISTANT' }),
+    ],
     ['a missing token', null, JSON.stringify(user)],
     ['a blank token', '   ', JSON.stringify(user)],
     ['a missing user', 'active-token', null],

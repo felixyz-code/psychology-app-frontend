@@ -121,7 +121,9 @@ export class DocumentPreviewDialogComponent implements OnDestroy {
 
         if (mimeType === 'application/pdf') {
           this.previewKind.set('pdf');
-          this.previewResourceUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.buildPdfPreviewUrl(objectUrl)));
+          this.previewResourceUrl.set(
+            this.sanitizer.bypassSecurityTrustResourceUrl(this.buildPdfPreviewUrl(objectUrl)),
+          );
         } else if (mimeType === 'image/png' || mimeType === 'image/jpeg') {
           this.previewKind.set('image');
           this.previewResourceUrl.set(null);
@@ -163,7 +165,10 @@ export class DocumentPreviewDialogComponent implements OnDestroy {
     this.previewResourceUrl.set(null);
   }
 
-  private getDocumentActionErrorMessage(error: HttpErrorResponse, action: 'ver' | 'descargar'): string {
+  private getDocumentActionErrorMessage(
+    error: HttpErrorResponse,
+    action: 'ver' | 'descargar',
+  ): string {
     if (error.status === 401 || error.status === 403) {
       return `No tienes permisos para ${action} este documento.`;
     }

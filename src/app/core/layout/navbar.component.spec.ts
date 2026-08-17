@@ -111,9 +111,9 @@ describe('NavbarComponent', () => {
     );
     expect(fixture.nativeElement.querySelector('.organization-menu-trigger')).toBeNull();
     expect(fixture.nativeElement.querySelector('.organization-control__chevron')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.organization-identity')?.getAttribute('aria-label')).toBe(
-      'Organización actual: Organization A',
-    );
+    expect(
+      fixture.nativeElement.querySelector('.organization-identity')?.getAttribute('aria-label'),
+    ).toBe('Organización actual: Organization A');
   });
 
   it('shows no switch affordance when the current context has no selectable organizations', () => {

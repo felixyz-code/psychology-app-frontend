@@ -27,7 +27,10 @@
       <div class="document-upload-form__grid app-form-grid">
         <mat-form-field appearance="outline" class="app-form-field--compact">
           <mat-label>Expediente</mat-label>
-          <mat-select formControlName="caseFileId" [disabled]="isCaseFilesLoading() || !caseFileOptions().length">
+          <mat-select
+            formControlName="caseFileId"
+            [disabled]="isCaseFilesLoading() || !caseFileOptions().length"
+          >
             @for (option of caseFileOptions(); track option.value) {
               <mat-option [value]="option.value">{{ option.label }}</mat-option>
             }
@@ -46,9 +49,13 @@
           <span>Cargando expedientes disponibles...</span>
         </div>
       } @else if (caseFilesLoadErrorMessage()) {
-        <p class="document-upload-form__error app-form-error" role="alert">{{ caseFilesLoadErrorMessage() }}</p>
+        <p class="document-upload-form__error app-form-error" role="alert">
+          {{ caseFilesLoadErrorMessage() }}
+        </p>
       } @else if (!caseFileOptions().length) {
-        <p class="document-upload-form__empty-message app-form-help">No hay expedientes disponibles para seleccionar.</p>
+        <p class="document-upload-form__empty-message app-form-help">
+          No hay expedientes disponibles para seleccionar.
+        </p>
       }
     }
 
@@ -83,7 +90,10 @@
         }
       </div>
 
-      <div class="document-upload-form__file-summary" [class.document-upload-form__file-summary--empty]="!selectedFile()">
+      <div
+        class="document-upload-form__file-summary"
+        [class.document-upload-form__file-summary--empty]="!selectedFile()"
+      >
         <mat-icon>{{ getSelectedFileIcon() }}</mat-icon>
 
         <div>
@@ -93,7 +103,9 @@
       </div>
 
       @if (fileErrorMessage()) {
-        <p class="document-upload-form__error app-form-error" role="alert">{{ fileErrorMessage() }}</p>
+        <p class="document-upload-form__error app-form-error" role="alert">
+          {{ fileErrorMessage() }}
+        </p>
       }
     </div>
 

@@ -38,7 +38,9 @@ export class ClinicalTimelineComponent {
     const sortedEvents = [...this.events()]
       .filter((event) => this.parseDate(event.timestamp) !== null)
       .sort((left, right) => {
-        return this.parseDate(right.timestamp)!.getTime() - this.parseDate(left.timestamp)!.getTime();
+        return (
+          this.parseDate(right.timestamp)!.getTime() - this.parseDate(left.timestamp)!.getTime()
+        );
       });
 
     const groups = new Map<string, ClinicalTimelineGroup>();
@@ -119,7 +121,11 @@ export class ClinicalTimelineComponent {
 
   private getDayDifference(date: Date, reference: Date): number {
     const currentDay = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-    const referenceDay = new Date(reference.getFullYear(), reference.getMonth(), reference.getDate()).getTime();
+    const referenceDay = new Date(
+      reference.getFullYear(),
+      reference.getMonth(),
+      reference.getDate(),
+    ).getTime();
     const dayInMilliseconds = 24 * 60 * 60 * 1000;
 
     return Math.round((referenceDay - currentDay) / dayInMilliseconds);

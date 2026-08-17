@@ -1,4 +1,16 @@
-:is(.appointments-overview,.appointments-loading-state,.appointments-loading-state__header,.appointments-loading-state__filters,.appointments-loading-row,.appointments-loading-state__table,.appointments-state__copy,.appointments-empty-state,.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) {
+:is(
+  .appointments-overview,
+  .appointments-loading-state,
+  .appointments-loading-state__header,
+  .appointments-loading-state__filters,
+  .appointments-loading-row,
+  .appointments-loading-state__table,
+  .appointments-state__copy,
+  .appointments-empty-state,
+  .appointments-patient-cell,
+  .appointments-date-cell,
+  .appointments-duration-cell
+) {
   display: grid;
 }
 
@@ -6,13 +18,20 @@
   gap: 0.8rem;
 }
 
-:is(.appointments-loading-state,.appointments-loading-state__header,.appointments-loading-state__filters,.appointments-loading-row,.appointments-empty-state) {
+:is(
+  .appointments-loading-state,
+  .appointments-loading-state__header,
+  .appointments-loading-state__filters,
+  .appointments-loading-row,
+  .appointments-empty-state
+) {
   gap: 1rem;
 }
 
 .appointments-overview__hero h2,
 .appointments-state__copy :is(h3, p),
-:is(.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) :is(strong,span) {
+:is(.appointments-patient-cell, .appointments-date-cell, .appointments-duration-cell)
+  :is(strong, span) {
   margin: 0;
 }
 
@@ -22,12 +41,11 @@
   padding: 0.82rem 1rem;
   border: 1px solid var(--app-color-card-border);
   border-radius: 20px;
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--app-color-card-bg) 95%, var(--app-color-primary-soft) 5%) 0,
-      var(--app-color-card-bg) 100%
-    );
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--app-color-card-bg) 95%, var(--app-color-primary-soft) 5%) 0,
+    var(--app-color-card-bg) 100%
+  );
   box-shadow: var(--app-shadow-surface);
 }
 
@@ -104,13 +122,18 @@
 }
 
 .appointments-loading-row {
-  grid-template-columns: minmax(12rem, 1.3fr) minmax(11rem, 1.2fr) minmax(8rem, 0.7fr) minmax(8rem, 0.8fr) 7rem;
+  grid-template-columns:
+    minmax(12rem, 1.3fr) minmax(11rem, 1.2fr) minmax(8rem, 0.7fr) minmax(8rem, 0.8fr)
+    7rem;
   align-items: center;
   padding: 0.95rem 0.85rem;
   border: 1px solid color-mix(in srgb, var(--app-color-card-border) 82%, transparent);
   border-radius: 18px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--app-color-card-bg) 96%, transparent) 0, var(--app-color-card-soft-bg) 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--app-color-card-bg) 96%, transparent) 0,
+    var(--app-color-card-soft-bg) 100%
+  );
 }
 
 .appointments-skeleton-line {
@@ -194,17 +217,17 @@
   min-width: 700px;
 }
 
-:is(.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) {
+:is(.appointments-patient-cell, .appointments-date-cell, .appointments-duration-cell) {
   gap: 0.12rem;
 }
 
-:is(.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) strong {
+:is(.appointments-patient-cell, .appointments-date-cell, .appointments-duration-cell) strong {
   color: var(--app-color-heading);
   font-weight: 675;
   line-height: 1.3;
 }
 
-:is(.appointments-patient-cell,.appointments-date-cell,.appointments-duration-cell) span {
+:is(.appointments-patient-cell, .appointments-date-cell, .appointments-duration-cell) span {
   color: var(--app-color-text-secondary);
   font-size: 0.88rem;
   line-height: 1.4;
@@ -269,12 +292,18 @@
   }
 
   .appointments-loading-row {
-    grid-template-columns: minmax(10rem, 1.2fr) minmax(9rem, 1fr) minmax(7rem, 0.65fr) minmax(7rem, 0.75fr) 6rem;
+    grid-template-columns:
+      minmax(10rem, 1.2fr) minmax(9rem, 1fr) minmax(7rem, 0.65fr) minmax(7rem, 0.75fr)
+      6rem;
   }
 }
 
 @media (max-width: 900px) {
-  :is(.appointments-filters-panel,.appointments-filters-panel--with-date-range,.appointments-loading-state__filters) {
+  :is(
+    .appointments-filters-panel,
+    .appointments-filters-panel--with-date-range,
+    .appointments-loading-state__filters
+  ) {
     grid-template-columns: 1fr;
   }
 
@@ -292,7 +321,7 @@
     padding: 0.78rem 0.9rem;
   }
 
-  :is(.appointments-summary,.appointments-loading-state__header) {
+  :is(.appointments-summary, .appointments-loading-state__header) {
     grid-template-columns: 1fr;
   }
 

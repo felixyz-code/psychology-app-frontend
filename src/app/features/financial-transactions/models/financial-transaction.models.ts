@@ -1,13 +1,6 @@
-export type FinancialTransactionType =
-  | 'INCOME'
-  | 'EXPENSE'
-  | 'ADJUSTMENT'
-  | 'REFUND';
+export type FinancialTransactionType = 'INCOME' | 'EXPENSE' | 'ADJUSTMENT' | 'REFUND';
 
-export type FinancialTransactionStatus =
-  | 'PENDING'
-  | 'COMPLETED'
-  | 'CANCELLED';
+export type FinancialTransactionStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED';
 
 export type FinancialTransactionCategory =
   | 'SESSION'
@@ -20,12 +13,7 @@ export type FinancialTransactionCategory =
   | 'SALARY'
   | 'OTHER';
 
-export type PaymentMethod =
-  | 'CASH'
-  | 'CARD'
-  | 'TRANSFER'
-  | 'CHECK'
-  | 'OTHER';
+export type PaymentMethod = 'CASH' | 'CARD' | 'TRANSFER' | 'CHECK' | 'OTHER';
 
 export interface CreateFinancialTransactionDto {
   type: FinancialTransactionType;

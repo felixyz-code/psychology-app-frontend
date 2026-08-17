@@ -5,9 +5,15 @@
   </div>
 
   <div class="session-note-delete-dialog__summary app-dialog__summary">
-    <p class="session-note-delete-dialog__summary-title app-dialog__summary-title">Nota seleccionada</p>
-    <p class="session-note-delete-dialog__title">"{{ sessionNote.title || 'Sesión sin título' }}"</p>
-    <p class="session-note-delete-dialog__meta">Fecha de sesión: {{ sessionNote.sessionDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+    <p class="session-note-delete-dialog__summary-title app-dialog__summary-title">
+      Nota seleccionada
+    </p>
+    <p class="session-note-delete-dialog__title">
+      "{{ sessionNote.title || 'Sesión sin título' }}"
+    </p>
+    <p class="session-note-delete-dialog__meta">
+      Fecha de sesión: {{ sessionNote.sessionDate | date: 'dd/MM/yyyy HH:mm' }}
+    </p>
   </div>
 
   <p class="session-note-delete-dialog__warning">
@@ -19,7 +25,9 @@
   }
 
   <div class="session-note-delete-dialog__actions">
-    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">
+      Cancelar
+    </button>
 
     <button
       mat-flat-button

@@ -5,7 +5,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
-import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  StatusBadgeComponent,
+  StatusBadgeVariant,
+} from '../../../shared/components/status-badge/status-badge.component';
 
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 import { parseAppointmentDate } from '../utils/appointment-datetime';

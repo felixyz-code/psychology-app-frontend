@@ -295,9 +295,7 @@ describe('AuthService', () => {
     };
 
     service.freelancerBootstrap(bootstrapRequest).subscribe({ error: receivedError });
-    httpTesting
-      .expectOne(`${environment.apiUrl}/auth/freelancer-bootstrap`)
-      .flush(legacyResponse);
+    httpTesting.expectOne(`${environment.apiUrl}/auth/freelancer-bootstrap`).flush(legacyResponse);
     await Promise.resolve();
 
     expect(receivedError).toHaveBeenCalledOnce();

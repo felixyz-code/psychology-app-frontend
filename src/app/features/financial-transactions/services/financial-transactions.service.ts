@@ -3,7 +3,11 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { isDateOnlyValue, nextLocalDayStart, startOfLocalDateOnly } from '../../../shared/utils/local-date-range';
+import {
+  isDateOnlyValue,
+  nextLocalDayStart,
+  startOfLocalDateOnly,
+} from '../../../shared/utils/local-date-range';
 import {
   CreateFinancialTransactionDto,
   FindFinancialTransactionsQueryDto,
@@ -28,7 +32,9 @@ export class FinancialTransactionsService {
     });
   }
 
-  findSummary(query?: FindFinancialTransactionsQueryDto): Observable<FinancialTransactionSummaryDto> {
+  findSummary(
+    query?: FindFinancialTransactionsQueryDto,
+  ): Observable<FinancialTransactionSummaryDto> {
     return this.http.get<FinancialTransactionSummaryDto>(`${this.basePath}/summary`, {
       params: this.buildQueryParams(query),
     });
@@ -38,7 +44,10 @@ export class FinancialTransactionsService {
     return this.http.get<FinancialTransactionResponse>(`${this.basePath}/${id}`);
   }
 
-  update(id: string, payload: UpdateFinancialTransactionDto): Observable<FinancialTransactionResponse> {
+  update(
+    id: string,
+    payload: UpdateFinancialTransactionDto,
+  ): Observable<FinancialTransactionResponse> {
     return this.http.patch<FinancialTransactionResponse>(`${this.basePath}/${id}`, payload);
   }
 
@@ -63,7 +72,9 @@ export class FinancialTransactionsService {
     return params;
   }
 
-  private normalizeDateRangeQuery(query: FindFinancialTransactionsQueryDto): FindFinancialTransactionsQueryDto {
+  private normalizeDateRangeQuery(
+    query: FindFinancialTransactionsQueryDto,
+  ): FindFinancialTransactionsQueryDto {
     return {
       ...query,
       from: this.toIsoBoundary(startOfLocalDateOnly(query.from), query.from),

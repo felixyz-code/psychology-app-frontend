@@ -2,7 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
-import { getAppointmentStatusLabel, getAppointmentStatusVariant } from '../../appointments/utils/appointment-presenters';
+import {
+  getAppointmentStatusLabel,
+  getAppointmentStatusVariant,
+} from '../../appointments/utils/appointment-presenters';
 import {
   getLocalDayDifference,
   isAfterTodayLocal,
@@ -66,7 +69,7 @@ export class DashboardAnalyticsService {
       map((snapshot) => ({
         snapshot,
         viewModel: this.buildViewModel(snapshot),
-      }))
+      })),
     );
   }
 
@@ -78,34 +81,34 @@ export class DashboardAnalyticsService {
     const failedSources: string[] = [];
     const monthRange = buildCurrentMonthDateRange();
     const financialSummaryRequest = this.tenantContextStore.hasCapability('finance.summary_read')
-      ? this.financialTransactionsService.findSummary(monthRange).pipe(
-          catchError(() => this.fallback(null, failedSources, 'resumen financiero'))
-        )
+      ? this.financialTransactionsService
+          .findSummary(monthRange)
+          .pipe(catchError(() => this.fallback(null, failedSources, 'resumen financiero')))
       : of(null);
 
     return forkJoin({
-      patients: this.patientsService.getPatients().pipe(
-        catchError(() => this.fallback<Patient[]>([], failedSources, 'pacientes'))
-      ),
-      appointments: this.appointmentsService.getAppointments().pipe(
-        catchError(() => this.fallback([], failedSources, 'citas'))
-      ),
-      caseFiles: this.caseFilesService.getCaseFiles().pipe(
-        catchError(() => this.fallback<CaseFile[]>([], failedSources, 'expedientes'))
-      ),
-      sessionNotes: this.sessionNotesService.getSessionNotes().pipe(
-        catchError(() => this.fallback<SessionNote[]>([], failedSources, 'notas'))
-      ),
-      documents: this.documentsService.getAll().pipe(
-        catchError(() => this.fallback<ClinicalDocument[]>([], failedSources, 'documentos'))
-      ),
+      patients: this.patientsService
+        .getPatients()
+        .pipe(catchError(() => this.fallback<Patient[]>([], failedSources, 'pacientes'))),
+      appointments: this.appointmentsService
+        .getAppointments()
+        .pipe(catchError(() => this.fallback([], failedSources, 'citas'))),
+      caseFiles: this.caseFilesService
+        .getCaseFiles()
+        .pipe(catchError(() => this.fallback<CaseFile[]>([], failedSources, 'expedientes'))),
+      sessionNotes: this.sessionNotesService
+        .getSessionNotes()
+        .pipe(catchError(() => this.fallback<SessionNote[]>([], failedSources, 'notas'))),
+      documents: this.documentsService
+        .getAll()
+        .pipe(catchError(() => this.fallback<ClinicalDocument[]>([], failedSources, 'documentos'))),
       financialSummary: financialSummaryRequest,
     }).pipe(
       map((result) => ({
         ...result,
         failedSources,
         generatedAt: new Date().toISOString(),
-      }))
+      })),
     );
   }
 
@@ -130,7 +133,7 @@ export class DashboardAnalyticsService {
 
   buildKpiStrip(
     snapshot: DashboardSnapshot,
-    canReadFinancialSummary = this.tenantContextStore.hasCapability('finance.summary_read')
+    canReadFinancialSummary = this.tenantContextStore.hasCapability('finance.summary_read'),
   ): DashboardKpiItem[] {
     const now = this.parseSnapshotDate(snapshot.generatedAt);
     const totalPatients = snapshot.patients.length;
@@ -167,18 +170,22 @@ export class DashboardAnalyticsService {
           : 'No hay atenciones futuras programadas.',
         variant: 'amber',
       },
-      ...(canReadFinancialSummary ? [{
-        id: 'monthly-balance',
-        icon: 'account_balance_wallet',
-        label: 'Balance del mes',
-        value: snapshot.financialSummary
-          ? formatFinancialCurrency(snapshot.financialSummary.netTotal)
-          : '--',
-        supportingText: snapshot.financialSummary
-          ? 'Diferencia neta entre ingresos y egresos del rango mensual activo.'
-          : 'No fue posible obtener el resumen financiero del mes.',
-        variant: 'violet',
-      } satisfies DashboardKpiItem] : []),
+      ...(canReadFinancialSummary
+        ? [
+            {
+              id: 'monthly-balance',
+              icon: 'account_balance_wallet',
+              label: 'Balance del mes',
+              value: snapshot.financialSummary
+                ? formatFinancialCurrency(snapshot.financialSummary.netTotal)
+                : '--',
+              supportingText: snapshot.financialSummary
+                ? 'Diferencia neta entre ingresos y egresos del rango mensual activo.'
+                : 'No fue posible obtener el resumen financiero del mes.',
+              variant: 'violet',
+            } satisfies DashboardKpiItem,
+          ]
+        : []),
     ];
 
     return metrics.slice(0, DashboardAnalyticsService.KPI_TOTAL);
@@ -272,7 +279,11 @@ export class DashboardAnalyticsService {
       typeLabel: 'Nota clínica',
       title: note.title?.trim() || 'Nota de sesión',
       description: 'Nota clínica registrada en el expediente.',
-      patientName: this.resolvePatientNameByCaseFileId(caseFilePatientIds, patientNames, note.caseFileId),
+      patientName: this.resolvePatientNameByCaseFileId(
+        caseFilePatientIds,
+        patientNames,
+        note.caseFileId,
+      ),
       timestamp: note.createdAt,
       dateLabel: this.formatDateTime(note.createdAt),
     }));
@@ -294,17 +305,25 @@ export class DashboardAnalyticsService {
       type: 'case-file',
       icon: 'folder_open',
       typeLabel: 'Expediente',
-      title: this.hasFoundationInformation(caseFile) ? 'Expediente con base completa' : 'Expediente actualizado',
+      title: this.hasFoundationInformation(caseFile)
+        ? 'Expediente con base completa'
+        : 'Expediente actualizado',
       description: this.hasFoundationInformation(caseFile)
         ? 'Diagnóstico y plan terapéutico visibles en el expediente.'
         : 'El expediente aún requiere completar información base.',
-      patientName: this.resolvePatientNameByCaseFileId(caseFilePatientIds, patientNames, caseFile.id),
+      patientName: this.resolvePatientNameByCaseFileId(
+        caseFilePatientIds,
+        patientNames,
+        caseFile.id,
+      ),
       timestamp: caseFile.updatedAt,
       dateLabel: this.formatDateTime(caseFile.updatedAt),
     }));
 
     const items = [...noteActivity, ...documentActivity, ...caseFileActivity]
-      .sort((left, right) => new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime())
+      .sort(
+        (left, right) => new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime(),
+      )
       .slice(0, DashboardAnalyticsService.ACTIVITY_LIMIT);
 
     return {
@@ -322,15 +341,21 @@ export class DashboardAnalyticsService {
 
     const items = snapshot.appointments
       .filter((appointment) => appointment.status === 'SCHEDULED')
-      .filter((appointment) => parseAppointmentDate(appointment.scheduledAt).getTime() < now.getTime())
-      .sort((left, right) => parseAppointmentDate(right.scheduledAt).getTime() - parseAppointmentDate(left.scheduledAt).getTime())
+      .filter(
+        (appointment) => parseAppointmentDate(appointment.scheduledAt).getTime() < now.getTime(),
+      )
+      .sort(
+        (left, right) =>
+          parseAppointmentDate(right.scheduledAt).getTime() -
+          parseAppointmentDate(left.scheduledAt).getTime(),
+      )
       .slice(0, DashboardAnalyticsService.ALERTS_LIMIT)
       .map<DashboardOperationalAlertItem>((appointment) => ({
         id: appointment.id,
         icon: 'warning',
         title: 'Cita programada sin cierre de estado',
         description: `${patientNames[appointment.patientId] ?? 'Paciente no disponible'} - ${this.formatDateTime(
-          appointment.scheduledAt
+          appointment.scheduledAt,
         )}. Conviene revisar su estado en Agenda.`,
         variant: 'warning',
         badgeLabel: 'Revisar',
@@ -365,12 +390,16 @@ export class DashboardAnalyticsService {
         label: 'Buscar paciente',
         variant: 'secondary',
       },
-      ...(canReadFinance ? [{
-        id: 'open-finance',
-        icon: 'payments',
-        label: 'Ir a finanzas',
-        variant: 'secondary',
-      } satisfies DashboardQuickActionItem] : []),
+      ...(canReadFinance
+        ? [
+            {
+              id: 'open-finance',
+              icon: 'payments',
+              label: 'Ir a finanzas',
+              variant: 'secondary',
+            } satisfies DashboardQuickActionItem,
+          ]
+        : []),
     ];
 
     return {
@@ -386,15 +415,23 @@ export class DashboardAnalyticsService {
       : [];
   }
 
-  private getTodayAppointments(snapshot: DashboardSnapshot, referenceDate: Date): DashboardAppointmentItem[] {
+  private getTodayAppointments(
+    snapshot: DashboardSnapshot,
+    referenceDate: Date,
+  ): DashboardAppointmentItem[] {
     const patientNames = this.buildPatientNamesMap(snapshot.patients);
 
     return sortAppointmentsByScheduledAt(
-      snapshot.appointments.filter((appointment) => isSameLocalDay(appointment.scheduledAt, referenceDate))
+      snapshot.appointments.filter((appointment) =>
+        isSameLocalDay(appointment.scheduledAt, referenceDate),
+      ),
     ).map((appointment) => this.mapAppointmentItem(appointment, patientNames, referenceDate));
   }
 
-  private getUpcomingAppointments(snapshot: DashboardSnapshot, referenceDate: Date): DashboardAppointmentItem[] {
+  private getUpcomingAppointments(
+    snapshot: DashboardSnapshot,
+    referenceDate: Date,
+  ): DashboardAppointmentItem[] {
     const patientNames = this.buildPatientNamesMap(snapshot.patients);
 
     return sortAppointmentsByScheduledAt(
@@ -404,14 +441,14 @@ export class DashboardAnalyticsService {
         }
 
         return parseAppointmentDate(appointment.scheduledAt).getTime() > referenceDate.getTime();
-      })
+      }),
     ).map((appointment) => this.mapAppointmentItem(appointment, patientNames, referenceDate));
   }
 
   private mapAppointmentItem(
     appointment: DashboardSnapshot['appointments'][number],
     patientNames: Record<string, string>,
-    referenceDate: Date
+    referenceDate: Date,
   ): DashboardAppointmentItem {
     const appointmentDate = parseAppointmentDate(appointment.scheduledAt);
 
@@ -444,7 +481,7 @@ export class DashboardAnalyticsService {
   private resolveDocumentPatientName(
     document: ClinicalDocument,
     caseFilePatientIds: Record<string, string>,
-    patientNames: Record<string, string>
+    patientNames: Record<string, string>,
   ): string {
     const embeddedPatientName = document.patient
       ? `${document.patient.firstName} ${document.patient.lastName}`.trim()
@@ -457,16 +494,20 @@ export class DashboardAnalyticsService {
     }
 
     const patientId = document.patientId?.trim() || caseFilePatientIds[document.caseFileId];
-    return patientId ? patientNames[patientId] ?? 'Paciente no disponible' : 'Paciente no disponible';
+    return patientId
+      ? (patientNames[patientId] ?? 'Paciente no disponible')
+      : 'Paciente no disponible';
   }
 
   private resolvePatientNameByCaseFileId(
     caseFilePatientIds: Record<string, string>,
     patientNames: Record<string, string>,
-    caseFileId: string
+    caseFileId: string,
   ): string {
     const patientId = caseFilePatientIds[caseFileId];
-    return patientId ? patientNames[patientId] ?? 'Paciente no disponible' : 'Paciente no disponible';
+    return patientId
+      ? (patientNames[patientId] ?? 'Paciente no disponible')
+      : 'Paciente no disponible';
   }
 
   private hasFoundationInformation(caseFile: CaseFile): boolean {

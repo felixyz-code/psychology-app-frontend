@@ -19,14 +19,20 @@ type SessionNoteDetailDialogResult =
 @Component({
   selector: 'app-session-note-detail-dialog',
   standalone: true,
-  imports: [DatePipe, MatButtonModule, MatDialogModule, MatIconModule, SessionNoteWorkspaceComponent],
+  imports: [
+    DatePipe,
+    MatButtonModule,
+    MatDialogModule,
+    MatIconModule,
+    SessionNoteWorkspaceComponent,
+  ],
   templateUrl: './session-note-detail-dialog.component.html',
   styleUrl: './session-note-detail-dialog.component.scss',
 })
 export class SessionNoteDetailDialogComponent {
   private readonly data = inject<SessionNoteDetailDialogData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(
-    MatDialogRef<SessionNoteDetailDialogComponent, SessionNoteDetailDialogResult>
+    MatDialogRef<SessionNoteDetailDialogComponent, SessionNoteDetailDialogResult>,
   );
 
   readonly sessionNote = this.data.sessionNote;

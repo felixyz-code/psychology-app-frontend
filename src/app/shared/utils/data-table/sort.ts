@@ -8,7 +8,7 @@ export interface SortOptions<T> {
 
 export function sortItems<T>(
   items: readonly T[],
-  { sortBy, sortDirection, getSortValue }: SortOptions<T>
+  { sortBy, sortDirection, getSortValue }: SortOptions<T>,
 ): T[] {
   if (!sortBy || !sortDirection) {
     return [...items];
@@ -41,4 +41,3 @@ function normalizeSortValue(value: string | number | Date | null | undefined): s
 
   return String(value ?? '').toLowerCase();
 }
-

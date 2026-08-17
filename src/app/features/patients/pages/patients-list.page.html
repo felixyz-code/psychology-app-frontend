@@ -3,7 +3,12 @@
     heading="Pacientes"
     subtitle="Gestion integral de pacientes con acceso rapido al expediente clinico."
   >
-    <button mat-flat-button type="button" class="app-page-header-action" (click)="openCreatePatientDialog()">
+    <button
+      mat-flat-button
+      type="button"
+      class="app-page-header-action"
+      (click)="openCreatePatientDialog()"
+    >
       <mat-icon>person_add</mat-icon>
       <span>Nuevo paciente</span>
     </button>
@@ -15,10 +20,19 @@
       <h2>Administra pacientes y accede rapidamente a su expediente clinico.</h2>
     </article>
 
-    <section class="patients-summary app-page__metrics" aria-label="Metricas del listado de pacientes">
+    <section
+      class="patients-summary app-page__metrics"
+      aria-label="Metricas del listado de pacientes"
+    >
       @if (isLoading()) {
         @for (item of summarySkeletonItems; track $index) {
-          <app-metric-card icon="hourglass_top" title="Cargando" value="--" [loading]="true" [compact]="true" />
+          <app-metric-card
+            icon="hourglass_top"
+            title="Cargando"
+            value="--"
+            [loading]="true"
+            [compact]="true"
+          />
         }
       } @else {
         @for (metric of summaryMetrics(); track metric.id) {
@@ -39,24 +53,42 @@
     @if (isLoading()) {
       <div class="patients-loading-state" aria-label="Cargando pacientes" aria-busy="true">
         <div class="patients-loading-state__header">
-          <span class="app-skeleton-line patients-skeleton-line patients-skeleton-line--search" aria-hidden="true"></span>
-          <span class="app-skeleton-line patients-skeleton-line patients-skeleton-line--meta" aria-hidden="true"></span>
+          <span
+            class="app-skeleton-line patients-skeleton-line patients-skeleton-line--search"
+            aria-hidden="true"
+          ></span>
+          <span
+            class="app-skeleton-line patients-skeleton-line patients-skeleton-line--meta"
+            aria-hidden="true"
+          ></span>
         </div>
 
         <div class="patients-loading-state__table" aria-hidden="true">
           @for (row of tableSkeletonRows; track $index) {
             <div class="patients-loading-row">
-              <span class="app-skeleton-line patients-skeleton-line patients-skeleton-line--name"></span>
-              <span class="app-skeleton-line patients-skeleton-line patients-skeleton-line--contact"></span>
-              <span class="app-skeleton-line patients-skeleton-line patients-skeleton-line--contact"></span>
-              <span class="app-skeleton-line patients-skeleton-line patients-skeleton-line--date"></span>
-              <span class="app-skeleton-line patients-skeleton-line patients-skeleton-line--actions"></span>
+              <span
+                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--name"
+              ></span>
+              <span
+                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--contact"
+              ></span>
+              <span
+                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--contact"
+              ></span>
+              <span
+                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--date"
+              ></span>
+              <span
+                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--actions"
+              ></span>
             </div>
           }
         </div>
       </div>
     } @else if (errorMessage()) {
-      <div class="patients-state patients-state--error app-table-feedback-state app-table-feedback-state--error">
+      <div
+        class="patients-state patients-state--error app-table-feedback-state app-table-feedback-state--error"
+      >
         <mat-icon aria-hidden="true">error_outline</mat-icon>
         <div class="patients-state__copy">
           <h3>No se pudo cargar el listado</h3>
@@ -99,7 +131,10 @@
             <ng-container matColumnDef="phoneNumber">
               <th mat-header-cell *matHeaderCellDef mat-sort-header="phoneNumber">Telefono</th>
               <td mat-cell *matCellDef="let patient">
-                <span class="patients-table-value" [class.patients-table-value--empty]="!patient.phoneNumber?.trim()">
+                <span
+                  class="patients-table-value"
+                  [class.patients-table-value--empty]="!patient.phoneNumber?.trim()"
+                >
                   {{ getDisplayValue(patient.phoneNumber) }}
                 </span>
               </td>
@@ -108,16 +143,24 @@
             <ng-container matColumnDef="email">
               <th mat-header-cell *matHeaderCellDef mat-sort-header="email">Email</th>
               <td mat-cell *matCellDef="let patient">
-                <span class="patients-table-value" [class.patients-table-value--empty]="!patient.email?.trim()">
+                <span
+                  class="patients-table-value"
+                  [class.patients-table-value--empty]="!patient.email?.trim()"
+                >
                   {{ getDisplayValue(patient.email) }}
                 </span>
               </td>
             </ng-container>
 
             <ng-container matColumnDef="birthDate">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="birthDate">Fecha de nacimiento</th>
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="birthDate">
+                Fecha de nacimiento
+              </th>
               <td mat-cell *matCellDef="let patient">
-                <span class="patients-table-value" [class.patients-table-value--empty]="!patient.birthDate">
+                <span
+                  class="patients-table-value"
+                  [class.patients-table-value--empty]="!patient.birthDate"
+                >
                   {{ formatBirthDate(patient.birthDate) }}
                 </span>
               </td>
@@ -127,13 +170,35 @@
               <th mat-header-cell *matHeaderCellDef>Acciones</th>
               <td mat-cell *matCellDef="let patient">
                 <div class="patients-actions app-table-actions" aria-label="Acciones disponibles">
-                  <button mat-icon-button type="button" matTooltip="Ver paciente" [matTooltipShowDelay]="150" (click)="stopRowClick($event); openPatientDetailDialog(patient)" [attr.aria-label]="'Ver ' + getFullName(patient)">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Ver paciente"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); openPatientDetailDialog(patient)"
+                    [attr.aria-label]="'Ver ' + getFullName(patient)"
+                  >
                     <mat-icon>visibility</mat-icon>
                   </button>
-                  <button mat-icon-button type="button" matTooltip="Editar paciente" [matTooltipShowDelay]="150" (click)="stopRowClick($event); openEditPatientDialog(patient)" [attr.aria-label]="'Editar ' + getFullName(patient)">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Editar paciente"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); openEditPatientDialog(patient)"
+                    [attr.aria-label]="'Editar ' + getFullName(patient)"
+                  >
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <button mat-icon-button type="button" class="app-table-action--danger" matTooltip="Eliminar paciente" [matTooltipShowDelay]="150" (click)="stopRowClick($event); openDeletePatientDialog(patient)" [attr.aria-label]="'Eliminar ' + getFullName(patient)">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="app-table-action--danger"
+                    matTooltip="Eliminar paciente"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); openDeletePatientDialog(patient)"
+                    [attr.aria-label]="'Eliminar ' + getFullName(patient)"
+                  >
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
@@ -151,7 +216,9 @@
               [matTooltipShowDelay]="150"
               (click)="openPatientDetailDialog(row)"
               (keydown.enter)="openPatientDetailDialog(row)"
-              (keydown.space)="stopRowClick($event); $event.preventDefault(); openPatientDetailDialog(row)"
+              (keydown.space)="
+                stopRowClick($event); $event.preventDefault(); openPatientDetailDialog(row)
+              "
             ></tr>
           </table>
         </div>
@@ -173,7 +240,9 @@
             message="Ajusta el termino de busqueda para volver a ver resultados del listado."
           />
           <div class="patients-empty-state__actions">
-            <button mat-stroked-button type="button" (click)="clearPatientFilters()">Limpiar busqueda</button>
+            <button mat-stroked-button type="button" (click)="clearPatientFilters()">
+              Limpiar busqueda
+            </button>
           </div>
         </div>
       }

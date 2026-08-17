@@ -5,12 +5,15 @@
   </div>
 
   <div class="patient-delete-dialog__summary app-dialog__summary">
-    <p class="patient-delete-dialog__summary-title app-dialog__summary-title">Paciente seleccionado</p>
+    <p class="patient-delete-dialog__summary-title app-dialog__summary-title">
+      Paciente seleccionado
+    </p>
     <p class="patient-delete-dialog__name">{{ getFullName() }}</p>
   </div>
 
   <p class="patient-delete-dialog__warning">
-    Esta acción no puede deshacerse y puede afectar la visualización de información asociada dentro del flujo clínico.
+    Esta acción no puede deshacerse y puede afectar la visualización de información asociada dentro
+    del flujo clínico.
   </p>
 
   @if (errorMessage()) {
@@ -18,7 +21,9 @@
   }
 
   <div class="patient-delete-dialog__actions">
-    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">
+      Cancelar
+    </button>
 
     <button
       mat-flat-button

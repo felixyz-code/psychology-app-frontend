@@ -5,7 +5,10 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatIconModule } from '@angular/material/icon';
 
 import { AuthStore } from '../../../core/auth/auth.store';
-import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  StatusBadgeComponent,
+  StatusBadgeVariant,
+} from '../../../shared/components/status-badge/status-badge.component';
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 
 interface AppointmentDetailDialogData {
@@ -32,7 +35,10 @@ export class AppointmentDetailDialogComponent {
   private readonly data = inject<AppointmentDetailDialogData>(MAT_DIALOG_DATA);
   private readonly authStore = inject(AuthStore);
   private readonly dialogRef = inject(
-    MatDialogRef<AppointmentDetailDialogComponent, { action: 'close' } | { action: 'edit'; appointment: Appointment }>
+    MatDialogRef<
+      AppointmentDetailDialogComponent,
+      { action: 'close' } | { action: 'edit'; appointment: Appointment }
+    >,
   );
 
   readonly appointment = this.data.appointment;
@@ -86,6 +92,8 @@ export class AppointmentDetailDialogComponent {
   }
 
   getAppointmentSummary(): string {
-    return AppointmentDetailDialogComponent.DATE_TIME_FORMATTER.format(new Date(this.appointment.scheduledAt));
+    return AppointmentDetailDialogComponent.DATE_TIME_FORMATTER.format(
+      new Date(this.appointment.scheduledAt),
+    );
   }
 }

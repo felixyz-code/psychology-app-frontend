@@ -2,7 +2,11 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { CreateSessionNoteRequest, SessionNote, UpdateSessionNoteRequest } from '../models/session-note.models';
+import {
+  CreateSessionNoteRequest,
+  SessionNote,
+  UpdateSessionNoteRequest,
+} from '../models/session-note.models';
 import { SessionNotesService } from './session-notes.service';
 
 describe('SessionNotesService', () => {
@@ -58,7 +62,9 @@ describe('SessionNotesService', () => {
   it('propagates case-file list HTTP errors without transforming them', () => {
     let receivedError: unknown;
 
-    service.getSessionNotesByCaseFileId('case-file-1').subscribe({ error: (error) => (receivedError = error) });
+    service
+      .getSessionNotesByCaseFileId('case-file-1')
+      .subscribe({ error: (error) => (receivedError = error) });
 
     httpTesting.expectOne('/api/session-notes/case-file/case-file-1').flush('Unavailable', {
       status: 500,
@@ -100,7 +106,9 @@ describe('SessionNotesService', () => {
   it('propagates create HTTP errors without transforming them', () => {
     let receivedError: unknown;
 
-    service.createSessionNote(createCreatePayload()).subscribe({ error: (error) => (receivedError = error) });
+    service
+      .createSessionNote(createCreatePayload())
+      .subscribe({ error: (error) => (receivedError = error) });
 
     httpTesting.expectOne('/api/session-notes').flush('Invalid payload', {
       status: 400,

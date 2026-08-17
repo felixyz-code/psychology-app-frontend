@@ -1,0 +1,343 @@
+<div class="agreement-detail">
+  <div class="agreement-detail__breadcrumb">
+    <a routerLink="/corporate" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      Volver a Convenios Corporativos
+    </a>
+  </div>
+
+  @if (isLoading()) {
+    <div class="agreement-detail__loader">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Cargando detalle del convenio...</p>
+    </div>
+  } @else if (errorMessage() || !agreement()) {
+    <div class="agreement-detail__error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage() || 'Convenio no encontrado' }}</p>
+      <a mat-button routerLink="/corporate">Volver</a>
+    </div>
+  } @else {
+    <!-- HEADER -->
+    <div class="agreement-header">
+      <div class="agreement-header__main">
+        <span class="badge" [class]="'badge--' + agreement()!.status.toLowerCase()">
+          {{ agreement()!.status }}
+        </span>
+        <h1 class="agreement-header__title">{{ agreement()!.title }}</h1>
+        <p class="agreement-header__sub">
+          C&oacute;digo: <strong>{{ agreement()!.code }}</strong> &bull; Empresa:
+          <strong>{{ agreement()!.corporateClient?.name }}</strong>
+        </p>
+      </div>
+      <div class="agreement-header__actions">
+        <button mat-stroked-button (click)="openNewPoolModal()">
+          <mat-icon>inventory_2</mat-icon>
+          Nueva Bolsa de Sesiones
+        </button>
+        <button mat-flat-button color="primary" (click)="openNewEmployeeModal()">
+          <mat-icon>person_add</mat-icon>
+          Agregar Colaborador
+        </button>
+        <button mat-stroked-button color="accent" (click)="openBatchModal()">
+          <mat-icon>upload_file</mat-icon>
+          Carga Masiva (CSV)
+        </button>
+      </div>
+    </div>
+
+    <!-- BENEFIT POOLS SECTION -->
+    <section class="section-block">
+      <div class="section-block__header">
+        <h2>Bolsas de Beneficios (Session Pools)</h2>
+        <span class="section-block__count">{{ pools().length }} bolsa(s) asignada(s)</span>
+      </div>
+
+      @if (pools().length === 0) {
+        <div class="empty-pool-box">
+          <p>
+            Este convenio a&uacute;n no tiene bolsas de sesiones activas. Crea una bolsa para
+            habilitar reservas.
+          </p>
+          <button mat-flat-button color="primary" (click)="openNewPoolModal()">
+            Crear Bolsa Ahora
+          </button>
+        </div>
+      } @else {
+        <div class="pools-grid">
+          @for (pool of pools(); track pool.id) {
+            <mat-card class="pool-card">
+              <mat-card-header>
+                <div class="pool-card__head">
+                  <h3 class="pool-card__title">{{ pool.name }}</h3>
+                  <span class="badge" [class]="'badge--' + pool.status.toLowerCase()">{{
+                    pool.status
+                  }}</span>
+                </div>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div class="pool-card__stats">
+                  <div class="stat">
+                    <span class="stat__label">Total</span>
+                    <span class="stat__val">{{ pool.totalSessions }}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat__label">Consumidas</span>
+                    <span class="stat__val stat__val--consumed">{{ pool.consumedSessions }}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat__label">Reservadas</span>
+                    <span class="stat__val stat__val--reserved">{{ pool.reservedSessions }}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat__label">Disponibles</span>
+                    <span class="stat__val stat__val--available">{{ pool.availableSessions }}</span>
+                  </div>
+                </div>
+
+                <div class="pool-card__progress">
+                  <div class="p-labels">
+                    <span>Utilizaci&oacute;n</span>
+                    <span>{{ pool.utilizationPercentage }}%</span>
+                  </div>
+                  <mat-progress-bar
+                    mode="determinate"
+                    [value]="pool.utilizationPercentage || 0"
+                  ></mat-progress-bar>
+                </div>
+
+                <div class="pool-card__dates">
+                  Vigencia: {{ pool.validFrom | date: 'dd/MM/yyyy' }} -
+                  {{ pool.validUntil | date: 'dd/MM/yyyy' }}
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- EMPLOYEE ELIGIBILITY ROSTER -->
+    <section class="section-block">
+      <div class="section-block__header">
+        <h2>Padr&oacute;n de Colaboradores Autorizados (Whitelist)</h2>
+        <span class="section-block__count">{{ employees().length }} colaborador(es)</span>
+      </div>
+
+      @if (employees().length === 0) {
+        <div class="empty-pool-box">
+          <p>No hay colaboradores registrados en la lista blanca de este convenio.</p>
+          <div class="actions-row">
+            <button mat-flat-button color="primary" (click)="openNewEmployeeModal()">
+              Agregar Uno a Uno
+            </button>
+            <button mat-stroked-button (click)="openBatchModal()">Carga Masiva</button>
+          </div>
+        </div>
+      } @else {
+        <div class="table-card">
+          <table class="roster-table">
+            <thead>
+              <tr>
+                <th>Colaborador</th>
+                <th>Correo Corporativo</th>
+                <th>N&oacute;mina / ID</th>
+                <th>Departamento</th>
+                <th>Cupo Asignado</th>
+                <th>Consumidas</th>
+                <th>Reservadas</th>
+                <th>Disponibles</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (emp of employees(); track emp.id) {
+                <tr>
+                  <td>
+                    <strong>{{ emp.firstName }} {{ emp.lastName }}</strong>
+                  </td>
+                  <td>{{ emp.email }}</td>
+                  <td>{{ emp.employeeNumber || '-' }}</td>
+                  <td>{{ emp.department || 'General' }}</td>
+                  <td>{{ emp.maxSessionsAllowed }}</td>
+                  <td>{{ emp.consumedSessions }}</td>
+                  <td>{{ emp.reservedSessions }}</td>
+                  <td>
+                    <strong class="text-success">{{ emp.availableSessions }}</strong>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="'badge--' + emp.status.toLowerCase()">
+                      {{ emp.status }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>
+
+<!-- POOL MODAL -->
+@if (showPoolModal()) {
+  <div class="modal-overlay" (click)="closePoolModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-card__header">
+        <h2>Crear Bolsa de Sesiones</h2>
+        <button mat-icon-button (click)="closePoolModal()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <form [formGroup]="poolForm" (ngSubmit)="savePool()" class="modal-card__form">
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre de la Bolsa</mat-label>
+          <input matInput formControlName="name" placeholder="ej. Bolsa Q1 2026 Planta Norte" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Cantidad Total de Sesiones</mat-label>
+          <input matInput type="number" formControlName="totalSessions" min="1" />
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Inicio de Vigencia</mat-label>
+            <input matInput type="date" formControlName="validFrom" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fin de Vigencia</mat-label>
+            <input matInput type="date" formControlName="validUntil" />
+          </mat-form-field>
+        </div>
+
+        <div class="modal-card__actions">
+          <button mat-button type="button" (click)="closePoolModal()">Cancelar</button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="poolForm.invalid || isSavingPool()"
+          >
+            {{ isSavingPool() ? 'Guardando...' : 'Asignar Bolsa' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- EMPLOYEE MODAL -->
+@if (showEmployeeModal()) {
+  <div class="modal-overlay" (click)="closeEmployeeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-card__header">
+        <h2>Registrar Colaborador</h2>
+        <button mat-icon-button (click)="closeEmployeeModal()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="modal-card__form">
+        <mat-form-field appearance="outline">
+          <mat-label>Correo Corporativo</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="usuario@empresa.com" />
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="firstName" placeholder="ej. María" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido</mat-label>
+            <input matInput formControlName="lastName" placeholder="ej. González" />
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>N&uacute;mero de N&oacute;mina / ID</mat-label>
+            <input matInput formControlName="employeeNumber" placeholder="EMP-001" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Departamento</mat-label>
+            <input matInput formControlName="department" placeholder="Operaciones" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>M&aacute;ximo de Sesiones Permitidas</mat-label>
+          <input matInput type="number" formControlName="maxSessionsAllowed" min="1" />
+        </mat-form-field>
+
+        <div class="modal-card__actions">
+          <button mat-button type="button" (click)="closeEmployeeModal()">Cancelar</button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="employeeForm.invalid || isSavingEmployee()"
+          >
+            {{ isSavingEmployee() ? 'Guardando...' : 'Registrar Colaborador' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- BATCH UPLOAD MODAL -->
+@if (showBatchModal()) {
+  <div class="modal-overlay" (click)="closeBatchModal()">
+    <div class="modal-card modal-card--lg" (click)="$event.stopPropagation()">
+      <div class="modal-card__header">
+        <h2>Carga Masiva de Colaboradores (CSV / Texto)</h2>
+        <button mat-icon-button (click)="closeBatchModal()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <div class="batch-instructions">
+        <p>Ingresa una lista de empleados separada por l&iacute;neas con formato:</p>
+        <code>email,nombre,apellido,numeroNomina,departamento</code>
+      </div>
+
+      <textarea
+        class="batch-textarea"
+        rows="8"
+        placeholder="juan@empresa.com,Juan,Perez,EMP-01,Finanzas&#10;ana@empresa.com,Ana,Gomez,EMP-02,Tecnologia"
+        [value]="batchText()"
+        (input)="onBatchTextChange($event)"
+      ></textarea>
+
+      @if (batchResult()) {
+        <div class="batch-result">
+          <p>
+            <strong>Resultados:</strong> {{ batchResult()?.importedCount }} importados,
+            {{ batchResult()?.skippedCount }} omitidos (duplicados).
+          </p>
+          @if (batchResult()?.errors && batchResult()!.errors.length > 0) {
+            <ul class="error-list">
+              @for (e of batchResult()!.errors; track e) {
+                <li>{{ e }}</li>
+              }
+            </ul>
+          }
+        </div>
+      }
+
+      <div class="modal-card__actions">
+        <button mat-button type="button" (click)="closeBatchModal()">Cerrar</button>
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="uploadBatch()"
+          [disabled]="!batchText() || isUploadingBatch()"
+        >
+          {{ isUploadingBatch() ? 'Importando...' : 'Iniciar Carga Masiva' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

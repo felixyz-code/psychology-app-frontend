@@ -61,7 +61,7 @@ describe('PatientsListPage', () => {
     expect(dialog.open).toHaveBeenNthCalledWith(
       1,
       PatientDetailDialogComponent,
-      expect.objectContaining({ data: { patient } })
+      expect.objectContaining({ data: { patient } }),
     );
     expect(getPatients).toHaveBeenCalledTimes(2);
   });

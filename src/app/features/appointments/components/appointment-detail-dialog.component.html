@@ -14,7 +14,9 @@
   <div class="appointment-detail-dialog__body">
     <div class="appointment-detail-dialog__summary app-dialog__summary">
       <div class="appointment-detail-dialog__summary-main">
-        <span class="appointment-detail-dialog__summary-title app-dialog__summary-title">Cita programada</span>
+        <span class="appointment-detail-dialog__summary-title app-dialog__summary-title"
+          >Cita programada</span
+        >
         <strong>{{ getAppointmentSummary() }}</strong>
         <p>Paciente: {{ patientName }}</p>
       </div>
@@ -41,7 +43,9 @@
 
       <div class="appointment-detail-dialog__item">
         <span class="appointment-detail-dialog__label">Fecha y hora</span>
-        <p class="appointment-detail-dialog__value">{{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        <p class="appointment-detail-dialog__value">
+          {{ appointment.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
       </div>
 
       <div class="appointment-detail-dialog__item">
@@ -56,12 +60,16 @@
 
       <div class="appointment-detail-dialog__item">
         <span class="appointment-detail-dialog__label">Creada</span>
-        <p class="appointment-detail-dialog__value">{{ appointment.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        <p class="appointment-detail-dialog__value">
+          {{ appointment.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
       </div>
 
       <div class="appointment-detail-dialog__item">
         <span class="appointment-detail-dialog__label">Ultima actualizacion</span>
-        <p class="appointment-detail-dialog__value">{{ appointment.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        <p class="appointment-detail-dialog__value">
+          {{ appointment.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
       </div>
 
       <div class="appointment-detail-dialog__item appointment-detail-dialog__item--full">
@@ -74,7 +82,12 @@
   <footer class="appointment-detail-dialog__actions app-dialog__actions">
     <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
     <div class="appointment-detail-dialog__actions-group app-dialog__actions-group">
-      <button mat-flat-button type="button" class="appointment-detail-dialog__primary-action" (click)="edit()">
+      <button
+        mat-flat-button
+        type="button"
+        class="appointment-detail-dialog__primary-action"
+        (click)="edit()"
+      >
         Editar
       </button>
     </div>

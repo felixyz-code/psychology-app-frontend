@@ -1,4 +1,7 @@
-<div class="detail-dialog-shell document-preview-dialog" [class.document-preview-dialog--pdf]="previewKind() === 'pdf'">
+<div
+  class="detail-dialog-shell document-preview-dialog"
+  [class.document-preview-dialog--pdf]="previewKind() === 'pdf'"
+>
   <header class="detail-dialog-header">
     <div class="document-preview-dialog__title-row">
       <div class="document-preview-dialog__file-type" aria-hidden="true">
@@ -20,7 +23,10 @@
         <p>Cargando vista previa...</p>
       </div>
     } @else if (errorMessage() && previewKind() === 'unavailable') {
-      <div class="document-preview-dialog__state document-preview-dialog__state--error" role="alert">
+      <div
+        class="document-preview-dialog__state document-preview-dialog__state--error"
+        role="alert"
+      >
         <p>{{ errorMessage() }}</p>
       </div>
     } @else if (previewKind() === 'pdf' && previewResourceUrl()) {
@@ -32,9 +38,15 @@
         ></iframe>
       </div>
     } @else if (previewKind() === 'image' && previewUrl()) {
-      <div class="document-preview-dialog__viewer-shell document-preview-dialog__viewer-shell--image">
+      <div
+        class="document-preview-dialog__viewer-shell document-preview-dialog__viewer-shell--image"
+      >
         <div class="document-preview-dialog__image-wrapper">
-          <img class="document-preview-dialog__image" [src]="previewUrl()" [alt]="document.fileName" />
+          <img
+            class="document-preview-dialog__image"
+            [src]="previewUrl()"
+            [alt]="document.fileName"
+          />
         </div>
       </div>
     } @else {

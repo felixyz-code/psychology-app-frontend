@@ -14,7 +14,11 @@ describe('financial transaction routes', () => {
   });
 
   it('keeps list and detail available under the parent finance.read guard', () => {
-    expect(financialTransactionsRoutes.find((route) => route.path === '')?.canActivate).toBeUndefined();
-    expect(financialTransactionsRoutes.find((route) => route.path === ':id')?.canActivate).toBeUndefined();
+    expect(
+      financialTransactionsRoutes.find((route) => route.path === '')?.canActivate,
+    ).toBeUndefined();
+    expect(
+      financialTransactionsRoutes.find((route) => route.path === ':id')?.canActivate,
+    ).toBeUndefined();
   });
 });

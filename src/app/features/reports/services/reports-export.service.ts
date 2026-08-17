@@ -23,7 +23,7 @@ export class ReportsExportService {
             <strong class="metric__value">${this.escapeHtml(metric.value)}</strong>
             <span class="metric__supporting">${this.escapeHtml(metric.supportingText)}</span>
           </div>
-        `
+        `,
       )
       .join('');
 
@@ -34,12 +34,15 @@ export class ReportsExportService {
             <span class="context-item__label">${this.escapeHtml(item.label)}</span>
             <strong class="context-item__value">${this.escapeHtml(item.value)}</strong>
           </div>
-        `
+        `,
       )
       .join('');
 
     const tableHeadHtml = result.columns
-      .map((column) => `<th class="${column.align === 'end' ? 'align-end' : ''}">${this.escapeHtml(column.label)}</th>`)
+      .map(
+        (column) =>
+          `<th class="${column.align === 'end' ? 'align-end' : ''}">${this.escapeHtml(column.label)}</th>`,
+      )
       .join('');
 
     const tableRowsHtml = result.rows
@@ -92,7 +95,7 @@ export class ReportsExportService {
                                         <strong>${this.escapeHtml(metaItem.label)}:</strong>
                                         <span>${this.escapeHtml(metaItem.value)}</span>
                                       </span>
-                                    `
+                                    `,
                                   )
                                   .join('')}
                               </div>
@@ -101,16 +104,18 @@ export class ReportsExportService {
                         }
                       </div>
                     </article>
-                  `
+                  `,
                 )
                 .join('')}
             </div>
           </section>
-        `
+        `,
       )
       .join('');
 
-    const descriptivePdfName = this.ensurePdfExtension(this.sanitizePrintableFileName(result.pdfFileName));
+    const descriptivePdfName = this.ensurePdfExtension(
+      this.sanitizePrintableFileName(result.pdfFileName),
+    );
     const printableDocumentTitle = descriptivePdfName.replace(/\.pdf$/i, '');
 
     const html = `
@@ -549,7 +554,9 @@ export class ReportsExportService {
 
   exportAsCsv(result: ReportResult<unknown>): void {
     const header = result.columns.map((column) => column.label);
-    const rows = result.rows.map((row) => result.columns.map((column) => row.values[column.key] ?? ''));
+    const rows = result.rows.map((row) =>
+      result.columns.map((column) => row.values[column.key] ?? ''),
+    );
     const csvContent = [header, ...rows]
       .map((row) => row.map((cell) => this.escapeCsvValue(cell)).join(','))
       .join('\r\n');
@@ -578,7 +585,9 @@ export class ReportsExportService {
     const firstEffectiveCharacter = value.match(/^[ \t\r\n]*([\s\S])/u)?.[1];
     const dangerousFormulaPrefixes = '=+-@＝＋－＠';
 
-    return firstEffectiveCharacter && dangerousFormulaPrefixes.includes(firstEffectiveCharacter) ? `\t${value}` : value;
+    return firstEffectiveCharacter && dangerousFormulaPrefixes.includes(firstEffectiveCharacter)
+      ? `\t${value}`
+      : value;
   }
 
   private escapeHtml(value: string): string {
@@ -631,7 +640,12 @@ export class ReportsExportService {
   }
 
   private buildClinicalSummaryPdfHtml(content: ClinicalSummaryContent): string {
-    const renderEmpty = (title: string | undefined, message: string | undefined, fallbackTitle: string, fallbackMessage: string) => `
+    const renderEmpty = (
+      title: string | undefined,
+      message: string | undefined,
+      fallbackTitle: string,
+      fallbackMessage: string,
+    ) => `
       <section class="clinical-empty">
         <strong>${this.escapeHtml(title || fallbackTitle)}</strong>
         <p>${this.escapeHtml(message || fallbackMessage)}</p>
@@ -657,7 +671,7 @@ export class ReportsExportService {
                   <strong>${this.escapeHtml(metric.value)}</strong>
                   <p>${this.escapeHtml(metric.supportingText)}</p>
                 </article>
-              `
+              `,
             )
             .join('')}
         </div>
@@ -682,7 +696,7 @@ export class ReportsExportService {
                 content.evolutionSection.emptyTitle,
                 content.evolutionSection.emptyMessage,
                 'Sin narrativa clínica suficiente',
-                'Todavía no hay suficiente información estructurada para redactar un resumen de evolución.'
+                'Todavía no hay suficiente información estructurada para redactar un resumen de evolución.',
               )
         }
       </section>
@@ -709,7 +723,7 @@ export class ReportsExportService {
                           <p>${this.escapeHtml(item.description)}</p>
                         </div>
                       </article>
-                    `
+                    `,
                   )
                   .join('')}
               </div>
@@ -718,7 +732,7 @@ export class ReportsExportService {
                 content.timelineSection.emptyTitle,
                 content.timelineSection.emptyMessage,
                 'Sin eventos clínicos en el período',
-                'Ajusta el rango de fechas para revisar actividad clínica visible en el workspace.'
+                'Ajusta el rango de fechas para revisar actividad clínica visible en el workspace.',
               )
         }
       </section>
@@ -742,7 +756,7 @@ export class ReportsExportService {
                         </div>
                         <p>${this.escapeHtml(note.excerpt)}</p>
                       </article>
-                    `
+                    `,
                   )
                   .join('')}
               </div>
@@ -756,7 +770,7 @@ export class ReportsExportService {
                 content.notesSection.emptyTitle,
                 content.notesSection.emptyMessage,
                 'Sin notas clínicas en el período',
-                'No se encontraron notas de sesión dentro del rango seleccionado.'
+                'No se encontraron notas de sesión dentro del rango seleccionado.',
               )
         }
       </section>
@@ -780,7 +794,7 @@ export class ReportsExportService {
                         </div>
                         <p>${this.escapeHtml(document.typeLabel)}</p>
                       </article>
-                    `
+                    `,
                   )
                   .join('')}
               </div>
@@ -789,7 +803,7 @@ export class ReportsExportService {
                 content.documentsSection.emptyTitle,
                 content.documentsSection.emptyMessage,
                 'Sin documentos relacionados en el período',
-                'No hay documentos visibles en el rango actual.'
+                'No hay documentos visibles en el rango actual.',
               )
         }
       </section>
@@ -797,7 +811,12 @@ export class ReportsExportService {
   }
 
   private buildClinicalRecordPdfHtml(content: ClinicalRecordContent): string {
-    const renderEmpty = (title: string | undefined, message: string | undefined, fallbackTitle: string, fallbackMessage: string) => `
+    const renderEmpty = (
+      title: string | undefined,
+      message: string | undefined,
+      fallbackTitle: string,
+      fallbackMessage: string,
+    ) => `
       <section class="clinical-empty">
         <strong>${this.escapeHtml(title || fallbackTitle)}</strong>
         <p>${this.escapeHtml(message || fallbackMessage)}</p>
@@ -867,7 +886,7 @@ export class ReportsExportService {
                         <p>Duración: ${this.escapeHtml(appointment.durationLabel)}</p>
                         <p>${this.escapeHtml(appointment.notes)}</p>
                       </article>
-                    `
+                    `,
                   )
                   .join('')}
               </div>
@@ -876,7 +895,7 @@ export class ReportsExportService {
                 content.appointmentsSection.emptyTitle,
                 content.appointmentsSection.emptyMessage,
                 'Sin citas en el período',
-                'No se encontraron citas visibles para el rango seleccionado.'
+                'No se encontraron citas visibles para el rango seleccionado.',
               )
         }
       </section>
@@ -900,7 +919,7 @@ export class ReportsExportService {
                         </div>
                         <p style="white-space: pre-wrap;">${this.escapeHtml(note.content)}</p>
                       </article>
-                    `
+                    `,
                   )
                   .join('')}
               </div>
@@ -909,7 +928,7 @@ export class ReportsExportService {
                 content.notesSection.emptyTitle,
                 content.notesSection.emptyMessage,
                 'Sin notas clínicas en el período',
-                'No se encontraron notas clínicas dentro del rango seleccionado.'
+                'No se encontraron notas clínicas dentro del rango seleccionado.',
               )
         }
       </section>
@@ -933,7 +952,7 @@ export class ReportsExportService {
                         </div>
                         <p>${this.escapeHtml(document.typeLabel)}</p>
                       </article>
-                    `
+                    `,
                   )
                   .join('')}
               </div>
@@ -942,7 +961,7 @@ export class ReportsExportService {
                 content.documentsSection.emptyTitle,
                 content.documentsSection.emptyMessage,
                 'Sin documentos en el período',
-                'No se encontraron documentos relacionados dentro del rango seleccionado.'
+                'No se encontraron documentos relacionados dentro del rango seleccionado.',
               )
         }
       </section>
@@ -969,7 +988,7 @@ export class ReportsExportService {
                           <p>${this.escapeHtml(item.description)}</p>
                         </div>
                       </article>
-                    `
+                    `,
                   )
                   .join('')}
               </div>
@@ -978,7 +997,7 @@ export class ReportsExportService {
                 content.timelineSection.emptyTitle,
                 content.timelineSection.emptyMessage,
                 'Sin eventos clínicos en el período',
-                'No se identificaron eventos clínicos visibles para el rango seleccionado.'
+                'No se identificaron eventos clínicos visibles para el rango seleccionado.',
               )
         }
       </section>
@@ -999,7 +1018,7 @@ export class ReportsExportService {
                         <span>${this.escapeHtml(reference.label)}</span>
                         <strong>${this.escapeHtml(reference.value)}</strong>
                       </article>
-                    `
+                    `,
                   )
                   .join('')}
               </div>
@@ -1008,7 +1027,7 @@ export class ReportsExportService {
                 content.referencesSection.emptyTitle,
                 content.referencesSection.emptyMessage,
                 'Sin referencias documentales',
-                'No hay documentos disponibles para anexar como referencia en el período consultado.'
+                'No hay documentos disponibles para anexar como referencia en el período consultado.',
               )
         }
       </section>
@@ -1018,7 +1037,7 @@ export class ReportsExportService {
   private buildClinicalGridSection(
     title: string,
     subtitle: string,
-    items: Array<{ label: string; value: string }>
+    items: Array<{ label: string; value: string }>,
   ): string {
     return `
       <section class="clinical-section">
@@ -1034,7 +1053,7 @@ export class ReportsExportService {
                   <span>${this.escapeHtml(item.label)}</span>
                   <strong>${this.escapeHtml(item.value)}</strong>
                 </article>
-              `
+              `,
             )
             .join('')}
         </div>

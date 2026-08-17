@@ -32,15 +32,39 @@ describe('DocumentUploadFlowStore', () => {
   it('loads sorted case-file options with their patient names', () => {
     caseFilesService.getCaseFiles.mockReturnValue(
       of([
-        { id: 'case-file-2', patientId: 'patient-2', createdAt: '2026-07-02T10:00:00.000Z', updatedAt: '2026-07-02T10:00:00.000Z' },
-        { id: 'case-file-1', patientId: 'patient-1', createdAt: '2026-07-01T10:00:00.000Z', updatedAt: '2026-07-01T10:00:00.000Z' },
-      ])
+        {
+          id: 'case-file-2',
+          patientId: 'patient-2',
+          createdAt: '2026-07-02T10:00:00.000Z',
+          updatedAt: '2026-07-02T10:00:00.000Z',
+        },
+        {
+          id: 'case-file-1',
+          patientId: 'patient-1',
+          createdAt: '2026-07-01T10:00:00.000Z',
+          updatedAt: '2026-07-01T10:00:00.000Z',
+        },
+      ]),
     );
     patientsService.getPatients.mockReturnValue(
       of([
-        { id: 'patient-1', psychologistId: 'psychologist-1', firstName: 'Ana', lastName: 'Lopez', createdAt: '', updatedAt: '' },
-        { id: 'patient-2', psychologistId: 'psychologist-1', firstName: 'Beto', lastName: 'Diaz', createdAt: '', updatedAt: '' },
-      ])
+        {
+          id: 'patient-1',
+          psychologistId: 'psychologist-1',
+          firstName: 'Ana',
+          lastName: 'Lopez',
+          createdAt: '',
+          updatedAt: '',
+        },
+        {
+          id: 'patient-2',
+          psychologistId: 'psychologist-1',
+          firstName: 'Beto',
+          lastName: 'Diaz',
+          createdAt: '',
+          updatedAt: '',
+        },
+      ]),
     );
     const store = createStore();
 
@@ -48,7 +72,10 @@ describe('DocumentUploadFlowStore', () => {
 
     expect(store.isCaseFilesLoading()).toBe(false);
     expect(store.caseFilesLoadErrorMessage()).toBe('');
-    expect(store.caseFileOptions().map((option) => option.value)).toEqual(['case-file-1', 'case-file-2']);
+    expect(store.caseFileOptions().map((option) => option.value)).toEqual([
+      'case-file-1',
+      'case-file-2',
+    ]);
     expect(store.caseFileOptions()[0].label).toContain('Ana Lopez');
   });
 
@@ -61,7 +88,9 @@ describe('DocumentUploadFlowStore', () => {
 
     expect(store.isCaseFilesLoading()).toBe(false);
     expect(store.caseFileOptions()).toEqual([]);
-    expect(store.caseFilesLoadErrorMessage()).toBe('No fue posible cargar los expedientes disponibles.');
+    expect(store.caseFilesLoadErrorMessage()).toBe(
+      'No fue posible cargar los expedientes disponibles.',
+    );
   });
 
   it('configures a fixed case file without loading global options', () => {
@@ -89,7 +118,9 @@ describe('DocumentUploadFlowStore', () => {
   });
 
   it('shows an upload error, permits retry, and does not call success for a failed request', () => {
-    documentsService.upload.mockReturnValueOnce(throwError(() => new Error('Unavailable'))).mockReturnValueOnce(of({}));
+    documentsService.upload
+      .mockReturnValueOnce(throwError(() => new Error('Unavailable')))
+      .mockReturnValueOnce(of({}));
     const onSuccess = vi.fn();
     const store = createStore();
     const payload = { caseFileId: 'case-file-1', file: new File(['content'], 'informe.pdf') };

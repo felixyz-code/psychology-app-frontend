@@ -66,7 +66,9 @@ describe('DocumentMetadataEditFlowStore', () => {
   });
 
   it('shows an error and permits retry after a failed metadata update', () => {
-    documentsService.update.mockReturnValueOnce(throwError(() => new Error('Unavailable'))).mockReturnValueOnce(of({}));
+    documentsService.update
+      .mockReturnValueOnce(throwError(() => new Error('Unavailable')))
+      .mockReturnValueOnce(of({}));
     const onSuccess = vi.fn();
     const store = createStore();
 
@@ -83,7 +85,10 @@ describe('DocumentMetadataEditFlowStore', () => {
 
   function createStore(): DocumentMetadataEditFlowStore {
     TestBed.configureTestingModule({
-      providers: [DocumentMetadataEditFlowStore, { provide: DocumentsService, useValue: documentsService }],
+      providers: [
+        DocumentMetadataEditFlowStore,
+        { provide: DocumentsService, useValue: documentsService },
+      ],
     });
 
     return TestBed.inject(DocumentMetadataEditFlowStore);
