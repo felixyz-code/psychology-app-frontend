@@ -118,6 +118,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'audit-trail',
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'audit.read' },
+        loadChildren: () =>
+          import('./features/audit-logs/audit-logs.routes').then((m) => m.auditLogsRoutes),
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',

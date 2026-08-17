@@ -70,10 +70,9 @@
   gap: 0.7rem;
 }
 .patients-loading-row {
-  grid-template-columns: minmax(12rem, 1.6fr) minmax(9rem, 1fr) minmax(11rem, 1.15fr) minmax(
-      9rem,
-      0.95fr
-    ) 7rem;
+  grid-template-columns:
+    minmax(12rem, 1.6fr) minmax(9rem, 1fr) minmax(11rem, 1.15fr) minmax(9rem, 0.95fr)
+    7rem;
   align-items: center;
   padding: 0.95rem 0.85rem;
   border: 1px solid color-mix(in srgb, var(--app-color-card-border) 82%, transparent);
@@ -242,9 +241,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .patients-loading-row {
-    grid-template-columns: minmax(11rem, 1.5fr) minmax(8rem, 1fr) minmax(10rem, 1fr) minmax(
-        8rem,
-        0.9fr
-      ) 6rem;
+    grid-template-columns:
+      minmax(11rem, 1.5fr) minmax(8rem, 1fr) minmax(10rem, 1fr) minmax(8rem, 0.9fr)
+      6rem;
   }
 }
