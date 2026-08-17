@@ -66,36 +66,35 @@ export class AuthService {
         body,
         { context },
       );
-    })
-      .pipe(
-        map((response) => {
-          if (!isValidBootstrapResponse(response)) {
-            throw new Error('The freelancer bootstrap response is invalid.');
-          }
+    }).pipe(
+      map((response) => {
+        if (!isValidBootstrapResponse(response)) {
+          throw new Error('The freelancer bootstrap response is invalid.');
+        }
 
-          return response;
-        }),
-        switchMap((response) => {
-          if (
-            this.authStore.isAuthenticated() ||
-            this.authStore.sessionVersion() !== requestSessionVersion
-          ) {
-            return throwError(() => new BootstrapSessionConflictError(true));
-          }
+        return response;
+      }),
+      switchMap((response) => {
+        if (
+          this.authStore.isAuthenticated() ||
+          this.authStore.sessionVersion() !== requestSessionVersion
+        ) {
+          return throwError(() => new BootstrapSessionConflictError(true));
+        }
 
-          this.authStore.setSession(response.accessToken, response.user);
-          const installedSessionVersion = this.authStore.sessionVersion();
+        this.authStore.setSession(response.accessToken, response.user);
+        const installedSessionVersion = this.authStore.sessionVersion();
 
-          return from(this.tenantContextStore.startForIdentity(response.user.id)).pipe(
-            switchMap(() =>
-              this.authStore.sessionVersion() === installedSessionVersion &&
-              this.authStore.user()?.id === response.user.id
-                ? of(response)
-                : throwError(() => new BootstrapSessionConflictError(true)),
-            ),
-          );
-        }),
-      );
+        return from(this.tenantContextStore.startForIdentity(response.user.id)).pipe(
+          switchMap(() =>
+            this.authStore.sessionVersion() === installedSessionVersion &&
+            this.authStore.user()?.id === response.user.id
+              ? of(response)
+              : throwError(() => new BootstrapSessionConflictError(true)),
+          ),
+        );
+      }),
+    );
   }
 
   logout(): void {
@@ -159,23 +158,14 @@ function isBootstrapOrganization(
   );
 }
 
-function isBootstrapMembership(
-  value: unknown,
-): value is FreelancerBootstrapResponse['membership'] {
+function isBootstrapMembership(value: unknown): value is FreelancerBootstrapResponse['membership'] {
   if (!value || typeof value !== 'object') {
     return false;
   }
 
   const membership = value as Record<string, unknown>;
   return (
-    hasExactKeys(membership, [
-      'id',
-      'organizationId',
-      'userId',
-      'role',
-      'status',
-      'joinedAt',
-    ]) &&
+    hasExactKeys(membership, ['id', 'organizationId', 'userId', 'role', 'status', 'joinedAt']) &&
     isNonEmptyString(membership['id']) &&
     isNonEmptyString(membership['organizationId']) &&
     isNonEmptyString(membership['userId']) &&

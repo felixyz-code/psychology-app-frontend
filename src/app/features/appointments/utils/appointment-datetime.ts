@@ -25,10 +25,12 @@ export function endOfLocalMonth(value: string | Date): Date {
 export function isWithinLocalDateRange(
   value: string | Date,
   startDate: Date | null,
-  endDate: Date | null
+  endDate: Date | null,
 ): boolean {
   const appointmentTime = parseAppointmentDate(value).getTime();
-  const rangeStartTime = startDate ? startOfLocalDay(startDate).getTime() : Number.NEGATIVE_INFINITY;
+  const rangeStartTime = startDate
+    ? startOfLocalDay(startDate).getTime()
+    : Number.NEGATIVE_INFINITY;
   const rangeEndTime = endDate ? endOfLocalDay(endDate).getTime() : Number.POSITIVE_INFINITY;
 
   return appointmentTime >= rangeStartTime && appointmentTime <= rangeEndTime;
@@ -86,9 +88,13 @@ export function localDateTimeValueToIso(value: string): string {
   return date.toISOString();
 }
 
-export function sortAppointmentsByScheduledAt<T extends { scheduledAt: string }>(appointments: T[]): T[] {
+export function sortAppointmentsByScheduledAt<T extends { scheduledAt: string }>(
+  appointments: T[],
+): T[] {
   return [...appointments].sort(
-    (left, right) => parseAppointmentDate(left.scheduledAt).getTime() - parseAppointmentDate(right.scheduledAt).getTime()
+    (left, right) =>
+      parseAppointmentDate(left.scheduledAt).getTime() -
+      parseAppointmentDate(right.scheduledAt).getTime(),
   );
 }
 

@@ -31,7 +31,9 @@ describe('DashboardAnalyticsService', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-02T18:00:00.000Z'));
 
-    appointmentsService = { getAppointments: vi.fn(() => of([appointment('today', '2026-07-02T16:00:00.000Z')])) };
+    appointmentsService = {
+      getAppointments: vi.fn(() => of([appointment('today', '2026-07-02T16:00:00.000Z')])),
+    };
     caseFilesService = { getCaseFiles: vi.fn(() => of([caseFile()])) };
     documentsService = { getAll: vi.fn(() => of([document()])) };
     financialTransactionsService = { findSummary: vi.fn(() => of(financialSummary())) };
@@ -64,7 +66,9 @@ describe('DashboardAnalyticsService', () => {
   });
 
   it('composes the dashboard view model from every required source', async () => {
-    const result = await firstValueFrom(TestBed.inject(DashboardAnalyticsService).loadDashboardData());
+    const result = await firstValueFrom(
+      TestBed.inject(DashboardAnalyticsService).loadDashboardData(),
+    );
 
     expect(patientsService.getPatients).toHaveBeenCalledOnce();
     expect(appointmentsService.getAppointments).toHaveBeenCalledOnce();
@@ -80,7 +84,9 @@ describe('DashboardAnalyticsService', () => {
       'monthly-balance',
     ]);
     expect(result.viewModel.agendaToday.items.map((item) => item.id)).toEqual(['today']);
-    expect(result.viewModel.financeSummary?.metrics.find((metric) => metric.id === 'movements')?.value).toBe('3 transacciones');
+    expect(
+      result.viewModel.financeSummary?.metrics.find((metric) => metric.id === 'movements')?.value,
+    ).toBe('3 transacciones');
     expect(result.viewModel.clinicalActivity.items.map((item) => item.id)).toEqual([
       'document-document-1',
       'note-note-1',
@@ -92,30 +98,42 @@ describe('DashboardAnalyticsService', () => {
   it('keeps available data and exposes a partial warning when one source fails', async () => {
     documentsService.getAll.mockReturnValue(throwError(() => new Error('Documents unavailable')));
 
-    const result = await firstValueFrom(TestBed.inject(DashboardAnalyticsService).loadDashboardData());
+    const result = await firstValueFrom(
+      TestBed.inject(DashboardAnalyticsService).loadDashboardData(),
+    );
 
     expect(result.snapshot.documents).toEqual([]);
     expect(result.snapshot.patients).toHaveLength(1);
     expect(result.snapshot.appointments).toHaveLength(1);
     expect(result.snapshot.failedSources).toEqual(['documentos']);
-    expect(result.viewModel.warnings).toEqual(['Algunos bloques se cargaron con datos parciales: documentos.']);
+    expect(result.viewModel.warnings).toEqual([
+      'Algunos bloques se cargaron con datos parciales: documentos.',
+    ]);
     expect(result.viewModel.agendaToday.items[0]?.patientName).toBe('Ana Lopez');
   });
 
   it('falls back only the failed financial source while keeping operational widgets usable', async () => {
-    financialTransactionsService.findSummary.mockReturnValue(throwError(() => new Error('Finance unavailable')));
+    financialTransactionsService.findSummary.mockReturnValue(
+      throwError(() => new Error('Finance unavailable')),
+    );
 
-    const viewModel = await firstValueFrom(TestBed.inject(DashboardAnalyticsService).loadDashboardViewModel());
+    const viewModel = await firstValueFrom(
+      TestBed.inject(DashboardAnalyticsService).loadDashboardViewModel(),
+    );
 
     expect(viewModel.financeSummary?.metrics.every((metric) => metric.value === '--')).toBe(true);
     expect(viewModel.agendaToday.totalCount).toBe(1);
-    expect(viewModel.warnings).toEqual(['Algunos bloques se cargaron con datos parciales: resumen financiero.']);
+    expect(viewModel.warnings).toEqual([
+      'Algunos bloques se cargaron con datos parciales: resumen financiero.',
+    ]);
   });
 
   it('omits unauthorized finance data and presentation without reporting a failed source', async () => {
     capabilities.set([]);
 
-    const result = await firstValueFrom(TestBed.inject(DashboardAnalyticsService).loadDashboardData());
+    const result = await firstValueFrom(
+      TestBed.inject(DashboardAnalyticsService).loadDashboardData(),
+    );
 
     expect(financialTransactionsService.findSummary).not.toHaveBeenCalled();
     expect(result.snapshot.financialSummary).toBeNull();
@@ -123,7 +141,9 @@ describe('DashboardAnalyticsService', () => {
     expect(result.viewModel.warnings).toEqual([]);
     expect(result.viewModel.financeSummary).toBeNull();
     expect(result.viewModel.kpiStrip.some((metric) => metric.id === 'monthly-balance')).toBe(false);
-    expect(result.viewModel.quickActions.items.some((action) => action.id === 'open-finance')).toBe(false);
+    expect(result.viewModel.quickActions.items.some((action) => action.id === 'open-finance')).toBe(
+      false,
+    );
   });
 
   it('uses the current tenant capabilities after they change', async () => {
@@ -152,10 +172,13 @@ describe('DashboardAnalyticsService', () => {
           appointment('today-early', '2026-07-02T15:00:00.000Z'),
           appointment('cancelled-future', '2026-07-03T14:00:00.000Z', 'CANCELLED'),
         ],
-      })
+      }),
     );
 
-    expect(viewModel.agendaToday.items.map((item) => item.id)).toEqual(['today-early', 'today-late']);
+    expect(viewModel.agendaToday.items.map((item) => item.id)).toEqual([
+      'today-early',
+      'today-late',
+    ]);
     expect(viewModel.upcomingAppointments.items.map((item) => item.id)).toEqual([
       'today-late',
       'future-early',
@@ -173,7 +196,7 @@ describe('DashboardAnalyticsService', () => {
           appointment('newest', '2026-07-02T15:00:00.000Z'),
           appointment('future', '2026-07-03T15:00:00.000Z'),
         ],
-      })
+      }),
     );
 
     expect(viewModel.operationalAlerts.items.map((item) => item.id)).toEqual(['newest', 'oldest']);
@@ -208,7 +231,7 @@ function patient(): Patient {
 function appointment(
   id: string,
   scheduledAt: string,
-  status: Appointment['status'] = 'SCHEDULED'
+  status: Appointment['status'] = 'SCHEDULED',
 ): Appointment {
   return {
     id,

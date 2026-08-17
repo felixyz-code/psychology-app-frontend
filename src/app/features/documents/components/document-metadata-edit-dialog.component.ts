@@ -15,7 +15,13 @@ interface DocumentMetadataEditDialogData {
 @Component({
   selector: 'app-document-metadata-edit-dialog',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, DocumentMetadataFormComponent],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    DocumentMetadataFormComponent,
+  ],
   templateUrl: './document-metadata-edit-dialog.component.html',
   styleUrl: './document-metadata-edit-dialog.component.scss',
   providers: [DocumentMetadataEditFlowStore],

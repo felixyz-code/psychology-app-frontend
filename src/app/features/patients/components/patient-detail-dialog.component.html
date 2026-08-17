@@ -2,12 +2,16 @@
   <div #workspaceContent class="patient-detail-dialog__content">
     <section class="patient-detail-dialog__hero">
       <div class="patient-detail-dialog__hero-main">
-        <div class="patient-detail-dialog__avatar" aria-hidden="true">{{ getPatientInitials() }}</div>
+        <div class="patient-detail-dialog__avatar" aria-hidden="true">
+          {{ getPatientInitials() }}
+        </div>
 
         <div class="patient-detail-dialog__identity">
           <span class="patient-detail-dialog__eyebrow">Espacio clinico</span>
           <h2>{{ getFullName() }}</h2>
-          <p>Centro clinico del paciente con contexto inmediato del expediente y accesos de trabajo.</p>
+          <p>
+            Centro clinico del paciente con contexto inmediato del expediente y accesos de trabajo.
+          </p>
 
           <div class="patient-detail-dialog__hero-meta">
             <span>Edad: {{ getPatientAge() }}</span>
@@ -18,7 +22,10 @@
 
       <div class="patient-detail-dialog__hero-status">
         <span class="patient-detail-dialog__label">Estado del expediente</span>
-        <app-status-badge [label]="getCaseFileStatusLabel()" [variant]="getCaseFileStatusVariant()" />
+        <app-status-badge
+          [label]="getCaseFileStatusLabel()"
+          [variant]="getCaseFileStatusVariant()"
+        />
         <p>{{ getCaseFileStatusSupportingText() }}</p>
       </div>
     </section>
@@ -45,24 +52,34 @@
         <div class="patient-detail-dialog__summary-grid">
           <article class="patient-detail-dialog__summary-panel">
             <span class="patient-detail-dialog__label">Proxima cita</span>
-            <p class="app-truncate-3" [title]="getNextAppointmentLabel()">{{ getNextAppointmentLabel() }}</p>
+            <p class="app-truncate-3" [title]="getNextAppointmentLabel()">
+              {{ getNextAppointmentLabel() }}
+            </p>
           </article>
 
           <article class="patient-detail-dialog__summary-panel">
             <span class="patient-detail-dialog__label">Ultima cita</span>
-            <p class="app-truncate-3" [title]="getLastAppointmentLabel()">{{ getLastAppointmentLabel() }}</p>
+            <p class="app-truncate-3" [title]="getLastAppointmentLabel()">
+              {{ getLastAppointmentLabel() }}
+            </p>
           </article>
 
           <article class="patient-detail-dialog__summary-panel">
             <span class="patient-detail-dialog__label">Diagnostico</span>
-            <p class="app-truncate-3" [title]="caseFile() ? getDisplayValue(caseFile()?.diagnosis) : 'Pendiente'">
+            <p
+              class="app-truncate-3"
+              [title]="caseFile() ? getDisplayValue(caseFile()?.diagnosis) : 'Pendiente'"
+            >
               {{ caseFile() ? getDisplayValue(caseFile()?.diagnosis) : 'Pendiente' }}
             </p>
           </article>
 
           <article class="patient-detail-dialog__summary-panel">
             <span class="patient-detail-dialog__label">Plan de tratamiento</span>
-            <p class="app-truncate-3" [title]="caseFile() ? getDisplayValue(caseFile()?.treatmentPlan) : 'Pendiente'">
+            <p
+              class="app-truncate-3"
+              [title]="caseFile() ? getDisplayValue(caseFile()?.treatmentPlan) : 'Pendiente'"
+            >
               {{ caseFile() ? getDisplayValue(caseFile()?.treatmentPlan) : 'Pendiente' }}
             </p>
           </article>
@@ -80,10 +97,28 @@
             variant="primary"
             (triggered)="openCaseFileActionDialog()"
           />
-          <app-action-card icon="person" label="Editar paciente" (triggered)="openEditPatientDialog()" />
-          <app-action-card icon="event" label="Nueva cita" (triggered)="openCreateAppointmentDialog()" />
-          <app-action-card icon="note_add" label="Nueva nota" [disabled]="!caseFile()" (triggered)="openCreateSessionNoteDialog()" />
-          <app-action-card icon="description" label="Ver documentos" [disabled]="!caseFile()" (triggered)="scrollToDocuments()" />
+          <app-action-card
+            icon="person"
+            label="Editar paciente"
+            (triggered)="openEditPatientDialog()"
+          />
+          <app-action-card
+            icon="event"
+            label="Nueva cita"
+            (triggered)="openCreateAppointmentDialog()"
+          />
+          <app-action-card
+            icon="note_add"
+            label="Nueva nota"
+            [disabled]="!caseFile()"
+            (triggered)="openCreateSessionNoteDialog()"
+          />
+          <app-action-card
+            icon="description"
+            label="Ver documentos"
+            [disabled]="!caseFile()"
+            (triggered)="scrollToDocuments()"
+          />
         </div>
       </app-section-card>
     </div>
@@ -105,7 +140,12 @@
     <div class="patient-detail-dialog__operational-grid">
       <app-section-card title="Citas" subtitle="Agenda registrada para este paciente.">
         <div sectionCardActions class="patient-detail-dialog__section-actions">
-          <button mat-button class="app-action-button" type="button" (click)="openCreateAppointmentDialog()">
+          <button
+            mat-button
+            class="app-action-button"
+            type="button"
+            (click)="openCreateAppointmentDialog()"
+          >
             <mat-icon>event</mat-icon>
             <span>Nueva cita</span>
           </button>
@@ -117,12 +157,18 @@
             <span>Cargando citas...</span>
           </div>
         } @else if (appointmentsErrorMessage()) {
-          <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
+          <p
+            class="patient-detail-dialog__message patient-detail-dialog__message--error"
+            role="alert"
+          >
             {{ appointmentsErrorMessage() }}
           </p>
         } @else if (appointments().length) {
           @if (appointmentsSuccessMessage()) {
-            <p class="patient-detail-dialog__message patient-detail-dialog__message--success" role="status">
+            <p
+              class="patient-detail-dialog__message patient-detail-dialog__message--success"
+              role="status"
+            >
               {{ appointmentsSuccessMessage() }}
             </p>
           }
@@ -141,7 +187,12 @@
                   </div>
 
                   <div class="patient-detail-dialog__appointment-actions">
-                    <button mat-button type="button" [disabled]="cancellingAppointmentId() !== null" (click)="openEditAppointmentDialog(appointment)">
+                    <button
+                      mat-button
+                      type="button"
+                      [disabled]="cancellingAppointmentId() !== null"
+                      (click)="openEditAppointmentDialog(appointment)"
+                    >
                       Editar
                     </button>
                     @if (appointment.status !== 'CANCELLED') {
@@ -171,7 +222,12 @@
                 </div>
 
                 @if (appointment.notes) {
-                  <p class="patient-detail-dialog__appointment-notes app-truncate-3" [title]="appointment.notes">{{ appointment.notes }}</p>
+                  <p
+                    class="patient-detail-dialog__appointment-notes app-truncate-3"
+                    [title]="appointment.notes"
+                  >
+                    {{ appointment.notes }}
+                  </p>
                 }
               </article>
             }
@@ -190,14 +246,20 @@
         </div>
       </app-section-card>
 
-      <app-section-card title="Base clinica" subtitle="Diagnostico y plan de tratamiento disponibles para este expediente.">
+      <app-section-card
+        title="Base clinica"
+        subtitle="Diagnostico y plan de tratamiento disponibles para este expediente."
+      >
         @if (isCaseFileLoading()) {
           <div class="patient-detail-dialog__loading" aria-live="polite">
             <mat-spinner diameter="22" />
             <span>Cargando expediente clinico...</span>
           </div>
         } @else if (caseFileErrorMessage()) {
-          <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
+          <p
+            class="patient-detail-dialog__message patient-detail-dialog__message--error"
+            role="alert"
+          >
             {{ caseFileErrorMessage() }}
           </p>
         } @else if (caseFile(); as currentCaseFile) {
@@ -237,10 +299,18 @@
       </app-section-card>
     </div>
 
-    <app-section-card title="Notas de sesion" subtitle="Seguimiento clinico registrado para este expediente.">
+    <app-section-card
+      title="Notas de sesion"
+      subtitle="Seguimiento clinico registrado para este expediente."
+    >
       <div sectionCardActions class="patient-detail-dialog__section-actions">
         @if (caseFile()) {
-          <button mat-button class="app-action-button" type="button" (click)="openCreateSessionNoteDialog()">
+          <button
+            mat-button
+            class="app-action-button"
+            type="button"
+            (click)="openCreateSessionNoteDialog()"
+          >
             <mat-icon>note_add</mat-icon>
             <span>Nueva nota</span>
           </button>
@@ -259,7 +329,10 @@
           <span>Cargando notas de sesion...</span>
         </div>
       } @else if (sessionNotesErrorMessage()) {
-        <p class="patient-detail-dialog__message patient-detail-dialog__message--error" role="alert">
+        <p
+          class="patient-detail-dialog__message patient-detail-dialog__message--error"
+          role="alert"
+        >
           {{ sessionNotesErrorMessage() }}
         </p>
       } @else if (sessionNotes().length) {
@@ -283,13 +356,21 @@
                   </div>
 
                   <div class="patient-detail-dialog__note-actions">
-                    <button mat-button type="button" (click)="openSessionNoteDetailDialog(note)">Ver</button>
-                    <button mat-button type="button" (click)="openEditSessionNoteDialog(note)">Editar</button>
-                    <button mat-button type="button" (click)="openDeleteSessionNoteDialog(note)">Eliminar</button>
+                    <button mat-button type="button" (click)="openSessionNoteDetailDialog(note)">
+                      Ver
+                    </button>
+                    <button mat-button type="button" (click)="openEditSessionNoteDialog(note)">
+                      Editar
+                    </button>
+                    <button mat-button type="button" (click)="openDeleteSessionNoteDialog(note)">
+                      Eliminar
+                    </button>
                   </div>
                 </div>
 
-                <p class="patient-detail-dialog__note-content" [title]="note.content">{{ note.content }}</p>
+                <p class="patient-detail-dialog__note-content" [title]="note.content">
+                  {{ note.content }}
+                </p>
               </article>
             }
           </div>
@@ -346,7 +427,10 @@
       </div>
     }
 
-    <app-section-card title="Informacion administrativa" subtitle="Datos administrativos del paciente asociados al expediente.">
+    <app-section-card
+      title="Informacion administrativa"
+      subtitle="Datos administrativos del paciente asociados al expediente."
+    >
       <div class="patient-detail-dialog__grid">
         <div>
           <span class="patient-detail-dialog__label">Nombre completo</span>
@@ -377,7 +461,6 @@
           <span class="patient-detail-dialog__label">Fecha de actualizacion</span>
           <p>{{ patient().updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
         </div>
-
       </div>
     </app-section-card>
   </div>

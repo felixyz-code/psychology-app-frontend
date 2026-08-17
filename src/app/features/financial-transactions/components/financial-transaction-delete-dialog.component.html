@@ -5,10 +5,13 @@
   </div>
 
   <div class="financial-transaction-delete-dialog__summary app-dialog__summary">
-    <p class="financial-transaction-delete-dialog__summary-title app-dialog__summary-title">Movimiento seleccionado</p>
+    <p class="financial-transaction-delete-dialog__summary-title app-dialog__summary-title">
+      Movimiento seleccionado
+    </p>
     <p class="financial-transaction-delete-dialog__title">"{{ transaction.concept }}"</p>
     <p class="financial-transaction-delete-dialog__meta">
-      Monto registrado: {{ formatAmount(transaction.amount, transaction.currency) }} {{ transaction.currency }}
+      Monto registrado: {{ formatAmount(transaction.amount, transaction.currency) }}
+      {{ transaction.currency }}
     </p>
   </div>
 
@@ -21,7 +24,9 @@
   }
 
   <div class="financial-transaction-delete-dialog__actions">
-    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">
+      Cancelar
+    </button>
 
     <button
       mat-flat-button

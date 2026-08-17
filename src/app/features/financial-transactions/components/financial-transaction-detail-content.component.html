@@ -12,7 +12,10 @@
 
     <div>
       <span class="financial-transaction-detail-label">Tipo</span>
-      <app-status-badge [label]="getTypeLabel(currentTransaction.type)" [variant]="getTypeVariant(currentTransaction.type)" />
+      <app-status-badge
+        [label]="getTypeLabel(currentTransaction.type)"
+        [variant]="getTypeVariant(currentTransaction.type)"
+      />
     </div>
 
     <div>
@@ -25,12 +28,16 @@
 
     <div>
       <span class="financial-transaction-detail-label">Categoria</span>
-      <p class="financial-transaction-detail-value">{{ getCategoryLabel(currentTransaction.category) }}</p>
+      <p class="financial-transaction-detail-value">
+        {{ getCategoryLabel(currentTransaction.category) }}
+      </p>
     </div>
 
     <div>
       <span class="financial-transaction-detail-label">Monto</span>
-      <p class="financial-transaction-detail-amount">{{ formatAmount(currentTransaction.amount, currentTransaction.currency) }}</p>
+      <p class="financial-transaction-detail-amount">
+        {{ formatAmount(currentTransaction.amount, currentTransaction.currency) }}
+      </p>
     </div>
 
     <div>
@@ -40,48 +47,63 @@
 
     <div>
       <span class="financial-transaction-detail-label">Fecha del movimiento</span>
-      <p class="financial-transaction-detail-value">{{ formatDateTime(currentTransaction.occurredAt) }}</p>
+      <p class="financial-transaction-detail-value">
+        {{ formatDateTime(currentTransaction.occurredAt) }}
+      </p>
     </div>
 
     @if (currentTransaction.dueDate) {
       <div>
         <span class="financial-transaction-detail-label">Fecha de vencimiento</span>
-        <p class="financial-transaction-detail-value">{{ formatDateTime(currentTransaction.dueDate) }}</p>
+        <p class="financial-transaction-detail-value">
+          {{ formatDateTime(currentTransaction.dueDate) }}
+        </p>
       </div>
     }
 
     @if (currentTransaction.paymentMethod) {
       <div>
         <span class="financial-transaction-detail-label">Metodo de pago</span>
-        <p class="financial-transaction-detail-value">{{ getPaymentMethodLabel(currentTransaction.paymentMethod) }}</p>
+        <p class="financial-transaction-detail-value">
+          {{ getPaymentMethodLabel(currentTransaction.paymentMethod) }}
+        </p>
       </div>
     }
 
     @if (currentTransaction.patientId) {
       <div>
         <span class="financial-transaction-detail-label">Paciente relacionado</span>
-        <p class="financial-transaction-detail-value">{{ getPatientRelationLabel(currentTransaction.patientId) }}</p>
+        <p class="financial-transaction-detail-value">
+          {{ getPatientRelationLabel(currentTransaction.patientId) }}
+        </p>
       </div>
     }
 
     @if (currentTransaction.appointmentId) {
       <div>
         <span class="financial-transaction-detail-label">Cita relacionada</span>
-        <p class="financial-transaction-detail-value">{{ getAppointmentRelationLabel(currentTransaction.appointmentId) }}</p>
+        <p class="financial-transaction-detail-value">
+          {{ getAppointmentRelationLabel(currentTransaction.appointmentId) }}
+        </p>
       </div>
     }
 
     @if (currentTransaction.createdById) {
       <div>
         <span class="financial-transaction-detail-label">Creado por</span>
-        <p class="financial-transaction-detail-value">{{ getCreatedByLabel(currentTransaction.createdById) }}</p>
+        <p class="financial-transaction-detail-value">
+          {{ getCreatedByLabel(currentTransaction.createdById) }}
+        </p>
       </div>
     }
   </div>
 </app-section-card>
 
 @if (currentTransaction.description || currentTransaction.notes) {
-  <app-section-card title="Informacion adicional" subtitle="Descripcion y notas asociadas al movimiento.">
+  <app-section-card
+    title="Informacion adicional"
+    subtitle="Descripcion y notas asociadas al movimiento."
+  >
     <div class="financial-transaction-detail-grid">
       @if (currentTransaction.description) {
         <div class="financial-transaction-detail-grid__full">
@@ -95,7 +117,9 @@
       @if (currentTransaction.notes) {
         <div class="financial-transaction-detail-grid__full">
           <span class="financial-transaction-detail-label">Notas</span>
-          <p class="financial-transaction-detail-value financial-transaction-detail-multiline">{{ currentTransaction.notes }}</p>
+          <p class="financial-transaction-detail-value financial-transaction-detail-multiline">
+            {{ currentTransaction.notes }}
+          </p>
         </div>
       }
     </div>
@@ -106,12 +130,16 @@
   <div class="financial-transaction-detail-grid">
     <div>
       <span class="financial-transaction-detail-label">Fecha de creacion</span>
-      <p class="financial-transaction-detail-value">{{ formatDateTime(currentTransaction.createdAt) }}</p>
+      <p class="financial-transaction-detail-value">
+        {{ formatDateTime(currentTransaction.createdAt) }}
+      </p>
     </div>
 
     <div>
       <span class="financial-transaction-detail-label">Ultima actualizacion</span>
-      <p class="financial-transaction-detail-value">{{ formatDateTime(currentTransaction.updatedAt) }}</p>
+      <p class="financial-transaction-detail-value">
+        {{ formatDateTime(currentTransaction.updatedAt) }}
+      </p>
     </div>
   </div>
 </app-section-card>

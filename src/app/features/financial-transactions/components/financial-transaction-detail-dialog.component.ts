@@ -15,7 +15,13 @@ interface FinancialTransactionDetailDialogData {
 @Component({
   selector: 'app-financial-transaction-detail-dialog',
   standalone: true,
-  imports: [MatButtonModule, MatDialogModule, MatIconModule, RouterLink, FinancialTransactionDetailContentComponent],
+  imports: [
+    MatButtonModule,
+    MatDialogModule,
+    MatIconModule,
+    RouterLink,
+    FinancialTransactionDetailContentComponent,
+  ],
   templateUrl: './financial-transaction-detail-dialog.component.html',
   styleUrl: './financial-transaction-detail-dialog.component.scss',
 })

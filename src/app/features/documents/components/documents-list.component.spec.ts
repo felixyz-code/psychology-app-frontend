@@ -71,7 +71,10 @@ describe('DocumentsListComponent', () => {
   it.each([
     ['upload', (component: DocumentsListComponent) => component.openUploadDialog()],
     ['delete', (component: DocumentsListComponent) => component.openDeleteDialog(createDocument())],
-    ['metadata edit', (component: DocumentsListComponent) => component.openEditDialog(createDocument())],
+    [
+      'metadata edit',
+      (component: DocumentsListComponent) => component.openEditDialog(createDocument()),
+    ],
   ])('refreshes the local list after a successful %s dialog mutation', (_operation, mutate) => {
     dialog.open.mockReturnValue({ afterClosed: () => of(true) });
     const { component } = createComponent();
@@ -123,7 +126,10 @@ describe('DocumentsListComponent', () => {
     expect(component.isLoading()).toBe(false);
   });
 
-  function createComponent(): { component: DocumentsListComponent; fixture: ComponentFixture<DocumentsListComponent> } {
+  function createComponent(): {
+    component: DocumentsListComponent;
+    fixture: ComponentFixture<DocumentsListComponent>;
+  } {
     TestBed.overrideComponent(DocumentsListComponent, {
       add: { providers: [{ provide: MatDialog, useValue: dialog }] },
     });

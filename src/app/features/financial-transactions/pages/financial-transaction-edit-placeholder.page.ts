@@ -6,13 +6,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { FinancialTransactionFormComponent } from '../components/financial-transaction-form.component';
-import { FinancialTransactionResponse, UpdateFinancialTransactionDto } from '../models/financial-transaction.models';
+import {
+  FinancialTransactionResponse,
+  UpdateFinancialTransactionDto,
+} from '../models/financial-transaction.models';
 import { FinancialTransactionsService } from '../services/financial-transactions.service';
 
 @Component({
   selector: 'app-financial-transaction-edit-placeholder-page',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatProgressSpinnerModule, FinancialTransactionFormComponent],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    FinancialTransactionFormComponent,
+  ],
   templateUrl: './financial-transaction-edit-placeholder.page.html',
   styleUrl: './financial-transaction-edit-placeholder.page.scss',
 })
@@ -48,7 +56,9 @@ export class FinancialTransactionEditPlaceholderPage {
           void this.router.navigate(['/financial-transactions']);
         },
         error: () => {
-          this.saveErrorMessage.set('No fue posible guardar los cambios de la transaccion financiera.');
+          this.saveErrorMessage.set(
+            'No fue posible guardar los cambios de la transaccion financiera.',
+          );
         },
       });
   }

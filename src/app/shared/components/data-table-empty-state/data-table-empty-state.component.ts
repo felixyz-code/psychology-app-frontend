@@ -13,4 +13,3 @@ export class DataTableEmptyStateComponent {
   readonly title = input.required<string>();
   readonly message = input('');
 }
-

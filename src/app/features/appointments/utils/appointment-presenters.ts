@@ -1,7 +1,12 @@
 import { StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
 import { AppointmentStatus } from '../models/appointment.models';
 
-export const APPOINTMENT_STATUSES: AppointmentStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
+export const APPOINTMENT_STATUSES: AppointmentStatus[] = [
+  'SCHEDULED',
+  'COMPLETED',
+  'CANCELLED',
+  'NO_SHOW',
+];
 
 export function getAppointmentStatusLabel(status: AppointmentStatus): string {
   const labels: Record<AppointmentStatus, string> = {

@@ -12,7 +12,11 @@ describe('logError', () => {
   });
 
   it('emits only the allowed fields from a valid error event', () => {
-    const error = { status: 503, message: 'Patient name: Ana', payload: { patientId: 'patient-1' } };
+    const error = {
+      status: 503,
+      message: 'Patient name: Ana',
+      payload: { patientId: 'patient-1' },
+    };
 
     logError('load-dashboard', error);
 

@@ -18,7 +18,11 @@ export class GlobalErrorHandler implements ErrorHandler {
   handleError(error: unknown): void {
     try {
       const location = this.injector.get(Location, null);
-      const url = location ? location.path() : (typeof window !== 'undefined' ? window.location.pathname : '');
+      const url = location
+        ? location.path()
+        : typeof window !== 'undefined'
+          ? window.location.pathname
+          : '';
 
       const payload: ClientDiagnosticPayload = {
         timestamp: new Date().toISOString(),

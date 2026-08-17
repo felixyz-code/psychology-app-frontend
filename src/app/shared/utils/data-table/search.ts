@@ -9,7 +9,7 @@ export function normalizeSearchText(value: unknown): string {
 export function matchesSearchTerm<T>(
   item: T,
   searchTerm: string,
-  searchableValues: (item: T) => Array<string | number | null | undefined>
+  searchableValues: (item: T) => Array<string | number | null | undefined>,
 ): boolean {
   const normalizedTerm = normalizeSearchText(searchTerm);
 
@@ -18,7 +18,7 @@ export function matchesSearchTerm<T>(
   }
 
   return searchableValues(item).some((value) =>
-    normalizeSearchText(value).includes(normalizedTerm)
+    normalizeSearchText(value).includes(normalizedTerm),
   );
 }
 
@@ -26,7 +26,7 @@ export function formatFilteredResultsLabel(
   totalFilteredItems: number,
   totalItems: number,
   formatTotalLabel: (count: number) => string,
-  hasActiveFilters: boolean
+  hasActiveFilters: boolean,
 ): string {
   const totalLabel = formatTotalLabel(totalItems);
 

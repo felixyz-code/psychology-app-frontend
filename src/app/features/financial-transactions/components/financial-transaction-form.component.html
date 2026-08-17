@@ -10,7 +10,11 @@
   />
 
   <app-section-card [title]="getCardTitle()" [subtitle]="getCardSubtitle()">
-    <form class="financial-transaction-form app-form" [formGroup]="transactionForm" (ngSubmit)="submit()">
+    <form
+      class="financial-transaction-form app-form"
+      [formGroup]="transactionForm"
+      (ngSubmit)="submit()"
+    >
       <div class="financial-transaction-form__section app-form-section">
         <div class="app-form-section__header">
           <h3>Datos principales</h3>
@@ -64,7 +68,10 @@
             <input matInput formControlName="currency" maxlength="10" />
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="financial-transaction-form__full app-form-field--full">
+          <mat-form-field
+            appearance="outline"
+            class="financial-transaction-form__full app-form-field--full"
+          >
             <mat-label>Concepto</mat-label>
             <input matInput formControlName="concept" maxlength="255" />
             @if (hasRequiredError('concept')) {
@@ -72,7 +79,10 @@
             }
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="financial-transaction-form__full app-form-field--full">
+          <mat-form-field
+            appearance="outline"
+            class="financial-transaction-form__full app-form-field--full"
+          >
             <mat-label>Descripcion</mat-label>
             <textarea matInput formControlName="description" rows="3" maxlength="1000"></textarea>
           </mat-form-field>
@@ -104,24 +114,39 @@
             <mat-select formControlName="paymentMethod">
               <mat-option value="">Sin metodo</mat-option>
               @for (paymentMethod of paymentMethods; track paymentMethod) {
-                <mat-option [value]="paymentMethod">{{ getPaymentMethodLabel(paymentMethod) }}</mat-option>
+                <mat-option [value]="paymentMethod">{{
+                  getPaymentMethodLabel(paymentMethod)
+                }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Paciente</mat-label>
-            <input matInput formControlName="patientId" maxlength="64" placeholder="ID o referencia del paciente" />
+            <input
+              matInput
+              formControlName="patientId"
+              maxlength="64"
+              placeholder="ID o referencia del paciente"
+            />
             <mat-hint>Opcional. Relaciona este movimiento con un paciente.</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Cita relacionada</mat-label>
-            <input matInput formControlName="appointmentId" maxlength="64" placeholder="ID o referencia de la cita" />
+            <input
+              matInput
+              formControlName="appointmentId"
+              maxlength="64"
+              placeholder="ID o referencia de la cita"
+            />
             <mat-hint>Opcional. Relaciona este movimiento con una cita.</mat-hint>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="financial-transaction-form__full app-form-field--full">
+          <mat-form-field
+            appearance="outline"
+            class="financial-transaction-form__full app-form-field--full"
+          >
             <mat-label>Notas</mat-label>
             <textarea matInput formControlName="notes" rows="4" maxlength="1000"></textarea>
           </mat-form-field>
@@ -129,7 +154,9 @@
       </div>
 
       @if (errorMessage()) {
-        <p class="financial-transaction-form__error app-form-error" role="alert">{{ errorMessage() }}</p>
+        <p class="financial-transaction-form__error app-form-error" role="alert">
+          {{ errorMessage() }}
+        </p>
       }
 
       @if (isSaving()) {
@@ -140,7 +167,9 @@
       }
 
       <div class="financial-transaction-form__actions app-form-actions">
-        <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">Cancelar</button>
+        <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">
+          Cancelar
+        </button>
         <button mat-flat-button type="submit" [disabled]="isSaving() || transactionForm.invalid">
           <mat-icon>save</mat-icon>
           <span>{{ getSubmitLabel() }}</span>

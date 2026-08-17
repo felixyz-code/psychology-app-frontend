@@ -60,13 +60,15 @@ import {
 } from '../models/clinical-summary-report.model';
 import { ReportDefinition, ReportKey } from '../models/report-definition.model';
 import { AgendaReportFilters, FinancialReportFilters } from '../models/report-filters.model';
-import { ReportContextItem, ReportPreviewGroup, ReportResult, ReportTableRow } from '../models/report-result.model';
+import {
+  ReportContextItem,
+  ReportPreviewGroup,
+  ReportResult,
+  ReportTableRow,
+} from '../models/report-result.model';
 import { ReportsCatalogService } from './reports-catalog.service';
 import { getReportMimeTypeLabel } from '../utils/report-formatters';
-import {
-  nextLocalDayStart,
-  startOfLocalDateOnly,
-} from '../utils/report-date-range';
+import { nextLocalDayStart, startOfLocalDateOnly } from '../utils/report-date-range';
 
 @Injectable({ providedIn: 'root' })
 export class ReportsRunnerService {
@@ -78,7 +80,9 @@ export class ReportsRunnerService {
 
   private static readonly CLINICAL_NOTES_PREVIEW_LIMIT = 5;
 
-  runFinancialReport(filters: FinancialReportFilters): Observable<ReportResult<FinancialReportFilters>> {
+  runFinancialReport(
+    filters: FinancialReportFilters,
+  ): Observable<ReportResult<FinancialReportFilters>> {
     const definition = this.getDefinition('financial');
     const query = this.buildInclusiveFinancialQuery(filters);
 
@@ -86,7 +90,9 @@ export class ReportsRunnerService {
       summary: this.financialTransactionsService.findSummary(query),
       transactions: this.financialTransactionsService.findAll(query),
     }).pipe(
-      map(({ summary, transactions }) => this.buildFinancialResult(definition, filters, summary, transactions))
+      map(({ summary, transactions }) =>
+        this.buildFinancialResult(definition, filters, summary, transactions),
+      ),
     );
   }
 
@@ -96,11 +102,15 @@ export class ReportsRunnerService {
     return forkJoin({
       appointments: this.appointmentsService.getAppointments(),
       patients: this.patientsService.getPatients().pipe(catchError(() => of([] as Patient[]))),
-    }).pipe(map(({ appointments, patients }) => this.buildAgendaResult(definition, filters, appointments, patients)));
+    }).pipe(
+      map(({ appointments, patients }) =>
+        this.buildAgendaResult(definition, filters, appointments, patients),
+      ),
+    );
   }
 
   runClinicalSummaryReport(
-    filters: ClinicalSummaryReportFilters
+    filters: ClinicalSummaryReportFilters,
   ): Observable<ReportResult<ClinicalSummaryReportFilters>> {
     const definition = this.getDefinition('clinical-summary');
 
@@ -110,7 +120,17 @@ export class ReportsRunnerService {
           switchMap((caseFile) =>
             this.caseFilesService
               .getWorkspace(caseFile.id)
-              .pipe(map((workspace) => this.buildClinicalSummaryResult(definition, filters, patient, caseFile, workspace)))
+              .pipe(
+                map((workspace) =>
+                  this.buildClinicalSummaryResult(
+                    definition,
+                    filters,
+                    patient,
+                    caseFile,
+                    workspace,
+                  ),
+                ),
+              ),
           ),
           catchError((error: { status?: number }) => {
             if (error?.status === 404) {
@@ -118,14 +138,14 @@ export class ReportsRunnerService {
             }
 
             return throwError(() => error);
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   }
 
   runClinicalRecordReport(
-    filters: ClinicalRecordReportFilters
+    filters: ClinicalRecordReportFilters,
   ): Observable<ReportResult<ClinicalRecordReportFilters>> {
     const definition = this.getDefinition('clinical-record');
 
@@ -135,7 +155,11 @@ export class ReportsRunnerService {
           switchMap((caseFile) =>
             this.caseFilesService
               .getWorkspace(caseFile.id)
-              .pipe(map((workspace) => this.buildClinicalRecordResult(definition, filters, patient, caseFile, workspace)))
+              .pipe(
+                map((workspace) =>
+                  this.buildClinicalRecordResult(definition, filters, patient, caseFile, workspace),
+                ),
+              ),
           ),
           catchError((error: { status?: number }) => {
             if (error?.status === 404) {
@@ -143,9 +167,9 @@ export class ReportsRunnerService {
             }
 
             return throwError(() => error);
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   }
 
@@ -153,7 +177,7 @@ export class ReportsRunnerService {
     definition: ReportDefinition,
     filters: FinancialReportFilters,
     summary: FinancialTransactionSummaryDto,
-    transactions: FinancialTransactionResponse[]
+    transactions: FinancialTransactionResponse[],
   ): ReportResult<FinancialReportFilters> {
     const generatedAt = new Date().toISOString();
 
@@ -235,7 +259,7 @@ export class ReportsRunnerService {
     definition: ReportDefinition,
     filters: AgendaReportFilters,
     appointments: Appointment[],
-    patients: Patient[]
+    patients: Patient[],
   ): ReportResult<AgendaReportFilters> {
     const patientNames = this.buildPatientNamesMap(patients);
     const filteredAppointments = this.filterAgendaAppointments(appointments, filters);
@@ -269,7 +293,8 @@ export class ReportsRunnerService {
       csvFileName: this.buildAgendaCsvFileName(filters),
       supportedExports: definition.supportedExports,
       emptyTitle: 'No hay citas para este reporte',
-      emptyMessage: 'Ajusta el rango, el estado o el paciente para visualizar la agenda del período seleccionado.',
+      emptyMessage:
+        'Ajusta el rango, el estado o el paciente para visualizar la agenda del período seleccionado.',
     };
   }
 
@@ -278,14 +303,21 @@ export class ReportsRunnerService {
     filters: ClinicalSummaryReportFilters,
     patient: Patient,
     caseFile: CaseFile | null,
-    workspace: CaseFileWorkspaceResponse | null
+    workspace: CaseFileWorkspaceResponse | null,
   ): ReportResult<ClinicalSummaryReportFilters> {
-    const filteredCompletedAppointments = this.getFilteredCompletedAppointments(workspace?.appointments ?? [], filters);
+    const filteredCompletedAppointments = this.getFilteredCompletedAppointments(
+      workspace?.appointments ?? [],
+      filters,
+    );
     const filteredNotes = this.getFilteredNotes(workspace?.sessionNotes ?? [], filters);
     const filteredDocuments = this.getFilteredDocuments(workspace?.documents ?? [], filters);
     const filteredTimeline = this.getFilteredTimeline(workspace?.timeline ?? [], filters);
-    const sortedTimeline = [...filteredTimeline].sort((left, right) => right.occurredAt.localeCompare(left.occurredAt));
-    const sortedNotes = [...filteredNotes].sort((left, right) => right.sessionDate.localeCompare(left.sessionDate));
+    const sortedTimeline = [...filteredTimeline].sort((left, right) =>
+      right.occurredAt.localeCompare(left.occurredAt),
+    );
+    const sortedNotes = [...filteredNotes].sort((left, right) =>
+      right.sessionDate.localeCompare(left.sessionDate),
+    );
     const notesPreview = sortedNotes.slice(0, ReportsRunnerService.CLINICAL_NOTES_PREVIEW_LIMIT);
     const clinicalContent = this.buildClinicalSummaryContent(
       patient,
@@ -295,7 +327,7 @@ export class ReportsRunnerService {
       notesPreview,
       filteredDocuments,
       sortedTimeline,
-      workspace?.summary.lastActivityAt ?? null
+      workspace?.summary.lastActivityAt ?? null,
     );
 
     const generatedAt = new Date().toISOString();
@@ -311,7 +343,11 @@ export class ReportsRunnerService {
         generatedAt,
       }),
       appliedFilters: filters,
-      contextItems: this.buildClinicalSummaryContextItems(filters, patient, caseFile ?? workspace?.caseFile ?? null),
+      contextItems: this.buildClinicalSummaryContextItems(
+        filters,
+        patient,
+        caseFile ?? workspace?.caseFile ?? null,
+      ),
       metrics: this.buildClinicalSummaryMetricCards(clinicalContent.kpis),
       columns: [],
       rows: [],
@@ -321,7 +357,8 @@ export class ReportsRunnerService {
       csvFileName: `resumen-clinico-${filters.patientId}-${filters.from ?? 'sin-desde'}-${filters.to ?? 'sin-hasta'}.csv`,
       supportedExports: definition.supportedExports,
       emptyTitle: 'Selecciona un paciente para generar el resumen',
-      emptyMessage: 'El reporte clínico se construye a partir del paciente y su expediente disponible.',
+      emptyMessage:
+        'El reporte clínico se construye a partir del paciente y su expediente disponible.',
     };
   }
 
@@ -330,9 +367,12 @@ export class ReportsRunnerService {
     filters: ClinicalRecordReportFilters,
     patient: Patient,
     caseFile: CaseFile | null,
-    workspace: CaseFileWorkspaceResponse | null
+    workspace: CaseFileWorkspaceResponse | null,
   ): ReportResult<ClinicalRecordReportFilters> {
-    const filteredAppointments = this.getFilteredAppointments(workspace?.appointments ?? [], filters);
+    const filteredAppointments = this.getFilteredAppointments(
+      workspace?.appointments ?? [],
+      filters,
+    );
     const filteredNotes = this.getFilteredNotes(workspace?.sessionNotes ?? [], filters);
     const filteredDocuments = this.getFilteredDocuments(workspace?.documents ?? [], filters);
     const filteredTimeline = this.getFilteredTimeline(workspace?.timeline ?? [], filters);
@@ -345,7 +385,7 @@ export class ReportsRunnerService {
       filteredDocuments,
       filteredTimeline,
       workspace?.summary.lastActivityAt ?? null,
-      this.buildDateRangeLabel(filters)
+      this.buildDateRangeLabel(filters),
     );
 
     const generatedAt = new Date().toISOString();
@@ -367,7 +407,7 @@ export class ReportsRunnerService {
         filteredAppointments,
         filteredNotes,
         filteredDocuments,
-        workspace?.summary.lastActivityAt ?? null
+        workspace?.summary.lastActivityAt ?? null,
       ),
       columns: [],
       rows: [],
@@ -377,24 +417,33 @@ export class ReportsRunnerService {
       csvFileName: `expediente-clinico-${filters.patientId}-${filters.from ?? 'sin-desde'}-${filters.to ?? 'sin-hasta'}.csv`,
       supportedExports: definition.supportedExports,
       emptyTitle: 'Selecciona un paciente para generar el expediente',
-      emptyMessage: 'El expediente clínico se construye a partir del paciente y su expediente disponible.',
+      emptyMessage:
+        'El expediente clínico se construye a partir del paciente y su expediente disponible.',
     };
   }
 
-  private filterAgendaAppointments(appointments: Appointment[], filters: AgendaReportFilters): Appointment[] {
+  private filterAgendaAppointments(
+    appointments: Appointment[],
+    filters: AgendaReportFilters,
+  ): Appointment[] {
     const rangeStart = startOfLocalDateOnly(filters.from)?.getTime() ?? Number.NEGATIVE_INFINITY;
     const rangeEndExclusive = nextLocalDayStart(filters.to)?.getTime() ?? Number.POSITIVE_INFINITY;
 
     return appointments
       .filter((appointment) => (filters.status ? appointment.status === filters.status : true))
-      .filter((appointment) => (filters.patientId ? appointment.patientId === filters.patientId : true))
+      .filter((appointment) =>
+        filters.patientId ? appointment.patientId === filters.patientId : true,
+      )
       .filter((appointment) => {
         const appointmentTime = parseAppointmentDate(appointment.scheduledAt).getTime();
         return appointmentTime >= rangeStart && appointmentTime < rangeEndExclusive;
       });
   }
 
-  private buildAgendaRows(appointments: Appointment[], patientNames: Record<string, string>): ReportTableRow[] {
+  private buildAgendaRows(
+    appointments: Appointment[],
+    patientNames: Record<string, string>,
+  ): ReportTableRow[] {
     return appointments.map((appointment) => {
       return {
         id: appointment.id,
@@ -410,7 +459,10 @@ export class ReportsRunnerService {
     });
   }
 
-  private buildAgendaGroups(appointments: Appointment[], patientNames: Record<string, string>): ReportPreviewGroup[] {
+  private buildAgendaGroups(
+    appointments: Appointment[],
+    patientNames: Record<string, string>,
+  ): ReportPreviewGroup[] {
     const groupsMap = new Map<string, ReportPreviewGroup>();
 
     appointments.forEach((appointment) => {
@@ -447,17 +499,25 @@ export class ReportsRunnerService {
 
     return [...groupsMap.values()].map((group) => ({
       ...group,
-      supportingText: group.items.length === 1 ? '1 cita registrada' : `${group.items.length} citas registradas`,
+      supportingText:
+        group.items.length === 1 ? '1 cita registrada' : `${group.items.length} citas registradas`,
     }));
   }
 
   private buildAgendaMetrics(appointments: Appointment[]) {
-    const scheduledCount = appointments.filter((appointment) => appointment.status === 'SCHEDULED').length;
-    const completedCount = appointments.filter((appointment) => appointment.status === 'COMPLETED').length;
-    const incidentsCount = appointments.filter(
-      (appointment) => appointment.status === 'CANCELLED' || appointment.status === 'NO_SHOW'
+    const scheduledCount = appointments.filter(
+      (appointment) => appointment.status === 'SCHEDULED',
     ).length;
-    const totalDurationMinutes = appointments.reduce((total, appointment) => total + appointment.durationMinutes, 0);
+    const completedCount = appointments.filter(
+      (appointment) => appointment.status === 'COMPLETED',
+    ).length;
+    const incidentsCount = appointments.filter(
+      (appointment) => appointment.status === 'CANCELLED' || appointment.status === 'NO_SHOW',
+    ).length;
+    const totalDurationMinutes = appointments.reduce(
+      (total, appointment) => total + appointment.durationMinutes,
+      0,
+    );
 
     return [
       {
@@ -536,14 +596,16 @@ export class ReportsRunnerService {
       from?: string;
       to?: string;
       generatedAt: string;
-    }
+    },
   ): string {
     const dateRangeSegment = this.buildFileDateRangeSegment(options.from, options.to);
     const parts = [
       reportLabel,
       options.patientName?.trim() || undefined,
       dateRangeSegment,
-      dateRangeSegment === 'Historico_Completo' ? this.buildGeneratedAtSegment(options.generatedAt) : undefined,
+      dateRangeSegment === 'Historico_Completo'
+        ? this.buildGeneratedAtSegment(options.generatedAt)
+        : undefined,
     ].filter((value): value is string => Boolean(value));
 
     return `${parts.map((part) => this.sanitizeFileNamePart(part)).join('_')}.pdf`;
@@ -576,12 +638,14 @@ export class ReportsRunnerService {
   }
 
   private sanitizeFileNamePart(value: string): string {
-    return value
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^A-Za-z0-9_-]+/g, '_')
-      .replace(/_+/g, '_')
-      .replace(/^_+|_+$/g, '') || 'Sin_Paciente';
+    return (
+      value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^A-Za-z0-9_-]+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'Sin_Paciente'
+    );
   }
 
   private buildFinancialContextItems(filters: FinancialReportFilters): ReportContextItem[] {
@@ -596,22 +660,28 @@ export class ReportsRunnerService {
       },
       {
         label: 'Estado',
-        value: filters.status ? getFinancialTransactionStatusLabel(filters.status) : 'Todos los estados',
+        value: filters.status
+          ? getFinancialTransactionStatusLabel(filters.status)
+          : 'Todos los estados',
       },
       {
         label: 'Categoría',
-        value: filters.category ? getFinancialTransactionCategoryLabel(filters.category) : 'Todas las categorias',
+        value: filters.category
+          ? getFinancialTransactionCategoryLabel(filters.category)
+          : 'Todas las categorias',
       },
       {
         label: 'Método de pago',
-        value: filters.paymentMethod ? getPaymentMethodLabel(filters.paymentMethod) : 'Todos los metodos',
+        value: filters.paymentMethod
+          ? getPaymentMethodLabel(filters.paymentMethod)
+          : 'Todos los metodos',
       },
     ];
   }
 
   private buildAgendaContextItems(
     filters: AgendaReportFilters,
-    patientNames: Record<string, string>
+    patientNames: Record<string, string>,
   ): ReportContextItem[] {
     return [
       {
@@ -624,7 +694,9 @@ export class ReportsRunnerService {
       },
       {
         label: 'Paciente',
-        value: filters.patientId ? patientNames[filters.patientId] ?? filters.patientId : 'Todos los pacientes',
+        value: filters.patientId
+          ? (patientNames[filters.patientId] ?? filters.patientId)
+          : 'Todos los pacientes',
       },
     ];
   }
@@ -632,7 +704,7 @@ export class ReportsRunnerService {
   private buildClinicalSummaryContextItems(
     filters: ClinicalSummaryReportFilters,
     patient: Patient,
-    caseFile: CaseFile | null
+    caseFile: CaseFile | null,
   ): ReportContextItem[] {
     return [
       {
@@ -653,7 +725,7 @@ export class ReportsRunnerService {
   private buildClinicalRecordContextItems(
     filters: ClinicalRecordReportFilters,
     patient: Patient,
-    caseFile: CaseFile | null
+    caseFile: CaseFile | null,
   ): ReportContextItem[] {
     return [
       {
@@ -690,7 +762,9 @@ export class ReportsRunnerService {
     return 'Historico completo';
   }
 
-  private buildInclusiveFinancialQuery(filters: FinancialReportFilters): FindFinancialTransactionsQueryDto {
+  private buildInclusiveFinancialQuery(
+    filters: FinancialReportFilters,
+  ): FindFinancialTransactionsQueryDto {
     return {
       ...filters,
       from: this.toIsoBoundary(startOfLocalDateOnly(filters.from)),
@@ -783,7 +857,7 @@ export class ReportsRunnerService {
     notesPreview: SessionNote[],
     filteredDocuments: Document[],
     filteredTimeline: ClinicalTimelineEvent[],
-    lastActivityAt: string | null
+    lastActivityAt: string | null,
   ): ClinicalSummaryContent {
     const latestCompletedAppointment = completedAppointments[0] ?? null;
     const timelineItems = filteredTimeline.map((event) => this.mapClinicalTimelineItem(event));
@@ -805,19 +879,23 @@ export class ReportsRunnerService {
       },
       evolutionSection: {
         title: 'Resumen de evolución',
-        subtitle: 'Síntesis narrativa construida únicamente con datos existentes en el contrato actual.',
+        subtitle:
+          'Síntesis narrativa construida únicamente con datos existentes en el contrato actual.',
         emptyTitle: 'Sin narrativa clínica suficiente',
-        emptyMessage: 'Todavía no hay suficiente información estructurada para redactar un resumen de evolución.',
+        emptyMessage:
+          'Todavía no hay suficiente información estructurada para redactar un resumen de evolución.',
       },
       timelineSection: {
         title: 'Cronología resumida',
         subtitle: 'Eventos clínicos visibles dentro del rango solicitado.',
         emptyTitle: 'Sin eventos clínicos en el período',
-        emptyMessage: 'Ajusta el rango de fechas para revisar actividad clínica visible en el workspace.',
+        emptyMessage:
+          'Ajusta el rango de fechas para revisar actividad clínica visible en el workspace.',
       },
       notesSection: {
         title: 'Sesiones relevantes',
-        subtitle: 'Notas resumidas para lectura ejecutiva sin imprimir bloques narrativos extensos.',
+        subtitle:
+          'Notas resumidas para lectura ejecutiva sin imprimir bloques narrativos extensos.',
         emptyTitle: 'Sin notas clínicas en el período',
         emptyMessage: 'No se encontraron notas de sesión dentro del rango seleccionado.',
       },
@@ -871,7 +949,7 @@ export class ReportsRunnerService {
         filteredNotes,
         filteredDocuments,
         latestCompletedAppointment,
-        lastActivityAt
+        lastActivityAt,
       ),
       evolutionSummary: this.buildEvolutionSummary(
         patient,
@@ -879,7 +957,7 @@ export class ReportsRunnerService {
         completedAppointments,
         filteredNotes,
         filteredDocuments,
-        latestCompletedAppointment
+        latestCompletedAppointment,
       ),
       timelineItems,
       notes,
@@ -896,11 +974,17 @@ export class ReportsRunnerService {
     documents: Document[],
     timeline: ClinicalTimelineEvent[],
     lastActivityAt: string | null,
-    periodLabel: string
+    periodLabel: string,
   ): ClinicalRecordContent {
-    const sortedDocuments = [...documents].sort((left, right) => right.uploadedAt.localeCompare(left.uploadedAt));
-    const sortedTimeline = [...timeline].sort((left, right) => right.occurredAt.localeCompare(left.occurredAt));
-    const mappedDocuments = sortedDocuments.map((document) => this.mapClinicalRecordDocument(document));
+    const sortedDocuments = [...documents].sort((left, right) =>
+      right.uploadedAt.localeCompare(left.uploadedAt),
+    );
+    const sortedTimeline = [...timeline].sort((left, right) =>
+      right.occurredAt.localeCompare(left.occurredAt),
+    );
+    const mappedDocuments = sortedDocuments.map((document) =>
+      this.mapClinicalRecordDocument(document),
+    );
 
     return {
       kind: 'record',
@@ -915,7 +999,8 @@ export class ReportsRunnerService {
       },
       recordSection: {
         title: 'Datos del expediente',
-        subtitle: 'Estado documental del expediente y referencias de seguimiento visibles en el frontend.',
+        subtitle:
+          'Estado documental del expediente y referencias de seguimiento visibles en el frontend.',
       },
       diagnosisSection: {
         title: 'Diagnóstico',
@@ -931,13 +1016,15 @@ export class ReportsRunnerService {
       },
       appointmentsSection: {
         title: 'Historial de citas',
-        subtitle: 'Citas visibles dentro del rango solicitado con estado, duración y notas asociadas.',
+        subtitle:
+          'Citas visibles dentro del rango solicitado con estado, duración y notas asociadas.',
         emptyTitle: 'Sin citas en el período',
         emptyMessage: 'No se encontraron citas visibles para el rango seleccionado.',
       },
       notesSection: {
         title: 'Notas clínicas',
-        subtitle: 'Registro narrativo completo de notas clínicas visibles en el período consultado.',
+        subtitle:
+          'Registro narrativo completo de notas clínicas visibles en el período consultado.',
         emptyTitle: 'Sin notas clínicas en el período',
         emptyMessage: 'No se encontraron notas clínicas dentro del rango seleccionado.',
       },
@@ -955,9 +1042,11 @@ export class ReportsRunnerService {
       },
       referencesSection: {
         title: 'Referencias y anexos',
-        subtitle: 'Índice referencial de documentos asociados. No se incluyen archivos reales en este reporte.',
+        subtitle:
+          'Índice referencial de documentos asociados. No se incluyen archivos reales en este reporte.',
         emptyTitle: 'Sin referencias documentales',
-        emptyMessage: 'No hay documentos disponibles para anexar como referencia en el período consultado.',
+        emptyMessage:
+          'No hay documentos disponibles para anexar como referencia en el período consultado.',
       },
       patientDetails: [
         {
@@ -999,19 +1088,32 @@ export class ReportsRunnerService {
           value: periodLabel,
         },
       ],
-      diagnosis: caseFile?.diagnosis?.trim() || 'No existe diagnóstico clínico registrado en el expediente actual.',
+      diagnosis:
+        caseFile?.diagnosis?.trim() ||
+        'No existe diagnóstico clínico registrado en el expediente actual.',
       treatmentPlan:
-        caseFile?.treatmentPlan?.trim() || 'No existe plan terapéutico registrado en el expediente actual.',
-      appointments: appointments.map((appointment) => this.mapClinicalRecordAppointment(appointment)),
+        caseFile?.treatmentPlan?.trim() ||
+        'No existe plan terapéutico registrado en el expediente actual.',
+      appointments: appointments.map((appointment) =>
+        this.mapClinicalRecordAppointment(appointment),
+      ),
       notes: notes.map((note) => this.mapClinicalRecordNote(note)),
       documents: mappedDocuments,
       timelineItems: sortedTimeline.map((event) => this.mapClinicalRecordTimelineItem(event)),
-      references: mappedDocuments.map((document, index) => this.buildClinicalRecordReference(document, index)),
+      references: mappedDocuments.map((document, index) =>
+        this.buildClinicalRecordReference(document, index),
+      ),
     };
   }
 
   private buildClinicalSummaryMetricCards(kpis: ClinicalSummaryMetric[]) {
-    const variants: Array<'blue' | 'green' | 'amber' | 'violet'> = ['blue', 'green', 'amber', 'violet', 'blue'];
+    const variants: Array<'blue' | 'green' | 'amber' | 'violet'> = [
+      'blue',
+      'green',
+      'amber',
+      'violet',
+      'blue',
+    ];
 
     return kpis.map((metric, index) => ({
       icon: ['event_available', 'notes', 'description', 'schedule', 'history'][index] ?? 'insights',
@@ -1027,7 +1129,7 @@ export class ReportsRunnerService {
     appointments: Appointment[],
     notes: SessionNote[],
     documents: Document[],
-    lastActivityAt: string | null
+    lastActivityAt: string | null,
   ) {
     const latestAppointment = appointments[0] ?? null;
 
@@ -1036,7 +1138,8 @@ export class ReportsRunnerService {
         icon: 'folder_shared',
         label: 'Estado del expediente',
         value: this.getCaseFileAvailabilityLabel(caseFile),
-        supportingText: 'Condición derivada del diagnóstico y plan terapéutico visibles en el expediente.',
+        supportingText:
+          'Condición derivada del diagnóstico y plan terapéutico visibles en el expediente.',
         variant: 'blue' as const,
       },
       {
@@ -1063,7 +1166,11 @@ export class ReportsRunnerService {
       {
         icon: 'history',
         label: 'Última actividad',
-        value: lastActivityAt ? this.formatDateTime(lastActivityAt) : latestAppointment ? this.formatDateTime(latestAppointment.scheduledAt) : 'Sin actividad visible',
+        value: lastActivityAt
+          ? this.formatDateTime(lastActivityAt)
+          : latestAppointment
+            ? this.formatDateTime(latestAppointment.scheduledAt)
+            : 'Sin actividad visible',
         supportingText: 'Referencia temporal más reciente encontrada en el expediente visible.',
         variant: 'blue' as const,
       },
@@ -1076,7 +1183,7 @@ export class ReportsRunnerService {
     notes: SessionNote[],
     documents: Document[],
     latestCompletedAppointment: Appointment | null,
-    lastActivityAt: string | null
+    lastActivityAt: string | null,
   ): ClinicalSummaryMetric[] {
     return [
       {
@@ -1096,12 +1203,17 @@ export class ReportsRunnerService {
       },
       {
         label: 'Tiempo en seguimiento',
-        value: caseFile ? this.formatFollowUpDuration(caseFile.createdAt, lastActivityAt) : 'Pendiente',
-        supportingText: 'Tiempo transcurrido desde la apertura del expediente hasta la última actividad visible.',
+        value: caseFile
+          ? this.formatFollowUpDuration(caseFile.createdAt, lastActivityAt)
+          : 'Pendiente',
+        supportingText:
+          'Tiempo transcurrido desde la apertura del expediente hasta la última actividad visible.',
       },
       {
         label: 'Última sesión',
-        value: latestCompletedAppointment ? this.formatDateTime(latestCompletedAppointment.scheduledAt) : 'Sin sesiones',
+        value: latestCompletedAppointment
+          ? this.formatDateTime(latestCompletedAppointment.scheduledAt)
+          : 'Sin sesiones',
         supportingText: 'Última cita completada identificada dentro del período filtrado.',
       },
     ];
@@ -1113,13 +1225,15 @@ export class ReportsRunnerService {
     completedAppointments: Appointment[],
     notes: SessionNote[],
     documents: Document[],
-    latestCompletedAppointment: Appointment | null
+    latestCompletedAppointment: Appointment | null,
   ): string[] {
     const summary: string[] = [];
     const patientName = `${patient.firstName} ${patient.lastName}`.trim();
 
     if (caseFile) {
-      summary.push(`El expediente clínico de ${patientName} fue abierto el ${this.formatDateTime(caseFile.createdAt)}.`);
+      summary.push(
+        `El expediente clínico de ${patientName} fue abierto el ${this.formatDateTime(caseFile.createdAt)}.`,
+      );
     }
 
     if (caseFile?.diagnosis?.trim()) {
@@ -1132,20 +1246,26 @@ export class ReportsRunnerService {
 
     if (completedAppointments.length) {
       summary.push(
-        `Durante el período filtrado se identifican ${this.formatCount(completedAppointments.length, 'sesión completada', 'sesiones completadas')}.`
+        `Durante el período filtrado se identifican ${this.formatCount(completedAppointments.length, 'sesión completada', 'sesiones completadas')}.`,
       );
     }
 
     if (latestCompletedAppointment) {
-      summary.push(`La última sesión visible en el período fue el ${this.formatDateTime(latestCompletedAppointment.scheduledAt)}.`);
+      summary.push(
+        `La última sesión visible en el período fue el ${this.formatDateTime(latestCompletedAppointment.scheduledAt)}.`,
+      );
     }
 
     if (notes.length) {
-      summary.push(`Se registran ${this.formatCount(notes.length, 'nota clínica', 'notas clínicas')} asociadas al expediente en el rango consultado.`);
+      summary.push(
+        `Se registran ${this.formatCount(notes.length, 'nota clínica', 'notas clínicas')} asociadas al expediente en el rango consultado.`,
+      );
     }
 
     if (documents.length) {
-      summary.push(`El expediente muestra ${this.formatCount(documents.length, 'documento relacionado', 'documentos relacionados')} en el período.`);
+      summary.push(
+        `El expediente muestra ${this.formatCount(documents.length, 'documento relacionado', 'documentos relacionados')} en el período.`,
+      );
     }
 
     return summary;
@@ -1153,25 +1273,31 @@ export class ReportsRunnerService {
 
   private getFilteredCompletedAppointments(
     appointments: Appointment[],
-    filters: ClinicalSummaryReportFilters
+    filters: ClinicalSummaryReportFilters,
   ): Appointment[] {
     return sortAppointmentsByScheduledAt(
-      appointments.filter((appointment) => appointment.status === 'COMPLETED' && this.matchesInclusiveRange(appointment.scheduledAt, filters))
+      appointments.filter(
+        (appointment) =>
+          appointment.status === 'COMPLETED' &&
+          this.matchesInclusiveRange(appointment.scheduledAt, filters),
+      ),
     ).reverse();
   }
 
   private getFilteredAppointments(
     appointments: Appointment[],
-    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters
+    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters,
   ): Appointment[] {
     return sortAppointmentsByScheduledAt(
-      appointments.filter((appointment) => this.matchesInclusiveRange(appointment.scheduledAt, filters))
+      appointments.filter((appointment) =>
+        this.matchesInclusiveRange(appointment.scheduledAt, filters),
+      ),
     ).reverse();
   }
 
   private getFilteredNotes(
     notes: SessionNote[],
-    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters
+    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters,
   ): SessionNote[] {
     return [...notes]
       .filter((note) => this.matchesInclusiveRange(note.sessionDate, filters))
@@ -1180,14 +1306,14 @@ export class ReportsRunnerService {
 
   private getFilteredDocuments(
     documents: Document[],
-    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters
+    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters,
   ): Document[] {
     return documents.filter((document) => this.matchesInclusiveRange(document.uploadedAt, filters));
   }
 
   private getFilteredTimeline(
     timeline: ClinicalTimelineEvent[],
-    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters
+    filters: ClinicalSummaryReportFilters | ClinicalRecordReportFilters,
   ): ClinicalTimelineEvent[] {
     return timeline.filter((event) => this.matchesInclusiveRange(event.occurredAt, filters));
   }
@@ -1210,7 +1336,10 @@ export class ReportsRunnerService {
     return {
       id: event.id,
       title: this.getClinicalTimelineTitle(event),
-      description: event.description?.trim() || event.title?.trim() || 'Evento clínico registrado en el expediente.',
+      description:
+        event.description?.trim() ||
+        event.title?.trim() ||
+        'Evento clínico registrado en el expediente.',
       occurredAt: event.occurredAt,
       occurredAtLabel: this.formatDateTime(event.occurredAt),
       sourceType: event.sourceType,
@@ -1272,7 +1401,10 @@ export class ReportsRunnerService {
     return {
       id: event.id,
       title: this.getClinicalTimelineTitle(event),
-      description: event.description?.trim() || event.title?.trim() || 'Evento clínico registrado en el expediente.',
+      description:
+        event.description?.trim() ||
+        event.title?.trim() ||
+        'Evento clínico registrado en el expediente.',
       occurredAt: event.occurredAt,
       occurredAtLabel: this.formatDateTime(event.occurredAt),
     };
@@ -1280,7 +1412,7 @@ export class ReportsRunnerService {
 
   private buildClinicalRecordReference(
     document: ClinicalRecordDocumentItem,
-    index: number
+    index: number,
   ): ClinicalRecordField {
     return {
       label: `Anexo ${index + 1}`,
@@ -1356,11 +1488,18 @@ export class ReportsRunnerService {
     const startDate = new Date(start);
     const endDate = end ? new Date(end) : new Date();
 
-    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || endDate < startDate) {
+    if (
+      Number.isNaN(startDate.getTime()) ||
+      Number.isNaN(endDate.getTime()) ||
+      endDate < startDate
+    ) {
       return 'Pendiente';
     }
 
-    const totalDays = Math.max(Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000), 0);
+    const totalDays = Math.max(
+      Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000),
+      0,
+    );
     const months = Math.floor(totalDays / 30);
     const days = totalDays % 30;
 

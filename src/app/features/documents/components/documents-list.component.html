@@ -1,7 +1,12 @@
 <app-section-card [title]="cardTitle()" [subtitle]="cardSubtitle()">
   @if (showUploadAction()) {
     <div sectionCardActions class="documents-card__header-actions">
-      <button mat-flat-button class="documents-card__create-button" type="button" (click)="openUploadDialog()">
+      <button
+        mat-flat-button
+        class="documents-card__create-button"
+        type="button"
+        (click)="openUploadDialog()"
+      >
         <mat-icon>upload_file</mat-icon>
         <span>{{ uploadButtonLabel() }}</span>
       </button>
@@ -9,15 +14,17 @@
   }
 
   @if (isLoading()) {
-      <div class="documents-state app-table-loading-state">
-        <mat-spinner diameter="40" />
-        <p>Cargando documentos...</p>
-      </div>
-    } @else if (errorMessage()) {
-      <div class="documents-state documents-state--error app-table-feedback-state app-table-feedback-state--error">
-        <p>{{ errorMessage() }}</p>
-        <button mat-stroked-button type="button" (click)="loadDocuments()">Reintentar</button>
-      </div>
+    <div class="documents-state app-table-loading-state">
+      <mat-spinner diameter="40" />
+      <p>Cargando documentos...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div
+      class="documents-state documents-state--error app-table-feedback-state app-table-feedback-state--error"
+    >
+      <p>{{ errorMessage() }}</p>
+      <button mat-stroked-button type="button" (click)="loadDocuments()">Reintentar</button>
+    </div>
   } @else if (documents().length) {
     @if (actionErrorMessage()) {
       <div class="documents-inline-error" role="status">
@@ -36,7 +43,9 @@
               </div>
 
               <div class="documents-file-cell__content">
-                <strong class="app-truncate-2" [title]="document.fileName">{{ document.fileName }}</strong>
+                <strong class="app-truncate-2" [title]="document.fileName">{{
+                  document.fileName
+                }}</strong>
               </div>
             </div>
           </td>
@@ -46,7 +55,10 @@
           <th mat-header-cell *matHeaderCellDef>Paciente</th>
           <td mat-cell *matCellDef="let document">
             <div class="documents-patient-cell">
-              <span class="documents-patient-cell__name app-truncate-2" [title]="getPatientName(document)">
+              <span
+                class="documents-patient-cell__name app-truncate-2"
+                [title]="getPatientName(document)"
+              >
                 {{ getPatientName(document) }}
               </span>
             </div>
@@ -133,6 +145,10 @@
       </table>
     </div>
   } @else {
-    <app-data-table-empty-state icon="description" [title]="emptyTitle()" [message]="emptyMessage()" />
+    <app-data-table-empty-state
+      icon="description"
+      [title]="emptyTitle()"
+      [message]="emptyMessage()"
+    />
   }
 </app-section-card>

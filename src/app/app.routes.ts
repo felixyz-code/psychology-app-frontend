@@ -93,6 +93,13 @@ export const routes: Routes = [
           import('./features/branches/branches.routes').then((m) => m.branchesRoutes),
       },
       {
+        path: 'corporate',
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'organization.read' },
+        loadChildren: () =>
+          import('./features/corporate/corporate.routes').then((m) => m.corporateRoutes),
+      },
+      {
         path: 'membership-administration',
         canActivate: [capabilityGuard],
         data: { requiredCapability: 'membership.read' },
@@ -109,6 +116,13 @@ export const routes: Routes = [
           import('./features/invitation-administration/invitation-administration.routes').then(
             (m) => m.invitationAdministrationRoutes,
           ),
+      },
+      {
+        path: 'audit-trail',
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'audit.read' },
+        loadChildren: () =>
+          import('./features/audit-logs/audit-logs.routes').then((m) => m.auditLogsRoutes),
       },
       {
         path: '',

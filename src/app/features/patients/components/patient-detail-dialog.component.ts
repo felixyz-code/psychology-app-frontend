@@ -2,7 +2,12 @@ import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -10,14 +15,28 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { finalize } from 'rxjs';
 
 import { ActionCardComponent } from '../../../shared/components/action-card/action-card.component';
-import { ClinicalTimelineComponent, ClinicalTimelineItem } from '../../../shared/components/clinical-timeline/clinical-timeline.component';
+import {
+  ClinicalTimelineComponent,
+  ClinicalTimelineItem,
+} from '../../../shared/components/clinical-timeline/clinical-timeline.component';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
-import { MetricCardComponent, MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
+import {
+  MetricCardComponent,
+  MetricCardVariant,
+} from '../../../shared/components/metric-card/metric-card.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
-import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  StatusBadgeComponent,
+  StatusBadgeVariant,
+} from '../../../shared/components/status-badge/status-badge.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
-import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems } from '../../../shared/utils/data-table';
+import {
+  formatFilteredResultsLabel,
+  getSafePageIndex,
+  matchesSearchTerm,
+  paginateItems,
+} from '../../../shared/utils/data-table';
 import { AppointmentDeleteDialogComponent } from '../../appointments/components/appointment-delete-dialog.component';
 import { AppointmentDetailDialogComponent } from '../../appointments/components/appointment-detail-dialog.component';
 import { AppointmentFormDialogComponent } from '../../appointments/components/appointment-form-dialog.component';
@@ -83,7 +102,10 @@ export class PatientDetailDialogComponent {
   private readonly caseFilesService = inject(CaseFilesService);
   private readonly dialog = inject(MatDialog);
   private readonly dialogRef = inject(
-    MatDialogRef<PatientDetailDialogComponent, { action: 'close' } | { action: 'edit'; patient: Patient }>
+    MatDialogRef<
+      PatientDetailDialogComponent,
+      { action: 'close' } | { action: 'edit'; patient: Patient }
+    >,
   );
 
   readonly workspaceContent = viewChild<ElementRef<HTMLElement>>('workspaceContent');
@@ -127,7 +149,9 @@ export class PatientDetailDialogComponent {
     const state = this.sessionNotesTableState();
     const items = this.sessionNotes();
     const filteredItems = items.filter((sessionNote) =>
-      matchesSearchTerm(sessionNote, state.searchTerm, (item) => this.getSessionNoteSearchValues(item))
+      matchesSearchTerm(sessionNote, state.searchTerm, (item) =>
+        this.getSessionNoteSearchValues(item),
+      ),
     );
 
     return {
@@ -146,7 +170,9 @@ export class PatientDetailDialogComponent {
   readonly safeSessionNotesPageIndex = computed(() => {
     const state = this.sessionNotesTableState();
     const totalFilteredItems = this.sessionNotes().filter((sessionNote) =>
-      matchesSearchTerm(sessionNote, state.searchTerm, (item) => this.getSessionNoteSearchValues(item))
+      matchesSearchTerm(sessionNote, state.searchTerm, (item) =>
+        this.getSessionNoteSearchValues(item),
+      ),
     ).length;
 
     return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
@@ -159,20 +185,24 @@ export class PatientDetailDialogComponent {
       result.totalFilteredItems,
       result.totalItems,
       (count) => this.formatSessionNoteCount(count),
-      result.hasActiveFilters
+      result.hasActiveFilters,
     );
   });
 
   readonly clinicalSummaryCards = computed(() => {
     const summary = this.workspaceSummary();
-    const lastActivityLabel = summary?.lastActivityAt ? this.formatDateTimeValue(summary.lastActivityAt) : 'Pendiente';
+    const lastActivityLabel = summary?.lastActivityAt
+      ? this.formatDateTimeValue(summary.lastActivityAt)
+      : 'Pendiente';
     const lastActivityEvent = this.timelineItems()[0];
 
     return [
       {
         icon: 'event',
         title: 'Total de citas',
-        value: summary ? this.formatMetricCount(summary.appointmentsCount, 'cita', 'citas') : 'Pendiente',
+        value: summary
+          ? this.formatMetricCount(summary.appointmentsCount, 'cita', 'citas')
+          : 'Pendiente',
         supportingText: 'Total de citas visibles en el workspace clinico.',
         tone: 'blue' as MetricCardVariant,
         loading: this.isCaseFileLoading(),
@@ -180,7 +210,9 @@ export class PatientDetailDialogComponent {
       {
         icon: 'notes',
         title: 'Total de notas',
-        value: summary ? this.formatMetricCount(summary.sessionNotesCount, 'nota', 'notas') : 'Pendiente',
+        value: summary
+          ? this.formatMetricCount(summary.sessionNotesCount, 'nota', 'notas')
+          : 'Pendiente',
         supportingText: this.caseFile()
           ? 'Notas de sesion vinculadas al expediente actual.'
           : 'Pendiente hasta que exista un expediente clinico.',
@@ -190,7 +222,9 @@ export class PatientDetailDialogComponent {
       {
         icon: 'description',
         title: 'Total de documentos',
-        value: summary ? this.formatMetricCount(summary.documentsCount, 'documento', 'documentos') : 'Pendiente',
+        value: summary
+          ? this.formatMetricCount(summary.documentsCount, 'documento', 'documentos')
+          : 'Pendiente',
         supportingText: this.caseFile()
           ? 'Documentos asociados al expediente actual.'
           : 'Pendiente hasta que exista un expediente clinico.',
@@ -339,7 +373,9 @@ export class PatientDetailDialogComponent {
           this.loadWorkspace();
         },
         error: (error: HttpErrorResponse) => {
-          this.appointmentsErrorMessage.set(this.getAppointmentActionErrorMessage(error, 'cancelar'));
+          this.appointmentsErrorMessage.set(
+            this.getAppointmentActionErrorMessage(error, 'cancelar'),
+          );
         },
       });
   }
@@ -637,7 +673,9 @@ export class PatientDetailDialogComponent {
       return 'Pendiente';
     }
 
-    return this.hasFoundationInformation(currentCaseFile) ? 'Base completa' : 'Informacion pendiente';
+    return this.hasFoundationInformation(currentCaseFile)
+      ? 'Base completa'
+      : 'Informacion pendiente';
   }
 
   getCaseFileStatusVariant(): StatusBadgeVariant {
@@ -869,10 +907,7 @@ export class PatientDetailDialogComponent {
   }
 
   private mapTimelineEvent(event: ClinicalTimelineEvent): ClinicalTimelineItem | null {
-    const config: Record<
-      ClinicalTimelineEvent['type'],
-      { icon: string; title: string }
-    > = {
+    const config: Record<ClinicalTimelineEvent['type'], { icon: string; title: string }> = {
       CASE_FILE_CREATED: { icon: 'folder_open', title: 'Expediente creado' },
       APPOINTMENT_COMPLETED: { icon: 'event', title: 'Cita completada' },
       SESSION_NOTE_CREATED: { icon: 'notes', title: 'Nota de sesion registrada' },
@@ -909,7 +944,12 @@ export class PatientDetailDialogComponent {
   }
 
   private getSessionNoteSearchValues(sessionNote: SessionNote): Array<string | null | undefined> {
-    return [sessionNote.title, this.getSessionNoteTitle(sessionNote), sessionNote.content, sessionNote.sessionDate];
+    return [
+      sessionNote.title,
+      this.getSessionNoteTitle(sessionNote),
+      sessionNote.content,
+      sessionNote.sessionDate,
+    ];
   }
 
   private formatSessionNoteCount(count: number): string {

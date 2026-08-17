@@ -2,7 +2,10 @@ import { Component, inject, input } from '@angular/core';
 
 import { AuthStore } from '../../../core/auth/auth.store';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
-import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  StatusBadgeComponent,
+  StatusBadgeVariant,
+} from '../../../shared/components/status-badge/status-badge.component';
 import {
   FinancialTransactionCategory,
   FinancialTransactionResponse,

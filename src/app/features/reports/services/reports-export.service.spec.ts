@@ -23,7 +23,7 @@ describe('ReportsExportService', () => {
           csvContent = (parts ?? []).map((part) => String(part)).join('');
           csvBlob = this;
         }
-      }
+      },
     );
     vi.stubGlobal('URL', {
       createObjectURL: vi.fn(() => 'blob:reports-csv'),
@@ -43,7 +43,7 @@ describe('ReportsExportService', () => {
       exportCsv(service, [value]);
 
       expect(csvContent).toBe(`${UTF8_BOM}"Valor"\r\n"\t${value}"`);
-    }
+    },
   );
 
   it.each(['    =1+1', '\t=1+1', '\r=1+1', '\n=1+1', ' \t@SUM(1,1)'])(
@@ -52,14 +52,23 @@ describe('ReportsExportService', () => {
       exportCsv(service, [value]);
 
       expect(csvContent).toBe(`${UTF8_BOM}"Valor"\r\n"\t${value}"`);
-    }
+    },
   );
 
   it('preserves safe text and CSV escaping without adding protection', () => {
-    exportCsv(service, ['Hola', 'Álvarez', 'Texto, con coma', 'Texto "citado"', 'Línea uno\nLínea dos', '', "'=1+1", 'Paciente = revisión']);
+    exportCsv(service, [
+      'Hola',
+      'Álvarez',
+      'Texto, con coma',
+      'Texto "citado"',
+      'Línea uno\nLínea dos',
+      '',
+      "'=1+1",
+      'Paciente = revisión',
+    ]);
 
     expect(csvContent).toBe(
-      `${UTF8_BOM}"Valor"\r\n"Hola"\r\n"Álvarez"\r\n"Texto, con coma"\r\n"Texto ""citado"""\r\n"Línea uno\nLínea dos"\r\n""\r\n"'=1+1"\r\n"Paciente = revisión"`
+      `${UTF8_BOM}"Valor"\r\n"Hola"\r\n"Álvarez"\r\n"Texto, con coma"\r\n"Texto ""citado"""\r\n"Línea uno\nLínea dos"\r\n""\r\n"'=1+1"\r\n"Paciente = revisión"`,
     );
   });
 
@@ -71,14 +80,24 @@ describe('ReportsExportService', () => {
 
   it('keeps the structural CSV layout while protecting only dangerous cells', () => {
     const result = createResult([
-      { concept: '=1+1', patient: '+Paciente', notes: 'Nota "clínica",\nmultilínea', amount: '1,234.50' },
-      { concept: 'Consulta', patient: 'Álvarez', notes: 'Paciente = revisión', amount: '-1,234.50' },
+      {
+        concept: '=1+1',
+        patient: '+Paciente',
+        notes: 'Nota "clínica",\nmultilínea',
+        amount: '1,234.50',
+      },
+      {
+        concept: 'Consulta',
+        patient: 'Álvarez',
+        notes: 'Paciente = revisión',
+        amount: '-1,234.50',
+      },
     ]);
 
     service.exportAsCsv(result);
 
     expect(csvContent).toBe(
-      `${UTF8_BOM}"Concept","Patient","Notes","Amount"\r\n"\t=1+1","\t+Paciente","Nota ""clínica"",\nmultilínea","1,234.50"\r\n"Consulta","Álvarez","Paciente = revisión","\t-1,234.50"`
+      `${UTF8_BOM}"Concept","Patient","Notes","Amount"\r\n"\t=1+1","\t+Paciente","Nota ""clínica"",\nmultilínea","1,234.50"\r\n"Consulta","Álvarez","Paciente = revisión","\t-1,234.50"`,
     );
   });
 
@@ -90,7 +109,7 @@ describe('ReportsExportService', () => {
     expect(csvBlob!.type).toBe('text/csv;charset=utf-8;');
     expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
     expect(csvContent.slice(UTF8_BOM.length)).toBe(
-      '"Valor"\r\n"Categoría"\r\n"Método"\r\n"seguimiento clínico"\r\n"sesión"'
+      '"Valor"\r\n"Categoría"\r\n"Método"\r\n"seguimiento clínico"\r\n"sesión"',
     );
   });
 
@@ -111,7 +130,10 @@ describe('ReportsExportService', () => {
   });
 
   it('returns false without writing when the print popup is blocked', () => {
-    vi.stubGlobal('open', vi.fn(() => null));
+    vi.stubGlobal(
+      'open',
+      vi.fn(() => null),
+    );
 
     const exported = service.exportAsPdf(createResult([{ value: 'contenido' }]));
 
@@ -133,7 +155,10 @@ describe('ReportsExportService', () => {
         return 0;
       },
     };
-    vi.stubGlobal('open', vi.fn(() => printWindow));
+    vi.stubGlobal(
+      'open',
+      vi.fn(() => printWindow),
+    );
     const result = createResult([{ value: '<img src=x onerror=alert(1)>' }]);
     result.title = '<script>alert(1)</script>';
 
@@ -152,7 +177,9 @@ function exportCsv(service: ReportsExportService, values: string[]): void {
   service.exportAsCsv(createResult(values.map((value) => ({ value }))));
 }
 
-function createResult(rows: Array<Record<string, string | null | undefined>>): ReportResult<unknown> {
+function createResult(
+  rows: Array<Record<string, string | null | undefined>>,
+): ReportResult<unknown> {
   const keys = Object.keys(rows[0] ?? { value: '' });
 
   return {
@@ -163,8 +190,14 @@ function createResult(rows: Array<Record<string, string | null | undefined>>): R
     appliedFilters: {},
     contextItems: [],
     metrics: [],
-    columns: keys.map((key) => ({ key, label: key === 'value' ? 'Valor' : key.charAt(0).toUpperCase() + key.slice(1) })),
-    rows: rows.map((values, index) => ({ id: String(index), values: values as Record<string, string> })),
+    columns: keys.map((key) => ({
+      key,
+      label: key === 'value' ? 'Valor' : key.charAt(0).toUpperCase() + key.slice(1),
+    })),
+    rows: rows.map((values, index) => ({
+      id: String(index),
+      values: values as Record<string, string>,
+    })),
     previewMode: 'table',
     groups: [],
     csvFileName: 'reporte-prueba.csv',

@@ -71,14 +71,19 @@ export class DocumentUploadFlowStore {
       });
   }
 
-  private buildCaseFileOptions(caseFiles: CaseFile[], patients: Patient[]): { value: string; label: string }[] {
+  private buildCaseFileOptions(
+    caseFiles: CaseFile[],
+    patients: Patient[],
+  ): { value: string; label: string }[] {
     const patientsById = new Map(patients.map((patient) => [patient.id, patient]));
 
     return [...caseFiles]
       .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
       .map((caseFile) => {
         const patient = patientsById.get(caseFile.patientId);
-        const patientName = patient ? `${patient.firstName} ${patient.lastName}`.trim() : 'Paciente sin nombre disponible';
+        const patientName = patient
+          ? `${patient.firstName} ${patient.lastName}`.trim()
+          : 'Paciente sin nombre disponible';
         const createdAtLabel = new Date(caseFile.createdAt).toLocaleDateString('es-MX');
 
         return {

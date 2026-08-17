@@ -4,7 +4,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
-import { FinancialTransactionResponse, FinancialTransactionSummaryDto } from '../models/financial-transaction.models';
+import {
+  FinancialTransactionResponse,
+  FinancialTransactionSummaryDto,
+} from '../models/financial-transaction.models';
 import { FinancialTransactionsService } from '../services/financial-transactions.service';
 import { FinancialTransactionsListPage } from './financial-transactions-list.page';
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
@@ -109,8 +112,12 @@ describe('FinancialTransactionsListPage', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Registrar movimiento');
-    expect(fixture.nativeElement.querySelector('[aria-label^="Editar transaccion"]')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('[aria-label^="Eliminar transaccion"]')).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[aria-label^="Editar transaccion"]'),
+    ).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[aria-label^="Eliminar transaccion"]'),
+    ).not.toBeNull();
   });
 
   function createPage(): FinancialTransactionsListPage {
@@ -119,7 +126,14 @@ describe('FinancialTransactionsListPage', () => {
 });
 
 function createSummary(): FinancialTransactionSummaryDto {
-  return { incomeTotal: 0, expenseTotal: 0, adjustmentTotal: 0, refundTotal: 0, netTotal: 0, transactionCount: 0 };
+  return {
+    incomeTotal: 0,
+    expenseTotal: 0,
+    adjustmentTotal: 0,
+    refundTotal: 0,
+    netTotal: 0,
+    transactionCount: 0,
+  };
 }
 
 function createTransaction(): FinancialTransactionResponse {

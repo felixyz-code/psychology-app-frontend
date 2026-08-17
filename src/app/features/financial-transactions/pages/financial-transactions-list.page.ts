@@ -16,10 +16,16 @@ import { RouterLink } from '@angular/router';
 import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { FilterToolbarComponent } from '../../../shared/components/filter-toolbar/filter-toolbar.component';
-import { MetricCardComponent, MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
+import {
+  MetricCardComponent,
+  MetricCardVariant,
+} from '../../../shared/components/metric-card/metric-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
-import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  StatusBadgeComponent,
+  StatusBadgeVariant,
+} from '../../../shared/components/status-badge/status-badge.component';
 import { FinancialTransactionDeleteDialogComponent } from '../components/financial-transaction-delete-dialog.component';
 import { FinancialTransactionDetailDialogComponent } from '../components/financial-transaction-detail-dialog.component';
 import {
@@ -84,7 +90,17 @@ export class FinancialTransactionsListPage {
   private transactionsLoadSubscription?: Subscription;
   private summaryLoadSubscription?: Subscription;
 
-  readonly displayedColumns = ['concept', 'type', 'category', 'amount', 'currency', 'status', 'occurredAt', 'paymentMethod', 'actions'];
+  readonly displayedColumns = [
+    'concept',
+    'type',
+    'category',
+    'amount',
+    'currency',
+    'status',
+    'occurredAt',
+    'paymentMethod',
+    'actions',
+  ];
   readonly transactionTypes: FinancialTransactionType[] = FINANCIAL_TRANSACTION_TYPES;
   readonly transactionStatuses: FinancialTransactionStatus[] = FINANCIAL_TRANSACTION_STATUSES;
   readonly transactionCategories: FinancialTransactionCategory[] = FINANCIAL_TRANSACTION_CATEGORIES;
@@ -97,7 +113,7 @@ export class FinancialTransactionsListPage {
   readonly summaryErrorMessage = signal('');
   readonly appliedFilters = signal<FindFinancialTransactionsQueryDto>(this.defaultDateRange);
   readonly canReadSummary = computed(() =>
-    this.tenantContextStore.hasCapability('finance.summary_read')
+    this.tenantContextStore.hasCapability('finance.summary_read'),
   );
   readonly canManage = computed(() => this.tenantContextStore.hasCapability('finance.manage'));
   readonly filtersForm = this.formBuilder.group({
@@ -296,9 +312,11 @@ export class FinancialTransactionsListPage {
         expenseLabel: 'Egresos totales',
         expenseSupportingText: 'Egresos acumulados sin restriccion de rango.',
         balanceLabel: 'Balance total',
-        balanceSupportingText: 'Diferencia neta entre ingresos y egresos de todas las transacciones.',
+        balanceSupportingText:
+          'Diferencia neta entre ingresos y egresos de todas las transacciones.',
         transactionsLabel: 'Movimientos totales',
-        transactionsSupportingText: 'Cantidad total de transacciones encontradas sin filtro de fechas.',
+        transactionsSupportingText:
+          'Cantidad total de transacciones encontradas sin filtro de fechas.',
       };
     }
 
@@ -323,7 +341,8 @@ export class FinancialTransactionsListPage {
       balanceLabel: 'Balance del mes',
       balanceSupportingText: 'Diferencia neta entre ingresos y egresos del mes en curso.',
       transactionsLabel: 'Movimientos del mes',
-      transactionsSupportingText: 'Cantidad de transacciones encontradas para el rango mensual activo.',
+      transactionsSupportingText:
+        'Cantidad de transacciones encontradas para el rango mensual activo.',
     };
   }
 

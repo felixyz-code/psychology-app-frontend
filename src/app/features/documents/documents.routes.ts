@@ -8,7 +8,8 @@ export const documentsRoutes: Routes = [
   },
   {
     path: ':id/edit',
-    loadComponent: () => import('./pages/document-metadata-edit.page').then((m) => m.DocumentMetadataEditPage),
+    loadComponent: () =>
+      import('./pages/document-metadata-edit.page').then((m) => m.DocumentMetadataEditPage),
   },
   {
     path: 'new',

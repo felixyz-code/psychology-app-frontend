@@ -16,4 +16,3 @@ export interface DataTableResult<T> {
   totalFilteredItems: number;
   hasActiveFilters: boolean;
 }
-

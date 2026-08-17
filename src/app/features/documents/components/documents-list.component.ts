@@ -53,9 +53,13 @@ export class DocumentsListComponent {
   readonly scope = input<DocumentsListScope>('global');
   readonly caseFileId = input<string | null>(null);
   readonly cardTitle = input('Documentos');
-  readonly cardSubtitle = input('Consulta la metadata disponible y accede a la visualizacion, descarga o eliminacion del registro segun el contrato actual.');
+  readonly cardSubtitle = input(
+    'Consulta la metadata disponible y accede a la visualizacion, descarga o eliminacion del registro segun el contrato actual.',
+  );
   readonly emptyTitle = input('No hay documentos registrados');
-  readonly emptyMessage = input('Cuando existan documentos disponibles, apareceran en este listado.');
+  readonly emptyMessage = input(
+    'Cuando existan documentos disponibles, apareceran en este listado.',
+  );
   readonly uploadButtonLabel = input('Nuevo documento');
   readonly showUploadAction = input(true);
   readonly items = input<Document[] | null>(null);
@@ -64,7 +68,7 @@ export class DocumentsListComponent {
   readonly displayedColumns = computed(() =>
     this.scope() === 'global'
       ? DocumentsListComponent.GLOBAL_COLUMNS
-      : DocumentsListComponent.CASE_FILE_COLUMNS
+      : DocumentsListComponent.CASE_FILE_COLUMNS,
   );
   readonly documents = signal<Document[]>([]);
   readonly isLoading = signal(true);
@@ -321,7 +325,8 @@ export class DocumentsListComponent {
       return this.formatPatientName(embeddedPatient);
     }
 
-    const patientId = document.patientId?.trim() || this.caseFileMap().get(document.caseFileId)?.patientId?.trim();
+    const patientId =
+      document.patientId?.trim() || this.caseFileMap().get(document.caseFileId)?.patientId?.trim();
 
     if (!patientId) {
       return 'No asignado';
@@ -332,7 +337,10 @@ export class DocumentsListComponent {
     return patient ? this.formatPatientName(patient) : 'Sin paciente';
   }
 
-  private getDocumentActionErrorMessage(error: HttpErrorResponse, action: 'ver' | 'descargar'): string {
+  private getDocumentActionErrorMessage(
+    error: HttpErrorResponse,
+    action: 'ver' | 'descargar',
+  ): string {
     if (error.status === 401 || error.status === 403) {
       return `No tienes permisos para ${action} este documento.`;
     }

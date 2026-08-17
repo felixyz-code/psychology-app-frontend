@@ -19,12 +19,24 @@ import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
-import { MetricCardComponent, MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
+import {
+  MetricCardComponent,
+  MetricCardVariant,
+} from '../../../shared/components/metric-card/metric-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
-import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  StatusBadgeComponent,
+  StatusBadgeVariant,
+} from '../../../shared/components/status-badge/status-badge.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
-import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems, sortItems } from '../../../shared/utils/data-table';
+import {
+  formatFilteredResultsLabel,
+  getSafePageIndex,
+  matchesSearchTerm,
+  paginateItems,
+  sortItems,
+} from '../../../shared/utils/data-table';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { AppointmentDeleteDialogComponent } from '../components/appointment-delete-dialog.component';
@@ -101,8 +113,10 @@ export class AppointmentsListPage {
   readonly viewMode = signal<'table' | 'calendar' | 'agenda'>('table');
   readonly selectedAgendaDate = signal(startOfLocalDay(new Date()));
   readonly patientNameResolver = (patientId: string) => this.getPatientName(patientId);
-  readonly appointmentStatusLabelResolver = (status: AppointmentStatus) => this.getAppointmentStatusLabel(status);
-  readonly appointmentStatusClassResolver = (status: AppointmentStatus) => this.getAppointmentStatusClass(status);
+  readonly appointmentStatusLabelResolver = (status: AppointmentStatus) =>
+    this.getAppointmentStatusLabel(status);
+  readonly appointmentStatusClassResolver = (status: AppointmentStatus) =>
+    this.getAppointmentStatusClass(status);
   readonly appointments = signal<Appointment[]>([]);
   readonly patientNames = signal<Record<string, string>>({});
   readonly availablePatients = signal<Patient[]>([]);
@@ -125,15 +139,19 @@ export class AppointmentsListPage {
 
     return this.appointments()
       .filter((appointment) =>
-        matchesSearchTerm(appointment, state.searchTerm, (item) => this.getAppointmentSearchValues(item))
+        matchesSearchTerm(appointment, state.searchTerm, (item) =>
+          this.getAppointmentSearchValues(item),
+        ),
       )
-      .filter((appointment) => (state.statusFilter === 'ALL' ? true : appointment.status === state.statusFilter));
+      .filter((appointment) =>
+        state.statusFilter === 'ALL' ? true : appointment.status === state.statusFilter,
+      );
   });
   readonly filteredAppointments = computed(() => {
     const state = this.tableState();
 
     return this.baseFilteredAppointments().filter((appointment) =>
-      isWithinLocalDateRange(appointment.scheduledAt, state.startDate, state.endDate)
+      isWithinLocalDateRange(appointment.scheduledAt, state.startDate, state.endDate),
     );
   });
   readonly tableSortedAppointments = computed(() =>
@@ -141,17 +159,17 @@ export class AppointmentsListPage {
       sortBy: this.tableState().sortBy,
       sortDirection: this.tableState().sortDirection,
       getSortValue: (appointment, sortBy) => this.getAppointmentSortValue(appointment, sortBy),
-    })
+    }),
   );
   readonly calendarAppointments = computed(() =>
-    sortAppointmentsByScheduledAt(this.filteredAppointments())
+    sortAppointmentsByScheduledAt(this.filteredAppointments()),
   );
   readonly appointmentsForSelectedDay = computed(() =>
     sortAppointmentsByScheduledAt(
       this.baseFilteredAppointments().filter((appointment) =>
-        isSameLocalDay(appointment.scheduledAt, this.selectedAgendaDate())
-      )
-    )
+        isSameLocalDay(appointment.scheduledAt, this.selectedAgendaDate()),
+      ),
+    ),
   );
   readonly appointmentsTableResult = computed<DataTableResult<Appointment>>(() => {
     const state = this.tableState();
@@ -168,7 +186,10 @@ export class AppointmentsListPage {
       }),
       totalItems: items.length,
       totalFilteredItems: filteredItems.length,
-      hasActiveFilters: Boolean(state.searchTerm.trim()) || state.statusFilter !== 'ALL' || this.hasDateRangeFilter(state),
+      hasActiveFilters:
+        Boolean(state.searchTerm.trim()) ||
+        state.statusFilter !== 'ALL' ||
+        this.hasDateRangeFilter(state),
     };
   });
   readonly showDateRangeReset = computed(() => !this.isCurrentMonthDateRange(this.tableState()));
@@ -187,30 +208,37 @@ export class AppointmentsListPage {
       result.totalFilteredItems,
       result.totalItems,
       (count) => this.formatAppointmentCount(count),
-      result.hasActiveFilters
+      result.hasActiveFilters,
     );
   });
   readonly summaryMetrics = computed(() => {
     const appointments = this.appointments();
     const today = startOfLocalDay(new Date());
-    const scheduledAppointments = appointments.filter((appointment) => appointment.status === 'SCHEDULED');
-    const completedAppointments = appointments.filter((appointment) => appointment.status === 'COMPLETED');
+    const scheduledAppointments = appointments.filter(
+      (appointment) => appointment.status === 'SCHEDULED',
+    );
+    const completedAppointments = appointments.filter(
+      (appointment) => appointment.status === 'COMPLETED',
+    );
     const upcomingAppointments = scheduledAppointments.filter((appointment) => {
       return this.getAppointmentTimestamp(appointment.scheduledAt) >= today.getTime();
     });
-    const nextAppointment = scheduledAppointments.reduce<Appointment | null>((next, appointment) => {
-      const appointmentTimestamp = this.getAppointmentTimestamp(appointment.scheduledAt);
+    const nextAppointment = scheduledAppointments.reduce<Appointment | null>(
+      (next, appointment) => {
+        const appointmentTimestamp = this.getAppointmentTimestamp(appointment.scheduledAt);
 
-      if (appointmentTimestamp < today.getTime()) {
+        if (appointmentTimestamp < today.getTime()) {
+          return next;
+        }
+
+        if (!next || appointmentTimestamp < this.getAppointmentTimestamp(next.scheduledAt)) {
+          return appointment;
+        }
+
         return next;
-      }
-
-      if (!next || appointmentTimestamp < this.getAppointmentTimestamp(next.scheduledAt)) {
-        return appointment;
-      }
-
-      return next;
-    }, null);
+      },
+      null,
+    );
 
     return [
       {
@@ -271,7 +299,9 @@ export class AppointmentsListPage {
     }).subscribe({
       next: ({ appointments, patients }) => {
         const sortedPatients = [...patients].sort((first, second) =>
-          `${first.firstName} ${first.lastName}`.localeCompare(`${second.firstName} ${second.lastName}`)
+          `${first.firstName} ${first.lastName}`.localeCompare(
+            `${second.firstName} ${second.lastName}`,
+          ),
         );
 
         this.appointments.set(appointments);
@@ -459,7 +489,9 @@ export class AppointmentsListPage {
     this.tableState.update((state) => {
       const startDate = event.value ? startOfLocalDay(event.value) : null;
       const endDate =
-        startDate && state.endDate && startDate.getTime() > state.endDate.getTime() ? startDate : state.endDate;
+        startDate && state.endDate && startDate.getTime() > state.endDate.getTime()
+          ? startDate
+          : state.endDate;
 
       return {
         ...state,
@@ -474,7 +506,9 @@ export class AppointmentsListPage {
     this.tableState.update((state) => {
       const endDate = event.value ? startOfLocalDay(event.value) : null;
       const startDate =
-        endDate && state.startDate && endDate.getTime() < state.startDate.getTime() ? endDate : state.startDate;
+        endDate && state.startDate && endDate.getTime() < state.startDate.getTime()
+          ? endDate
+          : state.startDate;
 
       return {
         ...state,
@@ -547,7 +581,9 @@ export class AppointmentsListPage {
     }, {});
   }
 
-  private getAppointmentSearchValues(appointment: Appointment): Array<string | number | null | undefined> {
+  private getAppointmentSearchValues(
+    appointment: Appointment,
+  ): Array<string | number | null | undefined> {
     return [
       this.getPatientName(appointment.patientId),
       appointment.scheduledAt,
@@ -560,7 +596,7 @@ export class AppointmentsListPage {
 
   private getAppointmentSortValue(
     appointment: Appointment,
-    sortBy: string
+    sortBy: string,
   ): string | number | Date | null | undefined {
     const sortValues: Record<string, string | number | Date | null | undefined> = {
       patient: this.getPatientName(appointment.patientId),
@@ -644,8 +680,8 @@ export class AppointmentsListPage {
   private shiftAgendaDay(days: number): void {
     this.selectedAgendaDate.update((currentDate) =>
       startOfLocalDay(
-        new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + days)
-      )
+        new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + days),
+      ),
     );
   }
 }
