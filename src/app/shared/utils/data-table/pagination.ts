@@ -13,7 +13,7 @@ export function getSafePageIndex(totalItems: number, pageIndex: number, pageSize
 
 export function paginateItems<T>(
   items: readonly T[],
-  { pageIndex, pageSize }: PaginationOptions
+  { pageIndex, pageSize }: PaginationOptions,
 ): T[] {
   const safePageSize = Math.max(pageSize, 1);
   const safePageIndex = Math.max(pageIndex, 0);

@@ -31,7 +31,9 @@ describe('CreateInvitationDialogComponent', () => {
   });
 
   it('keeps whitespace while editing, normalizes on blur, and submits the trimmed email once', () => {
-    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[formControlName="email"]');
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+      'input[formControlName="email"]',
+    );
     const submitButton: HTMLButtonElement =
       fixture.nativeElement.querySelector('button[type="submit"]');
     input.value = '  ana@example.com  ';

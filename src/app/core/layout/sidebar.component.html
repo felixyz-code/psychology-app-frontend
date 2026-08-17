@@ -139,6 +139,19 @@
             <span class="sidebar__title">Sedes</span>
           </span>
         </a>
+
+        <a
+          routerLink="/corporate"
+          routerLinkActive="sidebar__link--active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="sidebar__link"
+          (click)="navSelected.emit()"
+        >
+          <mat-icon>business_center</mat-icon>
+          <span class="sidebar__content">
+            <span class="sidebar__title">Convenios B2B</span>
+          </span>
+        </a>
       }
 
       @if (tenantContextStore.hasCapability('membership.read')) {

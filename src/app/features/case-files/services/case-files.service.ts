@@ -24,7 +24,9 @@ export class CaseFilesService {
   }
 
   getWorkspace(caseFileId: string): Observable<CaseFileWorkspaceResponse> {
-    return this.http.get<CaseFileWorkspaceResponse>(`${this.apiUrl}/case-files/${caseFileId}/workspace`);
+    return this.http.get<CaseFileWorkspaceResponse>(
+      `${this.apiUrl}/case-files/${caseFileId}/workspace`,
+    );
   }
 
   getCaseFileByPatientId(patientId: string): Observable<CaseFile> {

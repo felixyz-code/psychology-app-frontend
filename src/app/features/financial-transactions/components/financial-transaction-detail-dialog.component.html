@@ -19,7 +19,12 @@
     <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
     @if (canManage()) {
       <div class="financial-transaction-detail-dialog__actions-group app-dialog__actions-group">
-        <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']" (click)="close()">Editar</a>
+        <a
+          mat-flat-button
+          [routerLink]="['/financial-transactions', transaction.id, 'edit']"
+          (click)="close()"
+          >Editar</a
+        >
       </div>
     }
   </footer>

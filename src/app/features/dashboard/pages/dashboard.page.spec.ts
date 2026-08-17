@@ -22,7 +22,10 @@ describe('DashboardPage finance capabilities', () => {
     await TestBed.configureTestingModule({
       imports: [DashboardPage],
       providers: [
-        { provide: DashboardAnalyticsService, useValue: { loadDashboardData: () => of(dashboardResult()) } },
+        {
+          provide: DashboardAnalyticsService,
+          useValue: { loadDashboardData: () => of(dashboardResult()) },
+        },
         { provide: MatDialog, useValue: { open: vi.fn() } },
         { provide: PatientsService, useValue: { getPatients: vi.fn(() => of([])) } },
         { provide: Router, useValue: { navigate } },
@@ -122,7 +125,9 @@ function dashboardResult(): { snapshot: DashboardSnapshot; viewModel: DashboardV
       quickActions: {
         title: 'Acciones rapidas',
         subtitle: 'Accesos frecuentes.',
-        items: [{ id: 'open-finance', icon: 'payments', label: 'Ir a finanzas', variant: 'secondary' }],
+        items: [
+          { id: 'open-finance', icon: 'payments', label: 'Ir a finanzas', variant: 'secondary' },
+        ],
       },
       warnings: [],
     },

@@ -669,10 +669,7 @@ export class MembershipAdministrationPage implements OnDestroy {
     return this.activeOwnershipOperationId === operationId;
   }
 
-  private isOwnershipOperationCurrent(
-    operationId: number,
-    scope: OwnershipTransferScope,
-  ): boolean {
+  private isOwnershipOperationCurrent(operationId: number, scope: OwnershipTransferScope): boolean {
     return (
       this.isOwnershipOperationTokenCurrent(operationId) &&
       this.isOwnershipTransferScopeCurrent(scope)

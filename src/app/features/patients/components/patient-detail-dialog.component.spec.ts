@@ -13,7 +13,9 @@ import { PatientDetailDialogComponent } from './patient-detail-dialog.component'
 
 describe('PatientDetailDialogComponent', () => {
   let caseFilesService: {
-    getWorkspace: ReturnType<typeof vi.fn<(caseFileId: string) => Observable<CaseFileWorkspaceResponse>>>;
+    getWorkspace: ReturnType<
+      typeof vi.fn<(caseFileId: string) => Observable<CaseFileWorkspaceResponse>>
+    >;
     getCaseFileByPatientId: ReturnType<typeof vi.fn<(patientId: string) => Observable<never>>>;
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
@@ -49,7 +51,7 @@ describe('PatientDetailDialogComponent', () => {
 
   it('keeps a missing case file as an empty state without reporting a workspace error', () => {
     caseFilesService.getCaseFileByPatientId.mockReturnValue(
-      throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' }))
+      throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' })),
     );
 
     const component = createComponent();
@@ -67,7 +69,9 @@ describe('PatientDetailDialogComponent', () => {
     caseFilesService.getWorkspace
       .mockReturnValueOnce(of(createWorkspace()))
       .mockReturnValueOnce(
-        throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Internal Server Error' }))
+        throwError(
+          () => new HttpErrorResponse({ status: 500, statusText: 'Internal Server Error' }),
+        ),
       );
     const component = createComponent({ caseFileId: 'case-file-1' });
 
@@ -91,7 +95,9 @@ describe('PatientDetailDialogComponent', () => {
       .mockReturnValueOnce(of(createWorkspace()))
       .mockReturnValue(of(refreshedWorkspace));
     dialog.open
-      .mockReturnValueOnce({ afterClosed: () => of({ ...createPatient(), firstName: 'Ana Maria' }) })
+      .mockReturnValueOnce({
+        afterClosed: () => of({ ...createPatient(), firstName: 'Ana Maria' }),
+      })
       .mockReturnValueOnce({ afterClosed: () => of(true) });
     const component = createComponent({ caseFileId: 'case-file-1' });
 
@@ -106,7 +112,7 @@ describe('PatientDetailDialogComponent', () => {
     expectSessionNoteActionRefresh(
       (component) => component.openCreateSessionNoteDialog(),
       SessionNoteFormDialogComponent,
-      { mode: 'create', caseFileId: 'case-file-1' }
+      { mode: 'create', caseFileId: 'case-file-1' },
     );
   });
 
@@ -116,7 +122,7 @@ describe('PatientDetailDialogComponent', () => {
     expectSessionNoteActionRefresh(
       (component) => component.openEditSessionNoteDialog(sessionNote),
       SessionNoteFormDialogComponent,
-      { mode: 'edit', caseFileId: 'case-file-1', sessionNote }
+      { mode: 'edit', caseFileId: 'case-file-1', sessionNote },
     );
   });
 
@@ -126,7 +132,7 @@ describe('PatientDetailDialogComponent', () => {
     expectSessionNoteActionRefresh(
       (component) => component.openDeleteSessionNoteDialog(sessionNote),
       SessionNoteDeleteDialogComponent,
-      { sessionNote }
+      { sessionNote },
     );
   });
 
@@ -147,7 +153,7 @@ describe('PatientDetailDialogComponent', () => {
   function expectSessionNoteActionRefresh(
     action: (component: PatientDetailDialogComponent) => void,
     expectedDialogComponent: unknown,
-    expectedData: Record<string, unknown>
+    expectedData: Record<string, unknown>,
   ): void {
     caseFilesService.getWorkspace.mockReturnValue(of(createWorkspace()));
     dialog.open.mockReturnValue({ afterClosed: () => of(true) });
@@ -157,7 +163,7 @@ describe('PatientDetailDialogComponent', () => {
 
     expect(dialog.open).toHaveBeenCalledWith(
       expectedDialogComponent,
-      expect.objectContaining({ data: expectedData })
+      expect.objectContaining({ data: expectedData }),
     );
     expect(caseFilesService.getWorkspace).toHaveBeenCalledTimes(2);
   }

@@ -4,7 +4,11 @@
     <p>{{ getSubtitle() }}</p>
   </div>
 
-  <form class="appointment-dialog__form app-dialog__form app-form" [formGroup]="appointmentForm" (ngSubmit)="submit()">
+  <form
+    class="appointment-dialog__form app-dialog__form app-form"
+    [formGroup]="appointmentForm"
+    (ngSubmit)="submit()"
+  >
     <div class="appointment-dialog__body">
       <section class="appointment-dialog__section app-form-section">
         <div class="app-form-section__header">
@@ -13,7 +17,10 @@
         </div>
 
         <div class="appointment-dialog__grid app-dialog__grid app-form-grid">
-          <mat-form-field appearance="outline" class="appointment-dialog__full app-form-field--full">
+          <mat-form-field
+            appearance="outline"
+            class="appointment-dialog__full app-form-field--full"
+          >
             <mat-label>Paciente</mat-label>
             <mat-select formControlName="patientId" [disabled]="isLoadingPatients()">
               @for (patient of availablePatients(); track patient.id) {
@@ -28,7 +35,10 @@
         </div>
 
         @if (isLoadingPatients()) {
-          <div class="appointment-dialog__inline-state app-dialog__inline-state app-form-inline-state" aria-live="polite">
+          <div
+            class="appointment-dialog__inline-state app-dialog__inline-state app-form-inline-state"
+            aria-live="polite"
+          >
             <mat-spinner diameter="18" />
             <span>Cargando pacientes disponibles...</span>
           </div>
@@ -38,7 +48,9 @@
       <section class="appointment-dialog__section app-form-section">
         <div class="app-form-section__header">
           <h3>Agenda</h3>
-          <p>Define cuando se realizara la cita y cuanto tiempo quedara reservado para la sesion.</p>
+          <p>
+            Define cuando se realizara la cita y cuanto tiempo quedara reservado para la sesion.
+          </p>
         </div>
 
         <div class="appointment-dialog__grid app-dialog__grid app-form-grid">
@@ -53,7 +65,13 @@
 
           <mat-form-field appearance="outline" class="app-form-field--compact">
             <mat-label>Duracion en minutos</mat-label>
-            <input matInput type="number" min="1" formControlName="durationMinutes" placeholder="60" />
+            <input
+              matInput
+              type="number"
+              min="1"
+              formControlName="durationMinutes"
+              placeholder="60"
+            />
             <mat-hint>Tiempo reservado para la cita.</mat-hint>
             @if (hasRequiredError('durationMinutes')) {
               <mat-error>La duracion es obligatoria.</mat-error>
@@ -67,11 +85,17 @@
       <section class="appointment-dialog__section app-form-section">
         <div class="app-form-section__header">
           <h3>Estado y notas</h3>
-          <p>Registra el estado actual de la cita y agrega observaciones si necesitas contexto adicional.</p>
+          <p>
+            Registra el estado actual de la cita y agrega observaciones si necesitas contexto
+            adicional.
+          </p>
         </div>
 
         <div class="appointment-dialog__grid app-dialog__grid app-form-grid">
-          <mat-form-field appearance="outline" class="appointment-dialog__full app-form-field--full">
+          <mat-form-field
+            appearance="outline"
+            class="appointment-dialog__full app-form-field--full"
+          >
             <mat-label>Estado</mat-label>
             <mat-select formControlName="status">
               @for (status of statuses; track status) {
@@ -83,7 +107,10 @@
             }
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="appointment-dialog__full app-form-field--full">
+          <mat-form-field
+            appearance="outline"
+            class="appointment-dialog__full app-form-field--full"
+          >
             <mat-label>Notas</mat-label>
             <textarea
               matInput
@@ -97,21 +124,32 @@
       </section>
 
       @if (errorMessage()) {
-        <p class="appointment-dialog__error app-dialog__error app-form-error" role="alert">{{ errorMessage() }}</p>
+        <p class="appointment-dialog__error app-dialog__error app-form-error" role="alert">
+          {{ errorMessage() }}
+        </p>
       }
 
       @if (isSaving()) {
-        <div class="appointment-dialog__saving app-dialog__saving app-form-saving" aria-live="polite">
+        <div
+          class="appointment-dialog__saving app-dialog__saving app-form-saving"
+          aria-live="polite"
+        >
           <mat-spinner diameter="20" />
           <span>Guardando...</span>
         </div>
       }
     </div>
 
-    <div class="appointment-dialog__actions app-dialog__actions" role="group" aria-label="Acciones del formulario">
+    <div
+      class="appointment-dialog__actions app-dialog__actions"
+      role="group"
+      aria-label="Acciones del formulario"
+    >
       <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>
       <div class="app-dialog__actions-group app-form-actions__group">
-        <button mat-flat-button type="submit" [disabled]="isSaving()">{{ getSubmitLabel() }}</button>
+        <button mat-flat-button type="submit" [disabled]="isSaving()">
+          {{ getSubmitLabel() }}
+        </button>
       </div>
     </div>
   </form>

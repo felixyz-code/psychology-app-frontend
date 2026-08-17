@@ -14,9 +14,7 @@ import { catchError } from 'rxjs/operators';
 import { FilterToolbarComponent } from '../../../shared/components/filter-toolbar/filter-toolbar.component';
 import { MetricCardComponent } from '../../../shared/components/metric-card/metric-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import {
-  AppointmentStatus,
-} from '../../appointments/models/appointment.models';
+import { AppointmentStatus } from '../../appointments/models/appointment.models';
 import {
   APPOINTMENT_STATUSES,
   getAppointmentStatusLabel,
@@ -95,7 +93,9 @@ export class ReportRunnerPage {
   readonly paymentMethods: PaymentMethod[] = PAYMENT_METHODS;
   readonly appointmentStatuses: AppointmentStatus[] = APPOINTMENT_STATUSES;
   readonly availablePatients = signal<Patient[]>([]);
-  readonly definition = signal<ReportDefinition | null>(this.reportsCatalogService.getReportByKey(this.reportKey) ?? null);
+  readonly definition = signal<ReportDefinition | null>(
+    this.reportsCatalogService.getReportByKey(this.reportKey) ?? null,
+  );
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
   readonly reportResult = signal<ReportResult<ReportFilters> | null>(null);
@@ -110,22 +110,30 @@ export class ReportRunnerPage {
     to: this.defaultDateRange.to,
   });
   readonly metrics = computed(() => this.reportResult()?.metrics ?? []);
-  readonly displayedColumns = computed(() => this.reportResult()?.columns.map((column) => column.key) ?? []);
+  readonly displayedColumns = computed(
+    () => this.reportResult()?.columns.map((column) => column.key) ?? [],
+  );
   readonly resultsLabel = computed(() => {
     const rowCount = this.reportResult()?.rows.length ?? 0;
 
     if (this.isClinicalSummaryReport()) {
       const hasDocument = Boolean(this.reportResult()?.clinicalContent);
-      return hasDocument ? 'Documento clínico listo para revisión' : 'Selecciona un paciente para generar el documento';
+      return hasDocument
+        ? 'Documento clínico listo para revisión'
+        : 'Selecciona un paciente para generar el documento';
     }
 
     if (this.isClinicalRecordReport()) {
       const hasDocument = Boolean(this.reportResult()?.clinicalContent);
-      return hasDocument ? 'Expediente clínico listo para revisión' : 'Selecciona un paciente para generar el expediente';
+      return hasDocument
+        ? 'Expediente clínico listo para revisión'
+        : 'Selecciona un paciente para generar el expediente';
     }
 
     const noun = this.isAgendaReport() ? 'cita' : 'movimiento';
-    return rowCount === 1 ? `1 ${noun} en la vista previa` : `${rowCount} ${noun}s en la vista previa`;
+    return rowCount === 1
+      ? `1 ${noun} en la vista previa`
+      : `${rowCount} ${noun}s en la vista previa`;
   });
   readonly filtersPanelSubtitle = computed(() =>
     this.isAgendaReport()
@@ -134,7 +142,7 @@ export class ReportRunnerPage {
         ? 'Selecciona un paciente y define el período para construir un documento clínico profesional.'
         : this.isClinicalRecordReport()
           ? 'Selecciona un paciente y define el período para construir un expediente clínico estructurado.'
-        : 'Refina el período y los criterios financieros antes de generar la vista previa.'
+          : 'Refina el período y los criterios financieros antes de generar la vista previa.',
   );
   readonly previewSubtitle = computed(() =>
     this.isAgendaReport()
@@ -143,21 +151,21 @@ export class ReportRunnerPage {
         ? 'Documento clínico centrado en el paciente con resumen, evolución y cronología visible.'
         : this.isClinicalRecordReport()
           ? 'Expediente clínico documental con estructura completa, detalle y lectura imprimible.'
-        : 'Resumen tabular de movimientos incluidos en el reporte financiero actual.'
+          : 'Resumen tabular de movimientos incluidos en el reporte financiero actual.',
   );
   readonly guidedEmptyTitle = computed(() =>
     this.isClinicalSummaryReport() || this.isClinicalRecordReport()
       ? this.isClinicalRecordReport()
         ? 'Selecciona un paciente para generar el expediente'
         : 'Selecciona un paciente para generar el resumen'
-      : 'No hay datos para mostrar'
+      : 'No hay datos para mostrar',
   );
   readonly guidedEmptyMessage = computed(() =>
     this.isClinicalSummaryReport() || this.isClinicalRecordReport()
       ? this.isClinicalRecordReport()
         ? 'El expediente clínico se construye desde el expediente del paciente y su actividad visible en el período.'
         : 'El resumen clínico se construye desde el expediente del paciente y su actividad visible en el período.'
-      : 'Ajusta los filtros para generar una vista previa.'
+      : 'Ajusta los filtros para generar una vista previa.',
   );
 
   constructor() {
@@ -225,7 +233,7 @@ export class ReportRunnerPage {
 
       if (!exported) {
         this.errorMessage.set(
-          'No fue posible abrir la vista de impresión. Verifica que el navegador no esté bloqueando ventanas emergentes.'
+          'No fue posible abrir la vista de impresión. Verifica que el navegador no esté bloqueando ventanas emergentes.',
         );
       }
 
@@ -373,7 +381,11 @@ export class ReportRunnerPage {
   }
 
   private loadPatientsIfNeeded(): void {
-    if (!this.isAgendaReport() && !this.isClinicalSummaryReport() && !this.isClinicalRecordReport()) {
+    if (
+      !this.isAgendaReport() &&
+      !this.isClinicalSummaryReport() &&
+      !this.isClinicalRecordReport()
+    ) {
       return;
     }
 
@@ -383,7 +395,9 @@ export class ReportRunnerPage {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((patients) => {
         const sortedPatients = [...patients].sort((left, right) =>
-          `${left.firstName} ${left.lastName}`.localeCompare(`${right.firstName} ${right.lastName}`)
+          `${left.firstName} ${left.lastName}`.localeCompare(
+            `${right.firstName} ${right.lastName}`,
+          ),
         );
 
         this.availablePatients.set(sortedPatients);

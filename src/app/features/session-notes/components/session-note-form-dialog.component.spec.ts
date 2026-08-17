@@ -72,7 +72,9 @@ describe('SessionNoteFormDialogComponent', () => {
 
   it('updates the supplied note without calling create and closes after success', () => {
     const sessionNote = createSessionNote();
-    sessionNotesService.updateSessionNote.mockReturnValue(of({ ...sessionNote, content: 'Contenido actualizado.' }));
+    sessionNotesService.updateSessionNote.mockReturnValue(
+      of({ ...sessionNote, content: 'Contenido actualizado.' }),
+    );
     const { component, dialogRef } = createComponent({
       mode: 'edit',
       caseFileId: 'case-file-1',
@@ -97,7 +99,10 @@ describe('SessionNoteFormDialogComponent', () => {
 
   it.each([
     ['create', { mode: 'create' as const, caseFileId: 'case-file-1' }],
-    ['update', { mode: 'edit' as const, caseFileId: 'case-file-1', sessionNote: createSessionNote() }],
+    [
+      'update',
+      { mode: 'edit' as const, caseFileId: 'case-file-1', sessionNote: createSessionNote() },
+    ],
   ])('keeps the dialog open and exposes an error when %s fails', (_operation, data) => {
     const failedRequest = throwError(() => new Error('Unavailable'));
     sessionNotesService.createSessionNote.mockReturnValue(failedRequest);

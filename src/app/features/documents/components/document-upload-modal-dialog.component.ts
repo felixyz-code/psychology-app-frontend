@@ -18,7 +18,9 @@ interface DocumentUploadModalDialogData {
   providers: [DocumentUploadFlowStore],
 })
 export class DocumentUploadModalDialogComponent {
-  private readonly data = inject<DocumentUploadModalDialogData | null>(MAT_DIALOG_DATA, { optional: true });
+  private readonly data = inject<DocumentUploadModalDialogData | null>(MAT_DIALOG_DATA, {
+    optional: true,
+  });
   private readonly dialogRef = inject(MatDialogRef<DocumentUploadModalDialogComponent, boolean>);
   readonly flow = inject(DocumentUploadFlowStore);
 

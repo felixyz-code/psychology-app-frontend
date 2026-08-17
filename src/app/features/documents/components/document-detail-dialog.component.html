@@ -6,7 +6,12 @@
       <p>{{ getDisplayValue(document.fileName) }}</p>
     </div>
 
-    <button mat-icon-button type="button" aria-label="Cerrar detalle del documento" (click)="close()">
+    <button
+      mat-icon-button
+      type="button"
+      aria-label="Cerrar detalle del documento"
+      (click)="close()"
+    >
       <mat-icon>close</mat-icon>
     </button>
   </header>
@@ -64,7 +69,9 @@
         @if (document.filePath) {
           <div class="document-detail-dialog__item document-detail-dialog__item--full">
             <span class="document-detail-dialog__label">Ruta del archivo</span>
-            <p class="document-detail-dialog__value document-detail-dialog__value--technical">{{ document.filePath }}</p>
+            <p class="document-detail-dialog__value document-detail-dialog__value--technical">
+              {{ document.filePath }}
+            </p>
           </div>
         }
       </div>
@@ -79,12 +86,16 @@
       <div class="document-detail-dialog__grid">
         <div class="document-detail-dialog__item">
           <span class="document-detail-dialog__label">Fecha de subida</span>
-          <p class="document-detail-dialog__value">{{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+          <p class="document-detail-dialog__value">
+            {{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}
+          </p>
         </div>
 
         <div class="document-detail-dialog__item">
           <span class="document-detail-dialog__label">Ultima actualizacion</span>
-          <p class="document-detail-dialog__value">{{ document.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+          <p class="document-detail-dialog__value">
+            {{ document.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+          </p>
         </div>
       </div>
     </section>

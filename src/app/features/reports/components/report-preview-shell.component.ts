@@ -77,13 +77,13 @@ export class ReportPreviewShellComponent {
   }
 
   isClinicalSummaryContent(
-    content: ClinicalSummaryContent | ClinicalRecordContent | null
+    content: ClinicalSummaryContent | ClinicalRecordContent | null,
   ): content is ClinicalSummaryContent {
     return content?.kind === 'summary';
   }
 
   isClinicalRecordContent(
-    content: ClinicalSummaryContent | ClinicalRecordContent | null
+    content: ClinicalSummaryContent | ClinicalRecordContent | null,
   ): content is ClinicalRecordContent {
     return content?.kind === 'record';
   }

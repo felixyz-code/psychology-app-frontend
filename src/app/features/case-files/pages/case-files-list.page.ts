@@ -14,9 +14,18 @@ import { DataTableEmptyStateComponent } from '../../../shared/components/data-ta
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
-import { StatusBadgeComponent, StatusBadgeVariant } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  StatusBadgeComponent,
+  StatusBadgeVariant,
+} from '../../../shared/components/status-badge/status-badge.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
-import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems, sortItems } from '../../../shared/utils/data-table';
+import {
+  formatFilteredResultsLabel,
+  getSafePageIndex,
+  matchesSearchTerm,
+  paginateItems,
+  sortItems,
+} from '../../../shared/utils/data-table';
 import { PatientDetailDialogComponent } from '../../patients/components/patient-detail-dialog.component';
 import { PatientFormDialogComponent } from '../../patients/components/patient-form-dialog.component';
 import { Patient } from '../../patients/models/patient.models';
@@ -75,14 +84,16 @@ export class CaseFilesListPage {
     return map;
   });
   readonly completeFoundationCount = computed(
-    () => this.caseFiles().filter((caseFile) => this.hasFoundationInformation(caseFile)).length
+    () => this.caseFiles().filter((caseFile) => this.hasFoundationInformation(caseFile)).length,
   );
-  readonly pendingFoundationCount = computed(() => this.caseFiles().length - this.completeFoundationCount());
+  readonly pendingFoundationCount = computed(
+    () => this.caseFiles().length - this.completeFoundationCount(),
+  );
   readonly caseFilesTableResult = computed<DataTableResult<CaseFile>>(() => {
     const state = this.tableState();
     const items = this.caseFiles();
     const filteredItems = items.filter((caseFile) =>
-      matchesSearchTerm(caseFile, state.searchTerm, (item) => this.getCaseFileSearchValues(item))
+      matchesSearchTerm(caseFile, state.searchTerm, (item) => this.getCaseFileSearchValues(item)),
     );
     const sortedItems = sortItems(filteredItems, {
       sortBy: state.sortBy,
@@ -105,7 +116,7 @@ export class CaseFilesListPage {
   readonly safePageIndex = computed(() => {
     const state = this.tableState();
     const totalFilteredItems = this.caseFiles().filter((caseFile) =>
-      matchesSearchTerm(caseFile, state.searchTerm, (item) => this.getCaseFileSearchValues(item))
+      matchesSearchTerm(caseFile, state.searchTerm, (item) => this.getCaseFileSearchValues(item)),
     ).length;
 
     return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
@@ -117,7 +128,7 @@ export class CaseFilesListPage {
       result.totalFilteredItems,
       result.totalItems,
       (count) => this.formatCaseFileCount(count),
-      result.hasActiveFilters
+      result.hasActiveFilters,
     );
   });
 
@@ -134,9 +145,11 @@ export class CaseFilesListPage {
       caseFiles: this.caseFilesService.getCaseFiles(),
       patients: this.patientsService.getPatients().pipe(
         catchError(() => {
-          this.patientLoadWarning.set('Los expedientes se cargaron, pero no fue posible resolver los nombres de pacientes.');
+          this.patientLoadWarning.set(
+            'Los expedientes se cargaron, pero no fue posible resolver los nombres de pacientes.',
+          );
           return of([] as Patient[]);
-        })
+        }),
       ),
     }).subscribe({
       next: ({ caseFiles, patients }) => {
@@ -314,7 +327,10 @@ export class CaseFilesListPage {
     return count === 1 ? '1 expediente' : `${count} expedientes`;
   }
 
-  private getCaseFileSortValue(caseFile: CaseFile, sortBy: string): string | number | Date | null | undefined {
+  private getCaseFileSortValue(
+    caseFile: CaseFile,
+    sortBy: string,
+  ): string | number | Date | null | undefined {
     const sortValues: Record<string, string | number | Date | null | undefined> = {
       patient: this.getPatientName(caseFile),
       foundationStatus: this.hasFoundationInformation(caseFile) ? 1 : 0,

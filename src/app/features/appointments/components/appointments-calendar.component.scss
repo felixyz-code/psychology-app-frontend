@@ -85,7 +85,10 @@
   box-sizing: border-box;
   overflow: hidden;
   text-align: left;
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .appointments-calendar__day:hover {
@@ -100,7 +103,9 @@
 
 .appointments-calendar__day--today {
   border-color: var(--app-color-primary);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.14), var(--app-shadow-surface);
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.14),
+    var(--app-shadow-surface);
 }
 
 .appointments-calendar__day-header {

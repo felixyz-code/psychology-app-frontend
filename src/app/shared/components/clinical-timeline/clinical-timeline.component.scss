@@ -73,7 +73,9 @@
   transform: translateX(-50%);
 }
 
-.clinical-timeline__group-items .clinical-timeline__item:last-child .clinical-timeline__rail::after {
+.clinical-timeline__group-items
+  .clinical-timeline__item:last-child
+  .clinical-timeline__rail::after {
   display: none;
 }
 
@@ -93,8 +95,11 @@
   padding: 0.95rem 1rem;
   border: 1px solid var(--app-color-card-border);
   border-radius: 18px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--app-color-card-bg) 92%, transparent) 0%, var(--app-color-card-soft-bg) 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--app-color-card-bg) 92%, transparent) 0%,
+    var(--app-color-card-soft-bg) 100%
+  );
 }
 
 .clinical-timeline__topline {

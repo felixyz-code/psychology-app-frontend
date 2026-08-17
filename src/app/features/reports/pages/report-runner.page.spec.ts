@@ -19,7 +19,10 @@ describe('ReportRunnerPage export feedback', () => {
         ReportsCatalogService,
         { provide: ActivatedRoute, useValue: { snapshot: { data: { reportKey: 'financial' } } } },
         { provide: PatientsService, useValue: { getPatients: vi.fn(() => of([])) } },
-        { provide: ReportsRunnerService, useValue: { runFinancialReport: vi.fn(() => of(createResult())) } },
+        {
+          provide: ReportsRunnerService,
+          useValue: { runFinancialReport: vi.fn(() => of(createResult())) },
+        },
         { provide: ReportsExportService, useValue: { exportAsPdf, exportAsCsv: vi.fn() } },
       ],
     });

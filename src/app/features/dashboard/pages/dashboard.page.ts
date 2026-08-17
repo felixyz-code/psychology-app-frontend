@@ -55,11 +55,9 @@ export class DashboardPage {
   readonly viewModel = signal<DashboardViewModel | null>(null);
   readonly appointmentLookup = signal<Record<string, Appointment>>({});
   readonly availablePatients = signal<Patient[]>([]);
-  readonly canReadFinance = computed(() =>
-    this.tenantContextStore.hasCapability('finance.read')
-  );
+  readonly canReadFinance = computed(() => this.tenantContextStore.hasCapability('finance.read'));
   readonly canReadFinancialSummary = computed(() =>
-    this.tenantContextStore.hasCapability('finance.summary_read')
+    this.tenantContextStore.hasCapability('finance.summary_read'),
   );
 
   constructor() {
@@ -234,7 +232,7 @@ export class DashboardPage {
         }
 
         return lookup;
-      }, {})
+      }, {}),
     );
   }
 }

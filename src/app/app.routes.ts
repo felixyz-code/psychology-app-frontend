@@ -93,6 +93,13 @@ export const routes: Routes = [
           import('./features/branches/branches.routes').then((m) => m.branchesRoutes),
       },
       {
+        path: 'corporate',
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'organization.read' },
+        loadChildren: () =>
+          import('./features/corporate/corporate.routes').then((m) => m.corporateRoutes),
+      },
+      {
         path: 'membership-administration',
         canActivate: [capabilityGuard],
         data: { requiredCapability: 'membership.read' },

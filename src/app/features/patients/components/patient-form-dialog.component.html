@@ -4,7 +4,11 @@
     <p>{{ getSubtitle() }}</p>
   </div>
 
-  <form class="patient-dialog__form app-dialog__form app-form" [formGroup]="patientForm" (ngSubmit)="submit()">
+  <form
+    class="patient-dialog__form app-dialog__form app-form"
+    [formGroup]="patientForm"
+    (ngSubmit)="submit()"
+  >
     <div class="patient-dialog__body">
       <section class="patient-dialog__section app-form-section">
         <div class="app-form-section__header">
@@ -65,7 +69,9 @@
       </section>
 
       @if (errorMessage()) {
-        <p class="patient-dialog__error app-dialog__error app-form-error" role="alert">{{ errorMessage() }}</p>
+        <p class="patient-dialog__error app-dialog__error app-form-error" role="alert">
+          {{ errorMessage() }}
+        </p>
       }
 
       @if (isSaving()) {
@@ -79,7 +85,9 @@
     <div class="patient-dialog__actions app-dialog__actions">
       <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>
       <div class="app-dialog__actions-group app-form-actions__group">
-        <button mat-flat-button type="submit" [disabled]="isSaving()">{{ getSubmitLabel() }}</button>
+        <button mat-flat-button type="submit" [disabled]="isSaving()">
+          {{ getSubmitLabel() }}
+        </button>
       </div>
     </div>
   </form>

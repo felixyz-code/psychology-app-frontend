@@ -6,13 +6,23 @@
     </div>
 
     <div class="appointments-calendar__actions">
-      <button mat-stroked-button type="button" class="appointments-calendar__today" (click)="openToday()">
+      <button
+        mat-stroked-button
+        type="button"
+        class="appointments-calendar__today"
+        (click)="openToday()"
+      >
         <mat-icon>today</mat-icon>
         <span>Hoy</span>
       </button>
 
       <div class="appointments-calendar__nav">
-        <button mat-icon-button type="button" aria-label="Mes anterior" (click)="openPreviousMonth()">
+        <button
+          mat-icon-button
+          type="button"
+          aria-label="Mes anterior"
+          (click)="openPreviousMonth()"
+        >
           <mat-icon>chevron_left</mat-icon>
         </button>
 

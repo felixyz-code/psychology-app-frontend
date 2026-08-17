@@ -38,11 +38,7 @@ export type ClinicalTimelineEventType =
   | 'SESSION_NOTE_CREATED'
   | 'DOCUMENT_UPLOADED';
 
-export type ClinicalTimelineSourceType =
-  | 'CASE_FILE'
-  | 'APPOINTMENT'
-  | 'SESSION_NOTE'
-  | 'DOCUMENT';
+export type ClinicalTimelineSourceType = 'CASE_FILE' | 'APPOINTMENT' | 'SESSION_NOTE' | 'DOCUMENT';
 
 export interface ClinicalTimelineEvent {
   id: string;

@@ -50,7 +50,9 @@ describe('DocumentDeleteDialogComponent', () => {
   });
 
   it('allows retry after a failed deletion', () => {
-    documentsService.delete.mockReturnValueOnce(throwError(() => ({ status: 500 }))).mockReturnValueOnce(of(void 0));
+    documentsService.delete
+      .mockReturnValueOnce(throwError(() => ({ status: 500 })))
+      .mockReturnValueOnce(of(void 0));
     const { component, dialogRef } = createComponent();
 
     component.confirmDelete();
@@ -75,7 +77,10 @@ describe('DocumentDeleteDialogComponent', () => {
       ],
     });
 
-    return { component: TestBed.createComponent(DocumentDeleteDialogComponent).componentInstance, dialogRef };
+    return {
+      component: TestBed.createComponent(DocumentDeleteDialogComponent).componentInstance,
+      dialogRef,
+    };
   }
 });
 

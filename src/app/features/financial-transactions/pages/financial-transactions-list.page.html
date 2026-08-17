@@ -2,10 +2,7 @@
   <app-page-header
     heading="Finanzas"
     subtitle="Listado global de transacciones financieras registradas en el sistema."
-    [breadcrumbs]="[
-      { label: 'Dashboard', url: '/dashboard' },
-      { label: 'Finanzas' },
-    ]"
+    [breadcrumbs]="[{ label: 'Dashboard', url: '/dashboard' }, { label: 'Finanzas' }]"
   >
     @if (canManage()) {
       <a mat-flat-button routerLink="/financial-transactions/new" class="app-page-header-action">
@@ -16,7 +13,10 @@
   </app-page-header>
 
   @if (canReadSummary()) {
-    <section class="financial-transactions-summary app-page__metrics" aria-label="Resumen financiero">
+    <section
+      class="financial-transactions-summary app-page__metrics"
+      aria-label="Resumen financiero"
+    >
       @for (card of summaryCards(); track card.label) {
         <app-metric-card
           [icon]="card.icon"
@@ -33,7 +33,9 @@
     @if (summaryErrorMessage()) {
       <div class="financial-transactions-summary-error" role="status">
         <p>{{ summaryErrorMessage() }}</p>
-        <button mat-stroked-button type="button" (click)="retrySummary()">Reintentar resumen</button>
+        <button mat-stroked-button type="button" (click)="retrySummary()">
+          Reintentar resumen
+        </button>
       </div>
     }
   }
@@ -44,7 +46,11 @@
   >
     <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
       <app-filter-toolbar>
-        <mat-form-field filterToolbarPrimary appearance="outline" class="financial-transactions-filter">
+        <mat-form-field
+          filterToolbarPrimary
+          appearance="outline"
+          class="financial-transactions-filter"
+        >
           <mat-label>Tipo</mat-label>
           <mat-select formControlName="type">
             <mat-option value="">Todos</mat-option>
@@ -54,7 +60,11 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field filterToolbarPrimary appearance="outline" class="financial-transactions-filter">
+        <mat-form-field
+          filterToolbarPrimary
+          appearance="outline"
+          class="financial-transactions-filter"
+        >
           <mat-label>Estado</mat-label>
           <mat-select formControlName="status">
             <mat-option value="">Todos</mat-option>
@@ -64,7 +74,11 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field filterToolbarPrimary appearance="outline" class="financial-transactions-filter">
+        <mat-form-field
+          filterToolbarPrimary
+          appearance="outline"
+          class="financial-transactions-filter"
+        >
           <mat-label>Categoria</mat-label>
           <mat-select formControlName="category">
             <mat-option value="">Todas</mat-option>
@@ -74,37 +88,66 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field filterToolbarPrimary appearance="outline" class="financial-transactions-filter">
+        <mat-form-field
+          filterToolbarPrimary
+          appearance="outline"
+          class="financial-transactions-filter"
+        >
           <mat-label>Metodo de pago</mat-label>
           <mat-select formControlName="paymentMethod">
             <mat-option value="">Todos</mat-option>
             @for (paymentMethod of paymentMethods; track paymentMethod) {
-              <mat-option [value]="paymentMethod">{{ getPaymentMethodLabel(paymentMethod) }}</mat-option>
+              <mat-option [value]="paymentMethod">{{
+                getPaymentMethodLabel(paymentMethod)
+              }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field filterToolbarSecondary appearance="outline" class="financial-transactions-filter">
+        <mat-form-field
+          filterToolbarSecondary
+          appearance="outline"
+          class="financial-transactions-filter"
+        >
           <mat-label>Fecha desde</mat-label>
           <input matInput type="date" formControlName="from" />
         </mat-form-field>
 
-        <mat-form-field filterToolbarSecondary appearance="outline" class="financial-transactions-filter">
+        <mat-form-field
+          filterToolbarSecondary
+          appearance="outline"
+          class="financial-transactions-filter"
+        >
           <mat-label>Fecha hasta</mat-label>
           <input matInput type="date" formControlName="to" />
         </mat-form-field>
 
         <div filterToolbarActions class="financial-transactions-toolbar__actions">
-          <button mat-flat-button type="submit" class="app-toolbar-meta-button" [disabled]="isLoading()">
+          <button
+            mat-flat-button
+            type="submit"
+            class="app-toolbar-meta-button"
+            [disabled]="isLoading()"
+          >
             <mat-icon>filter_alt</mat-icon>
             <span>Aplicar filtros</span>
           </button>
-          <button mat-stroked-button type="button" class="app-toolbar-meta-button" [disabled]="isLoading() || !hasActiveFilters()" (click)="clearFilters()">
+          <button
+            mat-stroked-button
+            type="button"
+            class="app-toolbar-meta-button"
+            [disabled]="isLoading() || !hasActiveFilters()"
+            (click)="clearFilters()"
+          >
             <mat-icon>filter_alt_off</mat-icon>
             <span>Limpiar filtros</span>
           </button>
           <span class="app-table-toolbar-counter" aria-live="polite">
-            {{ transactions().length === 1 ? '1 transaccion' : `${transactions().length} transacciones` }}
+            {{
+              transactions().length === 1
+                ? '1 transaccion'
+                : `${transactions().length} transacciones`
+            }}
           </span>
         </div>
       </app-filter-toolbar>
@@ -116,17 +159,26 @@
         <p>Cargando transacciones...</p>
       </div>
     } @else if (errorMessage()) {
-      <div class="financial-transactions-state financial-transactions-state--error app-table-feedback-state app-table-feedback-state--error">
+      <div
+        class="financial-transactions-state financial-transactions-state--error app-table-feedback-state app-table-feedback-state--error"
+      >
         <p>{{ errorMessage() }}</p>
         <button mat-stroked-button type="button" (click)="loadTransactions()">Reintentar</button>
       </div>
     } @else if (transactions().length) {
       <div class="financial-transactions-table-wrapper app-table-wrapper">
-        <table mat-table [dataSource]="transactions()" class="financial-transactions-table app-data-table">
+        <table
+          mat-table
+          [dataSource]="transactions()"
+          class="financial-transactions-table app-data-table"
+        >
           <ng-container matColumnDef="concept">
             <th mat-header-cell *matHeaderCellDef>Concepto</th>
             <td mat-cell *matCellDef="let transaction">
-              <span class="financial-transactions-table__concept app-truncate-2" [title]="transaction.concept">
+              <span
+                class="financial-transactions-table__concept app-truncate-2"
+                [title]="transaction.concept"
+              >
                 {{ transaction.concept }}
               </span>
             </td>
@@ -145,7 +197,10 @@
           <ng-container matColumnDef="category">
             <th mat-header-cell *matHeaderCellDef>Categoria</th>
             <td mat-cell *matCellDef="let transaction">
-              <span class="financial-transactions-table__meta-text app-truncate-1" [title]="getCategoryLabel(transaction.category)">
+              <span
+                class="financial-transactions-table__meta-text app-truncate-1"
+                [title]="getCategoryLabel(transaction.category)"
+              >
                 {{ getCategoryLabel(transaction.category) }}
               </span>
             </td>
@@ -185,7 +240,10 @@
           <ng-container matColumnDef="paymentMethod">
             <th mat-header-cell *matHeaderCellDef>Metodo de pago</th>
             <td mat-cell *matCellDef="let transaction">
-              <span class="financial-transactions-table__meta-text app-truncate-1" [title]="getPaymentMethodLabel(transaction.paymentMethod)">
+              <span
+                class="financial-transactions-table__meta-text app-truncate-1"
+                [title]="getPaymentMethodLabel(transaction.paymentMethod)"
+              >
                 {{ getPaymentMethodLabel(transaction.paymentMethod) }}
               </span>
             </td>
@@ -194,7 +252,10 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let transaction">
-              <div class="financial-transactions-actions app-table-actions" aria-label="Acciones disponibles">
+              <div
+                class="financial-transactions-actions app-table-actions"
+                aria-label="Acciones disponibles"
+              >
                 <button
                   mat-icon-button
                   type="button"

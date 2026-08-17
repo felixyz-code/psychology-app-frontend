@@ -1,0 +1,451 @@
+<div class="corporate-dashboard">
+  <div class="corporate-dashboard__header">
+    <div>
+      <h1 class="corporate-dashboard__title">Convenios Corporativos y Bolsas PAEF</h1>
+      <p class="corporate-dashboard__subtitle">
+        Gesti&oacute;n de empresas clientes, contratos de cobertura empresarial, bolsas de sesiones
+        y elegibilidad en tiempo real.
+      </p>
+    </div>
+    <div class="corporate-dashboard__actions">
+      <button mat-stroked-button (click)="openNewClientModal()">
+        <mat-icon>business</mat-icon>
+        Nuevo Cliente B2B
+      </button>
+      <button mat-flat-button color="primary" (click)="openNewAgreementModal()">
+        <mat-icon>add_card</mat-icon>
+        Nuevo Convenio PAEF
+      </button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="corporate-dashboard__loader">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Cargando informaci&oacute;n corporativa...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="corporate-dashboard__error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage() }}</p>
+      <button mat-button (click)="loadData()">Reintentar</button>
+    </div>
+  } @else {
+    <mat-tab-group animationDuration="200ms" class="corporate-dashboard__tabs">
+      <!-- TAB 1: CONVENIOS PAEF -->
+      <mat-tab label="Convenios Activos">
+        <div class="tab-content">
+          @if (agreements().length === 0) {
+            <div class="empty-state">
+              <mat-icon>assignment_late</mat-icon>
+              <h3>No hay convenios corporativos registrados</h3>
+              <p>
+                Comienza creando un cliente B2B y asociando un convenio marco con bolsas de
+                sesiones.
+              </p>
+              <button mat-flat-button color="primary" (click)="openNewAgreementModal()">
+                Crear Primer Convenio
+              </button>
+            </div>
+          } @else {
+            <div class="agreements-grid">
+              @for (agr of agreements(); track agr.id) {
+                <mat-card class="agreement-card">
+                  <mat-card-header>
+                    <div class="agreement-card__header-box">
+                      <div>
+                        <span
+                          class="agreement-card__badge"
+                          [class]="'badge--' + agr.status.toLowerCase()"
+                        >
+                          {{ agr.status }}
+                        </span>
+                        <h2 class="agreement-card__title">{{ agr.title }}</h2>
+                        <span class="agreement-card__code"
+                          >{{ agr.code }} &bull; {{ agr.corporateClient?.name }}</span
+                        >
+                      </div>
+                    </div>
+                  </mat-card-header>
+
+                  <mat-card-content>
+                    <p class="agreement-card__desc">
+                      {{
+                        agr.description ||
+                          'Convenio de asistencia psicológica empresarial y familiar.'
+                      }}
+                    </p>
+
+                    <div class="agreement-card__metrics">
+                      <div class="metric">
+                        <span class="metric__label">Bolsas</span>
+                        <span class="metric__val">{{ agr.benefitPools?.length || 0 }}</span>
+                      </div>
+                      <div class="metric">
+                        <span class="metric__label">Colaboradores</span>
+                        <span class="metric__val">{{
+                          agr._count?.employeeEligibilities || 0
+                        }}</span>
+                      </div>
+                      <div class="metric">
+                        <span class="metric__label">Total Sesiones</span>
+                        <span class="metric__val">{{ getAgreementTotalSessions(agr) }}</span>
+                      </div>
+                    </div>
+
+                    <div class="agreement-card__progress">
+                      <div class="progress-info">
+                        <span
+                          >Consumo: {{ getAgreementConsumedSessions(agr) }} /
+                          {{ getAgreementTotalSessions(agr) }}</span
+                        >
+                        <span>{{ getAgreementUtilization(agr) }}%</span>
+                      </div>
+                      <mat-progress-bar
+                        mode="determinate"
+                        [value]="getAgreementUtilization(agr)"
+                      ></mat-progress-bar>
+                    </div>
+
+                    <div class="agreement-card__footer">
+                      <span class="date-range">
+                        Vigencia: {{ agr.validFrom | date: 'dd/MM/yyyy' }} -
+                        {{ agr.validUntil | date: 'dd/MM/yyyy' }}
+                      </span>
+                    </div>
+                  </mat-card-content>
+
+                  <mat-card-actions align="end">
+                    <a mat-button color="primary" [routerLink]="['/corporate/agreements', agr.id]">
+                      Ver Detalle & Bolsas
+                      <mat-icon>chevron_right</mat-icon>
+                    </a>
+                  </mat-card-actions>
+                </mat-card>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- TAB 2: CLIENTES B2B -->
+      <mat-tab label="Clientes Corporativos">
+        <div class="tab-content">
+          <div class="clients-list">
+            @for (client of clients(); track client.id) {
+              <mat-card class="client-card">
+                <div class="client-card__body">
+                  <div>
+                    <h3 class="client-card__name">{{ client.name }}</h3>
+                    <p class="client-card__sub">
+                      {{ client.commercialName || 'Empresa Patrocinadora' }} &bull; Tax ID:
+                      {{ client.taxId || 'N/A' }}
+                    </p>
+                    <div class="client-card__domains">
+                      <strong>Dominios autorizados:</strong>
+                      @if (client.domainWhitelist && client.domainWhitelist.length > 0) {
+                        @for (dom of client.domainWhitelist; track dom) {
+                          <span class="domain-tag">{{ dom }}</span>
+                        }
+                      } @else {
+                        <span class="text-muted">Solo lista blanca explícita</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="client-card__contact">
+                    <span><mat-icon>email</mat-icon> {{ client.contactEmail || 'Sin email' }}</span>
+                    <span
+                      ><mat-icon>phone</mat-icon> {{ client.contactPhone || 'Sin teléfono' }}</span
+                    >
+                  </div>
+                </div>
+              </mat-card>
+            }
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- TAB 3: VERIFICADOR EN TIEMPO REAL -->
+      <mat-tab label="Verificador de Elegibilidad">
+        <div class="tab-content checker-tab">
+          <mat-card class="checker-card">
+            <mat-card-header>
+              <mat-card-title>Verificación de Cobertura y Cupo en Tiempo Real</mat-card-title>
+              <mat-card-subtitle>
+                Verifica si un colaborador tiene derecho a cobertura empresarial antes de agendar o
+                iniciar la consulta.
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <form [formGroup]="checkForm" (ngSubmit)="runEligibilityCheck()" class="checker-form">
+                <mat-form-field appearance="outline">
+                  <mat-label>Convenio Corporativo</mat-label>
+                  <mat-select formControlName="agreementId">
+                    @for (agr of agreements(); track agr.id) {
+                      <mat-option [value]="agr.id">{{ agr.title }} ({{ agr.code }})</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Correo Corporativo del Empleado</mat-label>
+                  <input
+                    matInput
+                    type="email"
+                    formControlName="email"
+                    placeholder="ej. usuario@empresa.com"
+                  />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>N&uacute;mero de N&oacute;mina / ID (Opcional)</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    formControlName="employeeNumber"
+                    placeholder="ej. EMP-10492"
+                  />
+                </mat-form-field>
+
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="submit"
+                  [disabled]="checkForm.invalid || isChecking()"
+                  class="checker-btn"
+                >
+                  <mat-icon>verified</mat-icon>
+                  {{ isChecking() ? 'Verificando...' : 'Consultar Elegibilidad' }}
+                </button>
+              </form>
+
+              @if (checkResult()) {
+                <div
+                  class="check-result-box"
+                  [class.check-result-box--success]="checkResult()?.isEligible"
+                  [class.check-result-box--danger]="!checkResult()?.isEligible"
+                >
+                  <div class="result-header">
+                    <mat-icon>{{ checkResult()?.isEligible ? 'check_circle' : 'cancel' }}</mat-icon>
+                    <div>
+                      <h4>
+                        {{ checkResult()?.isEligible ? 'COLABORADOR ELEGIBLE' : 'NO ELEGIBLE' }}
+                      </h4>
+                      <p>{{ checkResult()?.message }}</p>
+                    </div>
+                  </div>
+
+                  @if (checkResult()?.isEligible && checkResult()?.eligibility) {
+                    <div class="result-details">
+                      <div class="detail-item">
+                        <span>Sesiones Disponibles Colaborador:</span>
+                        <strong
+                          >{{ checkResult()?.eligibility?.availableSessions }} de
+                          {{ checkResult()?.eligibility?.maxSessionsAllowed }}</strong
+                        >
+                      </div>
+                      <div class="detail-item">
+                        <span>Consumo Actual:</span>
+                        <span
+                          >{{ checkResult()?.eligibility?.consumedSessions }} completadas,
+                          {{ checkResult()?.eligibility?.reservedSessions }} reservadas</span
+                        >
+                      </div>
+                      <div class="detail-item">
+                        <span>Bolsas Activas con Saldo:</span>
+                        <span
+                          >{{ checkResult()?.availablePools?.length || 0 }} bolsa(s)
+                          habilitada(s)</span
+                        >
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (checkError()) {
+                <div class="check-result-box check-result-box--danger">
+                  <mat-icon>error</mat-icon>
+                  <p>{{ checkError() }}</p>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- TAB 4: LIBRO MAYOR DE DÉBITOS -->
+      <mat-tab label="Libro Mayor de Débitos">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title
+                >Auditor&iacute;a Transaccional de Débitos At&oacute;micos</mat-card-title
+              >
+            </mat-card-header>
+            <mat-card-content>
+              @if (debitLogs().length === 0) {
+                <p class="text-muted">No se registran transacciones de débito en este inquilino.</p>
+              } @else {
+                <div class="table-responsive">
+                  <table class="debit-table">
+                    <thead>
+                      <tr>
+                        <th>Fecha / Hora</th>
+                        <th>Convenio</th>
+                        <th>Bolsa</th>
+                        <th>Colaborador</th>
+                        <th>Sede</th>
+                        <th>Cant.</th>
+                        <th>Estado</th>
+                        <th>Motivo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (log of debitLogs(); track log.id) {
+                        <tr>
+                          <td>{{ log.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                          <td>
+                            <strong>{{ log.agreement?.code || 'N/A' }}</strong>
+                          </td>
+                          <td>{{ log.pool?.name || 'N/A' }}</td>
+                          <td>{{ log.eligibility?.email || 'N/A' }}</td>
+                          <td>{{ log.branch?.code || 'Global' }}</td>
+                          <td>{{ log.sessionQuantity }}</td>
+                          <td>
+                            <span class="badge" [class]="'badge--' + log.status.toLowerCase()">
+                              {{ log.status }}
+                            </span>
+                          </td>
+                          <td>{{ log.reason || '-' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>
+
+<!-- CLIENT MODAL -->
+@if (showClientModal()) {
+  <div class="modal-overlay" (click)="closeClientModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-card__header">
+        <h2>Nuevo Cliente Corporativo B2B</h2>
+        <button mat-icon-button (click)="closeClientModal()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <form [formGroup]="clientForm" (ngSubmit)="saveClient()" class="modal-card__form">
+        <mat-form-field appearance="outline">
+          <mat-label>Raz&oacute;n Social / Nombre</mat-label>
+          <input matInput formControlName="name" placeholder="ej. Inversiones Alfa S.A." />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre Comercial</mat-label>
+          <input matInput formControlName="commercialName" placeholder="ej. Alfa Tech" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Identificaci&oacute;n Fiscal (RUT / RFC / Tax ID)</mat-label>
+          <input matInput formControlName="taxId" placeholder="ej. 76.123.456-K" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Correo Contacto RRHH</mat-label>
+          <input matInput type="email" formControlName="contactEmail" placeholder="rrhh@alfa.com" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Dominios Corporativos (separados por coma)</mat-label>
+          <input matInput formControlName="domainWhitelist" placeholder="@alfa.com, @alfatech.io" />
+        </mat-form-field>
+
+        <div class="modal-card__actions">
+          <button mat-button type="button" (click)="closeClientModal()">Cancelar</button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="clientForm.invalid || isSavingClient()"
+          >
+            {{ isSavingClient() ? 'Guardando...' : 'Crear Cliente' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- AGREEMENT MODAL -->
+@if (showAgreementModal()) {
+  <div class="modal-overlay" (click)="closeAgreementModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-card__header">
+        <h2>Nuevo Convenio Marco PAEF</h2>
+        <button mat-icon-button (click)="closeAgreementModal()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <form [formGroup]="agreementForm" (ngSubmit)="saveAgreement()" class="modal-card__form">
+        <mat-form-field appearance="outline">
+          <mat-label>Cliente Corporativo</mat-label>
+          <mat-select formControlName="corporateClientId">
+            @for (c of clients(); track c.id) {
+              <mat-option [value]="c.id">{{ c.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>C&oacute;digo de Convenio (Único)</mat-label>
+          <input matInput formControlName="code" placeholder="ej. ALFA-PAEF-2026" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>T&iacute;tulo del Convenio</mat-label>
+          <input
+            matInput
+            formControlName="title"
+            placeholder="ej. Programa de Bienestar Emocional Alfa 2026"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>M&aacute;ximo Sesiones por Colaborador (Default)</mat-label>
+          <input matInput type="number" formControlName="defaultMaxSessionsPerEmployee" min="1" />
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha Inicio</mat-label>
+            <input matInput type="date" formControlName="validFrom" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha T&eacute;rmino</mat-label>
+            <input matInput type="date" formControlName="validUntil" />
+          </mat-form-field>
+        </div>
+
+        <div class="modal-card__actions">
+          <button mat-button type="button" (click)="closeAgreementModal()">Cancelar</button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="agreementForm.invalid || isSavingAgreement()"
+          >
+            {{ isSavingAgreement() ? 'Guardando...' : 'Crear Convenio' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
