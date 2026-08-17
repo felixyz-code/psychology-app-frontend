@@ -10,4 +10,9 @@ export const corporateRoutes: Routes = [
     path: 'agreements/:id',
     loadComponent: () => import('./pages/agreement-detail.page').then((m) => m.AgreementDetailPage),
   },
+  {
+    path: 'agreements/:id/reports',
+    loadComponent: () => import('./pages/corporate-reports.page').then((m) => m.CorporateReportsPage),
+  },
 ];
+

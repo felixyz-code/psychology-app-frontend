@@ -31,11 +31,19 @@
         </p>
       </div>
       <div class="agreement-header__actions">
+        <a
+          mat-flat-button
+          color="primary"
+          [routerLink]="['/corporate/agreements', agreementId(), 'reports']"
+        >
+          <mat-icon>assessment</mat-icon>
+          Informe Ejecutivo & Facturaci&oacute;n
+        </a>
         <button mat-stroked-button (click)="openNewPoolModal()">
           <mat-icon>inventory_2</mat-icon>
           Nueva Bolsa de Sesiones
         </button>
-        <button mat-flat-button color="primary" (click)="openNewEmployeeModal()">
+        <button mat-stroked-button (click)="openNewEmployeeModal()">
           <mat-icon>person_add</mat-icon>
           Agregar Colaborador
         </button>

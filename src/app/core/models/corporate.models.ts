@@ -192,3 +192,114 @@ export interface CreateEmployeeEligibilityPayload {
   maxSessionsAllowed?: number;
   status?: EmployeeEligibilityStatus;
 }
+
+export interface DepartmentDistributionItem {
+  department: string;
+  employeeCount: number;
+  sessionsConsumed: number;
+  percentageOfTotalSessions: number;
+  isAggregated: boolean;
+}
+
+export interface ExecutiveKpis {
+  totalSessionsContracted: number;
+  totalSessionsConsumed: number;
+  totalSessionsReserved: number;
+  totalSessionsAvailable: number;
+  burnRatePercentage: number;
+  uniqueEmployeesEntitled: number;
+  uniqueEmployeesAttended: number;
+  coveragePercentage: number;
+}
+
+export interface ExecutiveReportResponse {
+  agreement: {
+    id: string;
+    code: string;
+    title: string;
+    status: string;
+    corporateClient: {
+      id: string;
+      name: string;
+      commercialName: string | null;
+    };
+  };
+  kpis: ExecutiveKpis;
+  poolBreakdown: Array<{
+    poolId: string;
+    name: string;
+    totalSessions: number;
+    consumedSessions: number;
+    reservedSessions: number;
+    availableSessions: number;
+    utilizationPercentage: number;
+    status: string;
+    validFrom: string;
+    validUntil: string;
+  }>;
+  departmentDistribution: DepartmentDistributionItem[];
+  periodSummary: {
+    startDate: string | null;
+    endDate: string | null;
+    branchId: string | null;
+    totalConfirmedInPeriod: number;
+  };
+  privacyNotice: string;
+}
+
+export interface BillingStatementResponse {
+  statementNumber: string;
+  generatedAt: string;
+  agreement: {
+    id: string;
+    code: string;
+    title: string;
+    corporateClient: {
+      id: string;
+      name: string;
+      taxId: string | null;
+      contactEmail: string | null;
+      contactPhone: string | null;
+    };
+  };
+  billingPeriod: {
+    startDate: string;
+    endDate: string;
+  };
+  unitPrice: number;
+  currency: string;
+  summary: {
+    billableSessionsCount: number;
+    subtotal: number;
+    ivaTaxRate: number;
+    ivaAmount: number;
+    totalAmount: number;
+  };
+  poolReconciliation: Array<{
+    poolId: string;
+    poolName: string;
+    periodConfirmedSessions: number;
+    poolTotalSessions: number;
+    poolConsumedTotal: number;
+  }>;
+  debitItems: Array<{
+    debitId: string;
+    timestamp: string;
+    sessionQuantity: number;
+    branchId: string | null;
+    branchName: string | null;
+    status: BenefitDebitStatus;
+  }>;
+  privacyNotice: string;
+}
+
+export interface CorporateReportQueryParams {
+  startDate?: string;
+  endDate?: string;
+  branchId?: string;
+}
+
+export interface CorporateBillingStatementQueryParams extends CorporateReportQueryParams {
+  unitPrice?: number;
+}
+

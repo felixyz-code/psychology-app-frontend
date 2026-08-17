@@ -1,0 +1,366 @@
+<div class="reports-page">
+  <!-- BREADCRUMB -->
+  <div class="reports-page__breadcrumb no-print">
+    <a [routerLink]="['/corporate/agreements', agreementId()]" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      Volver a Detalle del Convenio
+    </a>
+  </div>
+
+  @if (isLoading()) {
+    <div class="reports-page__loader">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Compilando informe ejecutivo y conciliaci&oacute;n PAEF...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="reports-page__error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage() }}</p>
+      <button mat-flat-button color="primary" (click)="loadReports()">Reintentar</button>
+    </div>
+  } @else if (executiveReport()) {
+    <!-- HEADER -->
+    <header class="report-header">
+      <div class="report-header__main">
+        <div class="title-row">
+          <h1 class="report-header__title">Informe Ejecutivo y Facturaci&oacute;n PAEF</h1>
+          <span class="badge" [class]="'badge--' + agreement()!.status.toLowerCase()">
+            {{ agreement()!.status }}
+          </span>
+        </div>
+        <p class="report-header__sub">
+          Convenio: <strong>{{ agreement()!.title }}</strong> ({{ agreement()!.code }}) &bull;
+          Empresa: <strong>{{ agreement()!.corporateClient.name }}</strong>
+        </p>
+      </div>
+
+      <div class="report-header__privacy-badge">
+        <mat-icon>verified_user</mat-icon>
+        <div class="privacy-text">
+          <strong>Garant&iacute;a Zero ePHI Leakage</strong>
+          <span>NOM-004 / HIPAA &bull; k-Anonimato (k &ge; 5)</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTROLS & FILTER BAR -->
+    <div class="filter-card no-print">
+      <form [formGroup]="filterForm" (ngSubmit)="loadReports()" class="filter-form">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Fecha Inicio</mat-label>
+          <input matInput type="date" formControlName="startDate" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Fecha Fin</mat-label>
+          <input matInput type="date" formControlName="endDate" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Tarifa por Sesi&oacute;n (MXN)</mat-label>
+          <input matInput type="number" formControlName="unitPrice" min="0" />
+        </mat-form-field>
+
+        <div class="filter-actions">
+          <button mat-flat-button color="primary" type="submit">
+            <mat-icon>filter_list</mat-icon>
+            Actualizar M&eacute;tricas
+          </button>
+          <button
+            mat-stroked-button
+            color="accent"
+            type="button"
+            (click)="exportCsv()"
+            [disabled]="isExporting()"
+          >
+            <mat-icon>download</mat-icon>
+            {{ isExporting() ? 'Exportando...' : 'Exportar CSV' }}
+          </button>
+          <button mat-stroked-button type="button" (click)="printSummary()">
+            <mat-icon>print</mat-icon>
+            Imprimir / PDF
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- EXECUTIVE KPI CARDS -->
+    <section class="kpi-grid">
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <div class="kpi-icon kpi-icon--contracted">
+            <mat-icon>inventory_2</mat-icon>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Sesiones Contratadas</span>
+            <span class="kpi-value">{{ kpis()!.totalSessionsContracted }}</span>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <span class="kpi-hint">Capacidad total en bolsas activas</span>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <div class="kpi-icon kpi-icon--consumed">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Sesiones Consumidas</span>
+            <span class="kpi-value">{{ kpis()!.totalSessionsConsumed }}</span>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <span class="kpi-hint">Atendidas y confirmadas</span>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <div class="kpi-icon kpi-icon--reserved">
+            <mat-icon>schedule</mat-icon>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">En Reserva / Tr&aacute;nsito</span>
+            <span class="kpi-value">{{ kpis()!.totalSessionsReserved }}</span>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <span class="kpi-hint">Citas agendadas pendientes</span>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <div class="kpi-icon kpi-icon--available">
+            <mat-icon>hourglass_empty</mat-icon>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Saldo Disponible</span>
+            <span class="kpi-value">{{ kpis()!.totalSessionsAvailable }}</span>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <span class="kpi-hint">Cupo restante en convenio</span>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <div class="kpi-icon kpi-icon--burn">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Tasa de Quemado (Burn-Rate)</span>
+            <span class="kpi-value">{{ kpis()!.burnRatePercentage }}%</span>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-progress-bar mode="determinate" [value]="kpis()!.burnRatePercentage"></mat-progress-bar>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <div class="kpi-icon kpi-icon--coverage">
+            <mat-icon>group</mat-icon>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Colaboradores Atendidos</span>
+            <span class="kpi-value"
+              >{{ kpis()!.uniqueEmployeesAttended }} / {{ kpis()!.uniqueEmployeesEntitled }}</span
+            >
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <span class="kpi-hint">{{ kpis()!.coveragePercentage }}% de cobertura del padr&oacute;n</span>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- POOL BREAKDOWN & DEPARTMENT CHARTS -->
+    <div class="analytics-row">
+      <!-- POOL CONSUMPTION -->
+      <mat-card class="analytics-card">
+        <mat-card-header>
+          <mat-card-title>Consumo por Bolsa de Beneficios</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="pools-list">
+            @for (pool of pools(); track pool.poolId) {
+              <div class="pool-item">
+                <div class="pool-item__info">
+                  <span class="pool-item__name">{{ pool.name }}</span>
+                  <span class="pool-item__stats">
+                    <strong>{{ pool.consumedSessions }}</strong> / {{ pool.totalSessions }} sesiones
+                    ({{ pool.utilizationPercentage }}%)
+                  </span>
+                </div>
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="pool.utilizationPercentage"
+                  class="pool-progress"
+                ></mat-progress-bar>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- DEPARTMENT DISTRIBUTION (k-ANONYMITY) -->
+      <mat-card class="analytics-card">
+        <mat-card-header>
+          <div class="analytics-card__head">
+            <mat-card-title>Distribuci&oacute;n Departamental Anonimizada</mat-card-title>
+            <span class="badge badge--kanon" matTooltip="Grupos < 5 colaboradores son consolidados">
+              k-Anonimato Activo (k &ge; 5)
+            </span>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          @if (departments().length === 0) {
+            <p class="empty-hint">No hay registros de consumo departamental disponibles.</p>
+          } @else {
+            <div class="dept-list">
+              @for (dept of departments(); track dept.department) {
+                <div class="dept-item" [class.dept-item--aggregated]="dept.isAggregated">
+                  <div class="dept-item__info">
+                    <span class="dept-item__name">
+                      @if (dept.isAggregated) {
+                        <mat-icon
+                          class="info-icon"
+                          matTooltip="Agrupado para proteger la privacidad individual (k < 5)"
+                          >lock</mat-icon
+                        >
+                      }
+                      <span class="dept-name-text">{{ dept.department }}</span>
+                    </span>
+                    <span class="dept-item__stats">
+                      <strong>{{ dept.sessionsConsumed }}</strong> sesiones ({{
+                        dept.employeeCount
+                      }}
+                      colab.) &bull; {{ dept.percentageOfTotalSessions }}%
+                    </span>
+                  </div>
+                  <mat-progress-bar
+                    mode="determinate"
+                    [value]="dept.percentageOfTotalSessions"
+                    [color]="dept.isAggregated ? 'accent' : 'primary'"
+                  ></mat-progress-bar>
+                </div>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- MONTHLY BILLING STATEMENT -->
+    @if (billing()) {
+      <section class="billing-section">
+        <mat-card class="billing-card">
+          <mat-card-header>
+            <div class="billing-header">
+              <div>
+                <mat-card-title>Estado de Cuenta y Liquidaci&oacute;n de Facturaci&oacute;n</mat-card-title>
+                <p class="billing-folio">
+                  Folio: <strong>{{ billing()!.statementNumber }}</strong> &bull; Per&iacute;odo:
+                  <strong>{{ billing()!.billingPeriod.startDate | slice: 0 : 10 }}</strong> al
+                  <strong>{{ billing()!.billingPeriod.endDate | slice: 0 : 10 }}</strong>
+                </p>
+              </div>
+              <div class="billing-total-box">
+                <span class="billing-total-box__label">Total Liquidable</span>
+                <span class="billing-total-box__val">
+                  ${{ billing()!.summary.totalAmount | number: '1.2-2' }} {{ billing()!.currency }}
+                </span>
+              </div>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- FINANCIAL SUMMARY TABLE -->
+            <div class="financial-table-container">
+              <table class="financial-table">
+                <thead>
+                  <tr>
+                    <th>Concepto</th>
+                    <th class="text-right">Cantidad de Sesiones</th>
+                    <th class="text-right">Tarifa Unitaria</th>
+                    <th class="text-right">Subtotal</th>
+                    <th class="text-right">IVA (16%)</th>
+                    <th class="text-right">Total a Pagar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Sesiones Psicol&oacute;gicas PAEF Confirmadas</td>
+                    <td class="text-right">
+                      <strong>{{ billing()!.summary.billableSessionsCount }}</strong>
+                    </td>
+                    <td class="text-right">${{ billing()!.unitPrice | number: '1.2-2' }}</td>
+                    <td class="text-right">${{ billing()!.summary.subtotal | number: '1.2-2' }}</td>
+                    <td class="text-right">${{ billing()!.summary.ivaAmount | number: '1.2-2' }}</td>
+                    <td class="text-right text-primary">
+                      <strong>${{ billing()!.summary.totalAmount | number: '1.2-2' }}</strong>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- RECONCILED DEBIT LEDGER (OPAQUE & ANONYMIZED) -->
+            <div class="debit-ledger">
+              <div class="debit-ledger__head">
+                <h3>Registro Conciliado de D&eacute;bitos (Auditor&iacute;a Ciega)</h3>
+                <span class="badge badge--neutral"
+                  >{{ billing()!.debitItems.length }} evento(s) confirmados</span
+                >
+              </div>
+
+              @if (billing()!.debitItems.length === 0) {
+                <p class="empty-hint">No hay d&eacute;bitos confirmados en el per&iacute;odo seleccionado.</p>
+              } @else {
+                <div class="table-responsive">
+                  <table class="ledger-table">
+                    <thead>
+                      <tr>
+                        <th>Folio Transacci&oacute;n</th>
+                        <th>Fecha y Hora</th>
+                        <th>Sede de Atenci&oacute;n</th>
+                        <th class="text-right">Sesiones</th>
+                        <th class="text-center">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (item of billing()!.debitItems; track item.debitId) {
+                        <tr>
+                          <td>
+                            <code class="debit-code">{{ item.debitId }}</code>
+                          </td>
+                          <td>{{ item.timestamp | date: 'dd/MM/yyyy HH:mm' }}</td>
+                          <td>{{ item.branchName || 'Sede Central' }}</td>
+                          <td class="text-right">{{ item.sessionQuantity }}</td>
+                          <td class="text-center">
+                            <span class="badge badge--active">{{ item.status }}</span>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+
+            <!-- PRIVACY DISCLAIMER -->
+            <footer class="report-disclaimer">
+              <mat-icon>lock</mat-icon>
+              <p>{{ executiveReport()!.privacyNotice }}</p>
+            </footer>
+          </mat-card-content>
+        </mat-card>
+      </section>
+    }
+  }
+</div>
