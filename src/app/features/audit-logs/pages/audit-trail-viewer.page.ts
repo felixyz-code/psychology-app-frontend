@@ -325,21 +325,24 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
         margin: 0;
         font-size: 24px;
         font-weight: 700;
-        color: #212529;
+        color: var(--app-color-heading);
       }
       .subtitle {
         margin: 4px 0 0 0;
         font-size: 13px;
-        color: #6c757d;
+        color: var(--app-color-muted);
       }
       .header-actions {
         display: flex;
         gap: 12px;
       }
       .filter-card {
-        padding: 16px;
+        padding: 20px 24px;
         margin-bottom: 24px;
-        border-radius: 8px;
+        border-radius: 14px;
+        border: 1px solid var(--app-color-card-border);
+        background: var(--app-color-card-bg);
+        box-shadow: var(--app-shadow-card);
       }
       .filters-grid {
         display: grid;
@@ -351,7 +354,10 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
       }
       .table-card {
         position: relative;
-        border-radius: 8px;
+        border-radius: 14px;
+        border: 1px solid var(--app-color-card-border);
+        background: var(--app-color-card-bg);
+        box-shadow: var(--app-shadow-card);
         overflow: hidden;
       }
       .table-responsive {

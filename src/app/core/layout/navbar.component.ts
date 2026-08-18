@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { AuthService } from '../auth/auth.service';
 import { AuthStore } from '../auth/auth.store';
@@ -22,7 +21,6 @@ import { BranchSwitcherComponent } from '../../shared/components/branch-switcher
     MatMenuModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
-    MatToolbarModule,
     BranchSwitcherComponent,
   ],
   templateUrl: './navbar.component.html',

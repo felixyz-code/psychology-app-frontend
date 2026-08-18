@@ -9,7 +9,7 @@
   display: grid;
 }
 .dashboard-page {
-  --dashboard-gap: 0.85rem;
+  --dashboard-gap: 1.5rem;
   --dashboard-surface: color-mix(in srgb, var(--app-color-card-soft-bg) 88%, transparent);
   --dashboard-surface-strong: color-mix(
     in srgb,
@@ -26,7 +26,7 @@
   --dashboard-caption-size: 0.82rem;
   --dashboard-body-size: 0.92rem;
   --dashboard-title-size: 1rem;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 .dashboard-skeleton,
 .dashboard-list,
@@ -34,7 +34,7 @@
 .dashboard-alerts,
 .dashboard-warnings,
 .dashboard-finance-list {
-  gap: var(--dashboard-gap);
+  gap: 1.25rem;
 }
 .quick-actions {
   align-content: start;
@@ -44,20 +44,20 @@
 .dashboard-state,
 .dashboard-warning,
 .dashboard-alert-card {
-  border-radius: 20px;
+  border-radius: 14px;
 }
 .dashboard-hero,
 .dashboard-state {
   border: 1px solid var(--dashboard-border);
   background: var(--app-color-card-bg);
-  box-shadow: var(--app-shadow-surface);
+  box-shadow: var(--app-shadow-card);
 }
 .dashboard-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(14rem, 0.7fr);
   gap: var(--dashboard-gap);
   align-items: start;
-  padding: 0.95rem 1.05rem;
+  padding: 1.25rem 1.5rem;
   background:
     radial-gradient(
       circle at top right,
@@ -129,32 +129,26 @@
 .dashboard-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
 }
+.dashboard-content-layout,
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-areas: 'agenda agenda alerts' 'upcoming finance quick' 'activity activity activity';
-  gap: 0.8rem;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  gap: 1.5rem;
   align-items: start;
 }
-.dashboard-widget--agenda {
-  grid-area: agenda;
+.dashboard-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
 }
-.dashboard-widget--upcoming {
-  grid-area: upcoming;
-}
-.dashboard-widget--alerts {
-  grid-area: alerts;
-}
-.dashboard-widget--finance {
-  grid-area: finance;
-}
-.dashboard-widget--activity {
-  grid-area: activity;
-}
-.dashboard-widget--quick-actions {
-  grid-area: quick;
-  align-self: start;
+.dashboard-side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
 }
 .dashboard-list-item__topline,
 .dashboard-alert-card__topline,
@@ -277,10 +271,10 @@
 }
 .dashboard-panel {
   border: 1px solid var(--dashboard-border);
-  border-radius: 20px;
-  padding: 1rem;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
   background: var(--app-color-card-bg);
-  box-shadow: var(--app-shadow-surface);
+  box-shadow: var(--app-shadow-card);
 }
 .dashboard-skeleton-line--eyebrow {
   width: 7rem;
@@ -310,9 +304,11 @@
   .dashboard-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+@media (max-width: 1024px) {
+  .dashboard-content-layout,
   .dashboard-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-areas: 'agenda agenda' 'alerts upcoming' 'finance quick' 'activity activity';
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 960px) {
@@ -327,6 +323,7 @@
 @media (max-width: 720px) {
   .dashboard-page,
   .dashboard-skeleton,
+  .dashboard-content-layout,
   .dashboard-grid,
   .dashboard-metrics,
   .dashboard-list,
@@ -339,13 +336,11 @@
     padding: 0.95rem;
   }
   .dashboard-metrics,
+  .dashboard-content-layout,
   .dashboard-grid,
   .dashboard-list-item,
   .dashboard-list-item__topline {
     grid-template-columns: 1fr;
-  }
-  .dashboard-grid {
-    grid-template-areas: 'agenda' 'alerts' 'upcoming' 'finance' 'quick' 'activity';
   }
   .dashboard-alert-card__topline {
     flex-direction: column;

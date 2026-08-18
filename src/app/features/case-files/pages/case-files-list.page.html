@@ -6,19 +6,31 @@
   />
 
   <section class="case-files-summary app-page__metrics" aria-label="Resumen de expedientes">
-    <article class="case-files-summary__item">
+    <article class="case-files-summary__item case-files-summary__item--primary">
+      <div class="case-files-summary__icon case-files-summary__icon--primary">
+        <mat-icon aria-hidden="true">folder</mat-icon>
+      </div>
       <span class="case-files-summary__label">Expedientes</span>
-      <strong>{{ caseFiles().length }}</strong>
+      <strong class="case-files-summary__value">{{ caseFiles().length }}</strong>
+      <span class="case-files-summary__desc">Registros clínicos en la sede</span>
     </article>
 
-    <article class="case-files-summary__item">
+    <article class="case-files-summary__item case-files-summary__item--success">
+      <div class="case-files-summary__icon case-files-summary__icon--success">
+        <mat-icon aria-hidden="true">check_circle</mat-icon>
+      </div>
       <span class="case-files-summary__label">Base completa</span>
-      <strong>{{ completeFoundationCount() }}</strong>
+      <strong class="case-files-summary__value">{{ completeFoundationCount() }}</strong>
+      <span class="case-files-summary__desc">Expedientes con datos completos</span>
     </article>
 
-    <article class="case-files-summary__item">
+    <article class="case-files-summary__item case-files-summary__item--warning">
+      <div class="case-files-summary__icon case-files-summary__icon--warning">
+        <mat-icon aria-hidden="true">pending_actions</mat-icon>
+      </div>
       <span class="case-files-summary__label">Informaci&oacute;n pendiente</span>
-      <strong>{{ pendingFoundationCount() }}</strong>
+      <strong class="case-files-summary__value">{{ pendingFoundationCount() }}</strong>
+      <span class="case-files-summary__desc">Requieren completar datos base</span>
     </article>
   </section>
 
