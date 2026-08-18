@@ -28,15 +28,15 @@
 .patients-overview__hero {
   display: grid;
   gap: 0.35rem;
-  padding: 0.82rem 1rem;
+  padding: 1.25rem 1.5rem;
   border: 1px solid var(--app-color-card-border);
-  border-radius: 20px;
+  border-radius: 14px;
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--app-color-card-bg) 95%, var(--app-color-primary-soft) 5%) 0,
     var(--app-color-card-bg) 100%
   );
-  box-shadow: var(--app-shadow-surface);
+  box-shadow: var(--app-shadow-card);
 }
 .patients-overview__hero h2 {
   color: var(--app-color-heading);

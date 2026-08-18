@@ -52,12 +52,12 @@
     font-size: 1.6rem;
     font-weight: 700;
     margin: 0;
-    color: #0f172a;
+    color: var(--app-color-heading);
   }
 
   &__sub {
     margin: 0.35rem 0 0 0;
-    color: #64748b;
+    color: var(--app-color-muted);
     font-size: 0.95rem;
   }
 
@@ -89,10 +89,10 @@
 }
 
 .filter-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
+  background: var(--app-color-surface-soft);
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
   margin-bottom: 1.5rem;
 
   .filter-form {
@@ -124,9 +124,21 @@
 }
 
 .kpi-card {
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  border: 1px solid var(--app-color-card-border);
+  background: var(--app-color-card-bg);
+  box-shadow: var(--app-shadow-card);
+  padding: 1.25rem;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--app-shadow-card-hover);
+    border-color: var(--app-color-primary-border);
+  }
 
   mat-card-header {
     display: flex;
@@ -142,19 +154,19 @@
 
   .kpi-label {
     font-size: 0.8rem;
-    color: #64748b;
+    color: var(--app-color-muted);
     font-weight: 500;
   }
 
   .kpi-value {
     font-size: 1.35rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--app-color-heading);
   }
 
   .kpi-hint {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--app-color-muted);
   }
 }
 
@@ -187,9 +199,20 @@
 }
 
 .analytics-card {
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  border: 1px solid var(--app-color-card-border);
+  background: var(--app-color-card-bg);
+  box-shadow: var(--app-shadow-card);
+  padding: 1.5rem;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--app-shadow-card-hover);
+  }
 
   &__head {
     display: flex;
@@ -202,7 +225,7 @@
   mat-card-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--app-color-heading);
   }
 }
 
@@ -223,7 +246,7 @@
     gap: 0.75rem;
     font-size: 0.85rem;
     margin-bottom: 0.35rem;
-    color: #334155;
+    color: var(--app-color-text-secondary);
   }
 
   &__name {
@@ -272,9 +295,11 @@
 }
 
 .billing-card {
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  border: 1px solid var(--app-color-card-border);
+  background: var(--app-color-card-bg);
+  box-shadow: var(--app-shadow-card);
+  padding: 1.5rem;
 
   .billing-header {
     display: flex;
@@ -288,12 +313,12 @@
     mat-card-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--app-color-heading);
     }
 
     .billing-folio {
       font-size: 0.85rem;
-      color: #64748b;
+      color: var(--app-color-muted);
       margin: 0.25rem 0 0 0;
     }
   }

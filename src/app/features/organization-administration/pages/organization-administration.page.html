@@ -118,189 +118,127 @@
         }
 
         <div class="organization-admin-grid">
-          <app-section-card
-            title="Identidad y configuraci&oacute;n"
-            subtitle="Los campos disponibles corresponden exactamente al contrato certificado."
-          >
-            <form class="organization-admin-form" [formGroup]="form" (ngSubmit)="save()">
-              <div class="organization-admin-form__grid">
-                <mat-form-field appearance="outline">
-                  <mat-label>Nombre visible</mat-label>
-                  <input
-                    matInput
-                    formControlName="displayName"
-                    maxlength="150"
-                    [readonly]="!canManage()"
-                  />
-                  @if (getFieldError('displayName')) {
-                    <mat-error>{{ getFieldError('displayName') }}</mat-error>
-                  }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Raz&oacute;n social</mat-label>
-                  <input
-                    matInput
-                    formControlName="legalName"
-                    maxlength="255"
-                    [readonly]="!canManage()"
-                  />
-                  @if (getFieldError('legalName')) {
-                    <mat-error>{{ getFieldError('legalName') }}</mat-error>
-                  }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Identificador</mat-label>
-                  <input
-                    matInput
-                    formControlName="slug"
-                    maxlength="100"
-                    autocomplete="off"
-                    [readonly]="!canManage()"
-                  />
-                  <mat-hint>Min&uacute;sculas, n&uacute;meros y guiones.</mat-hint>
-                  @if (getFieldError('slug')) {
-                    <mat-error>{{ getFieldError('slug') }}</mat-error>
-                  }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Zona horaria</mat-label>
-                  <input
-                    matInput
-                    formControlName="timezone"
-                    maxlength="100"
-                    placeholder="America/Hermosillo"
-                    [readonly]="!canManage()"
-                  />
-                  @if (getFieldError('timezone')) {
-                    <mat-error>{{ getFieldError('timezone') }}</mat-error>
-                  }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Locale</mat-label>
-                  <input
-                    matInput
-                    formControlName="locale"
-                    maxlength="20"
-                    placeholder="es-MX"
-                    [readonly]="!canManage()"
-                  />
-                  @if (getFieldError('locale')) {
-                    <mat-error>{{ getFieldError('locale') }}</mat-error>
-                  }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Moneda</mat-label>
-                  <input
-                    matInput
-                    formControlName="currency"
-                    maxlength="3"
-                    placeholder="MXN"
-                    [readonly]="!canManage()"
-                  />
-                  @if (getFieldError('currency')) {
-                    <mat-error>{{ getFieldError('currency') }}</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              @if (canManage()) {
-                <div class="organization-admin-form__actions">
-                  <button
-                    mat-flat-button
-                    color="primary"
-                    type="submit"
-                    [disabled]="
-                      isSaving() || isChangingStatus() || isCanonicalContextSynchronizationPending()
-                    "
-                  >
-                    @if (isSaving()) {
-                      <mat-spinner diameter="20" />
-                    }
-                    <span>{{ isSaving() ? 'Guardando' : 'Guardar cambios' }}</span>
-                  </button>
-                </div>
-              } @else {
-                <p class="organization-admin-readonly">
-                  Tienes acceso de consulta. La edici&oacute;n requiere la capability
-                  <code>organization.manage</code>.
-                </p>
-              }
-            </form>
-          </app-section-card>
-
-          <div class="organization-admin-aside">
+          <div class="organization-admin-main">
             <app-section-card
-              title="Estado de la organizaci&oacute;n"
-              subtitle="El servidor valida cada transici&oacute;n y conserva la autoridad final."
+              title="Identidad y configuraci&oacute;n"
+              subtitle="Los campos disponibles corresponden exactamente al contrato certificado."
             >
-              <div class="organization-admin-lifecycle">
-                <div>
-                  <span>Estado actual</span>
-                  <strong>{{
-                    currentOrganization.status === 'ACTIVE' ? 'Activa' : 'Suspendida'
-                  }}</strong>
+              <form class="organization-admin-form" [formGroup]="form" (ngSubmit)="save()">
+                <div class="organization-admin-form__grid">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nombre visible</mat-label>
+                    <input
+                      matInput
+                      formControlName="displayName"
+                      maxlength="150"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('displayName')) {
+                      <mat-error>{{ getFieldError('displayName') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Raz&oacute;n social</mat-label>
+                    <input
+                      matInput
+                      formControlName="legalName"
+                      maxlength="255"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('legalName')) {
+                      <mat-error>{{ getFieldError('legalName') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Identificador</mat-label>
+                    <input
+                      matInput
+                      formControlName="slug"
+                      maxlength="100"
+                      autocomplete="off"
+                      [readonly]="!canManage()"
+                    />
+                    <mat-hint>Min&uacute;sculas, n&uacute;meros y guiones.</mat-hint>
+                    @if (getFieldError('slug')) {
+                      <mat-error>{{ getFieldError('slug') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Zona horaria</mat-label>
+                    <input
+                      matInput
+                      formControlName="timezone"
+                      maxlength="100"
+                      placeholder="America/Hermosillo"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('timezone')) {
+                      <mat-error>{{ getFieldError('timezone') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Locale</mat-label>
+                    <input
+                      matInput
+                      formControlName="locale"
+                      maxlength="20"
+                      placeholder="es-MX"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('locale')) {
+                      <mat-error>{{ getFieldError('locale') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Moneda</mat-label>
+                    <input
+                      matInput
+                      formControlName="currency"
+                      maxlength="3"
+                      placeholder="MXN"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('currency')) {
+                      <mat-error>{{ getFieldError('currency') }}</mat-error>
+                    }
+                  </mat-form-field>
                 </div>
 
                 @if (canManage()) {
-                  <button
-                    [color]="isSuspended() ? 'primary' : 'warn'"
-                    mat-stroked-button
-                    type="button"
-                    [disabled]="
-                      isChangingStatus() || isSaving() || isCanonicalContextSynchronizationPending()
-                    "
-                    (click)="openStatusConfirmation()"
-                  >
-                    @if (isChangingStatus()) {
-                      <mat-spinner diameter="20" />
-                    } @else {
-                      <mat-icon aria-hidden="true">{{
-                        isSuspended() ? 'play_arrow' : 'pause'
-                      }}</mat-icon>
-                    }
-                    <span>{{
-                      isSuspended()
-                        ? 'Reactivar organizaci&oacute;n'
-                        : 'Suspender organizaci&oacute;n'
-                    }}</span>
-                  </button>
+                  <div class="organization-admin-form__actions">
+                    <button
+                      mat-flat-button
+                      color="primary"
+                      type="submit"
+                      [disabled]="
+                        isSaving() || isChangingStatus() || isCanonicalContextSynchronizationPending()
+                      "
+                    >
+                      @if (isSaving()) {
+                        <mat-spinner diameter="20" />
+                      }
+                      <span>{{ isSaving() ? 'Guardando' : 'Guardar cambios' }}</span>
+                    </button>
+                  </div>
                 } @else {
-                  <p>No tienes una acci&oacute;n de lifecycle autorizada.</p>
+                  <p class="organization-admin-readonly">
+                    Tienes acceso de consulta. La edici&oacute;n requiere la capability
+                    <code>organization.manage</code>.
+                  </p>
                 }
-              </div>
+              </form>
             </app-section-card>
 
-            <app-section-card
-              title="Metadatos"
-              subtitle="Informaci&oacute;n de solo lectura del contrato."
-            >
-              <dl class="organization-admin-metadata">
-                <div>
-                  <dt>ID</dt>
-                  <dd>{{ currentOrganization.id }}</dd>
-                </div>
-                <div>
-                  <dt>Creada</dt>
-                  <dd>{{ currentOrganization.createdAt | date: 'medium' }}</dd>
-                </div>
-                <div>
-                  <dt>&Uacute;ltima actualizaci&oacute;n</dt>
-                  <dd>{{ currentOrganization.updatedAt | date: 'medium' }}</dd>
-                </div>
-              </dl>
-            </app-section-card>
-          </div>
-
-          <div class="organization-configuration-grid">
-            <app-section-card
-              title="Duración predeterminada de citas"
-              subtitle="Se aplica al crear nuevas citas de esta organización."
-            >
+            <div class="organization-configuration-grid">
+              <app-section-card
+                title="Duración predeterminada de citas"
+                subtitle="Se aplica al crear nuevas citas de esta organización."
+              >
               @if (
                 organizationConfigurationStore.settingsState() === 'LOADING' ||
                 organizationConfigurationStore.settingsState() === 'NOT_LOADED'
@@ -637,6 +575,70 @@
             </div>
           </div>
         </div>
+
+        <div class="organization-admin-aside">
+          <app-section-card
+            title="Estado de la organizaci&oacute;n"
+            subtitle="El servidor valida cada transici&oacute;n y conserva la autoridad final."
+          >
+            <div class="organization-admin-lifecycle">
+              <div>
+                <span>Estado actual</span>
+                <strong>{{
+                  currentOrganization.status === 'ACTIVE' ? 'Activa' : 'Suspendida'
+                }}</strong>
+              </div>
+
+              @if (canManage()) {
+                <button
+                  [color]="isSuspended() ? 'primary' : 'warn'"
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="
+                    isChangingStatus() || isSaving() || isCanonicalContextSynchronizationPending()
+                  "
+                  (click)="openStatusConfirmation()"
+                >
+                  @if (isChangingStatus()) {
+                    <mat-spinner diameter="20" />
+                  } @else {
+                    <mat-icon aria-hidden="true">{{
+                      isSuspended() ? 'play_arrow' : 'pause'
+                    }}</mat-icon>
+                  }
+                  <span>{{
+                    isSuspended()
+                      ? 'Reactivar organizaci&oacute;n'
+                      : 'Suspender organizaci&oacute;n'
+                  }}</span>
+                </button>
+              } @else {
+                <p>No tienes una acci&oacute;n de lifecycle autorizada.</p>
+              }
+            </div>
+          </app-section-card>
+
+          <app-section-card
+            title="Metadatos"
+            subtitle="Informaci&oacute;n de solo lectura del contrato."
+          >
+            <dl class="organization-admin-metadata">
+              <div>
+                <dt>ID</dt>
+                <dd>{{ currentOrganization.id }}</dd>
+              </div>
+              <div>
+                <dt>Creada</dt>
+                <dd>{{ currentOrganization.createdAt | date: 'medium' }}</dd>
+              </div>
+              <div>
+                <dt>&Uacute;ltima actualizaci&oacute;n</dt>
+                <dd>{{ currentOrganization.updatedAt | date: 'medium' }}</dd>
+              </div>
+            </dl>
+          </app-section-card>
+        </div>
+      </div>
       }
     }
   }
