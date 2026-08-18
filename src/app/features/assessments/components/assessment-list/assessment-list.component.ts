@@ -188,4 +188,10 @@ export class AssessmentListComponent implements OnInit {
     if (Array.isArray(admin.result.flagsJson) && admin.result.flagsJson.length > 0) return true;
     return false;
   }
+
+  getRiskAlertsCount(admin: AssessmentAdministration): number {
+    if (!admin.result?.flagsJson) return 0;
+    if (Array.isArray(admin.result.flagsJson)) return admin.result.flagsJson.length;
+    return 0;
+  }
 }

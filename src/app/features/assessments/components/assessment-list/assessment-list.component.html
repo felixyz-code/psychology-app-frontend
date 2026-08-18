@@ -72,11 +72,10 @@
                   [variant]="getSeverityVariant(admin.result.severity)"
                 ></app-status-badge>
                 @if (hasRiskFlags(admin)) {
-                  <mat-icon
-                    class="assessment-list__risk-icon"
-                    matTooltip="Alerta clínica detectada en reactivos críticos (NOM-004-SSA3-2012)"
-                    >warning</mat-icon
-                  >
+                  <span class="assessment-list__risk-badge" matTooltip="Alerta clínica detectada en reactivos críticos (NOM-004-SSA3-2012)">
+                    <mat-icon class="assessment-list__risk-icon">warning</mat-icon>
+                    <span>{{ getRiskAlertsCount(admin) === 1 ? '1 Alerta' : (getRiskAlertsCount(admin) + ' Alertas') }}</span>
+                  </span>
                 }
               </div>
             } @else {
