@@ -145,3 +145,12 @@
     </div>
   }
 </app-section-card>
+
+@if (patientId) {
+  <div style="margin-top: 2rem;">
+    <app-assessment-longitudinal
+      [patientId]="patientId"
+      [patientName]="patientName"
+    ></app-assessment-longitudinal>
+  </div>
+}

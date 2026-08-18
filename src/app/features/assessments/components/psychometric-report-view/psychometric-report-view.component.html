@@ -1,0 +1,210 @@
+<div class="psychometric-report-container">
+  <!-- Loading state -->
+  @if (loading()) {
+    <div class="report-loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Generando reporte psicométrico formal NOM-004-SSA3-2012...</p>
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (!loading() && error()) {
+    <div class="report-error">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  <!-- Report content -->
+  @if (!loading() && report(); as r) {
+    <div class="psychometric-report">
+      <!-- Institutional Header -->
+      <header class="report-header">
+        <div class="report-brand">
+          @if (r.organization.logoUrl) {
+            <img [src]="r.organization.logoUrl" [alt]="r.organization.displayName" class="report-logo" />
+          }
+          <div class="report-org-details">
+            <h1 class="report-org-name">{{ r.organization.legalName }}</h1>
+            <p class="report-branch-info">
+              Sucursal: {{ r.branch.name || 'Matriz' }}
+              @if (r.branch.address) { | {{ r.branch.address }} }
+              @if (r.branch.phone) { | Tel: {{ r.branch.phone }} }
+            </p>
+          </div>
+        </div>
+        <div class="report-meta-box">
+          <div class="report-title-tag">REPORTE PSICOMÉTRICO CLÍNICO</div>
+          <div class="report-generated-date">Generado: {{ r.reportGeneratedAt | date: 'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+      </header>
+
+      <mat-divider></mat-divider>
+
+      <!-- Clinical Information Bar -->
+      <section class="report-clinical-grid">
+        <div class="report-info-block">
+          <h3>DATOS DEL PACIENTE</h3>
+          <p><strong>Nombre:</strong> {{ r.patient.fullName }}</p>
+          <p><strong>ID Paciente:</strong> <code>{{ r.patient.id }}</code></p>
+          <p>
+            <strong>Edad:</strong> {{ r.patient.age !== null ? r.patient.age + ' años' : 'No especificada' }}
+            @if (r.patient.birthDate) { (F. Nac.: {{ r.patient.birthDate | date: 'dd/MM/yyyy' }}) }
+          </p>
+        </div>
+
+        <div class="report-info-block">
+          <h3>ESPECIALISTA Y EVALUACIÓN</h3>
+          <p><strong>Profesional:</strong> {{ r.professional.professionalName || r.professional.name }}</p>
+          <p><strong>Cédula Profesional:</strong> {{ r.professional.licenseNumber || 'No registrada' }}</p>
+          <p><strong>Instrumento:</strong> {{ r.instrument.name }} ({{ r.instrument.acronym }})</p>
+          <p><strong>Fecha Aplicación:</strong> {{ r.administration.completedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+          @if (r.administration.durationMinutes !== null) {
+            <p><strong>Duración:</strong> {{ r.administration.durationMinutes }} minutos</p>
+          }
+        </div>
+      </section>
+
+      <!-- Global Result Banner -->
+      <section class="report-summary-banner">
+        <div class="report-score-box">
+          <span class="report-score-number">{{ r.result.rawScore }}</span>
+          <span class="report-score-label">Puntaje Bruto</span>
+          @if (r.result.minPossibleScore !== null && r.result.maxPossibleScore !== null) {
+            <span class="report-score-range">Rango posible: {{ r.result.minPossibleScore }} - {{ r.result.maxPossibleScore }}</span>
+          }
+        </div>
+
+        <div class="report-strata-box">
+          <div class="report-strata-header">
+            <h2>{{ r.result.strataTitle || r.result.strataCode || 'Evaluación Psicométrica' }}</h2>
+            <app-status-badge
+              [label]="r.result.severity || 'Normal'"
+              [variant]="getSeverityVariant(r.result.severity)"
+            ></app-status-badge>
+          </div>
+          @if (r.result.strataDescription) {
+            <p class="report-strata-desc">{{ r.result.strataDescription }}</p>
+          }
+        </div>
+      </section>
+
+      <!-- Clinical Alerts (NOM-004-SSA3-2012) -->
+      @if (r.result.clinicalAlerts && r.result.clinicalAlerts.length > 0) {
+        <section class="report-alerts-section">
+          <div class="report-section-header">
+            <mat-icon class="alert-icon">warning</mat-icon>
+            <h3>ALERTAS CLÍNICAS Y DE RIESGO DETECTADAS</h3>
+          </div>
+          <div class="report-alert-cards">
+            @for (alert of r.result.clinicalAlerts; track alert.itemCode + alert.alertType) {
+              <div class="report-alert-card report-alert-card--{{ alert.severity.toLowerCase() }}">
+                <div class="report-alert-title font-semibold">
+                  [{{ alert.severity }}] {{ alert.alertType }} - Ítem: {{ alert.itemCode }}
+                </div>
+                <div class="report-alert-message">{{ alert.message }}</div>
+                @if (alert.actualValue !== null && alert.actualValue !== undefined) {
+                  <div class="report-alert-value">Valor registrado: <strong>{{ alert.actualValue }}</strong></div>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Subscales Section -->
+      @if (r.result.subscales && r.result.subscales.length > 0) {
+        <section class="report-subscales-section">
+          <h3 class="report-section-title">DESGLOSE POR SUBESCALAS / DIMENSIONES</h3>
+          <table class="report-subscale-table">
+            <thead>
+              <tr>
+                <th>Escala / Dimensión</th>
+                <th class="text-center">Puntaje Bruto</th>
+                <th class="text-center">Rango</th>
+                <th>Clasificación</th>
+                <th>Severidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (sub of r.result.subscales; track sub.scaleCode) {
+                <tr>
+                  <td>
+                    <strong>{{ sub.scaleName }}</strong>
+                    <span class="subscale-code font-mono">({{ sub.scaleCode }})</span>
+                  </td>
+                  <td class="text-center font-bold">{{ sub.rawScore }}</td>
+                  <td class="text-center">{{ sub.minPossibleScore }} - {{ sub.maxPossibleScore }}</td>
+                  <td>{{ sub.strataTitle || 'Normal' }}</td>
+                  <td>
+                    <app-status-badge
+                      [label]="sub.severity || 'Normal'"
+                      [variant]="getSeverityVariant(sub.severity)"
+                    ></app-status-badge>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
+
+      <!-- Item Responses Table -->
+      @if (r.itemResponses && r.itemResponses.length > 0) {
+        <section class="report-items-section">
+          <h3 class="report-section-title">DESGLOSE DE REACTIVOS Y RESPUESTAS REGISTRADAS</h3>
+          <table class="report-items-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">No.</th>
+                <th>Ítem / Pregunta</th>
+                <th>Respuesta Registrada</th>
+                <th style="width: 70px;" class="text-center">Pts</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of r.itemResponses; track item.itemCode) {
+                <tr>
+                  <td class="text-center font-mono">{{ item.sequenceNumber }}</td>
+                  <td>
+                    <span class="item-code">[{{ item.itemCode }}]</span>
+                    <span class="item-prompt">{{ item.prompt }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ item.responseLabel || item.responseValue }}</strong>
+                  </td>
+                  <td class="text-center font-bold">
+                    {{ item.numericWeight !== null ? item.numericWeight : '-' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
+
+      <!-- Legal Disclaimer & Signatures -->
+      <footer class="report-legal-footer">
+        <mat-divider></mat-divider>
+        <div class="report-disclaimer-box">
+          <pre class="disclaimer-text">{{ r.legalDisclaimer }}</pre>
+        </div>
+
+        <div class="report-signature-block">
+          <div class="signature-line"></div>
+          <p class="signature-name font-bold">{{ r.professional.professionalName || r.professional.name }}</p>
+          <p class="signature-license">Cédula Profesional: {{ r.professional.licenseNumber || 'No registrada' }}</p>
+          <p class="signature-title">Firma del Profesional Responsable</p>
+        </div>
+      </footer>
+
+      <!-- Floating Print Controls (Hidden on Print) -->
+      <div class="report-print-actions">
+        <button mat-raised-button color="primary" type="button" (click)="printReport()">
+          <mat-icon>print</mat-icon>
+          Imprimir / Exportar a PDF
+        </button>
+      </div>
+    </div>
+  }
+</div>

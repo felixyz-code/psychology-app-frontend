@@ -82,12 +82,15 @@
         <section class="assessment-result-dialog__subscales">
           <h4>Desglose por Subescalas / Dimensiones</h4>
           <div class="assessment-result-dialog__subscale-grid">
-            @for (sub of getSubscales(); track sub.code) {
+            @for (sub of getSubscales(); track sub.scaleCode) {
               <div class="assessment-result-dialog__subscale-card">
                 <span class="assessment-result-dialog__subscale-name">{{
-                  sub.name || sub.code
+                  sub.scaleName || sub.scaleCode
                 }}</span>
-                <span class="assessment-result-dialog__subscale-score">{{ sub.score }} pts</span>
+                <span class="assessment-result-dialog__subscale-score">{{ sub.rawScore }} pts</span>
+                @if (sub.strataTitle) {
+                  <span class="assessment-result-dialog__subscale-strata">{{ sub.strataTitle }}</span>
+                }
               </div>
             }
           </div>

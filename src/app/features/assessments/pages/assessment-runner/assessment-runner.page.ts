@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   computed,
@@ -14,7 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, firstValueFrom, Subject, switchMap } from 'rxjs';
 
 import {
   AdministrationStatus,
@@ -47,6 +48,7 @@ export class AssessmentRunnerPage implements OnInit {
   readonly isLoading = signal<boolean>(true);
   readonly isSubmitting = signal<boolean>(false);
   readonly errorMessage = signal<string>('');
+  readonly formAlertMessage = signal<string>('');
   readonly syncStatus = signal<SyncStatus>('SAVED');
   readonly isCompleted = signal<boolean>(false);
 
@@ -187,6 +189,7 @@ export class AssessmentRunnerPage implements OnInit {
   selectOption(itemCode: string, value: any): void {
     if (this.isCompleted()) return;
 
+    this.formAlertMessage.set('');
     const current = { ...this.responses(), [itemCode]: value };
     this.responses.set(current);
 
@@ -211,10 +214,10 @@ export class AssessmentRunnerPage implements OnInit {
     this.responseChange$.next();
   }
 
-  submitAssessment(): void {
+  async submitAssessment(): Promise<void> {
     if (this.isSubmitting() || this.isCompleted()) return;
 
-    // Validate completeness
+    // Validate completeness on client side
     const missing: string[] = [];
     const resps = this.responses();
     for (const item of this.items()) {
@@ -228,6 +231,9 @@ export class AssessmentRunnerPage implements OnInit {
 
     if (missing.length > 0) {
       this.missingItemCodes.set(missing);
+      this.formAlertMessage.set(
+        'Por favor responde todas las preguntas obligatorias antes de entregar la evaluación.',
+      );
       // Scroll to first missing item if scrollIntoView is supported
       const firstMissingElement = document.getElementById(`item-${missing[0]}`);
       if (firstMissingElement && typeof firstMissingElement.scrollIntoView === 'function') {
@@ -237,23 +243,66 @@ export class AssessmentRunnerPage implements OnInit {
     }
 
     this.isSubmitting.set(true);
-    this.assessmentsService.completePublicAssessment(this.accessToken()).subscribe({
-      next: () => {
-        this.isSubmitting.set(false);
-        this.isCompleted.set(true);
-        try {
-          localStorage.removeItem(`eval_backup_${this.accessToken()}`);
-        } catch {
-          // ignore
-        }
-      },
-      error: (err) => {
-        this.isSubmitting.set(false);
-        const msg =
-          err?.error?.message ||
-          'No fue posible finalizar la evaluación. Verifique que todas las preguntas hayan sido respondidas.';
-        this.errorMessage.set(msg);
-      },
-    });
+    this.formAlertMessage.set('');
+
+    const token = this.accessToken();
+    const currentResponses = this.responses();
+
+    // 1. Force flush current responses snapshot to avoid race conditions with debounced auto-save
+    try {
+      this.syncStatus.set('SAVING');
+      await firstValueFrom(
+        this.assessmentsService.savePublicResponses(token, { responses: currentResponses }),
+      );
+      this.syncStatus.set('SAVED');
+    } catch {
+      // If auto-save fails, continue to submission with payload
+    }
+
+    // 2. Submit completion request passing responses payload for atomic backend persistence & scoring
+    this.assessmentsService
+      .completePublicAssessment(token, { responses: currentResponses })
+      .subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.isCompleted.set(true);
+          try {
+            localStorage.removeItem(`eval_backup_${token}`);
+          } catch {
+            // ignore
+          }
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isSubmitting.set(false);
+
+          if (err.status === 422) {
+            // Missing items validation error from backend
+            const missingCodes = err.error?.missingItems || err.error?.missingItemCodes;
+            if (Array.isArray(missingCodes) && missingCodes.length > 0) {
+              this.missingItemCodes.set(missingCodes);
+              const firstElem = document.getElementById(`item-${missingCodes[0]}`);
+              if (firstElem && typeof firstElem.scrollIntoView === 'function') {
+                firstElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }
+            this.formAlertMessage.set(
+              err?.error?.message ||
+                'Por favor responde todas las preguntas obligatorias antes de entregar la evaluación.',
+            );
+            return;
+          }
+
+          if (err.status === 409) {
+            this.isCompleted.set(true);
+            return;
+          }
+
+          // Other errors (do not block the whole page if already loaded)
+          this.formAlertMessage.set(
+            err?.error?.message ||
+              'No fue posible enviar la evaluación. Por favor verifique su conexión e intente nuevamente.',
+          );
+        },
+      });
   }
 }

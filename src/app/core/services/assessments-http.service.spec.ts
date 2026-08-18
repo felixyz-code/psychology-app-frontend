@@ -102,15 +102,17 @@ describe('AssessmentsHttpService', () => {
     });
   });
 
-  it('should call POST /assessments/public/runner/:accessToken/complete for submission', () => {
+  it('should call POST /assessments/public/runner/:accessToken/complete for submission with payload', () => {
     const token = 'sec_eval_abc123';
+    const payload = { responses: { PHQ9_1: 3 } };
 
-    service.completePublicAssessment(token).subscribe((res) => {
+    service.completePublicAssessment(token, payload).subscribe((res) => {
       expect(res.status).toBe(AdministrationStatus.COMPLETED);
     });
 
     const req = httpMock.expectOne(`${apiUrl}/assessments/public/runner/${token}/complete`);
     expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(payload);
     req.flush({
       administrationId: 'adm-1',
       status: AdministrationStatus.COMPLETED,
