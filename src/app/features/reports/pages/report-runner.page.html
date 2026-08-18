@@ -62,7 +62,9 @@
             <mat-select formControlName="paymentMethod">
               <mat-option value="">Todos</mat-option>
               @for (paymentMethod of paymentMethods; track paymentMethod) {
-                <mat-option [value]="paymentMethod">{{ getPaymentMethodLabel(paymentMethod) }}</mat-option>
+                <mat-option [value]="paymentMethod">{{
+                  getPaymentMethodLabel(paymentMethod)
+                }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
@@ -86,7 +88,9 @@
             <mat-select formControlName="patientId">
               <mat-option value="">Todos</mat-option>
               @for (patient of availablePatients(); track patient.id) {
-                <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
+                <mat-option [value]="patient.id"
+                  >{{ patient.firstName }} {{ patient.lastName }}</mat-option
+                >
               }
             </mat-select>
           </mat-form-field>
@@ -98,7 +102,9 @@
             <mat-select formControlName="patientId">
               <mat-option value="">Selecciona un paciente</mat-option>
               @for (patient of availablePatients(); track patient.id) {
-                <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
+                <mat-option [value]="patient.id"
+                  >{{ patient.firstName }} {{ patient.lastName }}</mat-option
+                >
               }
             </mat-select>
           </mat-form-field>
@@ -115,7 +121,12 @@
         </mat-form-field>
 
         <div filterToolbarActions class="report-runner-page__filter-actions">
-          <button mat-flat-button type="submit" class="app-toolbar-meta-button" [disabled]="isLoading()">
+          <button
+            mat-flat-button
+            type="submit"
+            class="app-toolbar-meta-button"
+            [disabled]="isLoading()"
+          >
             <mat-icon>filter_alt</mat-icon>
             <span>Generar reporte</span>
           </button>
@@ -135,7 +146,10 @@
     </form>
   </app-report-filters-panel>
 
-  <section class="report-runner-page__metrics app-page__metrics" aria-label="Indicadores del reporte">
+  <section
+    class="report-runner-page__metrics app-page__metrics"
+    aria-label="Indicadores del reporte"
+  >
     @for (metric of metrics(); track metric.label) {
       <app-metric-card
         [icon]="metric.icon"

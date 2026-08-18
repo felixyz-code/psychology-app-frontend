@@ -1,0 +1,190 @@
+.branches-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.branches-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.branches-alert--success {
+  background: var(--app-color-success-soft);
+  color: var(--app-color-success-text);
+  border: 1px solid var(--app-color-success-border);
+}
+
+.branches-alert--error {
+  background: var(--app-color-danger-soft);
+  color: var(--app-color-danger-text);
+}
+
+.branches-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .branches-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.branches-metric-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 16px;
+  background: var(--app-color-card-bg);
+  box-shadow: var(--app-shadow-surface);
+}
+
+.branches-metric-card__icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.branches-metric-card__icon--primary {
+  background: var(--app-color-primary-soft);
+  color: var(--app-color-primary);
+}
+
+.branches-metric-card__icon--success {
+  background: var(--app-color-success-soft);
+  color: var(--app-color-success-text);
+}
+
+.branches-metric-card__icon--muted {
+  background: var(--app-color-surface-muted);
+  color: var(--app-color-muted);
+}
+
+.branches-metric-card__data {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.branches-metric-card__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-color-text-secondary);
+}
+
+.branches-metric-card__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--app-color-heading);
+}
+
+.branches-card {
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 20px;
+  background: var(--app-color-card-bg);
+  box-shadow: var(--app-shadow-surface);
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.branches-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.branches-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: min(100%, 20rem);
+  max-width: 32rem;
+}
+
+.branches-search__icon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--app-color-muted);
+  pointer-events: none;
+}
+
+.branches-search__input {
+  width: 100%;
+  height: 2.6rem;
+  padding: 0 2.5rem 0 2.6rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 12px;
+  background: var(--app-color-input-bg);
+  color: var(--app-color-heading);
+  font: inherit;
+  font-size: 0.9rem;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.branches-search__input:focus {
+  outline: none;
+  border-color: var(--app-color-primary);
+  box-shadow: 0 0 0 3px var(--app-focus-ring-soft);
+}
+
+.branches-search__clear {
+  position: absolute;
+  right: 0.25rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.branch-code-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: var(--app-color-surface-muted);
+  border: 1px solid var(--app-color-border);
+  font-family: var(--app-font-family, inherit);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--app-color-heading);
+}
+
+.branch-name-text {
+  font-size: 0.95rem;
+  color: var(--app-color-heading);
+}
+
+.branch-tz-text {
+  font-size: 0.85rem;
+  color: var(--app-color-text-secondary);
+}
+
+.branches-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  justify-content: flex-end;
+}
+
+.branches-actions--none {
+  color: var(--app-color-muted);
+  font-size: 0.9rem;
+}

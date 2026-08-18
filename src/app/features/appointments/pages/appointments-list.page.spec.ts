@@ -63,9 +63,26 @@ describe('AppointmentsListPage cancellation', () => {
 });
 
 function createPatient(): Patient {
-  return { id: 'patient-1', psychologistId: 'psychologist-1', firstName: 'Ana', lastName: 'Lopez', createdAt: '', updatedAt: '' };
+  return {
+    id: 'patient-1',
+    psychologistId: 'psychologist-1',
+    firstName: 'Ana',
+    lastName: 'Lopez',
+    createdAt: '',
+    updatedAt: '',
+  };
 }
 
 function createAppointment(): Appointment {
-  return { id: 'appointment-1', patientId: 'patient-1', psychologistId: 'psychologist-1', scheduledAt: '2026-07-15T16:30:00.000Z', durationMinutes: 60, status: 'SCHEDULED', notes: null, createdAt: '', updatedAt: '' };
+  return {
+    id: 'appointment-1',
+    patientId: 'patient-1',
+    psychologistId: 'psychologist-1',
+    scheduledAt: '2026-07-15T16:30:00.000Z',
+    durationMinutes: 60,
+    status: 'SCHEDULED',
+    notes: null,
+    createdAt: '',
+    updatedAt: '',
+  };
 }

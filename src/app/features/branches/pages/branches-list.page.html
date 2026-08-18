@@ -1,0 +1,224 @@
+<div class="branches-page app-page">
+  <app-page-header
+    heading="Sedes de la organización"
+    subtitle="Administra las sedes físicas y operativas de tu organización y asigna al personal correspondiente."
+    [breadcrumbs]="[
+      { label: 'Organización', url: '/organization-administration' },
+      { label: 'Sedes' },
+    ]"
+  >
+    @if (canManage()) {
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        class="app-page-header-action"
+        (click)="openCreateDialog()"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Nueva sede</span>
+      </button>
+    }
+  </app-page-header>
+
+  @if (successMessage()) {
+    <div class="branches-alert branches-alert--success" role="status">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="branches-alert branches-alert--error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <section class="branches-metrics-grid" aria-label="Métricas de sedes">
+    <article class="branches-metric-card">
+      <div class="branches-metric-card__icon branches-metric-card__icon--primary">
+        <mat-icon>apartment</mat-icon>
+      </div>
+      <div class="branches-metric-card__data">
+        <span class="branches-metric-card__label">Total de Sedes</span>
+        <strong class="branches-metric-card__value">{{ summary().total }}</strong>
+      </div>
+    </article>
+
+    <article class="branches-metric-card">
+      <div class="branches-metric-card__icon branches-metric-card__icon--success">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="branches-metric-card__data">
+        <span class="branches-metric-card__label">Sedes Activas</span>
+        <strong class="branches-metric-card__value">{{ summary().active }}</strong>
+      </div>
+    </article>
+
+    <article class="branches-metric-card">
+      <div class="branches-metric-card__icon branches-metric-card__icon--muted">
+        <mat-icon>domain_disabled</mat-icon>
+      </div>
+      <div class="branches-metric-card__data">
+        <span class="branches-metric-card__label">Sedes Inactivas</span>
+        <strong class="branches-metric-card__value">{{ summary().inactive }}</strong>
+      </div>
+    </article>
+  </section>
+
+  <section class="branches-card">
+    <div class="branches-toolbar">
+      <div class="branches-search">
+        <mat-icon class="branches-search__icon">search</mat-icon>
+        <input
+          type="text"
+          class="branches-search__input"
+          placeholder="Buscar por código, nombre, dirección o teléfono..."
+          [(ngModel)]="searchTerm"
+        />
+        @if (searchTerm()) {
+          <button
+            mat-icon-button
+            type="button"
+            class="branches-search__clear"
+            aria-label="Limpiar búsqueda"
+            (click)="searchTerm.set('')"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+
+      <div class="branches-toolbar__filters">
+        <mat-slide-toggle
+          color="primary"
+          [(ngModel)]="includeInactive"
+          (change)="onIncludeInactiveChange()"
+        >
+          Mostrar inactivas
+        </mat-slide-toggle>
+      </div>
+    </div>
+
+    @if (viewState() === 'loading') {
+      <div class="app-table-loading-state" aria-live="polite">
+        <mat-spinner diameter="36" />
+        <p>Cargando información de sedes...</p>
+      </div>
+    } @else if (viewState() === 'error') {
+      <div class="app-table-feedback-state app-table-feedback-state--error">
+        <mat-icon>cloud_off</mat-icon>
+        <p>{{ errorMessage() || 'No fue posible cargar las sedes.' }}</p>
+        <button mat-stroked-button type="button" (click)="loadBranches()">Reintentar</button>
+      </div>
+    } @else if (filteredBranches().length === 0) {
+      <app-data-table-empty-state
+        title="No se encontraron sedes"
+        description="No hay sedes que coincidan con los criterios de búsqueda o filtros aplicados."
+      />
+    } @else {
+      <div class="app-table-wrapper">
+        <table mat-table [dataSource]="filteredBranches()" class="app-data-table">
+          <!-- Código -->
+          <ng-container matColumnDef="code">
+            <th mat-header-cell *matHeaderCellDef>CÓDIGO</th>
+            <td mat-cell *matCellDef="let branch">
+              <span class="branch-code-badge">{{ branch.code }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Nombre -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>NOMBRE</th>
+            <td mat-cell *matCellDef="let branch">
+              <strong class="branch-name-text">{{ branch.name }}</strong>
+            </td>
+          </ng-container>
+
+          <!-- Dirección -->
+          <ng-container matColumnDef="address">
+            <th mat-header-cell *matHeaderCellDef>DIRECCIÓN</th>
+            <td mat-cell *matCellDef="let branch">
+              {{ branch.address || '—' }}
+            </td>
+          </ng-container>
+
+          <!-- Teléfono -->
+          <ng-container matColumnDef="phone">
+            <th mat-header-cell *matHeaderCellDef>TELÉFONO</th>
+            <td mat-cell *matCellDef="let branch">
+              {{ branch.phone || '—' }}
+            </td>
+          </ng-container>
+
+          <!-- Zona Horaria -->
+          <ng-container matColumnDef="timezone">
+            <th mat-header-cell *matHeaderCellDef>ZONA HORARIA</th>
+            <td mat-cell *matCellDef="let branch">
+              <span class="branch-tz-text">{{ branch.timezone }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Estado -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>ESTADO</th>
+            <td mat-cell *matCellDef="let branch">
+              <app-status-badge
+                [label]="branch.isActive ? 'Activa' : 'Inactiva'"
+                [variant]="branch.isActive ? 'success' : 'neutral'"
+              />
+            </td>
+          </ng-container>
+
+          <!-- Acciones -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>ACCIONES</th>
+            <td mat-cell *matCellDef="let branch">
+              @if (canManage()) {
+                <div class="branches-actions app-table-actions" aria-label="Acciones de sede">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Asignar personal"
+                    [matTooltipShowDelay]="150"
+                    (click)="openAssignDialog(branch)"
+                    [attr.aria-label]="'Asignar personal a sede ' + branch.name"
+                  >
+                    <mat-icon>people</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Editar sede"
+                    [matTooltipShowDelay]="150"
+                    (click)="openEditDialog(branch)"
+                    [attr.aria-label]="'Editar sede ' + branch.name"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="app-table-action--danger"
+                    matTooltip="Eliminar sede"
+                    [matTooltipShowDelay]="150"
+                    (click)="openDeleteDialog(branch)"
+                    [attr.aria-label]="'Eliminar sede ' + branch.name"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              } @else {
+                <span class="branches-actions--none">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+</div>

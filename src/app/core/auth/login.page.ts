@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from './auth.service';
 import { LoginRequest } from './auth.models';
+import { TenantContextStore } from '../tenant-context/tenant-context.store';
 
 @Component({
   selector: 'app-login-page',
@@ -23,6 +24,7 @@ import { LoginRequest } from './auth.models';
     MatInputModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    RouterLink,
   ],
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
@@ -30,11 +32,13 @@ import { LoginRequest } from './auth.models';
 export class LoginPage {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly tenantContextStore = inject(TenantContextStore);
   private readonly router = inject(Router);
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
   readonly hidePassword = signal(true);
+  readonly signupRoute = '/signup';
 
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -61,7 +65,12 @@ export class LoginPage {
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: () => {
-          this.router.navigate(['/dashboard']);
+          void this.router.navigate([
+            this.tenantContextStore.isActiveTenantReady() ||
+            this.tenantContextStore.isAdminSuspendedContext()
+              ? '/dashboard'
+              : '/organization-selection',
+          ]);
         },
         error: () => {
           this.errorMessage.set('Correo o contraseña incorrectos.');

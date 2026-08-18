@@ -6,22 +6,42 @@
     </div>
 
     <div class="appointments-agenda__actions">
-      <button mat-flat-button type="button" class="appointments-agenda__create" (click)="openCreateAppointment()">
+      <button
+        mat-flat-button
+        type="button"
+        class="appointments-agenda__create"
+        (click)="openCreateAppointment()"
+      >
         <mat-icon>event</mat-icon>
         <span>Nueva cita</span>
       </button>
 
-      <button mat-stroked-button type="button" class="appointments-agenda__today" (click)="openToday()">
+      <button
+        mat-stroked-button
+        type="button"
+        class="appointments-agenda__today"
+        (click)="openToday()"
+      >
         <mat-icon>today</mat-icon>
         <span>Hoy</span>
       </button>
 
       <div class="appointments-agenda__nav">
-        <button mat-icon-button type="button" aria-label="D&iacute;a anterior" (click)="openPreviousDay()">
+        <button
+          mat-icon-button
+          type="button"
+          aria-label="D&iacute;a anterior"
+          (click)="openPreviousDay()"
+        >
           <mat-icon>chevron_left</mat-icon>
         </button>
 
-        <button mat-icon-button type="button" aria-label="D&iacute;a siguiente" (click)="openNextDay()">
+        <button
+          mat-icon-button
+          type="button"
+          aria-label="D&iacute;a siguiente"
+          (click)="openNextDay()"
+        >
           <mat-icon>chevron_right</mat-icon>
         </button>
       </div>
@@ -58,19 +78,40 @@
 
           <div class="appointments-agenda__bottom-row">
             <div class="appointments-agenda__meta">
-              <span class="appointments-agenda__duration">{{ appointment.durationMinutes }} min</span>
+              <span class="appointments-agenda__duration"
+                >{{ appointment.durationMinutes }} min</span
+              >
 
               @if (appointment.notes) {
                 <span class="appointments-agenda__separator" aria-hidden="true">&bull;</span>
-                <span class="appointments-agenda__note" [title]="appointment.notes">{{ appointment.notes }}</span>
+                <span class="appointments-agenda__note" [title]="appointment.notes">{{
+                  appointment.notes
+                }}</span>
               }
             </div>
 
-            <div class="appointments-agenda__item-actions app-table-actions" aria-label="Acciones disponibles">
-              <button mat-icon-button type="button" aria-label="Ver cita" matTooltip="Ver cita" [matTooltipShowDelay]="150" (click)="openAppointment(appointment); $event.stopPropagation()">
+            <div
+              class="appointments-agenda__item-actions app-table-actions"
+              aria-label="Acciones disponibles"
+            >
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Ver cita"
+                matTooltip="Ver cita"
+                [matTooltipShowDelay]="150"
+                (click)="openAppointment(appointment); $event.stopPropagation()"
+              >
                 <mat-icon>visibility</mat-icon>
               </button>
-              <button mat-icon-button type="button" aria-label="Editar cita" matTooltip="Editar cita" [matTooltipShowDelay]="150" (click)="openAppointment(appointment); $event.stopPropagation()">
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Editar cita"
+                matTooltip="Editar cita"
+                [matTooltipShowDelay]="150"
+                (click)="openAppointment(appointment); $event.stopPropagation()"
+              >
                 <mat-icon>edit</mat-icon>
               </button>
 

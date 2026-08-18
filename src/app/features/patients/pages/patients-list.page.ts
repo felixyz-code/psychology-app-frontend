@@ -10,11 +10,20 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
-import { MetricCardComponent, MetricCardVariant } from '../../../shared/components/metric-card/metric-card.component';
+import {
+  MetricCardComponent,
+  MetricCardVariant,
+} from '../../../shared/components/metric-card/metric-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { DataTableResult, DataTableState } from '../../../shared/models/data-table.models';
-import { formatFilteredResultsLabel, getSafePageIndex, matchesSearchTerm, paginateItems, sortItems } from '../../../shared/utils/data-table';
+import {
+  formatFilteredResultsLabel,
+  getSafePageIndex,
+  matchesSearchTerm,
+  paginateItems,
+  sortItems,
+} from '../../../shared/utils/data-table';
 import { PatientDeleteDialogComponent } from '../components/patient-delete-dialog.component';
 import { PatientDetailDialogComponent } from '../components/patient-detail-dialog.component';
 import { PatientFormDialogComponent } from '../components/patient-form-dialog.component';
@@ -69,7 +78,7 @@ export class PatientsListPage {
     const state = this.tableState();
     const items = this.patients();
     const filteredItems = items.filter((patient) =>
-      matchesSearchTerm(patient, state.searchTerm, (item) => this.getPatientSearchValues(item))
+      matchesSearchTerm(patient, state.searchTerm, (item) => this.getPatientSearchValues(item)),
     );
     const sortedItems = sortItems(filteredItems, {
       sortBy: state.sortBy,
@@ -92,7 +101,7 @@ export class PatientsListPage {
   readonly safePageIndex = computed(() => {
     const state = this.tableState();
     const totalFilteredItems = this.patients().filter((patient) =>
-      matchesSearchTerm(patient, state.searchTerm, (item) => this.getPatientSearchValues(item))
+      matchesSearchTerm(patient, state.searchTerm, (item) => this.getPatientSearchValues(item)),
     ).length;
 
     return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
@@ -104,7 +113,7 @@ export class PatientsListPage {
       result.totalFilteredItems,
       result.totalItems,
       (count) => this.formatPatientCount(count),
-      result.hasActiveFilters
+      result.hasActiveFilters,
     );
   });
   readonly summaryMetrics = computed(() => {
@@ -119,7 +128,9 @@ export class PatientsListPage {
         ? createdAt.getMonth() === currentMonthIndex && createdAt.getFullYear() === currentYear
         : false;
     }).length;
-    const patientsWithContact = patients.filter((patient) => this.hasContactInformation(patient)).length;
+    const patientsWithContact = patients.filter((patient) =>
+      this.hasContactInformation(patient),
+    ).length;
     const latestPatient = patients.reduce<Patient | null>((latest, patient) => {
       const patientDate = this.parseIsoDate(patient.createdAt);
       const latestDate = latest ? this.parseIsoDate(latest.createdAt) : null;
@@ -343,7 +354,10 @@ export class PatientsListPage {
     event.stopPropagation();
   }
 
-  private getPatientSortValue(patient: Patient, sortBy: string): string | number | Date | null | undefined {
+  private getPatientSortValue(
+    patient: Patient,
+    sortBy: string,
+  ): string | number | Date | null | undefined {
     const sortValues: Record<string, string | number | Date | null | undefined> = {
       name: this.getFullName(patient),
       phoneNumber: patient.phoneNumber,

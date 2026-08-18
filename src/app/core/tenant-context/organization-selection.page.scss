@@ -1,0 +1,83 @@
+.organization-selection-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 2rem 1rem;
+  background: var(--app-color-page-bg);
+}
+
+.organization-selection-card {
+  width: min(100%, 30rem);
+  padding: 0.75rem;
+}
+
+.organization-selection-card__avatar {
+  display: grid;
+  place-items: center;
+  background: var(--app-color-primary);
+  color: #fff;
+}
+
+.organization-selection-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.organization-selection-form__hint,
+.organization-selection-form__error {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.organization-selection-form__hint {
+  color: var(--app-color-text-muted);
+}
+
+.organization-selection-form__error {
+  color: var(--app-color-danger);
+}
+
+.organization-selection-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.organization-selection-card__loading,
+.organization-selection-card__empty,
+.organization-selection-card__error {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 2rem 0.5rem 1rem;
+  text-align: center;
+}
+
+.organization-selection-card__empty mat-icon {
+  color: var(--app-color-text-muted);
+  font-size: 2rem;
+}
+
+.organization-selection-card__error {
+  color: var(--app-color-danger);
+}
+
+.organization-selection-card__empty p,
+.organization-selection-card__empty span,
+.organization-selection-card__error p,
+.organization-selection-card__error span {
+  margin: 0;
+}
+
+.organization-selection-card__empty span {
+  color: var(--app-color-text-muted);
+  font-size: 0.875rem;
+}
+
+.organization-selection-card__error span {
+  font-size: 0.875rem;
+}

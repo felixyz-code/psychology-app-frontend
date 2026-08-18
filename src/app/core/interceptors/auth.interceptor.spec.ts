@@ -1,4 +1,12 @@
-import { HttpClient, HttpHeaders, HttpRequest, HttpResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpContext,
+  HttpHeaders,
+  HttpRequest,
+  HttpResponse,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
@@ -6,6 +14,7 @@ import { of } from 'rxjs';
 import { AuthUser } from '../auth/auth.models';
 import { AuthStore } from '../auth/auth.store';
 import { authInterceptor } from './auth.interceptor';
+import { TENANT_HTTP_MODE } from '../tenant-context/tenant-http-context';
 
 const user: AuthUser = {
   id: 'user-1',
@@ -44,7 +53,11 @@ describe('authInterceptor', () => {
     store.setSession('active-token', user);
     const body = { status: 'ACTIVE' };
 
-    client.patch('/api/patients/user-1', body, { headers: new HttpHeaders({ 'X-Trace-Id': 'trace-1' }) }).subscribe();
+    client
+      .patch('/api/patients/user-1', body, {
+        headers: new HttpHeaders({ 'X-Trace-Id': 'trace-1' }),
+      })
+      .subscribe();
 
     const request = httpTesting.expectOne('/api/patients/user-1');
     expect(request.request.method).toBe('PATCH');
@@ -65,7 +78,13 @@ describe('authInterceptor', () => {
   it('excludes the login endpoint even when a session exists', () => {
     store.setSession('active-token', user);
 
-    client.post('/api/auth/login', { email: user.email, password: 'new-password' }).subscribe();
+    client
+      .post(
+        '/api/auth/login',
+        { email: user.email, password: 'new-password' },
+        { context: new HttpContext().set(TENANT_HTTP_MODE, 'PUBLIC') },
+      )
+      .subscribe();
 
     const request = httpTesting.expectOne('/api/auth/login');
     expect(request.request.headers.has('Authorization')).toBe(false);
@@ -74,14 +93,16 @@ describe('authInterceptor', () => {
 
   it('clones protected requests instead of mutating the original request', () => {
     store.setSession('active-token', user);
-    const originalRequest = new HttpRequest('POST', '/api/appointments', { patientId: 'patient-1' });
+    const originalRequest = new HttpRequest('POST', '/api/appointments', {
+      patientId: 'patient-1',
+    });
     let forwardedRequest: HttpRequest<unknown> | undefined;
 
     TestBed.runInInjectionContext(() =>
       authInterceptor(originalRequest, (request) => {
         forwardedRequest = request;
         return of(new HttpResponse({ status: 200 }));
-      }).subscribe()
+      }).subscribe(),
     );
 
     expect(forwardedRequest).not.toBe(originalRequest);

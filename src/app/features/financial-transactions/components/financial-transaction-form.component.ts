@@ -155,7 +155,9 @@ export class FinancialTransactionFormComponent {
   }
 
   getTitle(): string {
-    return this.mode() === 'edit' ? 'Editar transaccion financiera' : 'Nueva transaccion financiera';
+    return this.mode() === 'edit'
+      ? 'Editar transaccion financiera'
+      : 'Nueva transaccion financiera';
   }
 
   getSubtitle(): string {

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -22,6 +22,7 @@ import { Appointment } from '../../appointments/models/appointment.models';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientFormDialogComponent } from '../../patients/components/patient-form-dialog.component';
 import { PatientsService } from '../../patients/services/patients.service';
+import { TenantContextStore } from '../../../core/tenant-context/tenant-context.store';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -47,12 +48,17 @@ export class DashboardPage {
   private readonly dialog = inject(MatDialog);
   private readonly patientsService = inject(PatientsService);
   private readonly router = inject(Router);
+  private readonly tenantContextStore = inject(TenantContextStore);
 
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
   readonly viewModel = signal<DashboardViewModel | null>(null);
   readonly appointmentLookup = signal<Record<string, Appointment>>({});
   readonly availablePatients = signal<Patient[]>([]);
+  readonly canReadFinance = computed(() => this.tenantContextStore.hasCapability('finance.read'));
+  readonly canReadFinancialSummary = computed(() =>
+    this.tenantContextStore.hasCapability('finance.summary_read'),
+  );
 
   constructor() {
     this.loadDashboard();
@@ -119,7 +125,9 @@ export class DashboardPage {
       return;
     }
 
-    void this.router.navigate(['/financial-transactions']);
+    if (this.canReadFinance()) {
+      void this.router.navigate(['/financial-transactions']);
+    }
   }
 
   navigateToAppointments(): void {
@@ -131,7 +139,9 @@ export class DashboardPage {
   }
 
   navigateToFinance(): void {
-    void this.router.navigate(['/financial-transactions']);
+    if (this.canReadFinance()) {
+      void this.router.navigate(['/financial-transactions']);
+    }
   }
 
   openAppointmentDetails(item: DashboardAppointmentItem): void {
@@ -222,7 +232,7 @@ export class DashboardPage {
         }
 
         return lookup;
-      }, {})
+      }, {}),
     );
   }
 }

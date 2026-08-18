@@ -128,7 +128,8 @@ export interface DashboardViewModel {
   kpiStrip: DashboardKpiItem[];
   agendaToday: DashboardAgendaWidget;
   upcomingAppointments: DashboardAgendaWidget;
-  financeSummary: DashboardFinanceSummaryWidget;
+  financeSummary: DashboardFinanceSummaryWidget | null;
+  financeNavigationAvailable: boolean;
   clinicalActivity: DashboardClinicalActivityWidget;
   operationalAlerts: DashboardOperationalAlertsWidget;
   quickActions: DashboardQuickActionsWidget;

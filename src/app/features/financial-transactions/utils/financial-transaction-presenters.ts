@@ -7,9 +7,18 @@ import {
   PaymentMethod,
 } from '../models/financial-transaction.models';
 
-export const FINANCIAL_TRANSACTION_TYPES: FinancialTransactionType[] = ['INCOME', 'EXPENSE', 'ADJUSTMENT', 'REFUND'];
+export const FINANCIAL_TRANSACTION_TYPES: FinancialTransactionType[] = [
+  'INCOME',
+  'EXPENSE',
+  'ADJUSTMENT',
+  'REFUND',
+];
 
-export const FINANCIAL_TRANSACTION_STATUSES: FinancialTransactionStatus[] = ['PENDING', 'COMPLETED', 'CANCELLED'];
+export const FINANCIAL_TRANSACTION_STATUSES: FinancialTransactionStatus[] = [
+  'PENDING',
+  'COMPLETED',
+  'CANCELLED',
+];
 
 export const FINANCIAL_TRANSACTION_CATEGORIES: FinancialTransactionCategory[] = [
   'SESSION',
@@ -38,7 +47,9 @@ export function getFinancialTransactionTypeLabel(type: FinancialTransactionType)
   return labels[type];
 }
 
-export function getFinancialTransactionTypeVariant(type: FinancialTransactionType): StatusBadgeVariant {
+export function getFinancialTransactionTypeVariant(
+  type: FinancialTransactionType,
+): StatusBadgeVariant {
   const variants: Record<FinancialTransactionType, StatusBadgeVariant> = {
     INCOME: 'success',
     EXPENSE: 'danger',
@@ -59,7 +70,9 @@ export function getFinancialTransactionStatusLabel(status: FinancialTransactionS
   return labels[status];
 }
 
-export function getFinancialTransactionStatusVariant(status: FinancialTransactionStatus): StatusBadgeVariant {
+export function getFinancialTransactionStatusVariant(
+  status: FinancialTransactionStatus,
+): StatusBadgeVariant {
   const variants: Record<FinancialTransactionStatus, StatusBadgeVariant> = {
     PENDING: 'warning',
     COMPLETED: 'success',
@@ -69,7 +82,9 @@ export function getFinancialTransactionStatusVariant(status: FinancialTransactio
   return variants[status];
 }
 
-export function getFinancialTransactionCategoryLabel(category: FinancialTransactionCategory): string {
+export function getFinancialTransactionCategoryLabel(
+  category: FinancialTransactionCategory,
+): string {
   const labels: Record<FinancialTransactionCategory, string> = {
     SESSION: 'Sesion',
     ASSESSMENT: 'Evaluacion',
@@ -138,7 +153,9 @@ export function formatFinancialCount(value: number | undefined): string {
 }
 
 export function formatFinancialDate(value: string): string {
-  const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(value) ? parseLocalDateOnly(value) : new Date(value);
+  const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? parseLocalDateOnly(value)
+    : new Date(value);
 
   if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
     return '-';

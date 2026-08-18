@@ -1,0 +1,444 @@
+:host {
+  display: block;
+}
+
+.organization-admin-page,
+.organization-admin-main,
+.organization-admin-aside,
+.organization-admin-form,
+.organization-configuration-form,
+.organization-admin-lifecycle,
+.organization-admin-metadata {
+  display: grid;
+}
+
+.organization-admin-page {
+  gap: 1.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.organization-admin-summary,
+.organization-admin-summary__identity,
+.organization-admin-alert,
+.organization-admin-state,
+.organization-admin-form__actions,
+.organization-admin-lifecycle > div {
+  display: flex;
+  align-items: center;
+}
+
+.organization-admin-summary {
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: var(--app-card-radius, 14px);
+  background: var(--app-color-card-bg);
+  box-shadow: var(--app-shadow-card);
+}
+
+.organization-admin-summary__identity {
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.organization-admin-summary__icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 14px;
+  background: var(--app-color-primary-soft);
+  color: var(--app-color-primary);
+}
+
+.organization-admin-summary span,
+.organization-admin-lifecycle span,
+.organization-admin-metadata dt {
+  color: var(--app-color-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.organization-admin-summary :is(h2, p) {
+  margin: 0;
+}
+
+.organization-admin-summary h2 {
+  color: var(--app-color-heading);
+  font-size: 1.25rem;
+}
+
+.organization-admin-summary p {
+  margin-top: 0.2rem;
+  color: var(--app-color-text-secondary);
+}
+
+.organization-admin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.organization-admin-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.organization-admin-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.organization-configuration-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.organization-configuration-form {
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.organization-configuration-form mat-form-field {
+  min-width: 0;
+  width: 100%;
+}
+
+.organization-configuration-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.organization-configuration-state,
+.organization-configuration-success,
+.organization-configuration-error {
+  margin: 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.organization-configuration-error {
+  color: var(--app-color-danger-text);
+}
+.organization-configuration-success {
+  color: var(--app-color-success-text);
+}
+
+.organization-brand-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--app-color-text-secondary);
+}
+
+.organization-brand-preview__swatch {
+  display: inline-block;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 2px solid var(--app-color-card-border);
+  border-radius: 0.65rem;
+  background: var(--app-org-brand-accent);
+}
+
+.organization-logo-card {
+  grid-column: 1 / -1;
+}
+
+.organization-logo {
+  display: grid;
+  gap: 1rem;
+}
+
+.organization-logo__state,
+.organization-logo__present,
+.organization-logo__preview,
+.organization-logo__controls {
+  display: flex;
+  align-items: center;
+}
+
+.organization-logo__state {
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-height: 7rem;
+  justify-content: center;
+  color: var(--app-color-text-secondary);
+}
+
+.organization-logo__state--error {
+  color: var(--app-color-danger-text);
+}
+
+.organization-logo__present {
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.organization-logo__preview {
+  flex: 0 0 auto;
+  justify-content: center;
+  width: 11rem;
+  height: 11rem;
+  overflow: hidden;
+  border: 1px solid var(--app-color-card-border);
+  border-radius: 16px;
+  background: var(--app-color-surface-muted);
+}
+
+.organization-logo__preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.organization-logo__preview--empty {
+  width: 100%;
+  height: auto;
+  min-height: 8.5rem;
+  gap: 0.85rem;
+  border-style: dashed;
+  color: var(--app-color-muted);
+}
+
+.organization-logo__preview--empty mat-icon {
+  width: 2rem;
+  height: 2rem;
+  font-size: 2rem;
+}
+
+.organization-logo__preview--empty div,
+.organization-logo__metadata div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.organization-logo__preview--empty strong {
+  color: var(--app-color-heading);
+}
+
+.organization-logo__metadata {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(7rem, 1fr));
+  gap: 1rem;
+  width: 100%;
+  margin: 0;
+}
+
+.organization-logo__metadata div {
+  padding: 0.75rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 12px;
+}
+
+.organization-logo__metadata dt {
+  color: var(--app-color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.organization-logo__metadata dd {
+  margin: 0;
+  color: var(--app-color-heading);
+  font-weight: 600;
+}
+
+.organization-logo__constraints,
+.organization-logo__conflict {
+  margin: 0;
+  color: var(--app-color-text-secondary);
+  line-height: 1.5;
+}
+
+.organization-logo__conflict {
+  color: var(--app-color-warning-text);
+}
+
+.organization-logo__controls {
+  flex-wrap: wrap;
+  gap: 0.55rem 0.8rem;
+  padding: 0.85rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 12px;
+}
+
+.organization-logo__controls label {
+  flex: 0 0 100%;
+  color: var(--app-color-heading);
+  font-weight: 600;
+}
+
+.organization-logo__controls input {
+  max-width: 100%;
+  color: var(--app-color-text-secondary);
+}
+
+.organization-logo__controls .organization-configuration-error {
+  flex: 1 1 15rem;
+  overflow-wrap: anywhere;
+}
+
+.organization-admin-form {
+  gap: 1rem;
+}
+
+.organization-admin-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 1rem;
+}
+
+.organization-admin-form__actions {
+  justify-content: flex-end;
+}
+
+.organization-admin-form__actions button,
+.organization-admin-lifecycle button {
+  gap: 0.55rem;
+}
+
+.organization-admin-lifecycle {
+  gap: 1rem;
+}
+
+.organization-admin-lifecycle > div {
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--app-color-border);
+}
+
+.organization-admin-lifecycle strong {
+  color: var(--app-color-heading);
+}
+
+.organization-admin-lifecycle p,
+.organization-admin-readonly {
+  margin: 0;
+  color: var(--app-color-text-secondary);
+  line-height: 1.5;
+}
+
+.organization-admin-metadata {
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.organization-admin-metadata div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.organization-admin-metadata dd {
+  margin: 0;
+  color: var(--app-color-heading);
+  overflow-wrap: anywhere;
+}
+
+.organization-admin-alert {
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid;
+  border-radius: 12px;
+}
+
+.organization-admin-alert > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.organization-admin-alert--success {
+  border-color: var(--app-color-success-border);
+  background: var(--app-color-success-soft);
+  color: var(--app-color-success-text);
+}
+
+.organization-admin-alert--warning {
+  border-color: color-mix(in srgb, var(--app-color-warning) 45%, transparent);
+  background: color-mix(in srgb, var(--app-color-warning) 12%, var(--app-color-card-bg));
+  color: var(--app-color-warning-text);
+}
+
+.organization-admin-alert--error {
+  border-color: color-mix(in srgb, var(--app-color-danger) 40%, transparent);
+  background: var(--app-color-danger-soft);
+  color: var(--app-color-danger-text);
+}
+
+.organization-admin-state {
+  justify-content: center;
+  gap: 1rem;
+  min-height: 18rem;
+  padding: 2rem;
+  border: 1px dashed var(--app-color-border);
+  border-radius: 18px;
+  background: var(--app-color-card-bg);
+  text-align: left;
+}
+
+.organization-admin-state--error {
+  flex-wrap: wrap;
+}
+
+.organization-admin-state :is(h2, p) {
+  margin: 0;
+}
+
+.organization-admin-state p {
+  margin-top: 0.25rem;
+  color: var(--app-color-text-secondary);
+}
+
+@media (max-width: 1024px) {
+  .organization-admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .organization-admin-form__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .organization-admin-summary,
+  .organization-admin-state {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .organization-admin-form__actions button,
+  .organization-admin-lifecycle button,
+  .organization-configuration-actions button {
+    width: 100%;
+  }
+
+  .organization-logo__present {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .organization-logo__preview {
+    width: 100%;
+  }
+
+  .organization-logo__metadata {
+    grid-template-columns: 1fr;
+  }
+}

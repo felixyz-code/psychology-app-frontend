@@ -1,0 +1,185 @@
+.branch-assign-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: min(85vh, calc(100dvh - 2rem));
+  height: min(85vh, calc(100dvh - 2rem));
+  min-height: 0;
+  gap: 0.75rem;
+  min-width: min(100%, 38rem);
+  overflow: hidden;
+}
+
+.branch-assign-dialog__header {
+  flex-shrink: 0;
+}
+
+.branch-assign-dialog__title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.branch-assign-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--app-color-primary-soft);
+  color: var(--app-color-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.branch-assign-list {
+  display: grid;
+  gap: 0.75rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.branch-assign-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--app-color-border);
+  border-radius: 14px;
+  background: var(--app-color-card-soft-bg);
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.branch-assign-card--assigned {
+  border-color: var(--app-color-primary-border);
+  background: color-mix(in srgb, var(--app-color-primary-soft) 25%, var(--app-color-card-bg) 75%);
+}
+
+.branch-assign-card__user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.branch-assign-card__avatar {
+  display: grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 999px;
+  background: var(--app-color-primary);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.branch-assign-card__meta {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.branch-assign-card__meta strong {
+  font-size: 0.92rem;
+  color: var(--app-color-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.branch-assign-card__meta span {
+  font-size: 0.8rem;
+  color: var(--app-color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.branch-assign-card__role-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--app-color-muted);
+}
+
+.branch-assign-card__controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.branch-assign-control-group {
+  display: flex;
+  align-items: center;
+}
+
+.branch-assign-loading,
+.branch-assign-empty {
+  display: grid;
+  place-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--app-color-text-secondary);
+}
+
+.branch-assign-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 0.95rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.branch-assign-alert--error {
+  background: var(--app-color-danger-soft);
+  color: var(--app-color-danger-text);
+}
+
+.branch-assign-alert--success {
+  background: var(--app-color-success-soft);
+  color: var(--app-color-success-text);
+}
+
+.branch-assign-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  background: var(--app-color-dialog-bg);
+}
+
+@media (max-width: 720px) {
+  .branch-assign-dialog {
+    max-height: calc(100dvh - 1.25rem);
+    height: calc(100dvh - 1.25rem);
+    min-width: 100%;
+  }
+
+  .branch-assign-list {
+    padding-right: 0;
+  }
+
+  .branch-assign-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .branch-assign-card__controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

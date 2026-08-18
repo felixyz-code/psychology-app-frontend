@@ -3,21 +3,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   background:
-    radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 32rem),
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.2), transparent 34rem),
     linear-gradient(180deg, var(--app-color-app-bg) 0%, var(--app-color-surface-muted) 100%);
 }
 
 .login-card {
   width: min(100%, 26rem);
   border: 1px solid var(--app-color-card-border);
-  border-radius: 8px;
+  border-radius: 18px;
   box-shadow: var(--app-shadow-surface);
 }
 
 .login-card__header {
-  padding-bottom: 1rem;
+  display: grid;
+  gap: 0.35rem;
+  padding-bottom: 1.25rem;
+}
+
+.login-card__eyebrow {
+  order: -1;
+  color: var(--app-color-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .login-form {
@@ -36,6 +47,17 @@
   min-height: 3rem;
 }
 
+.login-form__alternate {
+  margin: 0;
+  color: var(--app-color-text-secondary);
+  text-align: center;
+}
+
+.login-form__alternate a {
+  color: var(--app-color-link);
+  font-weight: 700;
+}
+
 .login-form__submit .mdc-button__label {
   display: inline-flex;
   align-items: center;
@@ -46,12 +68,13 @@
   stroke: currentColor;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 680px) {
   .login-page {
+    align-items: flex-start;
     padding: 1rem;
   }
 
   .login-card {
-    border-radius: 1rem;
+    border-radius: 16px;
   }
 }

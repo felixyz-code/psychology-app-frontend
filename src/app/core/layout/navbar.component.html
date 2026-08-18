@@ -1,64 +1,154 @@
-<mat-toolbar class="navbar">
-  <button
-    class="navbar__menu-button"
-    mat-icon-button
-    type="button"
-    aria-label="Alternar menu lateral"
-    [attr.aria-expanded]="isSidebarOpen() || !isSidebarCollapsed()"
-    (click)="menuToggle.emit()"
-  >
-    <mat-icon>menu</mat-icon>
-  </button>
-
-  <div class="navbar__brand">
-    <span class="navbar__title">Psicologia App</span>
-  </div>
-
-  <div class="navbar__spacer"></div>
-
-  @if (authStore.user(); as user) {
+<header class="navbar" role="banner">
+  <div class="navbar__left-pane">
     <button
-      #userMenuTrigger="matMenuTrigger"
-      class="user-menu-trigger"
+      class="navbar__menu-button"
+      mat-icon-button
       type="button"
-      [matMenuTriggerFor]="userMenu"
-      aria-label="Abrir menu de usuario"
+      aria-label="Alternar menu lateral"
+      [attr.aria-expanded]="isSidebarOpen() || !isSidebarCollapsed()"
+      (click)="menuToggle.emit()"
     >
-      <div class="user-avatar" aria-hidden="true">{{ user.name.charAt(0) }}</div>
-      <div class="user-info">
-        <span class="user-name">{{ user.name }}</span>
-        <span class="user-role">{{ getRoleLabel(user.role) }}</span>
-      </div>
-      <mat-icon class="chevron">expand_more</mat-icon>
+      <mat-icon>menu</mat-icon>
     </button>
 
-    <mat-menu #userMenu="matMenu" xPosition="before" class="navbar-user-menu" panelClass="navbar-user-menu-panel">
-      <div class="navbar-user-menu__summary">
-        <span class="navbar-user-menu__avatar" aria-hidden="true">{{ user.name.charAt(0) }}</span>
-        <span class="navbar-user-menu__identity">
-          <span class="navbar-user-menu__name">{{ user.name }}</span>
-          <span class="navbar-user-menu__role">{{ getRoleLabel(user.role) }}</span>
-        </span>
-      </div>
+    <div class="navbar__brand">
+      <span class="navbar__title">Psicologia App</span>
+    </div>
+  </div>
 
-      <div class="navbar-user-menu__theme-row">
-        <div class="navbar-user-menu__theme-copy">
-          <mat-icon>{{ isDarkTheme() ? 'dark_mode' : 'light_mode' }}</mat-icon>
-          <span>Modo oscuro</span>
-        </div>
+  <div class="navbar__right-pane">
+    <div class="navbar__context-group">
+      @if (tenantContextStore.snapshot()?.organization; as organization) {
+        @if (canSwitchOrganization()) {
+          <button
+            class="organization-control organization-menu-trigger"
+            type="button"
+            [matMenuTriggerFor]="organizationMenu"
+            [disabled]="isSwitchingOrganization()"
+            [attr.aria-busy]="isSwitchingOrganization()"
+            [attr.aria-label]="'Cambiar organización: ' + organization.displayName"
+          >
+            @if (isSwitchingOrganization()) {
+              <mat-spinner diameter="16" aria-label="Cambiando organización" />
+            } @else {
+              <mat-icon class="control-icon" aria-hidden="true">business</mat-icon>
+            }
+            <span class="control-label">{{ organization.displayName }}</span>
+            <mat-icon class="organization-control__chevron" aria-hidden="true"
+              >expand_more</mat-icon
+            >
+          </button>
 
-        <mat-slide-toggle
-          class="navbar-user-menu__theme-toggle"
-          [checked]="isDarkTheme()"
-          (change)="toggleTheme($event.checked, userMenuTrigger)"
-          aria-label="Cambiar tema"
-        />
-      </div>
+          <mat-menu #organizationMenu="matMenu" xPosition="before" class="organization-switch-menu">
+            <div class="organization-switch-menu__heading">Cambiar organización</div>
+            @for (
+              membership of tenantContextStore.selectableMemberships();
+              track membership.organizationId
+            ) {
+              <button
+                mat-menu-item
+                type="button"
+                class="organization-switch-menu__item"
+                [disabled]="
+                  isSwitchingOrganization() || membership.organizationId === organization.id
+                "
+                [attr.aria-current]="membership.organizationId === organization.id ? 'true' : null"
+                (click)="switchOrganization(membership.organizationId)"
+              >
+                <mat-icon aria-hidden="true">
+                  {{ membership.organizationId === organization.id ? 'check' : 'business' }}
+                </mat-icon>
+                <span>{{ membership.organizationDisplayName }}</span>
+              </button>
+            }
+          </mat-menu>
+        } @else {
+          <div
+            class="organization-control organization-identity"
+            [attr.aria-label]="'Organización actual: ' + organization.displayName"
+          >
+            <mat-icon class="control-icon" aria-hidden="true">business</mat-icon>
+            <span class="control-label">{{ organization.displayName }}</span>
+          </div>
+        }
+      }
 
-      <button class="navbar-user-menu__action" mat-menu-item type="button" (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Cerrar sesion</span>
-      </button>
-    </mat-menu>
-  }
-</mat-toolbar>
+      <app-branch-switcher />
+    </div>
+
+    <div class="navbar__spacer"></div>
+
+    @if (tenantContextStore.preferredPersistenceState() === 'ERROR') {
+      <span
+        class="organization-preference-warning"
+        role="status"
+        title="La organizacion esta activa, pero no se pudo guardar como preferida."
+      >
+        <mat-icon aria-hidden="true">warning_amber</mat-icon>
+        <span>No se guardo como preferida</span>
+      </span>
+    }
+
+    @if (organizationSwitchError()) {
+      <span class="organization-switch-error" role="alert" [title]="organizationSwitchError()">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <span>{{ organizationSwitchError() }}</span>
+      </span>
+    }
+
+    <div class="navbar__user-section">
+      @if (authStore.user(); as user) {
+        <button
+          #userMenuTrigger="matMenuTrigger"
+          class="user-menu-trigger"
+          type="button"
+          [matMenuTriggerFor]="userMenu"
+          aria-label="Abrir menu de usuario"
+        >
+          <div class="user-avatar" aria-hidden="true">{{ user.name.charAt(0) }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ user.name }}</span>
+            <span class="user-role">{{ getRoleLabel(user.role) }}</span>
+          </div>
+          <mat-icon class="chevron">expand_more</mat-icon>
+        </button>
+
+        <mat-menu
+          #userMenu="matMenu"
+          xPosition="before"
+          class="navbar-user-menu"
+          panelClass="navbar-user-menu-panel"
+        >
+          <div class="navbar-user-menu__summary">
+            <span class="navbar-user-menu__avatar" aria-hidden="true">{{
+              user.name.charAt(0)
+            }}</span>
+            <span class="navbar-user-menu__identity">
+              <span class="navbar-user-menu__name">{{ user.name }}</span>
+              <span class="navbar-user-menu__role">{{ getRoleLabel(user.role) }}</span>
+            </span>
+          </div>
+
+          <div class="navbar-user-menu__theme-row">
+            <div class="navbar-user-menu__theme-copy">
+              <mat-icon>{{ isDarkTheme() ? 'dark_mode' : 'light_mode' }}</mat-icon>
+              <span>Modo oscuro</span>
+            </div>
+
+            <mat-slide-toggle
+              class="navbar-user-menu__theme-toggle"
+              [checked]="isDarkTheme()"
+              (change)="toggleTheme($event.checked, userMenuTrigger)"
+              aria-label="Cambiar tema"
+            />
+          </div>
+
+          <button class="navbar-user-menu__action" mat-menu-item type="button" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Cerrar sesion</span>
+          </button>
+        </mat-menu>
+      }
+    </div>
+  </div>
+</header>

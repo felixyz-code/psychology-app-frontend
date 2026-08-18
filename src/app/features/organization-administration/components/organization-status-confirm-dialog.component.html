@@ -1,0 +1,43 @@
+<div class="status-dialog">
+  <div class="status-dialog__icon" [class.status-dialog__icon--warning]="isSuspension">
+    <mat-icon aria-hidden="true">{{ isSuspension ? 'pause_circle' : 'play_circle' }}</mat-icon>
+  </div>
+
+  <div class="status-dialog__copy">
+    <h2 mat-dialog-title>
+      {{ isSuspension ? 'Suspender organizaci&oacute;n' : 'Reactivar organizaci&oacute;n' }}
+    </h2>
+
+    <mat-dialog-content>
+      @if (isSuspension) {
+        <p>
+          Al suspender <strong>{{ data.displayName }}</strong
+          >, se cerrar&aacute;n las superficies operativas y dejar&aacute;n de estar disponibles
+          pacientes, citas, expedientes, documentos, finanzas y reportes.
+        </p>
+        <p>
+          El acceso administrativo permitido se conservar&aacute; para poder reactivar la
+          organizaci&oacute;n.
+        </p>
+      } @else {
+        <p>
+          Se solicitar&aacute; la reactivaci&oacute;n de <strong>{{ data.displayName }}</strong
+          >. Los permisos operativos se recuperar&aacute;n &uacute;nicamente desde el contexto
+          can&oacute;nico del servidor.
+        </p>
+      }
+    </mat-dialog-content>
+  </div>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="cancel()">Cancelar</button>
+    <button
+      [color]="isSuspension ? 'warn' : 'primary'"
+      mat-flat-button
+      type="button"
+      (click)="confirm()"
+    >
+      {{ isSuspension ? 'Suspender organizaci&oacute;n' : 'Reactivar organizaci&oacute;n' }}
+    </button>
+  </mat-dialog-actions>
+</div>

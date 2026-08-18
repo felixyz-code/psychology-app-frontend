@@ -77,7 +77,9 @@ describe('DocumentPreviewDialogComponent', () => {
 
   it('downloads with a temporary anchor, document filename, and revoked object URL', () => {
     documentsService.view.mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' })));
-    documentsService.download.mockReturnValue(of(new Blob(['download'], { type: 'application/pdf' })));
+    documentsService.download.mockReturnValue(
+      of(new Blob(['download'], { type: 'application/pdf' })),
+    );
     const click = vi.fn();
     const anchor = { href: '', download: '', click } as unknown as HTMLAnchorElement;
     const { component } = createComponent();
@@ -127,7 +129,10 @@ describe('DocumentPreviewDialogComponent', () => {
       ],
     });
 
-    return { component: TestBed.createComponent(DocumentPreviewDialogComponent).componentInstance, dialogRef };
+    return {
+      component: TestBed.createComponent(DocumentPreviewDialogComponent).componentInstance,
+      dialogRef,
+    };
   }
 });
 

@@ -22,7 +22,9 @@ interface FinancialTransactionDeleteDialogData {
 export class FinancialTransactionDeleteDialogComponent {
   private readonly data = inject<FinancialTransactionDeleteDialogData>(MAT_DIALOG_DATA);
   private readonly financialTransactionsService = inject(FinancialTransactionsService);
-  private readonly dialogRef = inject(MatDialogRef<FinancialTransactionDeleteDialogComponent, boolean>);
+  private readonly dialogRef = inject(
+    MatDialogRef<FinancialTransactionDeleteDialogComponent, boolean>,
+  );
 
   readonly transaction = this.data.transaction;
   readonly isDeleting = signal(false);

@@ -2,7 +2,11 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { Appointment, CreateAppointmentRequest, UpdateAppointmentRequest } from '../models/appointment.models';
+import {
+  Appointment,
+  CreateAppointmentRequest,
+  UpdateAppointmentRequest,
+} from '../models/appointment.models';
 import { AppointmentsService } from './appointments.service';
 
 describe('AppointmentsService', () => {

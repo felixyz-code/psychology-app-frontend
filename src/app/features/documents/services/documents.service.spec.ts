@@ -40,7 +40,9 @@ describe('DocumentsService', () => {
 
     service.getAll().subscribe({ error: (error) => (receivedError = error) });
 
-    httpTesting.expectOne('/api/documents').flush('Unavailable', { status: 503, statusText: 'Service Unavailable' });
+    httpTesting
+      .expectOne('/api/documents')
+      .flush('Unavailable', { status: 503, statusText: 'Service Unavailable' });
 
     expect(receivedError).toMatchObject({ status: 503, statusText: 'Service Unavailable' });
   });
@@ -66,7 +68,10 @@ describe('DocumentsService', () => {
   });
 
   it('updates document metadata with the supplied payload', () => {
-    const payload: UpdateDocumentRequest = { fileName: 'informe-actualizado.pdf', mimeType: 'application/pdf' };
+    const payload: UpdateDocumentRequest = {
+      fileName: 'informe-actualizado.pdf',
+      mimeType: 'application/pdf',
+    };
 
     service.update('document-1', payload).subscribe();
 
@@ -124,28 +129,41 @@ describe('DocumentsService', () => {
   const errorOperations: [string, (service: DocumentsService) => Observable<unknown>][] = [
     ['case-file list', (service: DocumentsService) => service.getByCaseFile('case-file-1')],
     ['metadata', (service: DocumentsService) => service.getById('document-1')],
-    ['update', (service: DocumentsService) => service.update('document-1', { fileName: 'informe.pdf' })],
-    ['upload', (service: DocumentsService) => service.upload('case-file-1', new File(['content'], 'informe.pdf'))],
+    [
+      'update',
+      (service: DocumentsService) => service.update('document-1', { fileName: 'informe.pdf' }),
+    ],
+    [
+      'upload',
+      (service: DocumentsService) =>
+        service.upload('case-file-1', new File(['content'], 'informe.pdf')),
+    ],
     ['delete', (service: DocumentsService) => service.delete('document-1')],
     ['view', (service: DocumentsService) => service.view('document-1')],
     ['download', (service: DocumentsService) => service.download('document-1')],
   ];
 
-  it.each(errorOperations)('propagates %s HTTP errors without transforming them', (_operation, operation) => {
-    let receivedError: unknown;
+  it.each(errorOperations)(
+    'propagates %s HTTP errors without transforming them',
+    (_operation, operation) => {
+      let receivedError: unknown;
 
-    operation(service).subscribe({ error: (error) => (receivedError = error) });
+      operation(service).subscribe({ error: (error) => (receivedError = error) });
 
-    const request = httpTesting.expectOne((request) => request.url.startsWith('/api/documents'));
+      const request = httpTesting.expectOne((request) => request.url.startsWith('/api/documents'));
 
-    if (request.request.responseType === 'blob') {
-      request.error(new ProgressEvent('error'), { status: 500, statusText: 'Internal Server Error' });
-    } else {
-      request.flush('Unavailable', { status: 500, statusText: 'Internal Server Error' });
-    }
+      if (request.request.responseType === 'blob') {
+        request.error(new ProgressEvent('error'), {
+          status: 500,
+          statusText: 'Internal Server Error',
+        });
+      } else {
+        request.flush('Unavailable', { status: 500, statusText: 'Internal Server Error' });
+      }
 
-    expect(receivedError).toMatchObject({ status: 500, statusText: 'Internal Server Error' });
-  });
+      expect(receivedError).toMatchObject({ status: 500, statusText: 'Internal Server Error' });
+    },
+  );
 });
 
 function createDocument(): Document {

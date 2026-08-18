@@ -1,0 +1,86 @@
+<div class="branch-assign-dialog app-dialog">
+  <div class="branch-assign-dialog__header app-dialog__header">
+    <div class="branch-assign-dialog__title-row">
+      <div>
+        <h2>Asignar personal a sede</h2>
+        <p>
+          Configura qué miembros del equipo tienen acceso a operar en
+          <strong>{{ data.branch.name }}</strong> ({{ data.branch.code }}).
+        </p>
+      </div>
+      <span class="branch-assign-badge"> {{ assignedCount() }} asignado(s) </span>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="branch-assign-alert branch-assign-alert--error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="branch-assign-alert branch-assign-alert--success" role="status">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="branch-assign-loading" aria-live="polite">
+      <mat-spinner diameter="32" />
+      <span>Cargando miembros de la organización...</span>
+    </div>
+  } @else {
+    <div class="branch-assign-list">
+      @for (item of items(); track item.userId) {
+        <article class="branch-assign-card" [class.branch-assign-card--assigned]="item.isAssigned">
+          <div class="branch-assign-card__user">
+            <div class="branch-assign-card__avatar">
+              {{ item.displayName.charAt(0).toUpperCase() }}
+            </div>
+            <div class="branch-assign-card__meta">
+              <strong>{{ item.displayName }}</strong>
+              <span>{{ item.email }}</span>
+              <span class="branch-assign-card__role-tag">{{ getRoleLabel(item.role) }}</span>
+            </div>
+          </div>
+
+          <div class="branch-assign-card__controls">
+            <div class="branch-assign-control-group">
+              <mat-checkbox
+                [checked]="item.isPrimary"
+                [disabled]="!item.isAssigned || updatingUserId() === item.userId"
+                (change)="togglePrimary(item, $event.checked)"
+              >
+                Sede Principal
+              </mat-checkbox>
+            </div>
+
+            <mat-slide-toggle
+              color="primary"
+              [checked]="item.isAssigned"
+              [disabled]="updatingUserId() === item.userId"
+              (change)="toggleAssignment(item, $event.checked)"
+            >
+              {{ item.isAssigned ? 'Asignado' : 'Sin acceso' }}
+            </mat-slide-toggle>
+
+            @if (updatingUserId() === item.userId) {
+              <mat-spinner diameter="16" />
+            }
+          </div>
+        </article>
+      } @empty {
+        <div class="branch-assign-empty">
+          <mat-icon>people_outline</mat-icon>
+          <p>No se encontraron miembros activos en esta organización.</p>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="branch-assign-dialog__actions app-dialog__actions">
+    <button mat-flat-button color="primary" type="button" (click)="close()">Listo</button>
+  </div>
+</div>

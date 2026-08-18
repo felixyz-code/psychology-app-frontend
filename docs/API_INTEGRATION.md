@@ -120,18 +120,103 @@ Implementation uses Angular Signals.
 
 ---
 
-# JWT Interceptor
+# JWT and tenant metadata
 
-The JWT interceptor:
+The authentication interceptor reads the request mode from Angular `HttpContext` metadata:
 
-- Reads the token from `AuthStore`
-- Adds Authorization header
-- Excludes `/auth/login`
-- Does not refresh tokens
+- `PUBLIC`: no authentication or tenant headers
+- `IDENTITY_ONLY`: bearer JWT only
+- `TENANT_OPTIONAL`: bearer JWT plus `X-Organization-Id` when a confirmed tenant is selected
+- `TENANT_REQUIRED`: bearer JWT plus the confirmed tenant header
 
-Refresh Tokens are outside the current MVP.
+The interceptor does not infer behavior from URL strings. A request may provide an explicit organization override through its context metadata, but the frontend never treats that value as authorization evidence.
 
----
+`TenantContextStore` bootstraps `GET /auth/context` after identity restoration, validates the V1 response, and exposes the state machine, confirmed selection, capabilities, context version, and switch generation through Angular Signals. The confirmed organization is persisted only in `sessionStorage`, so selection is isolated per browser tab and is cleared by `resetTenantState`.
+
+## Tenant Request Invalidation
+
+Every `TENANT_REQUIRED` request is observed by the cross-tenant state interceptor.
+
+At subscription time it captures:
+
+- the current `switchGeneration`
+- the confirmed organization ID
+
+The response may reach application state only while both values still match `TenantContextStore`. A tenant invalidation completes pending subscriptions, and the final response guard also discards a response if it races with the invalidation event.
+
+This applies uniformly to reads and mutations across Patients, Case Files, Session Notes, Documents, Appointments, Financial Transactions, Dashboard orchestration and Reports orchestration. The backend remains authoritative for whether an in-flight mutation commits; the stale frontend response cannot publish data, errors or follow-up state under a later tenant.
+
+`TENANT_OPTIONAL` context resolution and the `IDENTITY_ONLY` preference write retain their dedicated generation and request-sequence guards in `TenantContextStore`.
+
+An operational `403` from a `TENANT_REQUIRED` request does not directly invalidate the tenant. The interceptor asks `TenantContextStore` to revalidate `GET /auth/context` for the request's captured organization, switch generation and context version. Concurrent `403` responses for that same captured context share one refresh. This operational refresh keeps the last confirmed state mounted while the request is pending, so a capability-only denial does not destroy route- or dialog-scoped data.
+
+The V1 response remains authoritative:
+
+- a still-valid `ACTIVE_TENANT_READY` response updates the context and propagates the original capability-denied `403` without clearing tenant data
+- `NO_ACTIVE_TENANT`, an ineligible current organization or an equivalent unresolved V1 state emits authorization-loss invalidation
+- `ADMIN_SUSPENDED_CONTEXT` removes operational capabilities and emits organization-suspended invalidation while preserving only the administrative context allowed by V1
+- a transient network or `5xx` refresh failure preserves the last confirmed context, records the refresh error and propagates the original operational `403`; it does not grant permissions or claim that access loss was confirmed
+
+The context request is `TENANT_OPTIONAL`, so it cannot recursively enter the operational `403` trigger. A response captured for an older organization, generation or context version cannot invalidate the current tenant.
+
+## Organization Administration Requests
+
+The lazy Organization Administration feature consumes only the certified
+organization primitives:
+
+- `GET /organizations/current` with `organization.read`
+- `PATCH /organizations/:organizationId` with `organization.manage`
+- `PATCH /organizations/:organizationId/status` with `organization.manage`
+
+Each request is `TENANT_REQUIRED` and captures the confirmed organization in
+`TENANT_ORGANIZATION_ID`; the URL identifier and `X-Organization-Id` therefore
+refer to the same selected tenant without becoming frontend authorization
+evidence. The identity update accepts only `legalName`, `displayName`, `slug`,
+`timezone`, `locale`, and `currency`. Lifecycle writes accept only `ACTIVE` or
+`SUSPENDED`.
+
+Successful mutations replace page data with the canonical response and then
+force a new `GET /auth/context` for the captured organization and switch
+generation. This forced post-commit request does not reuse an older in-flight
+refresh. Canonical detail or mutation responses whose lifecycle status differs
+from the current V1 snapshot also trigger synchronization. Operational routes,
+links, and organization mutations remain fail-closed during that mismatch; a
+transient synchronization failure preserves the last confirmed snapshot and
+requires an explicit retry.
+
+A `409` is a recoverable conflict and may represent either concurrent state or
+an identifier uniqueness conflict, so the UI does not claim concurrency as the
+only cause. Runtime `403`, redacted `404`, validation `400`, network and server
+failures remain distinct visible states; transient failures are not converted
+into empty organization data.
+
+## Protected Organization Logo Requests
+
+Organization Administration consumes the dedicated protected logo contract:
+
+- `GET /organizations/:organizationId/logo` with `organization.read` returns
+  canonical `ABSENT` or `PRESENT` metadata
+- `GET /organizations/:organizationId/logo/content` with `organization.read`
+  returns protected PNG or JPEG bytes
+- `PUT /organizations/:organizationId/logo` with `organization.manage` sends
+  `multipart/form-data` containing `file` and exactly one compare-and-swap
+  precondition: `expectedRowState=ABSENT` or canonical `expectedUpdatedAt`
+- `DELETE /organizations/:organizationId/logo` with `organization.manage`
+  sends canonical `expectedUpdatedAt` in the JSON body
+
+Every request uses `TENANT_REQUIRED` and an explicit
+`TENANT_ORGANIZATION_ID`, so the existing interceptors supply bearer and tenant
+headers and discard stale cross-tenant responses. Protected content is never
+used as a raw `<img>` URL. `OrganizationLogoService` obtains a `Blob` through
+`HttpClient`, and `OrganizationLogoStore` accepts only PNG/JPEG content that
+matches canonical metadata before creating a runtime object URL. Object URLs
+are revoked on replacement, removal, tenant invalidation, logout, stale
+acceptance, and store destruction; neither bytes nor URLs are persisted.
+
+Logo mutation `409` responses are not retried. The store performs one canonical
+metadata reload, reloads content only when the new state is `PRESENT`, and
+requires a new explicit user decision. Failed reconciliation enters a
+recoverable error state and blocks stale mutation attempts.
 
 # Route Guards
 
@@ -143,7 +228,9 @@ Current responsibilities:
 - Redirect anonymous users
 - Return `UrlTree`
 
-Role-based routing is not implemented.
+Capability routing uses `capabilityGuard`; operational routes also use
+`activeTenantGuard` so suspended tenants, and tenants with unresolved canonical
+lifecycle synchronization, cannot mount operational pages.
 
 Authorization remains enforced by the backend.
 
@@ -162,6 +249,7 @@ Current services include:
 - DocumentsService
 - AppointmentsService
 - FinancialTransactionsService
+- OrganizationsService
 
 Services encapsulate HTTP communication.
 

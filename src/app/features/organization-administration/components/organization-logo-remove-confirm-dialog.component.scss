@@ -1,0 +1,42 @@
+.logo-remove-dialog {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 1rem;
+  padding-top: 0.35rem;
+}
+
+.logo-remove-dialog__icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin: 1.25rem 0 0 1.5rem;
+  border-radius: 999px;
+  background: var(--app-color-danger-soft);
+  color: var(--app-color-danger-text);
+}
+
+.logo-remove-dialog__copy {
+  min-width: 0;
+}
+
+p {
+  margin: 0;
+  color: var(--app-color-text-secondary);
+  line-height: 1.55;
+}
+
+mat-dialog-actions {
+  grid-column: 1 / -1;
+  padding: 1rem 1.5rem 1.25rem;
+}
+
+@media (max-width: 560px) {
+  .logo-remove-dialog {
+    grid-template-columns: 1fr;
+  }
+
+  .logo-remove-dialog__icon {
+    margin: 1rem 1.5rem 0;
+  }
+}

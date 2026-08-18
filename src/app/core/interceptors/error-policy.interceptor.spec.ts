@@ -29,7 +29,7 @@ describe('errorPolicyInterceptor', () => {
       errorPolicyInterceptor(request, () => throwError(() => originalError)).subscribe({
         next: receivedNext,
         error: receivedError,
-      })
+      }),
     );
 
     expect(errorPolicy.handle).toHaveBeenCalledOnce();

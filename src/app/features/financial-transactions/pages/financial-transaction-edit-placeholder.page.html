@@ -5,7 +5,10 @@
       <p>Cargando transaccion...</p>
     </div>
   } @else if (loadErrorMessage()) {
-    <div class="financial-transaction-edit-state financial-transaction-edit-state--error" role="alert">
+    <div
+      class="financial-transaction-edit-state financial-transaction-edit-state--error"
+      role="alert"
+    >
       <p>{{ loadErrorMessage() }}</p>
       <div class="financial-transaction-edit-state__actions">
         <button mat-stroked-button type="button" (click)="retryLoad()">Reintentar</button>

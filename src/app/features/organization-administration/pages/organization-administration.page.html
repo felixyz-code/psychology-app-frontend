@@ -1,0 +1,645 @@
+<section class="organization-admin-page">
+  <app-page-header
+    heading="Administraci&oacute;n de la organizaci&oacute;n"
+    subtitle="Consulta la identidad y controla el estado de la organizaci&oacute;n confirmada."
+  />
+
+  @switch (viewState()) {
+    @case ('loading') {
+      <div class="organization-admin-state" role="status">
+        <mat-spinner diameter="42" />
+        <div>
+          <h2>Cargando organizaci&oacute;n</h2>
+          <p>Estamos consultando la informaci&oacute;n can&oacute;nica del servidor.</p>
+        </div>
+      </div>
+    }
+
+    @case ('forbidden') {
+      <div class="organization-admin-state organization-admin-state--error" role="alert">
+        <mat-icon aria-hidden="true">lock</mat-icon>
+        <div>
+          <h2>Acceso no autorizado</h2>
+          <p>El servidor no autoriz&oacute; la consulta de esta organizaci&oacute;n.</p>
+        </div>
+        <button mat-stroked-button type="button" (click)="loadOrganization()">Reintentar</button>
+      </div>
+    }
+
+    @case ('not-found') {
+      <div class="organization-admin-state organization-admin-state--error" role="alert">
+        <mat-icon aria-hidden="true">domain_disabled</mat-icon>
+        <div>
+          <h2>Organizaci&oacute;n no disponible</h2>
+          <p>La organizaci&oacute;n confirmada ya no est&aacute; disponible para este contexto.</p>
+        </div>
+        <button mat-stroked-button type="button" (click)="loadOrganization()">
+          Volver a verificar
+        </button>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="organization-admin-state organization-admin-state--error" role="alert">
+        <mat-icon aria-hidden="true">cloud_off</mat-icon>
+        <div>
+          <h2>No fue posible cargar la organizaci&oacute;n</h2>
+          <p>
+            Ocurri&oacute; un error transitorio. La informaci&oacute;n no se trat&oacute; como un
+            estado vac&iacute;o.
+          </p>
+        </div>
+        <button mat-stroked-button type="button" (click)="loadOrganization()">Reintentar</button>
+      </div>
+    }
+
+    @case ('loaded') {
+      @if (organization(); as currentOrganization) {
+        <div class="organization-admin-summary">
+          <div class="organization-admin-summary__identity">
+            <div class="organization-admin-summary__icon" aria-hidden="true">
+              <mat-icon>domain</mat-icon>
+            </div>
+            <div>
+              <span>Organizaci&oacute;n confirmada</span>
+              <h2>{{ currentOrganization.displayName }}</h2>
+              <p>{{ currentOrganization.legalName }}</p>
+            </div>
+          </div>
+
+          <app-status-badge
+            [label]="currentOrganization.status === 'ACTIVE' ? 'Activa' : 'Suspendida'"
+            [variant]="currentOrganization.status === 'ACTIVE' ? 'success' : 'warning'"
+          />
+        </div>
+
+        @if (isSuspended()) {
+          <div class="organization-admin-alert organization-admin-alert--warning" role="status">
+            <mat-icon aria-hidden="true">warning_amber</mat-icon>
+            <div>
+              <strong>La organizaci&oacute;n est&aacute; suspendida</strong>
+              <span>
+                Las superficies operativas permanecen cerradas. Solo se muestran acciones
+                administrativas autorizadas por el servidor.
+              </span>
+            </div>
+          </div>
+        }
+
+        @if (successMessage()) {
+          <div class="organization-admin-alert organization-admin-alert--success" role="status">
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <span>{{ successMessage() }}</span>
+          </div>
+        }
+
+        @if (errorMessage()) {
+          <div class="organization-admin-alert organization-admin-alert--error" role="alert">
+            <mat-icon aria-hidden="true">error</mat-icon>
+            <div>
+              <span>{{ errorMessage() }}</span>
+              @if (errorMessage().includes('Recarga')) {
+                <button mat-button type="button" (click)="loadOrganization()">Recargar</button>
+              }
+            </div>
+          </div>
+        }
+
+        @if (contextWarning()) {
+          <div class="organization-admin-alert organization-admin-alert--warning" role="alert">
+            <mat-icon aria-hidden="true">sync_problem</mat-icon>
+            <div>
+              <span>{{ contextWarning() }}</span>
+              <button mat-button type="button" (click)="retryContextSynchronization()">
+                Reintentar sincronizaci&oacute;n
+              </button>
+            </div>
+          </div>
+        }
+
+        <div class="organization-admin-grid">
+          <div class="organization-admin-main">
+            <app-section-card
+              title="Identidad y configuraci&oacute;n"
+              subtitle="Los campos disponibles corresponden exactamente al contrato certificado."
+            >
+              <form class="organization-admin-form" [formGroup]="form" (ngSubmit)="save()">
+                <div class="organization-admin-form__grid">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nombre visible</mat-label>
+                    <input
+                      matInput
+                      formControlName="displayName"
+                      maxlength="150"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('displayName')) {
+                      <mat-error>{{ getFieldError('displayName') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Raz&oacute;n social</mat-label>
+                    <input
+                      matInput
+                      formControlName="legalName"
+                      maxlength="255"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('legalName')) {
+                      <mat-error>{{ getFieldError('legalName') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Identificador</mat-label>
+                    <input
+                      matInput
+                      formControlName="slug"
+                      maxlength="100"
+                      autocomplete="off"
+                      [readonly]="!canManage()"
+                    />
+                    <mat-hint>Min&uacute;sculas, n&uacute;meros y guiones.</mat-hint>
+                    @if (getFieldError('slug')) {
+                      <mat-error>{{ getFieldError('slug') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Zona horaria</mat-label>
+                    <input
+                      matInput
+                      formControlName="timezone"
+                      maxlength="100"
+                      placeholder="America/Hermosillo"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('timezone')) {
+                      <mat-error>{{ getFieldError('timezone') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Locale</mat-label>
+                    <input
+                      matInput
+                      formControlName="locale"
+                      maxlength="20"
+                      placeholder="es-MX"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('locale')) {
+                      <mat-error>{{ getFieldError('locale') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Moneda</mat-label>
+                    <input
+                      matInput
+                      formControlName="currency"
+                      maxlength="3"
+                      placeholder="MXN"
+                      [readonly]="!canManage()"
+                    />
+                    @if (getFieldError('currency')) {
+                      <mat-error>{{ getFieldError('currency') }}</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                @if (canManage()) {
+                  <div class="organization-admin-form__actions">
+                    <button
+                      mat-flat-button
+                      color="primary"
+                      type="submit"
+                      [disabled]="
+                        isSaving() || isChangingStatus() || isCanonicalContextSynchronizationPending()
+                      "
+                    >
+                      @if (isSaving()) {
+                        <mat-spinner diameter="20" />
+                      }
+                      <span>{{ isSaving() ? 'Guardando' : 'Guardar cambios' }}</span>
+                    </button>
+                  </div>
+                } @else {
+                  <p class="organization-admin-readonly">
+                    Tienes acceso de consulta. La edici&oacute;n requiere la capability
+                    <code>organization.manage</code>.
+                  </p>
+                }
+              </form>
+            </app-section-card>
+
+            <div class="organization-configuration-grid">
+              <app-section-card
+                title="Duración predeterminada de citas"
+                subtitle="Se aplica al crear nuevas citas de esta organización."
+              >
+              @if (
+                organizationConfigurationStore.settingsState() === 'LOADING' ||
+                organizationConfigurationStore.settingsState() === 'NOT_LOADED'
+              ) {
+                <p class="organization-configuration-state" role="status">Cargando ajustes…</p>
+              } @else if (organizationConfigurationStore.settingsState() === 'ERROR') {
+                <div class="organization-configuration-state" role="alert">
+                  <span>{{ organizationConfigurationStore.settingsError() }}</span>
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="organizationConfigurationStore.loadCurrent()"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              } @else {
+                <form
+                  class="organization-configuration-form"
+                  [formGroup]="settingsForm"
+                  (ngSubmit)="saveAppointmentDefault()"
+                >
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Duración predeterminada (minutos)</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      min="1"
+                      max="1440"
+                      formControlName="defaultAppointmentDuration"
+                      [readonly]="!canManage()"
+                    />
+                    <mat-hint
+                      >Valor efectivo:
+                      {{ organizationConfigurationStore.effectiveAppointmentDuration() }} minutos.
+                      El valor predeterminado de la plataforma es 60 minutos.</mat-hint
+                    >
+                    @if (
+                      settingsForm.controls.defaultAppointmentDuration.hasError('min') ||
+                      settingsForm.controls.defaultAppointmentDuration.hasError('max')
+                    ) {
+                      <mat-error>Usa un valor entre 1 y 1440 minutos.</mat-error>
+                    }
+                  </mat-form-field>
+                  @if (organizationConfigurationStore.settingsSuccess()) {
+                    <p class="organization-configuration-success" role="status">
+                      {{ organizationConfigurationStore.settingsSuccess() }}
+                    </p>
+                  }
+                  @if (organizationConfigurationStore.settingsError()) {
+                    <p class="organization-configuration-error" role="alert">
+                      {{ organizationConfigurationStore.settingsError() }}
+                    </p>
+                  }
+                  @if (canManage()) {
+                    <div class="organization-configuration-actions">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="
+                          settingsForm.invalid || organizationConfigurationStore.settingsSaving()
+                        "
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="resetAppointmentDefault()"
+                        [disabled]="organizationConfigurationStore.settingsSaving()"
+                      >
+                        Usar valor predeterminado
+                      </button>
+                    </div>
+                  } @else {
+                    <p class="organization-admin-readonly">
+                      Tienes acceso de consulta; la edición requiere
+                      <code>organization.manage</code>.
+                    </p>
+                  }
+                </form>
+              }
+            </app-section-card>
+
+            <app-section-card
+              title="Identidad visual de la organización"
+              subtitle="Un acento limitado; no cambia el tema ni los controles de la aplicación."
+            >
+              @if (
+                organizationConfigurationStore.brandingState() === 'LOADING' ||
+                organizationConfigurationStore.brandingState() === 'NOT_LOADED'
+              ) {
+                <p class="organization-configuration-state" role="status">
+                  Cargando identidad visual…
+                </p>
+              } @else if (organizationConfigurationStore.brandingState() === 'ERROR') {
+                <div class="organization-configuration-state" role="alert">
+                  <span>{{ organizationConfigurationStore.brandingError() }}</span
+                  ><button
+                    mat-button
+                    type="button"
+                    (click)="organizationConfigurationStore.loadCurrent()"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              } @else {
+                <form
+                  class="organization-configuration-form"
+                  [formGroup]="brandingForm"
+                  (ngSubmit)="saveBranding()"
+                >
+                  <div class="organization-brand-preview">
+                    <span class="organization-brand-preview__swatch" aria-hidden="true"></span
+                    ><span>Vista previa del acento de la organización</span>
+                  </div>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Color de acento (#RRGGBB)</mat-label>
+                    <input
+                      matInput
+                      formControlName="primaryColor"
+                      placeholder="#2563EB"
+                      maxlength="7"
+                      autocomplete="off"
+                      [readonly]="!canManage()"
+                    />
+                    <mat-hint>Debe contrastar con superficies claras y oscuras.</mat-hint>
+                    @if (brandingForm.controls.primaryColor.hasError('unsafeColor')) {
+                      <mat-error>Usa #RRGGBB con contraste suficiente.</mat-error>
+                    }
+                  </mat-form-field>
+                  @if (organizationConfigurationStore.brandingSuccess()) {
+                    <p class="organization-configuration-success" role="status">
+                      {{ organizationConfigurationStore.brandingSuccess() }}
+                    </p>
+                  }
+                  @if (organizationConfigurationStore.brandingError()) {
+                    <p class="organization-configuration-error" role="alert">
+                      {{ organizationConfigurationStore.brandingError() }}
+                    </p>
+                  }
+                  @if (canManage()) {
+                    <div class="organization-configuration-actions">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="
+                          brandingForm.invalid || organizationConfigurationStore.brandingSaving()
+                        "
+                      >
+                        Guardar</button
+                      ><button
+                        mat-stroked-button
+                        type="button"
+                        (click)="resetBranding()"
+                        [disabled]="organizationConfigurationStore.brandingSaving()"
+                      >
+                        Usar valor predeterminado
+                      </button>
+                    </div>
+                  } @else {
+                    <p class="organization-admin-readonly">
+                      Tienes acceso de consulta; la edición requiere
+                      <code>organization.manage</code>.
+                    </p>
+                  }
+                </form>
+              }
+            </app-section-card>
+
+            <div class="organization-logo-card">
+              <app-section-card
+                title="Logotipo de la organizaci&oacute;n"
+                subtitle="Imagen protegida disponible solo mediante el contexto autenticado de la organizaci&oacute;n."
+              >
+                <div class="organization-logo">
+                  @if (
+                    organizationLogoStore.state() === 'LOADING' ||
+                    organizationLogoStore.state() === 'NOT_LOADED'
+                  ) {
+                    <div class="organization-logo__state" role="status">
+                      <mat-spinner diameter="32" />
+                      <span>Cargando logotipo&hellip;</span>
+                    </div>
+                  } @else if (organizationLogoStore.state() === 'ERROR') {
+                    <div
+                      class="organization-logo__state organization-logo__state--error"
+                      role="alert"
+                    >
+                      <mat-icon aria-hidden="true">broken_image</mat-icon>
+                      <span>{{ organizationLogoStore.errorMessage() }}</span>
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="organizationLogoStore.loadCurrent()"
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  } @else {
+                    @if (organizationLogoStore.state() === 'ABSENT') {
+                      <div class="organization-logo__preview organization-logo__preview--empty">
+                        <mat-icon aria-hidden="true">image_not_supported</mat-icon>
+                        <div>
+                          <strong>Sin logotipo</strong>
+                          <span>La organizaci&oacute;n no tiene una imagen configurada.</span>
+                        </div>
+                      </div>
+                    } @else if (presentLogo(); as logo) {
+                      <div class="organization-logo__present">
+                        <div class="organization-logo__preview">
+                          <img
+                            [src]="organizationLogoStore.previewUrl()"
+                            [alt]="'Logotipo de ' + currentOrganization.displayName"
+                          />
+                        </div>
+                        <dl class="organization-logo__metadata">
+                          <div>
+                            <dt>Dimensiones</dt>
+                            <dd>{{ logo.width }} &times; {{ logo.height }} px</dd>
+                          </div>
+                          <div>
+                            <dt>Tipo</dt>
+                            <dd>{{ logoTypeLabel(logo) }}</dd>
+                          </div>
+                          <div>
+                            <dt>Tama&ntilde;o</dt>
+                            <dd>{{ logoSizeLabel(logo.byteSize) }}</dd>
+                          </div>
+                        </dl>
+                      </div>
+                    }
+
+                    <p id="organization-logo-constraints" class="organization-logo__constraints">
+                      PNG o JPEG, m&aacute;ximo 1 MiB y dimensiones entre 64 y 2048 px. El servidor
+                      valida el archivo de forma definitiva.
+                    </p>
+
+                    @if (organizationLogoStore.successMessage()) {
+                      <p class="organization-configuration-success" role="status">
+                        {{ organizationLogoStore.successMessage() }}
+                      </p>
+                    }
+                    @if (organizationLogoStore.conflictMessage()) {
+                      <p class="organization-logo__conflict" role="alert">
+                        {{ organizationLogoStore.conflictMessage() }}
+                      </p>
+                    }
+                    @if (organizationLogoStore.errorMessage()) {
+                      <p class="organization-configuration-error" role="alert">
+                        {{ organizationLogoStore.errorMessage() }}
+                      </p>
+                    }
+
+                    @if (canManage()) {
+                      <div class="organization-logo__controls">
+                        <label for="organization-logo-file">Seleccionar archivo</label>
+                        <input
+                          #logoFileInput
+                          id="organization-logo-file"
+                          type="file"
+                          accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                          [attr.aria-describedby]="
+                            organizationLogoStore.fileError()
+                              ? 'organization-logo-constraints organization-logo-file-feedback'
+                              : 'organization-logo-constraints'
+                          "
+                          [attr.aria-errormessage]="
+                            organizationLogoStore.fileError()
+                              ? 'organization-logo-file-feedback'
+                              : null
+                          "
+                          [attr.aria-invalid]="organizationLogoStore.fileError() ? 'true' : null"
+                          [disabled]="organizationLogoStore.mutationState() !== 'IDLE'"
+                          (change)="selectLogoFile($event)"
+                        />
+                        @if (organizationLogoStore.fileError()) {
+                          <p
+                            id="organization-logo-file-feedback"
+                            class="organization-configuration-error"
+                            role="alert"
+                          >
+                            {{ organizationLogoStore.fileError() }}
+                          </p>
+                        }
+                      </div>
+
+                      <div class="organization-configuration-actions">
+                        <button
+                          mat-flat-button
+                          color="primary"
+                          type="button"
+                          [disabled]="
+                            !organizationLogoStore.selectedFile() ||
+                            organizationLogoStore.mutationState() !== 'IDLE'
+                          "
+                          (click)="uploadLogo()"
+                        >
+                          @if (organizationLogoStore.mutationState() === 'UPLOADING') {
+                            <mat-spinner diameter="20" />
+                          }
+                          <span>{{
+                            organizationLogoStore.state() === 'PRESENT'
+                              ? 'Reemplazar logotipo'
+                              : 'Subir logotipo'
+                          }}</span>
+                        </button>
+                        @if (organizationLogoStore.state() === 'PRESENT') {
+                          <button
+                            mat-stroked-button
+                            color="warn"
+                            type="button"
+                            [disabled]="organizationLogoStore.mutationState() !== 'IDLE'"
+                            (click)="openLogoRemoveConfirmation()"
+                          >
+                            @if (organizationLogoStore.mutationState() === 'REMOVING') {
+                              <mat-spinner diameter="20" />
+                            }
+                            <span>Eliminar logotipo</span>
+                          </button>
+                        }
+                      </div>
+                    } @else {
+                      <p class="organization-admin-readonly">
+                        Tienes acceso de consulta; subir, reemplazar o eliminar requiere
+                        <code>organization.manage</code>.
+                      </p>
+                    }
+                  }
+                </div>
+              </app-section-card>
+            </div>
+          </div>
+        </div>
+
+        <div class="organization-admin-aside">
+          <app-section-card
+            title="Estado de la organizaci&oacute;n"
+            subtitle="El servidor valida cada transici&oacute;n y conserva la autoridad final."
+          >
+            <div class="organization-admin-lifecycle">
+              <div>
+                <span>Estado actual</span>
+                <strong>{{
+                  currentOrganization.status === 'ACTIVE' ? 'Activa' : 'Suspendida'
+                }}</strong>
+              </div>
+
+              @if (canManage()) {
+                <button
+                  [color]="isSuspended() ? 'primary' : 'warn'"
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="
+                    isChangingStatus() || isSaving() || isCanonicalContextSynchronizationPending()
+                  "
+                  (click)="openStatusConfirmation()"
+                >
+                  @if (isChangingStatus()) {
+                    <mat-spinner diameter="20" />
+                  } @else {
+                    <mat-icon aria-hidden="true">{{
+                      isSuspended() ? 'play_arrow' : 'pause'
+                    }}</mat-icon>
+                  }
+                  <span>{{
+                    isSuspended()
+                      ? 'Reactivar organizaci&oacute;n'
+                      : 'Suspender organizaci&oacute;n'
+                  }}</span>
+                </button>
+              } @else {
+                <p>No tienes una acci&oacute;n de lifecycle autorizada.</p>
+              }
+            </div>
+          </app-section-card>
+
+          <app-section-card
+            title="Metadatos"
+            subtitle="Informaci&oacute;n de solo lectura del contrato."
+          >
+            <dl class="organization-admin-metadata">
+              <div>
+                <dt>ID</dt>
+                <dd>{{ currentOrganization.id }}</dd>
+              </div>
+              <div>
+                <dt>Creada</dt>
+                <dd>{{ currentOrganization.createdAt | date: 'medium' }}</dd>
+              </div>
+              <div>
+                <dt>&Uacute;ltima actualizaci&oacute;n</dt>
+                <dd>{{ currentOrganization.updatedAt | date: 'medium' }}</dd>
+              </div>
+            </dl>
+          </app-section-card>
+        </div>
+      </div>
+      }
+    }
+  }
+</section>

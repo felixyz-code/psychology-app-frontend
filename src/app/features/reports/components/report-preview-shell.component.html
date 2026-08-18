@@ -11,7 +11,9 @@
       @if (generatedAt()) {
         <div class="report-preview-shell__meta-item">
           <span class="report-preview-shell__meta-label">Generado</span>
-          <strong class="report-preview-shell__meta-value">{{ formatGeneratedAt(generatedAt()) }}</strong>
+          <strong class="report-preview-shell__meta-value">{{
+            formatGeneratedAt(generatedAt())
+          }}</strong>
         </div>
       }
     </section>
@@ -23,7 +25,10 @@
       <p>Generando vista previa...</p>
     </div>
   } @else if (errorMessage()) {
-    <div class="report-preview-shell__state app-table-feedback-state app-table-feedback-state--error" role="alert">
+    <div
+      class="report-preview-shell__state app-table-feedback-state app-table-feedback-state--error"
+      role="alert"
+    >
       <p>{{ errorMessage() }}</p>
       <button mat-stroked-button type="button" (click)="requestRetry()">Reintentar</button>
     </div>
@@ -31,24 +36,35 @@
     @let content = clinicalContent()!;
     <article
       class="report-preview-shell__clinical-document"
-      [attr.aria-label]="isClinicalRecordContent(content) ? 'Expediente clínico profesional' : 'Resumen clínico profesional'"
+      [attr.aria-label]="
+        isClinicalRecordContent(content)
+          ? 'Expediente clínico profesional'
+          : 'Resumen clínico profesional'
+      "
     >
       @if (isClinicalRecordContent(content)) {
         <section class="report-preview-shell__clinical-section">
           <header class="report-preview-shell__clinical-section-header">
             <span class="report-preview-shell__clinical-eyebrow">Documento clínico</span>
             <h4>{{ content.documentTitle }}</h4>
-            <p>Paciente: {{ content.patientFullName }} | Período: {{ content.periodLabel }} | Generado: {{ content.generatedAtLabel }}</p>
+            <p>
+              Paciente: {{ content.patientFullName }} | Período: {{ content.periodLabel }} |
+              Generado: {{ content.generatedAtLabel }}
+            </p>
           </header>
         </section>
 
         <section class="report-preview-shell__clinical-hero">
           <div class="report-preview-shell__clinical-patient">
-            <div class="report-preview-shell__clinical-avatar" aria-hidden="true">{{ content.patientInitials }}</div>
+            <div class="report-preview-shell__clinical-avatar" aria-hidden="true">
+              {{ content.patientInitials }}
+            </div>
             <div class="report-preview-shell__clinical-patient-copy">
               <span class="report-preview-shell__clinical-eyebrow">Expediente clínico</span>
               <h3>{{ content.patientFullName }}</h3>
-              <p>Documento estructurado e imprimible del expediente clínico visible en el sistema.</p>
+              <p>
+                Documento estructurado e imprimible del expediente clínico visible en el sistema.
+              </p>
             </div>
           </div>
         </section>
@@ -63,7 +79,9 @@
             @for (detail of content.patientDetails; track trackByLabel($index, detail)) {
               <article class="report-preview-shell__clinical-data-card">
                 <span class="report-preview-shell__clinical-data-label">{{ detail.label }}</span>
-                <strong class="report-preview-shell__clinical-data-value">{{ detail.value }}</strong>
+                <strong class="report-preview-shell__clinical-data-value">{{
+                  detail.value
+                }}</strong>
               </article>
             }
           </div>
@@ -79,7 +97,9 @@
             @for (detail of content.recordDetails; track trackByLabel($index, detail)) {
               <article class="report-preview-shell__clinical-data-card">
                 <span class="report-preview-shell__clinical-data-label">{{ detail.label }}</span>
-                <strong class="report-preview-shell__clinical-data-value">{{ detail.value }}</strong>
+                <strong class="report-preview-shell__clinical-data-value">{{
+                  detail.value
+                }}</strong>
               </article>
             }
           </div>
@@ -118,10 +138,16 @@
               @for (appointment of content.appointments; track appointment.id) {
                 <article class="report-preview-shell__clinical-list-item">
                   <div class="report-preview-shell__clinical-list-header">
-                    <strong class="report-preview-shell__clinical-list-title">{{ appointment.scheduledAtLabel }}</strong>
-                    <span class="report-preview-shell__clinical-list-date">{{ appointment.statusLabel }}</span>
+                    <strong class="report-preview-shell__clinical-list-title">{{
+                      appointment.scheduledAtLabel
+                    }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{
+                      appointment.statusLabel
+                    }}</span>
                   </div>
-                  <p class="report-preview-shell__clinical-list-body">Duración: {{ appointment.durationLabel }}</p>
+                  <p class="report-preview-shell__clinical-list-body">
+                    Duración: {{ appointment.durationLabel }}
+                  </p>
                   <p class="report-preview-shell__clinical-list-body">{{ appointment.notes }}</p>
                 </article>
               }
@@ -146,10 +172,16 @@
               @for (note of content.notes; track note.id) {
                 <article class="report-preview-shell__clinical-list-item">
                   <div class="report-preview-shell__clinical-list-header">
-                    <strong class="report-preview-shell__clinical-list-title">{{ note.title }}</strong>
-                    <span class="report-preview-shell__clinical-list-date">{{ note.sessionDateLabel }}</span>
+                    <strong class="report-preview-shell__clinical-list-title">{{
+                      note.title
+                    }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{
+                      note.sessionDateLabel
+                    }}</span>
                   </div>
-                  <p class="report-preview-shell__clinical-list-body report-preview-shell__clinical-list-body--preserve">
+                  <p
+                    class="report-preview-shell__clinical-list-body report-preview-shell__clinical-list-body--preserve"
+                  >
                     {{ note.content }}
                   </p>
                 </article>
@@ -175,8 +207,12 @@
               @for (document of content.documents; track document.id) {
                 <article class="report-preview-shell__clinical-list-item">
                   <div class="report-preview-shell__clinical-list-header">
-                    <strong class="report-preview-shell__clinical-list-title">{{ document.fileName }}</strong>
-                    <span class="report-preview-shell__clinical-list-date">{{ document.uploadedAtLabel }}</span>
+                    <strong class="report-preview-shell__clinical-list-title">{{
+                      document.fileName
+                    }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{
+                      document.uploadedAtLabel
+                    }}</span>
                   </div>
                   <p class="report-preview-shell__clinical-list-body">{{ document.typeLabel }}</p>
                 </article>
@@ -201,11 +237,18 @@
             <div class="report-preview-shell__clinical-timeline">
               @for (item of content.timelineItems; track item.id) {
                 <article class="report-preview-shell__clinical-timeline-item">
-                  <div class="report-preview-shell__clinical-timeline-marker" aria-hidden="true"></div>
+                  <div
+                    class="report-preview-shell__clinical-timeline-marker"
+                    aria-hidden="true"
+                  ></div>
                   <div class="report-preview-shell__clinical-timeline-body">
                     <div class="report-preview-shell__clinical-timeline-row">
-                      <strong class="report-preview-shell__clinical-list-title">{{ item.title }}</strong>
-                      <span class="report-preview-shell__clinical-list-date">{{ item.occurredAtLabel }}</span>
+                      <strong class="report-preview-shell__clinical-list-title">{{
+                        item.title
+                      }}</strong>
+                      <span class="report-preview-shell__clinical-list-date">{{
+                        item.occurredAtLabel
+                      }}</span>
                     </div>
                     <p class="report-preview-shell__clinical-list-body">{{ item.description }}</p>
                   </div>
@@ -231,8 +274,12 @@
             <div class="report-preview-shell__clinical-grid">
               @for (reference of content.references; track trackByLabel($index, reference)) {
                 <article class="report-preview-shell__clinical-data-card">
-                  <span class="report-preview-shell__clinical-data-label">{{ reference.label }}</span>
-                  <strong class="report-preview-shell__clinical-data-value">{{ reference.value }}</strong>
+                  <span class="report-preview-shell__clinical-data-label">{{
+                    reference.label
+                  }}</span>
+                  <strong class="report-preview-shell__clinical-data-value">{{
+                    reference.value
+                  }}</strong>
                 </article>
               }
             </div>
@@ -247,9 +294,13 @@
       } @else {
         <section class="report-preview-shell__clinical-hero">
           <div class="report-preview-shell__clinical-patient">
-            <div class="report-preview-shell__clinical-avatar" aria-hidden="true">{{ content.patientInitials }}</div>
+            <div class="report-preview-shell__clinical-avatar" aria-hidden="true">
+              {{ content.patientInitials }}
+            </div>
             <div class="report-preview-shell__clinical-patient-copy">
-              <span class="report-preview-shell__clinical-eyebrow">{{ content.patientSection.title }}</span>
+              <span class="report-preview-shell__clinical-eyebrow">{{
+                content.patientSection.title
+              }}</span>
               <h3>{{ content.patientFullName }}</h3>
               <p>{{ content.patientSection.subtitle }}</p>
             </div>
@@ -260,7 +311,9 @@
               <article class="report-preview-shell__clinical-kpi">
                 <span class="report-preview-shell__clinical-kpi-label">{{ metric.label }}</span>
                 <strong class="report-preview-shell__clinical-kpi-value">{{ metric.value }}</strong>
-                <p class="report-preview-shell__clinical-kpi-supporting">{{ metric.supportingText }}</p>
+                <p class="report-preview-shell__clinical-kpi-supporting">
+                  {{ metric.supportingText }}
+                </p>
               </article>
             }
           </div>
@@ -276,7 +329,9 @@
             @for (detail of content.patientDetails; track trackByLabel($index, detail)) {
               <article class="report-preview-shell__clinical-data-card">
                 <span class="report-preview-shell__clinical-data-label">{{ detail.label }}</span>
-                <strong class="report-preview-shell__clinical-data-value">{{ detail.value }}</strong>
+                <strong class="report-preview-shell__clinical-data-value">{{
+                  detail.value
+                }}</strong>
               </article>
             }
           </div>
@@ -329,11 +384,18 @@
             <div class="report-preview-shell__clinical-timeline">
               @for (item of content.timelineItems; track item.id) {
                 <article class="report-preview-shell__clinical-timeline-item">
-                  <div class="report-preview-shell__clinical-timeline-marker" aria-hidden="true"></div>
+                  <div
+                    class="report-preview-shell__clinical-timeline-marker"
+                    aria-hidden="true"
+                  ></div>
                   <div class="report-preview-shell__clinical-timeline-body">
                     <div class="report-preview-shell__clinical-timeline-row">
-                      <strong class="report-preview-shell__clinical-list-title">{{ item.title }}</strong>
-                      <span class="report-preview-shell__clinical-list-date">{{ item.occurredAtLabel }}</span>
+                      <strong class="report-preview-shell__clinical-list-title">{{
+                        item.title
+                      }}</strong>
+                      <span class="report-preview-shell__clinical-list-date">{{
+                        item.occurredAtLabel
+                      }}</span>
                     </div>
                     <p class="report-preview-shell__clinical-list-body">{{ item.description }}</p>
                   </div>
@@ -360,8 +422,12 @@
               @for (note of content.notes; track note.id) {
                 <article class="report-preview-shell__clinical-list-item">
                   <div class="report-preview-shell__clinical-list-header">
-                    <strong class="report-preview-shell__clinical-list-title">{{ note.title }}</strong>
-                    <span class="report-preview-shell__clinical-list-date">{{ note.sessionDateLabel }}</span>
+                    <strong class="report-preview-shell__clinical-list-title">{{
+                      note.title
+                    }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{
+                      note.sessionDateLabel
+                    }}</span>
                   </div>
                   <p class="report-preview-shell__clinical-list-body">{{ note.excerpt }}</p>
                 </article>
@@ -370,7 +436,8 @@
 
             @if (content.hiddenNotesCount > 0) {
               <p class="report-preview-shell__clinical-footnote">
-                Se omitieron visualmente {{ content.hiddenNotesCount }} notas adicionales para mantener una lectura ejecutiva.
+                Se omitieron visualmente {{ content.hiddenNotesCount }} notas adicionales para
+                mantener una lectura ejecutiva.
               </p>
             }
           } @else {
@@ -393,8 +460,12 @@
               @for (document of content.documents; track document.id) {
                 <article class="report-preview-shell__clinical-list-item">
                   <div class="report-preview-shell__clinical-list-header">
-                    <strong class="report-preview-shell__clinical-list-title">{{ document.fileName }}</strong>
-                    <span class="report-preview-shell__clinical-list-date">{{ document.uploadedAtLabel }}</span>
+                    <strong class="report-preview-shell__clinical-list-title">{{
+                      document.fileName
+                    }}</strong>
+                    <span class="report-preview-shell__clinical-list-date">{{
+                      document.uploadedAtLabel
+                    }}</span>
                   </div>
                   <p class="report-preview-shell__clinical-list-body">{{ document.typeLabel }}</p>
                 </article>
@@ -411,7 +482,7 @@
       }
     </article>
   } @else if (previewMode() === 'grouped' && groups().length) {
-      <div class="report-preview-shell__groups" aria-label="Vista previa agrupada por día">
+    <div class="report-preview-shell__groups" aria-label="Vista previa agrupada por día">
       @for (group of groups(); track group.id) {
         <section class="report-preview-shell__group">
           <header class="report-preview-shell__group-header">
@@ -466,10 +537,18 @@
       <table mat-table [dataSource]="rows()" class="report-preview-shell__table app-data-table">
         @for (columnKey of displayedColumns(); track columnKey) {
           <ng-container [matColumnDef]="columnKey">
-            <th mat-header-cell *matHeaderCellDef [class.report-preview-shell__cell--end]="isColumnEndAligned(columnKey)">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              [class.report-preview-shell__cell--end]="isColumnEndAligned(columnKey)"
+            >
               {{ getColumnLabel(columnKey) }}
             </th>
-            <td mat-cell *matCellDef="let row" [class.report-preview-shell__cell--end]="isColumnEndAligned(columnKey)">
+            <td
+              mat-cell
+              *matCellDef="let row"
+              [class.report-preview-shell__cell--end]="isColumnEndAligned(columnKey)"
+            >
               {{ row.values[columnKey] }}
             </td>
           </ng-container>
@@ -480,7 +559,11 @@
       </table>
     </div>
   } @else {
-    <app-data-table-empty-state icon="analytics" [title]="emptyTitle()" [message]="emptyMessage()" />
+    <app-data-table-empty-state
+      icon="analytics"
+      [title]="emptyTitle()"
+      [message]="emptyMessage()"
+    />
   }
 
   <div sectionCardFooter class="report-preview-shell__footer">

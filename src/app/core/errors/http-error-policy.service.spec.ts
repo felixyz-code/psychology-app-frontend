@@ -70,7 +70,10 @@ describe('HttpErrorPolicyService', () => {
     const { service, store } = configureService(router);
     store.setSession('active-token', user);
 
-    const result = service.handle(new HttpErrorResponse({ status: 403, statusText: 'Forbidden' }), '/api/reports');
+    const result = service.handle(
+      new HttpErrorResponse({ status: 403, statusText: 'Forbidden' }),
+      '/api/reports',
+    );
 
     expect(result).toBe('forbidden');
     expect(store.token()).toBe('active-token');

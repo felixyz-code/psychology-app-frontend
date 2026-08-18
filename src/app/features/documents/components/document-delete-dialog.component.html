@@ -5,13 +5,18 @@
   </div>
 
   <div class="document-delete-dialog__summary app-dialog__summary">
-    <p class="document-delete-dialog__summary-title app-dialog__summary-title">Documento seleccionado</p>
+    <p class="document-delete-dialog__summary-title app-dialog__summary-title">
+      Documento seleccionado
+    </p>
     <p class="document-delete-dialog__title">"{{ document.fileName }}"</p>
-    <p class="document-delete-dialog__meta">Fecha de carga: {{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+    <p class="document-delete-dialog__meta">
+      Fecha de carga: {{ document.uploadedAt | date: 'dd/MM/yyyy HH:mm' }}
+    </p>
   </div>
 
   <p class="document-delete-dialog__warning">
-    Esta acción eliminará el registro del documento seleccionado. El archivo físico no se elimina y esta acción no puede deshacerse.
+    Esta acción eliminará el registro del documento seleccionado. El archivo físico no se elimina y
+    esta acción no puede deshacerse.
   </p>
 
   @if (errorMessage()) {
@@ -19,7 +24,9 @@
   }
 
   <div class="document-delete-dialog__actions">
-    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">Cancelar</button>
+    <button mat-button type="button" cdkFocusInitial [disabled]="isDeleting()" (click)="cancel()">
+      Cancelar
+    </button>
 
     <button
       mat-flat-button

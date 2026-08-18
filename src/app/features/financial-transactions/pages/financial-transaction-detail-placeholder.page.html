@@ -10,15 +10,24 @@
   />
 
   @if (isLoading()) {
-    <app-section-card title="Detalle de transaccion" subtitle="Cargando informacion del movimiento financiero.">
+    <app-section-card
+      title="Detalle de transaccion"
+      subtitle="Cargando informacion del movimiento financiero."
+    >
       <div class="financial-transaction-detail-state" aria-live="polite">
         <mat-spinner diameter="40" />
         <p>Cargando transaccion...</p>
       </div>
     </app-section-card>
   } @else if (errorMessage()) {
-    <app-section-card title="Detalle de transaccion" subtitle="No fue posible obtener la informacion solicitada.">
-      <div class="financial-transaction-detail-state financial-transaction-detail-state--error" role="alert">
+    <app-section-card
+      title="Detalle de transaccion"
+      subtitle="No fue posible obtener la informacion solicitada."
+    >
+      <div
+        class="financial-transaction-detail-state financial-transaction-detail-state--error"
+        role="alert"
+      >
         <p>{{ errorMessage() }}</p>
         <div class="financial-transaction-detail-actions">
           <a mat-button routerLink="/financial-transactions">
@@ -38,14 +47,16 @@
         <mat-icon>arrow_back</mat-icon>
         <span>Volver al listado</span>
       </a>
-      <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']">
-        <mat-icon>edit</mat-icon>
-        <span>Editar transaccion</span>
-      </a>
-      <button mat-stroked-button type="button" (click)="openDeleteDialog()">
-        <mat-icon>delete</mat-icon>
-        <span>Eliminar transaccion</span>
-      </button>
+      @if (canManage()) {
+        <a mat-flat-button [routerLink]="['/financial-transactions', transaction.id, 'edit']">
+          <mat-icon>edit</mat-icon>
+          <span>Editar transaccion</span>
+        </a>
+        <button mat-stroked-button type="button" (click)="openDeleteDialog()">
+          <mat-icon>delete</mat-icon>
+          <span>Eliminar transaccion</span>
+        </button>
+      }
     </div>
 
     <app-financial-transaction-detail-content [transaction]="transaction" />

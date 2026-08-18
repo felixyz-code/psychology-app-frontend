@@ -28,7 +28,9 @@ describe('FinancialTransactionsService', () => {
   it('gets transactions with inclusive local date boundaries and defined filters only', () => {
     service.findAll({ from: '2026-01-31', to: '2026-02-01', type: 'INCOME' }).subscribe();
 
-    const request = httpTesting.expectOne((request) => request.url === '/api/financial-transactions');
+    const request = httpTesting.expectOne(
+      (request) => request.url === '/api/financial-transactions',
+    );
     expect(request.request.method).toBe('GET');
     expect(request.request.params.get('from')).toBe(new Date(2026, 0, 31).toISOString());
     expect(request.request.params.get('to')).toBe(new Date(2026, 1, 2).toISOString());
@@ -40,7 +42,9 @@ describe('FinancialTransactionsService', () => {
   it('gets the summary with the same inclusive local date boundaries', () => {
     service.findSummary({ from: '2026-12-31', to: '2026-12-31', status: 'COMPLETED' }).subscribe();
 
-    const request = httpTesting.expectOne((request) => request.url === '/api/financial-transactions/summary');
+    const request = httpTesting.expectOne(
+      (request) => request.url === '/api/financial-transactions/summary',
+    );
     expect(request.request.method).toBe('GET');
     expect(request.request.params.get('from')).toBe(new Date(2026, 11, 31).toISOString());
     expect(request.request.params.get('to')).toBe(new Date(2027, 0, 1).toISOString());

@@ -14,6 +14,6 @@ export const errorPolicyInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       return throwError(() => error);
-    })
+    }),
   );
 };

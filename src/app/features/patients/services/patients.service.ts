@@ -3,11 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import {
-  CreatePatientRequest,
-  Patient,
-  UpdatePatientRequest,
-} from '../models/patient.models';
+import { CreatePatientRequest, Patient, UpdatePatientRequest } from '../models/patient.models';
 
 @Injectable({ providedIn: 'root' })
 export class PatientsService {

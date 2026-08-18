@@ -40,6 +40,100 @@ Phase 3 progress:
 Completed - Reports foundation generalized for multiple professional reports
 ```
 
+POST-GO-LIVE.4 status:
+
+```text
+POST-GO-LIVE.4: CLOSED / INTEGRATED
+POST-GO-LIVE.4.0 through 4.9: COMPLETE / INTEGRATED
+FRONTEND BASELINE: 092eca3a1f9ed236586d9c0bb1b5f1c59f1e2a7c
+BACKEND SUPPORTING BASELINE: ef4c1f7cefa9d5ab5bfc3b27e59ed51c8ea72fee
+```
+
+POST-GO-LIVE.5 status:
+
+```text
+POST-GO-LIVE.5 (Organization Branding & Configuration): CLOSED / INTEGRATED
+POST-GO-LIVE.5.0: COMPLETE / INTEGRATED (Organization Branding & Configuration Architecture)
+POST-GO-LIVE.5.1: COMPLETE / INTEGRATED (Backend Organization Configuration Runtime)
+POST-GO-LIVE.5.2: COMPLETE / INTEGRATED (Backend Protected Logo Storage & API Runtime)
+POST-GO-LIVE.5.3: COMPLETE / INTEGRATED (Backend Hardening, Verification & Audit)
+POST-GO-LIVE.5.4: COMPLETE / INTEGRATED (Frontend Organization Configuration & Branding UX - PR #37)
+POST-GO-LIVE.5.5: COMPLETE / INTEGRATED (Frontend Protected Organization Logo UX - PR #38)
+POST-GO-LIVE.5.6: COMPLETE / INTEGRATED (Manual UX Certification & Accessibility)
+POST-GO-LIVE.5.7: COMPLETE / INTEGRATED (Cross-Repository Integration Certification)
+POST-GO-LIVE.5.8: COMPLETE / INTEGRATED (Phase 5 Normative Closeout)
+FRONTEND MERGED BASELINE: 5ebf23e74786698f77af046966f3153bec27fdd6
+BACKEND SUPPORTING BASELINE: development (synced)
+PHASE 5 FORMALLY CLOSED
+```
+
+## POST-GO-LIVE.5.5 - Organization Logo UX
+
+**Status:** `COMPLETE / CERTIFIED AND INTEGRATED IN PR #38 (Commit 5ebf23e74786698f77af046966f3153bec27fdd6)`.
+
+**Goal:** expose the certified protected organization-logo contract inside
+Organization Administration without weakening tenant or authentication
+boundaries.
+
+**Implementation & Architecture:**
+- **Storage Namespace & Protected Streaming:** Dedicated `/organizations/:organizationId/logo` metadata and `/organizations/:organizationId/logo/content` protected byte endpoints with strict tenant scoping and MIME validation.
+- **Blob-Based Object URL Lifecycle:** Client-side runtime-only Object URL management via `OrganizationLogoStore` with deterministic URL revocation on replacement, removal, tenant invalidation/logout, stale acceptance, and store destruction (zero leak risk).
+- **Concurrency & CAS Conflict Reconciliation:** Compare-and-swap (CAS) preconditions (`expectedRowState=ABSENT` or canonical `expectedUpdatedAt`). HTTP `409 Conflict` errors are never retried; they trigger exactly one canonical metadata refresh and reload content only when the reconciled state is `PRESENT`.
+- **Tenant Boundary Isolation:** Tenant-generation-owned state scoped by `organizationId`, `switchGeneration`, and monotonic `requestVersion` to prevent late cross-tenant reads or mutations from publishing.
+
+## POST-GO-LIVE.4.4 - Organization Administration UX (Historical capability record)
+
+**Status:** `COMPLETE / INTEGRATED`. This historical capability record remains
+accurate; the Phase 4 functional sequence subsequently completed through 4.9.
+
+**Goal:** provide the first organization-domain administration experience for
+the confirmed tenant, using the certified backend organization read, identity
+update, and `ACTIVE`/`SUSPENDED` lifecycle APIs.
+
+**In scope:** organization details; capability-aware owner administration
+controls; identity fields (`legalName`, `displayName`, `slug`, `timezone`,
+`locale`, `currency`); deliberate suspend/reactivate UX; contract error and
+concurrency recovery; and context refresh/invalidation after a successful
+lifecycle change.
+
+**Out of scope:** membership administration, invitations and invitation
+decisions, ownership transfer, freelancer signup or organization creation,
+branding, billing, settings expansion, and infrastructure or backend schema
+work.
+
+**Dependencies:** 4.1 Tenant Context Foundation, 4.2 Organization Selection &
+Preferred Organization, and 4.3 Cross-Tenant State Invalidation.
+
+**Acceptance criteria:** only a confirmed selected organization is addressed;
+read/manage controls follow the server-projected capabilities; all tenant API
+calls use the established tenant-required metadata; successful updates refresh
+context; suspension clears operational UI and enters only the allowed
+administrative context; reactivation restores only after confirmed context;
+and 403/404 responses remain redacted without cross-tenant disclosure.
+
+**Implementation:** lazy `/organization-administration` route; capability-aware
+read/manage controls; typed identity form; explicit lifecycle confirmation;
+canonical mutation reconciliation; V1 context refresh; suspended-safe routing;
+generation/context-version guards for late feature responses; and forced
+post-commit context synchronization keyed to the current organization and
+switch generation. Operational routes now require an active tenant and cannot
+mount under `ADMIN_SUSPENDED_CONTEXT` or while a canonical lifecycle mismatch
+is unresolved.
+
+**Security invariants:** `X-Organization-Id` remains request-time authority;
+the client never infers authorization from URLs, stored state, or capabilities;
+the backend remains authoritative; stale responses are discarded by tenant
+generation; and no suspended-organization operational data or action is
+rendered. A failed lifecycle synchronization preserves the canonical warning
+and keeps operational navigation fail-closed until retry or tenant change.
+
+Documentation-only rollback:
+
+```text
+Document-only rollback -> git revert <documentation-commit> -> restore previous documentation baseline.
+No code rollback is included in this phase.
+```
+
 RC.FE.1 status:
 
 ```text
@@ -432,7 +526,4 @@ Related documentation:
 * DECISION_LOG.md
 
 End of document.
-
-
-
 

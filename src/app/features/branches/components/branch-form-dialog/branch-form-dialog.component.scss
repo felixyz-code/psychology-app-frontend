@@ -1,0 +1,123 @@
+.branch-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: min(85vh, calc(100dvh - 2rem));
+  height: min(85vh, calc(100dvh - 2rem));
+  min-height: 0;
+  gap: 0.75rem;
+  min-width: min(100%, 36rem);
+  overflow: hidden;
+}
+
+.branch-dialog__header {
+  flex-shrink: 0;
+}
+
+.branch-dialog__form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.branch-dialog__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1.15rem;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.branch-dialog__plan-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.95rem 1.1rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--app-color-warning) 12%, var(--app-color-card-bg) 88%);
+  border: 1px solid var(--app-color-warning);
+  color: var(--app-color-heading);
+  flex-shrink: 0;
+}
+
+.branch-dialog__plan-banner-icon {
+  color: var(--app-color-warning);
+  margin-top: 0.1rem;
+}
+
+.branch-dialog__plan-banner-text strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+}
+
+.branch-dialog__plan-banner-text p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--app-color-text-secondary);
+}
+
+.branch-dialog__toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.branch-dialog__toggle-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--app-color-heading);
+}
+
+.branch-dialog__toggle-desc {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: var(--app-color-text-secondary);
+}
+
+.branch-dialog__error {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: var(--app-color-danger-soft);
+  color: var(--app-color-danger-text);
+  font-size: 0.88rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.branch-dialog__saving {
+  flex-shrink: 0;
+}
+
+.branch-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  background: var(--app-color-dialog-bg);
+}
+
+@media (max-width: 720px) {
+  .branch-dialog {
+    max-height: calc(100dvh - 1.25rem);
+    height: calc(100dvh - 1.25rem);
+    min-width: 100%;
+  }
+
+  .branch-dialog__form {
+    gap: 0.75rem;
+  }
+
+  .branch-dialog__body {
+    padding-right: 0;
+  }
+}

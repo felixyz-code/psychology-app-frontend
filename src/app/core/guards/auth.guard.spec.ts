@@ -1,4 +1,10 @@
-import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+  provideRouter,
+} from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 
 import { AuthUser } from '../auth/auth.models';
@@ -48,8 +54,8 @@ describe('authGuard', () => {
   });
 
   function runGuard(): boolean | UrlTree {
-    return TestBed.runInInjectionContext(() =>
-      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as boolean | UrlTree
+    return TestBed.runInInjectionContext(
+      () => authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as boolean | UrlTree,
     );
   }
 });

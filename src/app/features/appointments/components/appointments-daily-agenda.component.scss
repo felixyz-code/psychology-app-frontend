@@ -65,7 +65,11 @@
 
 .appointments-agenda__item--interactive {
   cursor: pointer;
-  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
 }
 
 .appointments-agenda__item--interactive:focus-visible {

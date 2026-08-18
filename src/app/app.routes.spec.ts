@@ -1,4 +1,7 @@
 import { authGuard } from './core/guards/auth.guard';
+import { anonymousOnlyGuard } from './core/guards/anonymous-only.guard';
+import { capabilityGuard } from './core/guards/capability.guard';
+import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
 import { routes } from './app.routes';
 
 describe('app routes', () => {
@@ -9,12 +12,28 @@ describe('app routes', () => {
     expect(loginRoute?.loadComponent).toBeDefined();
   });
 
+  it('exposes signup to anonymous users through the narrowly scoped anonymous-only policy', () => {
+    const signupRoute = routes.find((route) => route.path === 'signup');
+
+    expect(signupRoute?.canActivate).toEqual([anonymousOnlyGuard]);
+    expect(signupRoute?.loadComponent).toBeDefined();
+  });
+
+  it('exposes organization selection behind authentication but outside tenant resolution', () => {
+    const selectionRoute = routes.find((route) => route.path === 'organization-selection');
+
+    expect(selectionRoute?.canActivate).toEqual([authGuard]);
+    expect(selectionRoute?.loadComponent).toBeDefined();
+  });
+
   it('keeps the root shell protected by the real auth guard', () => {
     const shellRoute = routes.find((route) => route.path === '');
 
-    expect(shellRoute?.canActivate).toEqual([authGuard]);
+    expect(shellRoute?.canActivate).toEqual([authGuard, tenantContextGuard]);
     expect(shellRoute?.loadComponent).toBeDefined();
-    expect(shellRoute?.children?.some((route) => route.path === 'dashboard' && route.loadComponent)).toBe(true);
+    expect(
+      shellRoute?.children?.some((route) => route.path === 'dashboard' && route.loadComponent),
+    ).toBe(true);
   });
 
   it('keeps critical redirects and lazy feature children stable', () => {
@@ -30,9 +49,62 @@ describe('app routes', () => {
       path: '**',
       redirectTo: '',
     });
-    expect(childRoutes.some((route) => route.path === 'financial-transactions' && route.loadChildren)).toBe(true);
-    expect(childRoutes.some((route) => route.path === 'case-files' && route.loadChildren)).toBe(true);
-    expect(childRoutes.some((route) => route.path === 'documents' && route.loadChildren)).toBe(true);
+    expect(routes.find((route) => route.path === 'login')?.loadComponent).toBeDefined();
+    expect(
+      routes.find((route) => route.path === 'organization-selection')?.loadComponent,
+    ).toBeDefined();
+    expect(
+      childRoutes.some((route) => route.path === 'financial-transactions' && route.loadChildren),
+    ).toBe(true);
+    expect(childRoutes.some((route) => route.path === 'case-files' && route.loadChildren)).toBe(
+      true,
+    );
+    expect(childRoutes.some((route) => route.path === 'documents' && route.loadChildren)).toBe(
+      true,
+    );
     expect(childRoutes.some((route) => route.path === 'reports' && route.loadChildren)).toBe(true);
+  });
+
+  it('separates operational routes from suspended-safe organization administration', () => {
+    const shellRoute = routes.find((route) => route.path === '');
+    const childRoutes = shellRoute?.children ?? [];
+    const operationalPaths = [
+      'dashboard',
+      'patients',
+      'appointments',
+      'case-files',
+      'documents',
+      'reports',
+    ];
+
+    for (const path of operationalPaths) {
+      expect(childRoutes.find((route) => route.path === path)?.canActivate).toEqual([
+        activeTenantGuard,
+      ]);
+    }
+
+    expect(childRoutes.find((route) => route.path === 'financial-transactions')).toMatchObject({
+      canActivate: [activeTenantGuard, capabilityGuard],
+      data: { requiredCapability: 'finance.read' },
+    });
+
+    expect(childRoutes.find((route) => route.path === 'organization-administration')).toMatchObject(
+      {
+        canActivate: [capabilityGuard],
+        data: { requiredCapability: 'organization.read' },
+      },
+    );
+    expect(childRoutes.find((route) => route.path === 'membership-administration')).toMatchObject({
+      canActivate: [capabilityGuard],
+      data: { requiredCapability: 'membership.read' },
+    });
+    expect(childRoutes.find((route) => route.path === 'corporate')).toMatchObject({
+      canActivate: [activeTenantGuard, capabilityGuard],
+      data: { requiredCapability: 'organization.read' },
+    });
+    expect(childRoutes.find((route) => route.path === 'invitation-administration')).toMatchObject({
+      canActivate: [activeTenantGuard, capabilityGuard],
+      data: { requiredCapability: 'invitation.read' },
+    });
   });
 });
