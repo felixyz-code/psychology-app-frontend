@@ -427,6 +427,13 @@
       </div>
     }
 
+    <app-assessment-list
+      [patientId]="patient().id"
+      [patientName]="getFullName()"
+      [caseFileId]="caseFile()?.id"
+      (assessmentChanged)="refreshWorkspaceData()"
+    ></app-assessment-list>
+
     <app-section-card
       title="Informacion administrativa"
       subtitle="Datos administrativos del paciente asociados al expediente."

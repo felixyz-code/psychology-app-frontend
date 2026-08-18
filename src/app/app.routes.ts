@@ -24,6 +24,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'assessment-runner/:accessToken',
+    loadComponent: () =>
+      import('./features/assessments/pages/assessment-runner/assessment-runner.page').then(
+        (m) => m.AssessmentRunnerPage,
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard, tenantContextGuard],
     loadComponent: () =>

@@ -1,0 +1,254 @@
+.assessment-result-dialog {
+  min-width: 320px;
+  max-width: 720px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  &__icon {
+    color: #0284c7;
+  }
+
+  &__subtitle {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    color: #475569;
+    text-align: right;
+    gap: 0.25rem;
+
+    @media (max-width: 600px) {
+      text-align: left;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 0.5rem 0;
+  }
+
+  &__banner {
+    display: flex;
+    gap: 1.5rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 10px;
+    padding: 1.25rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__score-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    min-width: 110px;
+  }
+
+  &__score-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  &__score-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0369a1;
+    line-height: 1.1;
+    margin: 0.25rem 0;
+  }
+
+  &__score-norm {
+    font-size: 0.75rem;
+    color: #475569;
+  }
+
+  &__diagnosis-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+  }
+
+  &__diag-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  &__diag-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__strata-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  &__flags {
+    background-color: #fff1f2;
+    border: 1px solid #fecdd3;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  &__flag-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    h4 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #9f1239;
+    }
+  }
+
+  &__flag-icon {
+    color: #e11d48;
+  }
+
+  &__flag-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__flag-item {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    background-color: #ffffff;
+    border-left: 4px solid #e11d48;
+    color: #881337;
+  }
+
+  &__subscales {
+    h4 {
+      margin: 0 0 0.75rem 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+  }
+
+  &__subscale-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__subscale-card {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__subscale-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #334155;
+  }
+
+  &__subscale-score {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0284c7;
+  }
+
+  &__responses {
+    h4 {
+      margin: 0 0 0.75rem 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+  }
+
+  &__table-wrapper {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+
+    th {
+      background-color: #f1f5f9;
+      color: #475569;
+      font-weight: 600;
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+    }
+  }
+
+  &__no-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    color: #64748b;
+    gap: 0.5rem;
+  }
+
+  &__actions {
+    padding: 1rem 1.5rem;
+    gap: 0.5rem;
+  }
+}

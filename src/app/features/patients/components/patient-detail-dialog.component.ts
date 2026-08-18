@@ -58,6 +58,7 @@ import { SessionNoteFormDialogComponent } from '../../session-notes/components/s
 import { SessionNote } from '../../session-notes/models/session-note.models';
 import { Patient } from '../models/patient.models';
 import { PatientFormDialogComponent } from './patient-form-dialog.component';
+import { AssessmentListComponent } from '../../assessments/components/assessment-list/assessment-list.component';
 
 interface PatientDetailDialogData {
   patient: Patient;
@@ -76,6 +77,7 @@ interface PatientDetailDialogData {
     MatProgressSpinnerModule,
     MatTooltipModule,
     ActionCardComponent,
+    AssessmentListComponent,
     ClinicalTimelineComponent,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
