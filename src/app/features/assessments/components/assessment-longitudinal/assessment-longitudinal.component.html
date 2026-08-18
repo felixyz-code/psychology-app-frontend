@@ -136,8 +136,8 @@
                 </td>
                 <td class="text-center">
                   @if (point.hasRiskFlag) {
-                    <span class="risk-badge" title="{{ point.activeCriticalAlerts }} alertas de riesgo activas">
-                      <mat-icon>warning</mat-icon> {{ point.activeCriticalAlerts }} Alertas
+                    <span class="risk-badge" [title]="point.activeCriticalAlerts + ' alerta(s) de riesgo activas'">
+                      <mat-icon>warning</mat-icon> {{ point.activeCriticalAlerts === 1 ? '1 Alerta' : (point.activeCriticalAlerts + ' Alertas') }}
                     </span>
                   } @else {
                     <span class="no-risk-tag"><mat-icon>shield</mat-icon> Normal</span>

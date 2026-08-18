@@ -215,8 +215,9 @@ export class CaseFilesListPage {
     }
 
     const dialogRef = this.dialog.open(PatientDetailDialogComponent, {
-      width: '90vw',
-      maxWidth: '1100px',
+      width: 'min(1100px, 95vw)',
+      maxWidth: '95vw',
+      panelClass: 'patient-detail-dialog-panel',
       autoFocus: false,
       data: {
         patient,

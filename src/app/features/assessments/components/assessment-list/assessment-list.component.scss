@@ -135,10 +135,11 @@
   }
 
   &__score-cell {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
 
   &__score-badge {
@@ -148,14 +149,29 @@
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
     font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  &__risk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    cursor: help;
   }
 
   &__risk-icon {
     color: #e11d48;
-    font-size: 1.25rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    cursor: help;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
   }
 
   &__pending {
