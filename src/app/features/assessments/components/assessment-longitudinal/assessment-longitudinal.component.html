@@ -1,0 +1,158 @@
+<div class="assessment-longitudinal-container">
+  <div class="longitudinal-header">
+    <div class="longitudinal-title-group">
+      <mat-icon class="title-icon">show_chart</mat-icon>
+      <div>
+        <h2 class="longitudinal-title">EVOLUCIÓN PSICOMÉTRICA LONGITUDINAL</h2>
+        <p class="longitudinal-subtitle">
+          Paciente: <strong>{{ seriesData()?.patientName || patientName || 'Sin especificar' }}</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- Filter Control -->
+    <div class="longitudinal-filters">
+      <mat-form-field appearance="outline" class="instrument-filter-field">
+        <mat-label>Instrumento Psicométrico</mat-label>
+        <mat-select [value]="selectedInstrumentCode" (selectionChange)="onInstrumentChange($event.value)">
+          @for (instr of availableInstruments(); track instr.code) {
+            <mat-option [value]="instr.code">{{ instr.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="longitudinal-loading">
+      <mat-spinner diameter="36"></mat-spinner>
+      <p>Cargando trayectoria de evaluaciones del paciente...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (!loading() && error()) {
+    <div class="longitudinal-error">
+      <mat-icon color="warn">error_outline</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading() && seriesData(); as s) {
+    <!-- Statistical Summary Banner -->
+    <div class="longitudinal-summary-grid">
+      <div class="summary-card">
+        <span class="card-label">Total Evaluaciones</span>
+        <span class="card-value">{{ s.summary.totalCompletedAssessments }}</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="card-label">Rango Puntaje (Min / Max)</span>
+        <span class="card-value">
+          {{ s.summary.scoreMin !== null ? s.summary.scoreMin : '-' }} / {{ s.summary.scoreMax !== null ? s.summary.scoreMax : '-' }}
+        </span>
+      </div>
+
+      <div class="summary-card">
+        <span class="card-label">Promedio Histórico</span>
+        <span class="card-value">{{ s.summary.scoreAverage !== null ? s.summary.scoreAverage : '-' }} pts</span>
+      </div>
+
+      <div class="summary-card summary-card--trend" [ngClass]="getTrendClass(s.summary.scoreTrend)">
+        <span class="card-label">Tendencia General</span>
+        <div class="trend-value-box">
+          <mat-icon>{{ getTrendIcon(s.summary.scoreTrend) }}</mat-icon>
+          <span class="trend-label">{{ getTrendLabel(s.summary.scoreTrend) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline Table -->
+    @if (s.series.length > 0) {
+      <div class="longitudinal-table-wrapper">
+        <table class="longitudinal-table">
+          <thead>
+            <tr>
+              <th>Fecha Aplicación</th>
+              <th>Instrumento</th>
+              <th class="text-center">Puntaje</th>
+              <th>Clasificación / Estrato</th>
+              <th>Delta (vs Anterior)</th>
+              <th class="text-center">Significancia Clínica</th>
+              <th class="text-center">Riesgo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (point of s.series; track point.administrationId) {
+              <tr>
+                <td>
+                  <strong>{{ point.completedAt | date: 'dd/MM/yyyy HH:mm' }}</strong>
+                </td>
+                <td>
+                  <span class="instrument-tag">{{ point.instrumentCode }} v.{{ point.versionNumber }}</span>
+                </td>
+                <td class="text-center font-bold text-lg">
+                  {{ point.rawScore }}
+                </td>
+                <td>
+                  <div class="strata-cell">
+                    <span>{{ point.strataTitle || point.strataCode || 'Completado' }}</span>
+                    <app-status-badge
+                      [label]="point.severity || 'Normal'"
+                      [variant]="getSeverityVariant(point.severity)"
+                    ></app-status-badge>
+                  </div>
+                </td>
+                <td>
+                  @if (point.delta) {
+                    <div class="delta-badge delta-badge--{{ point.delta.severityChange.toLowerCase() }}">
+                      @if (point.delta.rawScoreDelta !== null) {
+                        <span class="delta-score">
+                          {{ point.delta.rawScoreDelta > 0 ? '+' + point.delta.rawScoreDelta : point.delta.rawScoreDelta }} pts
+                        </span>
+                      }
+                      <span class="delta-direction">
+                        @if (point.delta.severityChange === 'IMPROVED') { ↓ Mejoría }
+                        @else if (point.delta.severityChange === 'WORSENED') { ↑ Empeoramiento }
+                        @else { = Estable }
+                      </span>
+                    </div>
+                  } @else {
+                    <span class="text-muted">- (Inicial)</span>
+                  }
+                </td>
+                <td class="text-center">
+                  @if (point.delta?.clinicalSignificance === 'CLINICALLY_SIGNIFICANT') {
+                    <span class="sig-tag sig-tag--yes font-semibold">
+                      <mat-icon>check_circle</mat-icon> MCiD Relevante
+                    </span>
+                  } @else if (point.delta?.clinicalSignificance === 'MINIMAL_CHANGE') {
+                    <span class="sig-tag sig-tag--minimal">Cambio Mínimo</span>
+                  } @else {
+                    <span class="text-muted">Primera toma</span>
+                  }
+                </td>
+                <td class="text-center">
+                  @if (point.hasRiskFlag) {
+                    <span class="risk-badge" title="{{ point.activeCriticalAlerts }} alertas de riesgo activas">
+                      <mat-icon>warning</mat-icon> {{ point.activeCriticalAlerts }} Alertas
+                    </span>
+                  } @else {
+                    <span class="no-risk-tag"><mat-icon>shield</mat-icon> Normal</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="longitudinal-empty">
+        <mat-icon>history_toggle_off</mat-icon>
+        <p>No se encontraron evaluaciones completadas para los filtros seleccionados.</p>
+      </div>
+    }
+  }
+</div>

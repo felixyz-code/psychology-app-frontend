@@ -7,6 +7,8 @@ import {
   AssessmentAdministrationListResponse,
   AssignAssessmentRequest,
   CompleteAssessmentResponse,
+  LongitudinalAssessmentSeriesDto,
+  PsychometricReportDto,
   SaveResponsesRequest,
 } from '../models/assessment.models';
 
@@ -16,6 +18,13 @@ export interface SaveResponsesResponse {
   savedCount: number;
   totalAnswered: number;
   message: string;
+}
+
+export interface QueryLongitudinalParams {
+  instrumentCode?: string;
+  fromDate?: string;
+  toDate?: string;
+  limit?: number;
 }
 
 export interface QueryAdministrationsParams {
@@ -82,6 +91,29 @@ export class AssessmentsHttpService {
     return this.http.post<CompleteAssessmentResponse>(
       `${this.apiUrl}/assessments/administrations/${id}/complete`,
       {},
+    );
+  }
+
+  getPsychometricReport(administrationId: string): Observable<PsychometricReportDto> {
+    return this.http.get<PsychometricReportDto>(
+      `${this.apiUrl}/assessments/administrations/${administrationId}/report`,
+    );
+  }
+
+  getLongitudinalSeries(
+    patientId: string,
+    params?: QueryLongitudinalParams,
+  ): Observable<LongitudinalAssessmentSeriesDto> {
+    let httpParams = new HttpParams();
+    if (params) {
+      if (params.instrumentCode) httpParams = httpParams.set('instrumentCode', params.instrumentCode);
+      if (params.fromDate) httpParams = httpParams.set('fromDate', params.fromDate);
+      if (params.toDate) httpParams = httpParams.set('toDate', params.toDate);
+      if (params.limit !== undefined) httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    return this.http.get<LongitudinalAssessmentSeriesDto>(
+      `${this.apiUrl}/assessments/patients/${patientId}/longitudinal`,
+      { params: httpParams },
     );
   }
 

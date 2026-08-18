@@ -20,6 +20,7 @@ import {
 } from '../../../../shared/components/status-badge/status-badge.component';
 import { SectionCardComponent } from '../../../../shared/components/section-card/section-card.component';
 import { AssessmentAssignDialogComponent } from '../assessment-assign-dialog/assessment-assign-dialog.component';
+import { AssessmentLongitudinalComponent } from '../assessment-longitudinal/assessment-longitudinal.component';
 import { AssessmentResultDialogComponent } from '../assessment-result-dialog/assessment-result-dialog.component';
 
 @Component({
@@ -36,6 +37,7 @@ import { AssessmentResultDialogComponent } from '../assessment-result-dialog/ass
     MatTooltipModule,
     SectionCardComponent,
     StatusBadgeComponent,
+    AssessmentLongitudinalComponent,
   ],
   templateUrl: './assessment-list.component.html',
   styleUrl: './assessment-list.component.scss',

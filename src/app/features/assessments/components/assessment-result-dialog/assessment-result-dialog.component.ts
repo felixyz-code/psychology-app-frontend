@@ -50,11 +50,22 @@ export class AssessmentResultDialogComponent {
     return [];
   }
 
-  getSubscales(): Array<{ code: string; score: number; name?: string }> {
+  getSubscales(): Array<{
+    scaleCode: string;
+    scaleName: string;
+    rawScore: number;
+    normalizedScore?: number | null;
+    strataTitle?: string | null;
+    severity?: string | null;
+  }> {
     if (!this.result?.subscaleScoresJson) return [];
-    return Object.entries(this.result.subscaleScoresJson).map(([code, val]) => ({
-      code,
-      score: typeof val === 'number' ? val : Number(val) || 0,
+    return Object.values(this.result.subscaleScoresJson).map((val: any) => ({
+      scaleCode: val.scaleCode || val.code || '',
+      scaleName: val.scaleName || val.name || val.scaleCode || '',
+      rawScore: typeof val.rawScore === 'number' ? val.rawScore : Number(val.rawScore || val.score) || 0,
+      normalizedScore: val.normalizedScore,
+      strataTitle: val.strataTitle,
+      severity: val.severity,
     }));
   }
 

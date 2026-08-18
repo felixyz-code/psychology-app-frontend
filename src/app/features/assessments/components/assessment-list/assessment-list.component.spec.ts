@@ -54,6 +54,24 @@ describe('AssessmentListComponent', () => {
         meta: { total: 1, page: 1, limit: 50, totalPages: 1 },
       }),
     ),
+    getLongitudinalSeries: vi.fn().mockReturnValue(
+      of({
+        patientId: 'pat-1',
+        patientName: 'Juan Perez',
+        instrumentCode: null,
+        series: [],
+        summary: {
+          totalCompletedAssessments: 0,
+          firstAssessmentAt: null,
+          lastAssessmentAt: null,
+          scoreMin: null,
+          scoreMax: null,
+          scoreAverage: null,
+          scoreTrend: 'INSUFFICIENT_DATA',
+          severityDistribution: {},
+        },
+      }),
+    ),
   };
 
   const mockDialog = {
