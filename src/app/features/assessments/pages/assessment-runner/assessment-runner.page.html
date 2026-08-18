@@ -185,8 +185,13 @@
 
       <!-- Submission Footer -->
       <footer class="assessment-runner__footer">
-        @if (missingItemCodes().length > 0) {
-          <div class="assessment-runner__footer-alert">
+        @if (formAlertMessage()) {
+          <div class="assessment-runner__footer-alert" role="alert">
+            <mat-icon>warning</mat-icon>
+            <span>{{ formAlertMessage() }}</span>
+          </div>
+        } @else if (missingItemCodes().length > 0) {
+          <div class="assessment-runner__footer-alert" role="alert">
             <mat-icon>warning</mat-icon>
             <span
               >Faltan {{ missingItemCodes().length }} preguntas obligatorias por responder.</span

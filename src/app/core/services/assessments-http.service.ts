@@ -103,10 +103,13 @@ export class AssessmentsHttpService {
     );
   }
 
-  completePublicAssessment(accessToken: string): Observable<CompleteAssessmentResponse> {
+  completePublicAssessment(
+    accessToken: string,
+    payload?: SaveResponsesRequest,
+  ): Observable<CompleteAssessmentResponse> {
     return this.http.post<CompleteAssessmentResponse>(
       `${this.apiUrl}/assessments/public/runner/${accessToken}/complete`,
-      {},
+      payload || {},
     );
   }
 }

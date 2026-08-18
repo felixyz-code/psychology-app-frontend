@@ -131,24 +131,58 @@ describe('AssessmentRunnerPage', () => {
     expect(component.progressPercentage()).toBe(50);
   });
 
-  it('should prevent submission and highlight missing items if incomplete', () => {
+  it('should prevent submission and highlight missing items if incomplete', async () => {
     component.selectOption('PHQ9_1', '2');
     // PHQ9_2 still missing
-    component.submitAssessment();
+    await component.submitAssessment();
 
     expect(component.missingItemCodes()).toContain('PHQ9_2');
+    expect(component.formAlertMessage()).toContain('obligatorias');
     expect(mockAssessmentsService.completePublicAssessment).not.toHaveBeenCalled();
   });
 
-  it('should complete assessment when all required items are answered', () => {
+  it('should complete assessment when all required items are answered', async () => {
     component.selectOption('PHQ9_1', '2');
     component.selectOption('PHQ9_2', '1');
 
-    component.submitAssessment();
+    await component.submitAssessment();
 
+    expect(mockAssessmentsService.savePublicResponses).toHaveBeenCalledWith(
+      'sec_eval_valid123',
+      expect.objectContaining({ responses: { PHQ9_1: '2', PHQ9_2: '1' } }),
+    );
     expect(mockAssessmentsService.completePublicAssessment).toHaveBeenCalledWith(
       'sec_eval_valid123',
+      expect.objectContaining({ responses: { PHQ9_1: '2', PHQ9_2: '1' } }),
     );
     expect(component.isCompleted()).toBe(true);
+  });
+
+  it('should handle 422 error from server without setting blocking global errorMessage', async () => {
+    component.selectOption('PHQ9_1', '2');
+    component.selectOption('PHQ9_2', '1');
+
+    const { throwError } = await import('rxjs');
+    const { HttpErrorResponse } = await import('@angular/common/http');
+
+    mockAssessmentsService.completePublicAssessment.mockReturnValueOnce(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 422,
+            error: {
+              message: 'Assessment is incomplete',
+              missingItemCodes: ['PHQ9_2'],
+            },
+          }),
+      ),
+    );
+
+    await component.submitAssessment();
+
+    expect(component.isCompleted()).toBe(false);
+    expect(component.errorMessage()).toBe(''); // Global blocking error NOT set
+    expect(component.formAlertMessage()).toBe('Assessment is incomplete');
+    expect(component.missingItemCodes()).toContain('PHQ9_2');
   });
 });
