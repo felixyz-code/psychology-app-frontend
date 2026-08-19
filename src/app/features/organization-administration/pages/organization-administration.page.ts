@@ -29,6 +29,8 @@ import {
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SectionCardComponent } from '../../../shared/components/section-card/section-card.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { OrganizationColorPickerComponent } from '../components/organization-color-picker/organization-color-picker.component';
+import { OrganizationLogoDropzoneComponent } from '../components/organization-logo-dropzone/organization-logo-dropzone.component';
 import {
   OrganizationLogoRemoveConfirmDialogComponent,
   OrganizationLogoRemoveConfirmDialogData,
@@ -67,6 +69,8 @@ interface RequestScope {
     PageHeaderComponent,
     SectionCardComponent,
     StatusBadgeComponent,
+    OrganizationColorPickerComponent,
+    OrganizationLogoDropzoneComponent,
   ],
   templateUrl: './organization-administration.page.html',
   styleUrl: './organization-administration.page.scss',
@@ -80,6 +84,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
   private readonly logoFileInput = viewChild<ElementRef<HTMLInputElement>>('logoFileInput');
   private loadSubscription?: Subscription;
   private mutationSubscription?: Subscription;
+  private institutionalMutationSubscription?: Subscription;
   private loadSequence = 0;
   private destroyed = false;
   private configurationFormScope = '';
@@ -87,9 +92,12 @@ export class OrganizationAdministrationPage implements OnDestroy {
   readonly viewState = signal<ViewState>('loading');
   readonly organization = signal<OrganizationDetails | null>(null);
   readonly isSaving = signal(false);
+  readonly isSavingInstitutional = signal(false);
   readonly isChangingStatus = signal(false);
   readonly successMessage = signal('');
   readonly errorMessage = signal('');
+  readonly institutionalSuccess = signal('');
+  readonly institutionalError = signal('');
   readonly contextWarning = signal('');
   readonly canManage = computed(() => this.tenantContextStore.hasCapability('organization.manage'));
   readonly isSuspended = computed(() => this.organization()?.status === 'SUSPENDED');
@@ -134,14 +142,52 @@ export class OrganizationAdministrationPage implements OnDestroy {
       validators: [Validators.required, Validators.pattern(/^[A-Z]{3}$/)],
     }),
   });
+
+  readonly institutionalForm = new FormGroup({
+    taxId: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.maxLength(50)],
+    }),
+    tradeName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.maxLength(150)],
+    }),
+    phone: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.maxLength(30)],
+    }),
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.email, Validators.maxLength(255)],
+    }),
+    website: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.maxLength(500)],
+    }),
+    address: new FormControl('', {
+      nonNullable: true,
+    }),
+  });
+
   readonly settingsForm = new FormGroup({
     defaultAppointmentDuration: new FormControl<number | null>(null, [
       Validators.min(1),
       Validators.max(1440),
     ]),
   });
+
   readonly brandingForm = new FormGroup({
+    visualName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.maxLength(150)],
+    }),
     primaryColor: new FormControl<string | null>(null, [
+      (control) =>
+        control.value === null || isSafeOrganizationBrandColor(control.value)
+          ? null
+          : { unsafeColor: true },
+    ]),
+    accentColor: new FormControl<string | null>(null, [
       (control) =>
         control.value === null || isSafeOrganizationBrandColor(control.value)
           ? null
@@ -159,7 +205,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
       if (formScope !== this.configurationFormScope) {
         this.configurationFormScope = formScope;
         this.settingsForm.reset({ defaultAppointmentDuration: null });
-        this.brandingForm.reset({ primaryColor: null });
+        this.brandingForm.reset({ visualName: '', primaryColor: null, accentColor: null });
       }
     });
     effect(() => {
@@ -189,7 +235,11 @@ export class OrganizationAdministrationPage implements OnDestroy {
         brandingOwner?.organizationId === organizationId &&
         brandingOwner.generation === generation
       ) {
-        this.brandingForm.reset({ primaryColor: branding.primaryColor });
+        this.brandingForm.reset({
+          visualName: branding.visualName ?? '',
+          primaryColor: branding.primaryColor,
+          accentColor: branding.accentColor,
+        });
       }
     });
     effect(() => {
@@ -216,6 +266,7 @@ export class OrganizationAdministrationPage implements OnDestroy {
     this.destroyed = true;
     this.loadSubscription?.unsubscribe();
     this.mutationSubscription?.unsubscribe();
+    this.institutionalMutationSubscription?.unsubscribe();
   }
 
   loadOrganization(): void {
@@ -399,22 +450,41 @@ export class OrganizationAdministrationPage implements OnDestroy {
       this.brandingForm.markAllAsTouched();
       return;
     }
-    const value = this.brandingForm.controls.primaryColor.value;
-    const normalized =
-      value === null || value === '' ? null : canonicalOrganizationBrandColor(value);
-    this.organizationConfigurationStore.saveBranding(normalized);
-    if (this.organizationConfigurationStore.branding()?.primaryColor === normalized) {
+    const raw = this.brandingForm.getRawValue();
+    const visualName = raw.visualName.trim().length > 0 ? raw.visualName.trim() : null;
+    const primaryColor =
+      raw.primaryColor === null || raw.primaryColor === ''
+        ? null
+        : canonicalOrganizationBrandColor(raw.primaryColor);
+    const accentColor =
+      raw.accentColor === null || raw.accentColor === ''
+        ? null
+        : canonicalOrganizationBrandColor(raw.accentColor);
+
+    this.organizationConfigurationStore.saveBranding({
+      visualName,
+      primaryColor,
+      accentColor,
+    });
+    const canonical = this.organizationConfigurationStore.branding();
+    if (
+      canonical?.primaryColor === primaryColor &&
+      canonical?.accentColor === accentColor &&
+      canonical?.visualName === visualName
+    ) {
       this.brandingForm.markAsPristine();
     }
   }
 
   resetBranding(): void {
     if (!this.canManage()) return;
-    this.brandingForm.controls.primaryColor.setValue(null);
-    this.organizationConfigurationStore.saveBranding(null);
-    if (this.organizationConfigurationStore.branding()?.primaryColor === null) {
-      this.brandingForm.markAsPristine();
-    }
+    this.brandingForm.reset({ visualName: '', primaryColor: null, accentColor: null });
+    this.organizationConfigurationStore.saveBranding({
+      visualName: null,
+      primaryColor: null,
+      accentColor: null,
+    });
+    this.brandingForm.markAsPristine();
   }
 
   selectLogoFile(event: Event): void {
@@ -604,6 +674,117 @@ export class OrganizationAdministrationPage implements OnDestroy {
       locale: organization.locale,
       currency: organization.currency,
     });
+    this.institutionalForm.reset({
+      taxId: organization.taxId ?? '',
+      tradeName: organization.tradeName ?? '',
+      phone: organization.phone ?? '',
+      email: organization.email ?? '',
+      website: organization.website ?? '',
+      address: organization.address ?? '',
+    });
+  }
+
+  saveInstitutional(): void {
+    const organization = this.organization();
+    const scope = this.captureScope();
+
+    this.clearInstitutionalFeedback();
+
+    if (
+      !organization ||
+      !scope ||
+      !this.canManage() ||
+      this.isSavingInstitutional() ||
+      this.isSaving() ||
+      this.isChangingStatus() ||
+      this.isCanonicalContextSynchronizationPending()
+    ) {
+      return;
+    }
+
+    if (this.institutionalForm.invalid) {
+      this.institutionalForm.markAllAsTouched();
+      this.institutionalError.set('Revisa los campos marcados antes de guardar.');
+      return;
+    }
+
+    const value = this.institutionalForm.getRawValue();
+    const payload: UpdateOrganizationDto = {};
+
+    if (value.tradeName.trim() !== (organization.tradeName ?? '')) {
+      payload.tradeName = value.tradeName.trim() || undefined;
+    }
+    if (value.taxId.trim() !== (organization.taxId ?? '')) {
+      payload.taxId = value.taxId.trim() || undefined;
+    }
+    if (value.phone.trim() !== (organization.phone ?? '')) {
+      payload.phone = value.phone.trim() || undefined;
+    }
+    if (value.email.trim() !== (organization.email ?? '')) {
+      payload.email = value.email.trim() || undefined;
+    }
+    if (value.website.trim() !== (organization.website ?? '')) {
+      payload.website = value.website.trim() || undefined;
+    }
+    if (value.address.trim() !== (organization.address ?? '')) {
+      payload.address = value.address.trim() || undefined;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      this.institutionalSuccess.set('La información institucional ya está actualizada.');
+      return;
+    }
+
+    this.isSavingInstitutional.set(true);
+    this.institutionalMutationSubscription?.unsubscribe();
+    this.institutionalMutationSubscription = this.organizationsService
+      .update(scope.organizationId, payload)
+      .subscribe({
+        next: (canonical) => {
+          if (!this.isScopeCurrent(scope)) return;
+          this.applyCanonicalOrganization(canonical);
+          void this.finishInstitutionalSynchronization(scope, canonical);
+        },
+        error: (error: HttpErrorResponse) => {
+          if (!this.isScopeCurrent(scope)) return;
+          this.isSavingInstitutional.set(false);
+          this.institutionalError.set(this.getMutationErrorMessage(error, 'update'));
+        },
+      });
+  }
+
+  private async finishInstitutionalSynchronization(
+    scope: RequestScope,
+    organization: OrganizationDetails,
+  ): Promise<void> {
+    const result = await this.synchronizeCanonicalContext(scope, organization);
+
+    if (this.destroyed || !this.isScopeCurrent(scope)) {
+      return;
+    }
+
+    this.isSavingInstitutional.set(false);
+
+    if (result === 'stale') {
+      return;
+    }
+
+    if (result === 'synchronized') {
+      this.institutionalSuccess.set('Los datos institucionales se actualizaron correctamente.');
+    }
+  }
+
+  getInstitutionalFieldError(fieldName: keyof typeof this.institutionalForm.controls): string {
+    const control = this.institutionalForm.controls[fieldName];
+    if (!control.touched || !control.errors) return '';
+    if (control.hasError('maxlength')) return 'El valor supera la longitud permitida.';
+    if (control.hasError('email')) return 'Ingresa un formato de correo válido.';
+    return 'Campo inválido.';
+  }
+
+  private clearInstitutionalFeedback(): void {
+    this.institutionalSuccess.set('');
+    this.institutionalError.set('');
   }
 
   private buildUpdatePayload(organization: OrganizationDetails): UpdateOrganizationDto {

@@ -93,6 +93,8 @@ describe('OrganizationLogoStore', () => {
     expect(store.logo()).toBe(canonical);
     expect(store.state()).toBe('ABSENT');
     expect(store.owner()).toEqual({ organizationId: 'organization-a', generation: 1 });
+    expect(store.isLogoPresent()).toBe(false);
+    expect(store.logoUrl()).toBeNull();
     expect(api.getContent).not.toHaveBeenCalled();
     expect(createObjectURL).not.toHaveBeenCalled();
   });
@@ -108,6 +110,8 @@ describe('OrganizationLogoStore', () => {
     expect(createObjectURL).toHaveBeenCalledWith(blob);
     expect(store.logo()).toBe(canonical);
     expect(store.previewUrl()).toBe('blob:logo-1');
+    expect(store.logoUrl()).toBe('blob:logo-1');
+    expect(store.isLogoPresent()).toBe(true);
     expect(store.state()).toBe('PRESENT');
   });
 
@@ -320,8 +324,8 @@ describe('OrganizationLogoStore', () => {
   it('rejects obvious local size, MIME, and extension errors as UX checks', () => {
     metadataReads[0].subject.next(absentLogo());
 
-    store.selectFile(new File([new Uint8Array(1_048_577)], 'large.png', { type: 'image/png' }));
-    expect(store.fileError()).toContain('1 MiB');
+    store.selectFile(new File([new Uint8Array(2_097_153)], 'large.png', { type: 'image/png' }));
+    expect(store.fileError()).toContain('2 MiB');
     store.selectFile(new File(['gif'], 'logo.gif', { type: 'image/gif' }));
     expect(store.fileError()).toContain('PNG o JPEG');
     store.selectFile(new File(['png'], 'logo.txt', { type: 'image/png' }));

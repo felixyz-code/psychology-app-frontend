@@ -1,0 +1,169 @@
+<div class="org-logo-dropzone" [class.org-logo-dropzone--disabled]="!canManage()">
+  <input
+    #fileInput
+    type="file"
+    class="org-logo-dropzone__file-input"
+    accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+    (change)="onFileInputChange($event)"
+  />
+
+  @if (logoStore.state() === 'LOADING' || logoStore.state() === 'NOT_LOADED') {
+    <div class="org-logo-dropzone__state" role="status">
+      <mat-spinner diameter="36" />
+      <span>Cargando logotipo&hellip;</span>
+    </div>
+  } @else if (logoStore.state() === 'ERROR') {
+    <div class="org-logo-dropzone__state org-logo-dropzone__state--error" role="alert">
+      <mat-icon aria-hidden="true">broken_image</mat-icon>
+      <span>{{ logoStore.errorMessage() }}</span>
+      <button mat-stroked-button type="button" (click)="logoStore.loadCurrent()">
+        Reintentar
+      </button>
+    </div>
+  } @else {
+    <!-- Vista de Logo Actual o Vacío -->
+    <div class="org-logo-dropzone__current-view">
+      @if (presentLogo(); as currentLogo) {
+        <div class="org-logo-dropzone__card">
+          <div class="org-logo-dropzone__preview-box">
+            <img
+              [src]="logoStore.previewUrl()"
+              [alt]="'Logotipo de ' + organizationName()"
+              class="org-logo-dropzone__image"
+            />
+          </div>
+          <div class="org-logo-dropzone__meta">
+            <div class="org-logo-dropzone__meta-row">
+              <span class="org-logo-dropzone__meta-label">Dimensiones:</span>
+              <strong>{{ currentLogo.width }} &times; {{ currentLogo.height }} px</strong>
+            </div>
+            <div class="org-logo-dropzone__meta-row">
+              <span class="org-logo-dropzone__meta-label">Formato:</span>
+              <strong>{{ logoTypeLabel(currentLogo) }}</strong>
+            </div>
+            <div class="org-logo-dropzone__meta-row">
+              <span class="org-logo-dropzone__meta-label">Tamaño:</span>
+              <strong>{{ logoSizeLabel(currentLogo.byteSize) }}</strong>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="org-logo-dropzone__card org-logo-dropzone__card--empty">
+          <mat-icon aria-hidden="true">image_not_supported</mat-icon>
+          <div>
+            <strong>Sin logotipo configurado</strong>
+            <p>La organización aún no tiene una imagen institucional asignada.</p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Zona interactiva Drag & Drop -->
+    @if (canManage()) {
+      <div
+        class="org-logo-dropzone__drop-area"
+        [class.org-logo-dropzone__drop-area--active]="isDragOver()"
+        [class.org-logo-dropzone__drop-area--has-file]="!!localPreviewUrl() || !!logoStore.selectedFile()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="triggerFileInput()"
+        role="button"
+        tabindex="0"
+        aria-label="Área para arrastrar y soltar logotipo"
+      >
+        @if (localPreviewUrl()) {
+          <div class="org-logo-dropzone__selected-preview">
+            <img [src]="localPreviewUrl()" alt="Vista previa del nuevo logotipo" />
+            <div class="org-logo-dropzone__selected-info">
+              <span class="org-logo-dropzone__selected-tag">Listo para subir</span>
+              <strong>{{ logoStore.selectedFile()?.name }}</strong>
+              <small>{{ logoSizeLabel(logoStore.selectedFile()?.size || 0) }}</small>
+            </div>
+          </div>
+        } @else {
+          <div class="org-logo-dropzone__drop-prompt">
+            <mat-icon aria-hidden="true">cloud_upload</mat-icon>
+            <div class="org-logo-dropzone__prompt-text">
+              <strong>Arrastra y suelta tu logotipo aquí</strong>
+              <span>o haz clic para explorar archivos en tu equipo</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <p class="org-logo-dropzone__constraints">
+        Formatos permitidos: <strong>PNG</strong> o <strong>JPEG</strong>. Tamaño máximo: <strong>2 MiB</strong>. Dimensiones entre 64 y 2048 px.
+      </p>
+
+      <!-- Mensajes de feedback -->
+      @if (localFileError() || logoStore.fileError()) {
+        <p class="org-logo-dropzone__feedback org-logo-dropzone__feedback--error" role="alert">
+          {{ localFileError() || logoStore.fileError() }}
+        </p>
+      }
+      @if (logoStore.errorMessage()) {
+        <p class="org-logo-dropzone__feedback org-logo-dropzone__feedback--error" role="alert">
+          {{ logoStore.errorMessage() }}
+        </p>
+      }
+      @if (logoStore.conflictMessage()) {
+        <p class="org-logo-dropzone__feedback org-logo-dropzone__feedback--warning" role="alert">
+          {{ logoStore.conflictMessage() }}
+        </p>
+      }
+      @if (logoStore.successMessage()) {
+        <p class="org-logo-dropzone__feedback org-logo-dropzone__feedback--success" role="status">
+          {{ logoStore.successMessage() }}
+        </p>
+      }
+
+      <!-- Acciones -->
+      <div class="org-logo-dropzone__actions">
+        @if (logoStore.selectedFile()) {
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="logoStore.mutationState() !== 'IDLE'"
+            (click)="upload()"
+          >
+            @if (logoStore.mutationState() === 'UPLOADING') {
+              <mat-spinner diameter="20" />
+            }
+            <span>{{ presentLogo() ? 'Reemplazar logotipo' : 'Subir logotipo' }}</span>
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="logoStore.mutationState() !== 'IDLE'"
+            (click)="clearSelection()"
+          >
+            Cancelar selección
+          </button>
+        }
+
+        @if (presentLogo() && !logoStore.selectedFile()) {
+          <button
+            mat-stroked-button
+            color="warn"
+            type="button"
+            [disabled]="logoStore.mutationState() !== 'IDLE'"
+            (click)="requestRemove()"
+          >
+            @if (logoStore.mutationState() === 'REMOVING') {
+              <mat-spinner diameter="20" />
+            }
+            <mat-icon aria-hidden="true">delete_outline</mat-icon>
+            <span>Eliminar logotipo actual</span>
+          </button>
+        }
+      </div>
+    } @else {
+      <p class="org-logo-dropzone__readonly">
+        Tienes acceso de consulta. Para subir o modificar el logotipo se requiere el permiso
+        <code>organization.manage</code>.
+      </p>
+    }
+  }
+</div>

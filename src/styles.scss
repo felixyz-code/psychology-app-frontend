@@ -98,7 +98,10 @@ td,
   --app-font-family:
     'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  --app-org-brand-accent: #2563eb;
+  --app-org-brand-primary: #2563eb;
+  --app-org-brand-accent: #0d9488;
+  --primary-color: var(--app-org-brand-primary, #2563eb);
+  --accent-color: var(--app-org-brand-accent, #0d9488);
   --app-navbar-height: 4rem;
   --app-sidebar-width: 17rem;
   --app-sidebar-collapsed-width: 4.75rem;
@@ -107,15 +110,15 @@ td,
   --app-page-gap-tight: 1rem;
   --app-page-section-gap: 0.9rem;
   --app-page-block-padding: 1rem;
-  --app-focus-ring-color: #2563eb;
+  --app-focus-ring-color: var(--app-org-brand-primary, #2563eb);
   --app-focus-ring-soft: rgba(37, 99, 235, 0.24);
   --app-color-sidebar-bg: #0f1e36;
   --app-color-header-bg: #0f1e36;
   --app-color-header-border: rgba(255, 255, 255, 0.1);
-  --app-color-primary: #3b82f6;
+  --app-color-primary: var(--app-org-brand-primary, #2563eb);
   --app-color-primary-soft: rgba(59, 130, 246, 0.12);
   --app-color-primary-border: rgba(147, 197, 253, 0.32);
-  --app-color-link: #3b82f6;
+  --app-color-link: var(--app-org-brand-primary, #2563eb);
   --app-color-app-bg: #f8fafc;
   --app-color-muted: #64748b;
   --app-color-text: #0f172a;
@@ -2225,5 +2228,37 @@ app-report-preview-shell {
       min-height: auto;
       padding: 0.75rem 0.9rem;
     }
+  }
+}
+
+button.btn--primary,
+.btn--primary,
+.organization-admin-btn--primary {
+  background-color: var(--primary-color, var(--app-org-brand-primary, #2563eb)) !important;
+  color: #ffffff !important;
+}
+
+button.btn--reset,
+.btn--reset,
+.organization-admin-btn--reset {
+  border: 1px solid #e2e8f0 !important;
+  background-color: #ffffff !important;
+  color: #64748b !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  padding: 0.35rem 0.85rem !important;
+  border-radius: 9999px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+
+  &:hover:not(:disabled) {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  &:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
   }
 }
