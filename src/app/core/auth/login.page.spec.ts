@@ -86,8 +86,8 @@ describe('LoginPage', () => {
     fixture.detectChanges();
 
     const nativeElement = fixture.nativeElement as HTMLElement;
-    expect(nativeElement.querySelector('.login-card__eyebrow')?.textContent?.trim()).toBe(
-      'Psicologia App',
+    expect(nativeElement.querySelector('.login-card__eyebrow')?.textContent?.trim()).toContain(
+      'PsiqueOS',
     );
     const headings = nativeElement.querySelectorAll('h1');
     expect(headings).toHaveLength(1);

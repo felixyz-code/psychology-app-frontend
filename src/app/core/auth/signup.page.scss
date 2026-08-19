@@ -24,11 +24,14 @@
 
 .signup-card__eyebrow {
   order: -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   color: var(--app-color-primary);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .signup-form {

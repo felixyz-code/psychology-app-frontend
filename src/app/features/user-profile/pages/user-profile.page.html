@@ -1,0 +1,247 @@
+<div class="profile-page">
+  <!-- Header Card / Avatar Section -->
+  <mat-card class="profile-page__header-card">
+    <div class="profile-page__header-content">
+      <div class="profile-page__avatar-wrapper">
+        @if (store.avatarUrl(); as avatarUrl) {
+          <img
+            [src]="avatarUrl"
+            class="profile-page__avatar-img"
+            alt="Foto de perfil"
+          />
+        } @else {
+          <div class="profile-page__avatar-placeholder" aria-hidden="true">
+            {{ userInitials() }}
+          </div>
+        }
+
+        <div class="profile-page__avatar-actions">
+          <input
+            #avatarInput
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            style="display: none;"
+            (change)="onAvatarFileSelected($event)"
+          />
+          <button
+            mat-mini-fab
+            color="primary"
+            type="button"
+            class="profile-page__avatar-btn-upload"
+            [disabled]="store.isUploadingAvatar()"
+            matTooltip="Cambiar foto de perfil"
+            (click)="avatarInput.click()"
+          >
+            <mat-icon>photo_camera</mat-icon>
+          </button>
+
+          @if (store.hasAvatar()) {
+            <button
+              mat-mini-fab
+              color="warn"
+              type="button"
+              class="profile-page__avatar-btn-remove"
+              [disabled]="store.isUploadingAvatar()"
+              matTooltip="Eliminar foto"
+              (click)="removeAvatar()"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="profile-page__identity">
+        <div class="profile-page__name-row">
+          <h1 class="profile-page__title">
+            {{ store.profile()?.professionalName || 'Mi Perfil Profesional' }}
+          </h1>
+          <span class="profile-page__role-badge">
+            {{ store.profile()?.role === 'ADMIN' ? 'Administrador' : 'Profesional de Salud Mental' }}
+          </span>
+        </div>
+        <p class="profile-page__email">{{ store.profile()?.email }}</p>
+        <p class="profile-page__meta">
+          <span>Cédula: {{ store.profile()?.licenseNumber || 'Sin registrar' }}</span>
+          <span class="profile-page__meta-dot">•</span>
+          <span>Especialidades: {{ store.profile()?.specialties?.length || 0 }} registradas</span>
+        </p>
+      </div>
+    </div>
+  </mat-card>
+
+  @if (successMessage()) {
+    <div class="alert alert--success" role="status">
+      <mat-icon class="alert__icon">check_circle</mat-icon>
+      <div class="alert__content">{{ successMessage() }}</div>
+    </div>
+  }
+
+  @if (store.errorMessage() || avatarError()) {
+    <div class="alert alert--danger" role="alert">
+      <mat-icon class="alert__icon">error_outline</mat-icon>
+      <div class="alert__content">{{ store.errorMessage() || avatarError() }}</div>
+    </div>
+  }
+
+  <!-- Professional Information Form -->
+  <mat-card class="profile-page__card">
+    <mat-card-header class="profile-page__card-header">
+      <div class="profile-page__card-title-group">
+        <mat-icon class="profile-page__card-icon">badge</mat-icon>
+        <div>
+          <h2 mat-card-title>Datos Profesionales y Colegiados</h2>
+          <mat-card-subtitle>
+            Información que aparecerá en tus expedientes, recetas y reportes clínicos emitidos.
+          </mat-card-subtitle>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content class="profile-page__card-body">
+      <form [formGroup]="profileForm" (ngSubmit)="submitProfile()" class="profile-form">
+        <div class="profile-form__grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre profesional completo</mat-label>
+            <input
+              matInput
+              formControlName="professionalName"
+              placeholder="Ej. Lic. / Mtro. / Dr. Juan Pérez"
+            />
+            <mat-hint>Título y nombre tal como deseas que figure en reportes.</mat-hint>
+            @if (profileForm.get('professionalName')?.hasError('required')) {
+              <mat-error>El nombre profesional es obligatorio.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Cédula profesional / Licencia</mat-label>
+            <input
+              matInput
+              formControlName="licenseNumber"
+              placeholder="Ej. 12345678"
+            />
+            <mat-hint>Cédula legal o registro oficial de ejercicio profesional.</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="profile-form__grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono de contacto profesional</mat-label>
+            <input
+              matInput
+              formControlName="phone"
+              placeholder="Ej. +52 55 1234 5678"
+            />
+            <mat-hint>Teléfono visible para citas y contacto clínico.</mat-hint>
+          </mat-form-field>
+
+          <div class="profile-form__specialties-container">
+            <mat-form-field appearance="outline" class="profile-form__chips-field">
+              <mat-label>Especialidades y Enfoques Terapéuticos</mat-label>
+              <mat-chip-grid #chipGrid aria-label="Especialidades">
+                @for (spec of specialties(); track spec) {
+                  <mat-chip-row (removed)="removeSpecialty(spec)">
+                    {{ spec }}
+                    <button matChipRemove [attr.aria-label]="'Remover ' + spec">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip-row>
+                }
+                <input
+                  placeholder="Escribe y presiona Enter..."
+                  [matChipInputFor]="chipGrid"
+                  [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  (matChipInputTokenEnd)="addSpecialty($event)"
+                />
+              </mat-chip-grid>
+              <mat-hint>Presiona Enter o coma para añadir una especialidad.</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Sugerencias rápidas de especialidades -->
+        <div class="profile-form__suggestions">
+          <span class="profile-form__suggestions-label">Sugerencias rápidas:</span>
+          <div class="profile-form__suggestions-chips">
+            <button
+              type="button"
+              class="profile-form__suggestion-btn"
+              (click)="addSuggestedSpecialty('Terapia Cognitivo-Conductual')"
+            >
+              + TCC
+            </button>
+            <button
+              type="button"
+              class="profile-form__suggestion-btn"
+              (click)="addSuggestedSpecialty('Psicología Clínica')"
+            >
+              + Psicología Clínica
+            </button>
+            <button
+              type="button"
+              class="profile-form__suggestion-btn"
+              (click)="addSuggestedSpecialty('Neuropsicología')"
+            >
+              + Neuropsicología
+            </button>
+            <button
+              type="button"
+              class="profile-form__suggestion-btn"
+              (click)="addSuggestedSpecialty('Psicoterapia Infantil')"
+            >
+              + Infantil
+            </button>
+            <button
+              type="button"
+              class="profile-form__suggestion-btn"
+              (click)="addSuggestedSpecialty('Terapia Familiar y Pareja')"
+            >
+              + Pareja y Familia
+            </button>
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Semblanza profesional / Resumen curricular</mat-label>
+          <textarea
+            matInput
+            rows="4"
+            formControlName="bio"
+            placeholder="Describe tu trayectoria, enfoques y experiencia clínica..."
+          ></textarea>
+          <mat-hint align="end">{{ profileForm.get('bio')?.value?.length || 0 }} / 2000</mat-hint>
+        </mat-form-field>
+
+        <div class="profile-form__submit-row">
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            class="profile-form__btn-submit"
+            [disabled]="store.isSaving()"
+          >
+            @if (store.isSaving()) {
+              <ng-container>
+                <mat-spinner diameter="18" />
+                <span>Guardando...</span>
+              </ng-container>
+            } @else {
+              <ng-container>
+                <mat-icon>save</mat-icon>
+                <span>Guardar datos profesionales</span>
+              </ng-container>
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Digital Signature Card -->
+  <mat-card class="profile-page__card">
+    <mat-card-content class="profile-page__card-body">
+      <app-digital-signature-pad />
+    </mat-card-content>
+  </mat-card>
+</div>
