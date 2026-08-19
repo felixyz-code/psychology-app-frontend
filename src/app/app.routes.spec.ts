@@ -102,6 +102,10 @@ describe('app routes', () => {
       canActivate: [activeTenantGuard, capabilityGuard],
       data: { requiredCapability: 'organization.read' },
     });
+    expect(childRoutes.find((route) => route.path === 'management/assessments')).toMatchObject({
+      canActivate: [activeTenantGuard, capabilityGuard],
+      data: { requiredCapability: 'assessment.template_manage' },
+    });
     expect(childRoutes.find((route) => route.path === 'invitation-administration')).toMatchObject({
       canActivate: [activeTenantGuard, capabilityGuard],
       data: { requiredCapability: 'invitation.read' },

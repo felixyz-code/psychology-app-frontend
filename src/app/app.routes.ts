@@ -125,6 +125,15 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'management/assessments',
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'assessment.template_manage' },
+        loadChildren: () =>
+          import('./features/assessments/assessment-management.routes').then(
+            (m) => m.assessmentManagementRoutes,
+          ),
+      },
+      {
         path: 'audit-trail',
         canActivate: [activeTenantGuard, capabilityGuard],
         data: { requiredCapability: 'audit.read' },

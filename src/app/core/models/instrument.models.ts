@@ -15,6 +15,8 @@ export interface InstrumentVersion {
   scoringSpecJson?: ScoringSpec;
   createdAt: string;
   publishedAt?: string | null;
+  administrationsCount?: number;
+  isLocked?: boolean;
 }
 
 export interface Instrument {
@@ -25,7 +27,29 @@ export interface Instrument {
   description?: string | null;
   targetPopulation?: string | null;
   isSystem: boolean;
+  isEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
   versions?: InstrumentVersion[];
+  versionsCount?: number;
+  hasActiveAdministrations?: boolean;
+  latestVersion?: InstrumentVersion | null;
+  publishedVersion?: InstrumentVersion | null;
+  draftVersion?: InstrumentVersion | null;
+}
+
+export interface CreateInstrumentRequest {
+  code: string;
+  name: string;
+  description?: string;
+  targetPopulation?: string;
+  initialDraft?: {
+    definitionJson: InstrumentDefinition;
+    scoringSpecJson: ScoringSpec;
+  };
+}
+
+export interface CreateInstrumentVersionRequest {
+  definitionJson: InstrumentDefinition;
+  scoringSpecJson: ScoringSpec;
 }
