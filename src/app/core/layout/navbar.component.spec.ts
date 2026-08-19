@@ -74,6 +74,19 @@ describe('NavbarComponent', () => {
     sessionStorage.clear();
   });
 
+  it('renders official branding with svg isotype and title', () => {
+    const fixture = TestBed.createComponent(NavbarComponent);
+    fixture.detectChanges();
+
+    const brandElement = fixture.nativeElement.querySelector('.navbar__brand');
+    const logoElement = fixture.nativeElement.querySelector('.navbar__logo');
+    const titleElement = fixture.nativeElement.querySelector('.navbar__title');
+
+    expect(brandElement).not.toBeNull();
+    expect(logoElement).not.toBeNull();
+    expect(titleElement?.textContent).toContain('Psicologia App');
+  });
+
   it('clears the authenticated session and navigates to login on logout', () => {
     store.setSession('active-token', user);
 
