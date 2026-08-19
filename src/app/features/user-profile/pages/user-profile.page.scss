@@ -109,10 +109,40 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .profile-page__meta-dot {
   opacity: 0.5;
+}
+
+/* Tabs */
+.profile-page__tabs {
+  background: transparent;
+
+  ::ng-deep .mat-mdc-tab-header {
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--app-color-card-border);
+  }
+
+  ::ng-deep .mat-mdc-tab {
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+  }
+}
+
+.profile-page__tab-icon {
+  margin-right: 0.5rem;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+.profile-page__tab-body {
+  display: grid;
+  gap: 1.5rem;
 }
 
 .profile-page__card {
@@ -153,6 +183,28 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem;
+}
+
+.profile-form__tz-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.profile-form__tz-field {
+  flex: 1;
+  min-width: 260px;
+}
+
+.profile-form__btn-detect-tz {
+  height: 56px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .profile-form__specialties-container {
@@ -200,6 +252,44 @@
     color: #ffffff;
     border-color: var(--app-color-primary);
   }
+}
+
+.profile-form__toggles-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.profile-form__toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+.profile-form__toggle-info {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.profile-form__toggle-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--app-color-text-main);
+}
+
+.profile-form__toggle-desc {
+  font-size: 0.84rem;
+  color: var(--app-color-text-muted);
+}
+
+.profile-form__reminder-select {
+  padding-left: 1.5rem;
+  margin-top: -0.25rem;
+}
+
+.profile-form__full-width {
+  width: 100%;
 }
 
 .profile-form__submit-row {

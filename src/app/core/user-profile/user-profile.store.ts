@@ -2,8 +2,10 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { AuthStore } from '../auth/auth.store';
 import {
+  UpdateUserPreferencesPayload,
   UpdateUserProfilePayload,
   UserAssetMetadata,
+  UserPreferences,
   UserProfile,
 } from './user-profile.models';
 import { UserProfileService } from './user-profile.service';
@@ -14,15 +16,19 @@ export class UserProfileStore {
   private readonly authStore = inject(AuthStore);
 
   readonly profile = signal<UserProfile | null>(null);
+  readonly preferences = signal<UserPreferences | null>(null);
   readonly avatarMetadata = signal<UserAssetMetadata | null>(null);
   readonly signatureMetadata = signal<UserAssetMetadata | null>(null);
   readonly avatarUrl = signal<string | null>(null);
   readonly signatureUrl = signal<string | null>(null);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
+  readonly isLoadingPreferences = signal<boolean>(false);
+  readonly isSavingPreferences = signal<boolean>(false);
   readonly isUploadingAvatar = signal<boolean>(false);
   readonly isUploadingSignature = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly preferencesError = signal<string | null>(null);
 
   readonly hasAvatar = computed(() => this.avatarMetadata()?.rowState === 'PRESENT');
   readonly hasSignature = computed(() => this.signatureMetadata()?.rowState === 'PRESENT');
@@ -56,6 +62,49 @@ export class UserProfileStore {
       });
 
     this.loadMetadata();
+    this.loadPreferences();
+  }
+
+  loadPreferences(): void {
+    this.isLoadingPreferences.set(true);
+    this.preferencesError.set(null);
+
+    this.profileService
+      .getPreferences()
+      .pipe(finalize(() => this.isLoadingPreferences.set(false)))
+      .subscribe({
+        next: (prefs) => {
+          this.preferences.set(prefs);
+        },
+        error: (err) => {
+          this.preferencesError.set(
+            err?.error?.message || 'No se pudieron cargar las preferencias de usuario.',
+          );
+        },
+      });
+  }
+
+  updatePreferences(
+    payload: UpdateUserPreferencesPayload,
+    onSuccess?: () => void,
+  ): void {
+    this.isSavingPreferences.set(true);
+    this.preferencesError.set(null);
+
+    this.profileService
+      .updatePreferences(payload)
+      .pipe(finalize(() => this.isSavingPreferences.set(false)))
+      .subscribe({
+        next: (prefs) => {
+          this.preferences.set(prefs);
+          onSuccess?.();
+        },
+        error: (err) => {
+          this.preferencesError.set(
+            err?.error?.message || 'No se pudieron guardar las preferencias.',
+          );
+        },
+      });
   }
 
   loadMetadata(): void {

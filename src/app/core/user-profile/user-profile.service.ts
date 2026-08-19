@@ -3,8 +3,10 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  UpdateUserPreferencesPayload,
   UpdateUserProfilePayload,
   UserAssetMetadata,
+  UserPreferences,
   UserProfile,
 } from './user-profile.models';
 
@@ -19,6 +21,19 @@ export class UserProfileService {
 
   updateProfile(payload: UpdateUserProfilePayload): Observable<UserProfile> {
     return this.http.patch<UserProfile>(`${this.baseUrl}/profile`, payload);
+  }
+
+  getPreferences(): Observable<UserPreferences> {
+    return this.http.get<UserPreferences>(`${this.baseUrl}/preferences`);
+  }
+
+  updatePreferences(
+    payload: UpdateUserPreferencesPayload,
+  ): Observable<UserPreferences> {
+    return this.http.patch<UserPreferences>(
+      `${this.baseUrl}/preferences`,
+      payload,
+    );
   }
 
   getAvatarMetadata(): Observable<UserAssetMetadata> {
