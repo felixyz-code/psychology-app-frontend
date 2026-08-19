@@ -191,6 +191,25 @@
       @if (
         tenantContextStore.isActiveTenantReady() &&
         !tenantContextStore.isCanonicalContextSynchronizationPending() &&
+        tenantContextStore.hasCapability('assessment.template_manage')
+      ) {
+        <a
+          routerLink="/management/assessments"
+          routerLinkActive="sidebar__link--active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="sidebar__link"
+          (click)="navSelected.emit()"
+        >
+          <mat-icon>psychology</mat-icon>
+          <span class="sidebar__content">
+            <span class="sidebar__title">Instrumentos</span>
+          </span>
+        </a>
+      }
+
+      @if (
+        tenantContextStore.isActiveTenantReady() &&
+        !tenantContextStore.isCanonicalContextSynchronizationPending() &&
         tenantContextStore.hasCapability('audit.read')
       ) {
         <a
