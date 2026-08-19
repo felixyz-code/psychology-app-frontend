@@ -137,7 +137,11 @@
           [matMenuTriggerFor]="userMenu"
           aria-label="Abrir menu de usuario"
         >
-          <div class="user-avatar" aria-hidden="true">{{ user.name.charAt(0) }}</div>
+          @if (userProfileStore.avatarUrl(); as avatarUrl) {
+            <img [src]="avatarUrl" class="user-menu__avatar-img" alt="Avatar de usuario" />
+          } @else {
+            <div class="user-avatar" aria-hidden="true">{{ user.name.charAt(0) }}</div>
+          }
           <div class="user-info">
             <span class="user-name">{{ user.name }}</span>
             <span class="user-role">{{ getRoleLabel(user.role) }}</span>
@@ -152,9 +156,13 @@
           panelClass="navbar-user-menu-panel"
         >
           <div class="navbar-user-menu__summary">
-            <span class="navbar-user-menu__avatar" aria-hidden="true">{{
-              user.name.charAt(0)
-            }}</span>
+            @if (userProfileStore.avatarUrl(); as avatarUrl) {
+              <img [src]="avatarUrl" class="navbar-user-menu__avatar-img" alt="Avatar de usuario" />
+            } @else {
+              <span class="navbar-user-menu__avatar" aria-hidden="true">{{
+                user.name.charAt(0)
+              }}</span>
+            }
             <span class="navbar-user-menu__identity">
               <span class="navbar-user-menu__name">{{ user.name }}</span>
               <span class="navbar-user-menu__role">{{ getRoleLabel(user.role) }}</span>
@@ -174,6 +182,11 @@
               aria-label="Cambiar tema"
             />
           </div>
+
+          <a class="navbar-user-menu__action" mat-menu-item routerLink="/profile">
+            <mat-icon>badge</mat-icon>
+            <span>Mi perfil profesional</span>
+          </a>
 
           <button class="navbar-user-menu__action" mat-menu-item type="button" (click)="logout()">
             <mat-icon>logout</mat-icon>

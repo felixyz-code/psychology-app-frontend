@@ -50,6 +50,20 @@ export class AuthStore {
     this.sessionChangeSubject.next(user);
   }
 
+  updateUser(updated: Partial<AuthUser>): void {
+    const current = this.currentUserSignal();
+    const token = this.accessTokenSignal();
+    if (current && token) {
+      const merged: AuthUser = { ...current, ...updated };
+      this.currentUserSignal.set(merged);
+      localStorage.setItem(
+        AUTH_SESSION_KEY,
+        JSON.stringify({ accessToken: token, user: merged }),
+      );
+      this.sessionChangeSubject.next(merged);
+    }
+  }
+
   clearSession(): void {
     const hadSession = this.accessTokenSignal() !== null || this.currentUserSignal() !== null;
 

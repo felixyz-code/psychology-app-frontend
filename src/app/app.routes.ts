@@ -141,6 +141,13 @@ export const routes: Routes = [
           import('./features/audit-logs/audit-logs.routes').then((m) => m.auditLogsRoutes),
       },
       {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/user-profile/pages/user-profile.page').then(
+            (m) => m.UserProfilePage,
+          ),
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',

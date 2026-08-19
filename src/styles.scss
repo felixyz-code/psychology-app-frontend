@@ -1294,6 +1294,14 @@ body.dark-theme .navbar-user-menu .mat-mdc-menu-content {
   text-transform: uppercase;
 }
 
+.navbar-user-menu__avatar-img {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid var(--app-color-border);
+}
+
 .navbar-user-menu__identity {
   display: grid;
   min-width: 0;
