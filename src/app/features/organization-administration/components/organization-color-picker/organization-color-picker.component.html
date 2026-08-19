@@ -1,0 +1,99 @@
+<div class="org-color-picker" [class.org-color-picker--disabled]="isDisabled() || disabled()">
+  <div class="org-color-picker__header">
+    <label class="org-color-picker__label">{{ label() }}</label>
+    @if (internalValue()) {
+      <button
+        mat-button
+        type="button"
+        class="org-color-picker__reset-btn"
+        (click)="clearColor()"
+        [disabled]="isDisabled() || disabled()"
+      >
+        Restablecer
+      </button>
+    }
+  </div>
+
+  <div class="org-color-picker__input-row">
+    <div
+      class="org-color-picker__swatch-wrapper"
+      [style.background-color]="effectiveColor() || defaultFallback()"
+    >
+      <input
+        type="color"
+        class="org-color-picker__native-input"
+        [value]="effectiveColor() || defaultFallback()"
+        [disabled]="isDisabled() || disabled()"
+        (change)="onNativePickerChange($event)"
+        aria-label="Selector de color nativo"
+      />
+    </div>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="org-color-picker__hex-field">
+      <mat-label>Código hexadecimal</mat-label>
+      <input
+        matInput
+        [value]="internalValue() || ''"
+        (input)="onHexInput($any($event.target).value)"
+        placeholder="#2563EB"
+        maxlength="7"
+        [disabled]="isDisabled() || disabled()"
+        autocomplete="off"
+      />
+      @if (effectiveColor()) {
+        <mat-icon matSuffix aria-hidden="true" [style.color]="effectiveColor()">palette</mat-icon>
+      }
+    </mat-form-field>
+  </div>
+
+  <div class="org-color-picker__presets">
+    <span class="org-color-picker__presets-title">Paleta clínica sugerida:</span>
+    <div class="org-color-picker__chips" role="radiogroup" aria-label="Colores clínicos recomendados">
+      @for (preset of presets; track preset.hex) {
+        <button
+          type="button"
+          class="org-color-picker__chip"
+          [class.org-color-picker__chip--active]="internalValue() === preset.hex"
+          [disabled]="isDisabled() || disabled()"
+          [title]="preset.label + ' (' + preset.hex + ') - ' + preset.description"
+          (click)="selectPreset(preset.hex)"
+        >
+          <span
+            class="org-color-picker__chip-dot"
+            [style.background-color]="preset.hex"
+            aria-hidden="true"
+          ></span>
+          <span class="org-color-picker__chip-name">{{ preset.label }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (effectiveColor()) {
+    <div
+      class="org-color-picker__wcag-card"
+      [class.org-color-picker__wcag-card--compliant]="isWcagCompliant()"
+      [class.org-color-picker__wcag-card--warning]="!isWcagCompliant()"
+    >
+      <div class="org-color-picker__wcag-header">
+        <mat-icon aria-hidden="true">
+          {{ isWcagCompliant() ? 'verified' : 'warning' }}
+        </mat-icon>
+        <strong>
+          {{ isWcagCompliant() ? 'Contraste accesible (WCAG AA 3:1)' : 'Contraste insuficiente' }}
+        </strong>
+      </div>
+      <div class="org-color-picker__wcag-metrics">
+        <span class="org-color-picker__metric">
+          Fondo claro: <strong>{{ lightContrast() }}:1</strong>
+        </span>
+        <span class="org-color-picker__metric-divider">&bull;</span>
+        <span class="org-color-picker__metric">
+          Fondo oscuro: <strong>{{ darkContrast() }}:1</strong>
+        </span>
+      </div>
+    </div>
+  }
+
+  <p class="org-color-picker__hint">{{ hint() }}</p>
+</div>

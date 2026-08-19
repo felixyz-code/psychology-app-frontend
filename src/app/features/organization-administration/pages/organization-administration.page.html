@@ -55,22 +55,72 @@
 
     @case ('loaded') {
       @if (organization(); as currentOrganization) {
+        <!-- Header Card Unificado Superior -->
         <div class="organization-admin-summary">
           <div class="organization-admin-summary__identity">
-            <div class="organization-admin-summary__icon" aria-hidden="true">
-              <mat-icon>domain</mat-icon>
-            </div>
-            <div>
-              <span>Organizaci&oacute;n confirmada</span>
-              <h2>{{ currentOrganization.displayName }}</h2>
-              <p>{{ currentOrganization.legalName }}</p>
+            @if (organizationLogoStore.logoUrl(); as logoUrl) {
+              <div class="organization-admin-summary__icon organization-admin-summary__icon--logo">
+                <img
+                  [src]="logoUrl"
+                  class="org-summary-card__logo-img organization-admin-summary__logo-img"
+                  alt="Logo de la organización"
+                />
+              </div>
+            } @else {
+              <div class="organization-admin-summary__icon" aria-hidden="true">
+                <mat-icon>domain</mat-icon>
+              </div>
+            }
+            <div class="organization-admin-summary__names">
+              <span class="organization-admin-summary__eyebrow">Organizaci&oacute;n confirmada</span>
+              <h2 class="organization-admin-summary__title">
+                {{ currentOrganization.tradeName || currentOrganization.displayName }}
+              </h2>
+              <p class="organization-admin-summary__legal">{{ currentOrganization.legalName }}</p>
             </div>
           </div>
 
-          <app-status-badge
-            [label]="currentOrganization.status === 'ACTIVE' ? 'Activa' : 'Suspendida'"
-            [variant]="currentOrganization.status === 'ACTIVE' ? 'success' : 'warning'"
-          />
+          <div class="organization-admin-summary__actions">
+            <div class="organization-admin-summary__status-row">
+              <app-status-badge
+                [label]="currentOrganization.status === 'ACTIVE' ? 'Activa' : 'Suspendida'"
+                [variant]="currentOrganization.status === 'ACTIVE' ? 'success' : 'warning'"
+              />
+
+              @if (canManage()) {
+                <button
+                  [color]="isSuspended() ? 'primary' : 'warn'"
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="
+                    isChangingStatus() || isSaving() || isCanonicalContextSynchronizationPending()
+                  "
+                  (click)="openStatusConfirmation()"
+                >
+                  @if (isChangingStatus()) {
+                    <mat-spinner diameter="18" />
+                  } @else {
+                    <mat-icon aria-hidden="true">{{
+                      isSuspended() ? 'play_arrow' : 'pause'
+                    }}</mat-icon>
+                  }
+                  <span>{{
+                    isSuspended()
+                      ? 'Reactivar organizaci&oacute;n'
+                      : 'Suspender organizaci&oacute;n'
+                  }}</span>
+                </button>
+              }
+            </div>
+
+            <div class="organization-admin-summary__meta">
+              <span>ID: {{ currentOrganization.id }}</span>
+              <span class="organization-admin-summary__meta-divider">&bull;</span>
+              <span>Creada: {{ currentOrganization.createdAt | date: 'shortDate' }}</span>
+              <span class="organization-admin-summary__meta-divider">&bull;</span>
+              <span>Actualizada: {{ currentOrganization.updatedAt | date: 'shortDate' }}</span>
+            </div>
+          </div>
         </div>
 
         @if (isSuspended()) {
@@ -117,528 +167,498 @@
           </div>
         }
 
-        <div class="organization-admin-grid">
-          <div class="organization-admin-main">
-            <app-section-card
-              title="Identidad y configuraci&oacute;n"
-              subtitle="Los campos disponibles corresponden exactamente al contrato certificado."
-            >
-              <form class="organization-admin-form" [formGroup]="form" (ngSubmit)="save()">
-                <div class="organization-admin-form__grid">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Nombre visible</mat-label>
-                    <input
-                      matInput
-                      formControlName="displayName"
-                      maxlength="150"
-                      [readonly]="!canManage()"
-                    />
-                    @if (getFieldError('displayName')) {
-                      <mat-error>{{ getFieldError('displayName') }}</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Raz&oacute;n social</mat-label>
-                    <input
-                      matInput
-                      formControlName="legalName"
-                      maxlength="255"
-                      [readonly]="!canManage()"
-                    />
-                    @if (getFieldError('legalName')) {
-                      <mat-error>{{ getFieldError('legalName') }}</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Identificador</mat-label>
-                    <input
-                      matInput
-                      formControlName="slug"
-                      maxlength="100"
-                      autocomplete="off"
-                      [readonly]="!canManage()"
-                    />
-                    <mat-hint>Min&uacute;sculas, n&uacute;meros y guiones.</mat-hint>
-                    @if (getFieldError('slug')) {
-                      <mat-error>{{ getFieldError('slug') }}</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Zona horaria</mat-label>
-                    <input
-                      matInput
-                      formControlName="timezone"
-                      maxlength="100"
-                      placeholder="America/Hermosillo"
-                      [readonly]="!canManage()"
-                    />
-                    @if (getFieldError('timezone')) {
-                      <mat-error>{{ getFieldError('timezone') }}</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Locale</mat-label>
-                    <input
-                      matInput
-                      formControlName="locale"
-                      maxlength="20"
-                      placeholder="es-MX"
-                      [readonly]="!canManage()"
-                    />
-                    @if (getFieldError('locale')) {
-                      <mat-error>{{ getFieldError('locale') }}</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Moneda</mat-label>
-                    <input
-                      matInput
-                      formControlName="currency"
-                      maxlength="3"
-                      placeholder="MXN"
-                      [readonly]="!canManage()"
-                    />
-                    @if (getFieldError('currency')) {
-                      <mat-error>{{ getFieldError('currency') }}</mat-error>
-                    }
-                  </mat-form-field>
-                </div>
-
-                @if (canManage()) {
-                  <div class="organization-admin-form__actions">
-                    <button
-                      mat-flat-button
-                      color="primary"
-                      type="submit"
-                      [disabled]="
-                        isSaving() || isChangingStatus() || isCanonicalContextSynchronizationPending()
-                      "
-                    >
-                      @if (isSaving()) {
-                        <mat-spinner diameter="20" />
-                      }
-                      <span>{{ isSaving() ? 'Guardando' : 'Guardar cambios' }}</span>
-                    </button>
-                  </div>
-                } @else {
-                  <p class="organization-admin-readonly">
-                    Tienes acceso de consulta. La edici&oacute;n requiere la capability
-                    <code>organization.manage</code>.
-                  </p>
+        <!-- 1. Identidad y configuración (Full-Width) -->
+        <app-section-card
+          title="Identidad y configuraci&oacute;n"
+          subtitle="Los campos disponibles corresponden exactamente al contrato certificado."
+        >
+          <form class="organization-admin-form" [formGroup]="form" (ngSubmit)="save()">
+            <div class="organization-admin-form__grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Nombre visible</mat-label>
+                <input
+                  matInput
+                  formControlName="displayName"
+                  maxlength="150"
+                  [readonly]="!canManage()"
+                />
+                @if (getFieldError('displayName')) {
+                  <mat-error>{{ getFieldError('displayName') }}</mat-error>
                 }
-              </form>
-            </app-section-card>
+              </mat-form-field>
 
-            <div class="organization-configuration-grid">
-              <app-section-card
-                title="Duración predeterminada de citas"
-                subtitle="Se aplica al crear nuevas citas de esta organización."
-              >
-              @if (
-                organizationConfigurationStore.settingsState() === 'LOADING' ||
-                organizationConfigurationStore.settingsState() === 'NOT_LOADED'
-              ) {
-                <p class="organization-configuration-state" role="status">Cargando ajustes…</p>
-              } @else if (organizationConfigurationStore.settingsState() === 'ERROR') {
-                <div class="organization-configuration-state" role="alert">
-                  <span>{{ organizationConfigurationStore.settingsError() }}</span>
-                  <button
-                    mat-button
-                    type="button"
-                    (click)="organizationConfigurationStore.loadCurrent()"
-                  >
-                    Reintentar
-                  </button>
-                </div>
-              } @else {
-                <form
-                  class="organization-configuration-form"
-                  [formGroup]="settingsForm"
-                  (ngSubmit)="saveAppointmentDefault()"
-                >
-                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Duración predeterminada (minutos)</mat-label>
-                    <input
-                      matInput
-                      type="number"
-                      min="1"
-                      max="1440"
-                      formControlName="defaultAppointmentDuration"
-                      [readonly]="!canManage()"
-                    />
-                    <mat-hint
-                      >Valor efectivo:
-                      {{ organizationConfigurationStore.effectiveAppointmentDuration() }} minutos.
-                      El valor predeterminado de la plataforma es 60 minutos.</mat-hint
-                    >
-                    @if (
-                      settingsForm.controls.defaultAppointmentDuration.hasError('min') ||
-                      settingsForm.controls.defaultAppointmentDuration.hasError('max')
-                    ) {
-                      <mat-error>Usa un valor entre 1 y 1440 minutos.</mat-error>
-                    }
-                  </mat-form-field>
-                  @if (organizationConfigurationStore.settingsSuccess()) {
-                    <p class="organization-configuration-success" role="status">
-                      {{ organizationConfigurationStore.settingsSuccess() }}
-                    </p>
-                  }
-                  @if (organizationConfigurationStore.settingsError()) {
-                    <p class="organization-configuration-error" role="alert">
-                      {{ organizationConfigurationStore.settingsError() }}
-                    </p>
-                  }
-                  @if (canManage()) {
-                    <div class="organization-configuration-actions">
-                      <button
-                        mat-flat-button
-                        color="primary"
-                        type="submit"
-                        [disabled]="
-                          settingsForm.invalid || organizationConfigurationStore.settingsSaving()
-                        "
-                      >
-                        Guardar
-                      </button>
-                      <button
-                        mat-stroked-button
-                        type="button"
-                        (click)="resetAppointmentDefault()"
-                        [disabled]="organizationConfigurationStore.settingsSaving()"
-                      >
-                        Usar valor predeterminado
-                      </button>
-                    </div>
-                  } @else {
-                    <p class="organization-admin-readonly">
-                      Tienes acceso de consulta; la edición requiere
-                      <code>organization.manage</code>.
-                    </p>
-                  }
-                </form>
-              }
-            </app-section-card>
+              <mat-form-field appearance="outline">
+                <mat-label>Raz&oacute;n social</mat-label>
+                <input
+                  matInput
+                  formControlName="legalName"
+                  maxlength="255"
+                  [readonly]="!canManage()"
+                />
+                @if (getFieldError('legalName')) {
+                  <mat-error>{{ getFieldError('legalName') }}</mat-error>
+                }
+              </mat-form-field>
 
-            <app-section-card
-              title="Identidad visual de la organización"
-              subtitle="Un acento limitado; no cambia el tema ni los controles de la aplicación."
-            >
-              @if (
-                organizationConfigurationStore.brandingState() === 'LOADING' ||
-                organizationConfigurationStore.brandingState() === 'NOT_LOADED'
-              ) {
-                <p class="organization-configuration-state" role="status">
-                  Cargando identidad visual…
-                </p>
-              } @else if (organizationConfigurationStore.brandingState() === 'ERROR') {
-                <div class="organization-configuration-state" role="alert">
-                  <span>{{ organizationConfigurationStore.brandingError() }}</span
-                  ><button
-                    mat-button
-                    type="button"
-                    (click)="organizationConfigurationStore.loadCurrent()"
-                  >
-                    Reintentar
-                  </button>
-                </div>
-              } @else {
-                <form
-                  class="organization-configuration-form"
-                  [formGroup]="brandingForm"
-                  (ngSubmit)="saveBranding()"
-                >
-                  <div class="organization-brand-preview">
-                    <span class="organization-brand-preview__swatch" aria-hidden="true"></span
-                    ><span>Vista previa del acento de la organización</span>
-                  </div>
-                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Color de acento (#RRGGBB)</mat-label>
-                    <input
-                      matInput
-                      formControlName="primaryColor"
-                      placeholder="#2563EB"
-                      maxlength="7"
-                      autocomplete="off"
-                      [readonly]="!canManage()"
-                    />
-                    <mat-hint>Debe contrastar con superficies claras y oscuras.</mat-hint>
-                    @if (brandingForm.controls.primaryColor.hasError('unsafeColor')) {
-                      <mat-error>Usa #RRGGBB con contraste suficiente.</mat-error>
-                    }
-                  </mat-form-field>
-                  @if (organizationConfigurationStore.brandingSuccess()) {
-                    <p class="organization-configuration-success" role="status">
-                      {{ organizationConfigurationStore.brandingSuccess() }}
-                    </p>
-                  }
-                  @if (organizationConfigurationStore.brandingError()) {
-                    <p class="organization-configuration-error" role="alert">
-                      {{ organizationConfigurationStore.brandingError() }}
-                    </p>
-                  }
-                  @if (canManage()) {
-                    <div class="organization-configuration-actions">
-                      <button
-                        mat-flat-button
-                        color="primary"
-                        type="submit"
-                        [disabled]="
-                          brandingForm.invalid || organizationConfigurationStore.brandingSaving()
-                        "
-                      >
-                        Guardar</button
-                      ><button
-                        mat-stroked-button
-                        type="button"
-                        (click)="resetBranding()"
-                        [disabled]="organizationConfigurationStore.brandingSaving()"
-                      >
-                        Usar valor predeterminado
-                      </button>
-                    </div>
-                  } @else {
-                    <p class="organization-admin-readonly">
-                      Tienes acceso de consulta; la edición requiere
-                      <code>organization.manage</code>.
-                    </p>
-                  }
-                </form>
-              }
-            </app-section-card>
+              <mat-form-field appearance="outline">
+                <mat-label>Identificador</mat-label>
+                <input
+                  matInput
+                  formControlName="slug"
+                  maxlength="100"
+                  autocomplete="off"
+                  [readonly]="!canManage()"
+                />
+                <mat-hint>Min&uacute;sculas, n&uacute;meros y guiones.</mat-hint>
+                @if (getFieldError('slug')) {
+                  <mat-error>{{ getFieldError('slug') }}</mat-error>
+                }
+              </mat-form-field>
 
-            <div class="organization-logo-card">
-              <app-section-card
-                title="Logotipo de la organizaci&oacute;n"
-                subtitle="Imagen protegida disponible solo mediante el contexto autenticado de la organizaci&oacute;n."
-              >
-                <div class="organization-logo">
-                  @if (
-                    organizationLogoStore.state() === 'LOADING' ||
-                    organizationLogoStore.state() === 'NOT_LOADED'
-                  ) {
-                    <div class="organization-logo__state" role="status">
-                      <mat-spinner diameter="32" />
-                      <span>Cargando logotipo&hellip;</span>
-                    </div>
-                  } @else if (organizationLogoStore.state() === 'ERROR') {
-                    <div
-                      class="organization-logo__state organization-logo__state--error"
-                      role="alert"
-                    >
-                      <mat-icon aria-hidden="true">broken_image</mat-icon>
-                      <span>{{ organizationLogoStore.errorMessage() }}</span>
-                      <button
-                        mat-stroked-button
-                        type="button"
-                        (click)="organizationLogoStore.loadCurrent()"
-                      >
-                        Reintentar
-                      </button>
-                    </div>
-                  } @else {
-                    @if (organizationLogoStore.state() === 'ABSENT') {
-                      <div class="organization-logo__preview organization-logo__preview--empty">
-                        <mat-icon aria-hidden="true">image_not_supported</mat-icon>
-                        <div>
-                          <strong>Sin logotipo</strong>
-                          <span>La organizaci&oacute;n no tiene una imagen configurada.</span>
-                        </div>
-                      </div>
-                    } @else if (presentLogo(); as logo) {
-                      <div class="organization-logo__present">
-                        <div class="organization-logo__preview">
-                          <img
-                            [src]="organizationLogoStore.previewUrl()"
-                            [alt]="'Logotipo de ' + currentOrganization.displayName"
-                          />
-                        </div>
-                        <dl class="organization-logo__metadata">
-                          <div>
-                            <dt>Dimensiones</dt>
-                            <dd>{{ logo.width }} &times; {{ logo.height }} px</dd>
-                          </div>
-                          <div>
-                            <dt>Tipo</dt>
-                            <dd>{{ logoTypeLabel(logo) }}</dd>
-                          </div>
-                          <div>
-                            <dt>Tama&ntilde;o</dt>
-                            <dd>{{ logoSizeLabel(logo.byteSize) }}</dd>
-                          </div>
-                        </dl>
-                      </div>
-                    }
+              <mat-form-field appearance="outline">
+                <mat-label>Zona horaria</mat-label>
+                <input
+                  matInput
+                  formControlName="timezone"
+                  maxlength="100"
+                  placeholder="America/Hermosillo"
+                  [readonly]="!canManage()"
+                />
+                @if (getFieldError('timezone')) {
+                  <mat-error>{{ getFieldError('timezone') }}</mat-error>
+                }
+              </mat-form-field>
 
-                    <p id="organization-logo-constraints" class="organization-logo__constraints">
-                      PNG o JPEG, m&aacute;ximo 1 MiB y dimensiones entre 64 y 2048 px. El servidor
-                      valida el archivo de forma definitiva.
-                    </p>
+              <mat-form-field appearance="outline">
+                <mat-label>Locale</mat-label>
+                <input
+                  matInput
+                  formControlName="locale"
+                  maxlength="20"
+                  placeholder="es-MX"
+                  [readonly]="!canManage()"
+                />
+                @if (getFieldError('locale')) {
+                  <mat-error>{{ getFieldError('locale') }}</mat-error>
+                }
+              </mat-form-field>
 
-                    @if (organizationLogoStore.successMessage()) {
-                      <p class="organization-configuration-success" role="status">
-                        {{ organizationLogoStore.successMessage() }}
-                      </p>
-                    }
-                    @if (organizationLogoStore.conflictMessage()) {
-                      <p class="organization-logo__conflict" role="alert">
-                        {{ organizationLogoStore.conflictMessage() }}
-                      </p>
-                    }
-                    @if (organizationLogoStore.errorMessage()) {
-                      <p class="organization-configuration-error" role="alert">
-                        {{ organizationLogoStore.errorMessage() }}
-                      </p>
-                    }
-
-                    @if (canManage()) {
-                      <div class="organization-logo__controls">
-                        <label for="organization-logo-file">Seleccionar archivo</label>
-                        <input
-                          #logoFileInput
-                          id="organization-logo-file"
-                          type="file"
-                          accept=".png,.jpg,.jpeg,image/png,image/jpeg"
-                          [attr.aria-describedby]="
-                            organizationLogoStore.fileError()
-                              ? 'organization-logo-constraints organization-logo-file-feedback'
-                              : 'organization-logo-constraints'
-                          "
-                          [attr.aria-errormessage]="
-                            organizationLogoStore.fileError()
-                              ? 'organization-logo-file-feedback'
-                              : null
-                          "
-                          [attr.aria-invalid]="organizationLogoStore.fileError() ? 'true' : null"
-                          [disabled]="organizationLogoStore.mutationState() !== 'IDLE'"
-                          (change)="selectLogoFile($event)"
-                        />
-                        @if (organizationLogoStore.fileError()) {
-                          <p
-                            id="organization-logo-file-feedback"
-                            class="organization-configuration-error"
-                            role="alert"
-                          >
-                            {{ organizationLogoStore.fileError() }}
-                          </p>
-                        }
-                      </div>
-
-                      <div class="organization-configuration-actions">
-                        <button
-                          mat-flat-button
-                          color="primary"
-                          type="button"
-                          [disabled]="
-                            !organizationLogoStore.selectedFile() ||
-                            organizationLogoStore.mutationState() !== 'IDLE'
-                          "
-                          (click)="uploadLogo()"
-                        >
-                          @if (organizationLogoStore.mutationState() === 'UPLOADING') {
-                            <mat-spinner diameter="20" />
-                          }
-                          <span>{{
-                            organizationLogoStore.state() === 'PRESENT'
-                              ? 'Reemplazar logotipo'
-                              : 'Subir logotipo'
-                          }}</span>
-                        </button>
-                        @if (organizationLogoStore.state() === 'PRESENT') {
-                          <button
-                            mat-stroked-button
-                            color="warn"
-                            type="button"
-                            [disabled]="organizationLogoStore.mutationState() !== 'IDLE'"
-                            (click)="openLogoRemoveConfirmation()"
-                          >
-                            @if (organizationLogoStore.mutationState() === 'REMOVING') {
-                              <mat-spinner diameter="20" />
-                            }
-                            <span>Eliminar logotipo</span>
-                          </button>
-                        }
-                      </div>
-                    } @else {
-                      <p class="organization-admin-readonly">
-                        Tienes acceso de consulta; subir, reemplazar o eliminar requiere
-                        <code>organization.manage</code>.
-                      </p>
-                    }
-                  }
-                </div>
-              </app-section-card>
+              <mat-form-field appearance="outline">
+                <mat-label>Moneda</mat-label>
+                <input
+                  matInput
+                  formControlName="currency"
+                  maxlength="3"
+                  placeholder="MXN"
+                  [readonly]="!canManage()"
+                />
+                @if (getFieldError('currency')) {
+                  <mat-error>{{ getFieldError('currency') }}</mat-error>
+                }
+              </mat-form-field>
             </div>
-          </div>
-        </div>
 
-        <div class="organization-admin-aside">
-          <app-section-card
-            title="Estado de la organizaci&oacute;n"
-            subtitle="El servidor valida cada transici&oacute;n y conserva la autoridad final."
-          >
-            <div class="organization-admin-lifecycle">
-              <div>
-                <span>Estado actual</span>
-                <strong>{{
-                  currentOrganization.status === 'ACTIVE' ? 'Activa' : 'Suspendida'
-                }}</strong>
-              </div>
-
-              @if (canManage()) {
+            @if (canManage()) {
+              <div class="organization-admin-form__actions">
                 <button
-                  [color]="isSuspended() ? 'primary' : 'warn'"
-                  mat-stroked-button
-                  type="button"
+                  mat-flat-button
+                  color="primary"
+                  type="submit"
                   [disabled]="
-                    isChangingStatus() || isSaving() || isCanonicalContextSynchronizationPending()
+                    isSaving() || isChangingStatus() || isCanonicalContextSynchronizationPending()
                   "
-                  (click)="openStatusConfirmation()"
                 >
-                  @if (isChangingStatus()) {
+                  @if (isSaving()) {
                     <mat-spinner diameter="20" />
-                  } @else {
-                    <mat-icon aria-hidden="true">{{
-                      isSuspended() ? 'play_arrow' : 'pause'
-                    }}</mat-icon>
                   }
-                  <span>{{
-                    isSuspended()
-                      ? 'Reactivar organizaci&oacute;n'
-                      : 'Suspender organizaci&oacute;n'
-                  }}</span>
+                  <span>{{ isSaving() ? 'Guardando' : 'Guardar cambios' }}</span>
                 </button>
-              } @else {
-                <p>No tienes una acci&oacute;n de lifecycle autorizada.</p>
-              }
-            </div>
-          </app-section-card>
+              </div>
+            } @else {
+              <p class="organization-admin-readonly">
+                Tienes acceso de consulta. La edici&oacute;n requiere la capability
+                <code>organization.manage</code>.
+              </p>
+            }
+          </form>
+        </app-section-card>
 
-          <app-section-card
-            title="Metadatos"
-            subtitle="Informaci&oacute;n de solo lectura del contrato."
-          >
-            <dl class="organization-admin-metadata">
-              <div>
-                <dt>ID</dt>
-                <dd>{{ currentOrganization.id }}</dd>
+        <!-- 2. Datos institucionales y de contacto (Full-Width) -->
+        <app-section-card
+          title="Datos institucionales y de contacto"
+          subtitle="Información fiscal, comercial y canales de comunicación del tenant."
+        >
+          @if (institutionalSuccess()) {
+            <div class="organization-admin-alert organization-admin-alert--success" role="status">
+              <mat-icon aria-hidden="true">check_circle</mat-icon>
+              <span>{{ institutionalSuccess() }}</span>
+            </div>
+          }
+          @if (institutionalError()) {
+            <div class="organization-admin-alert organization-admin-alert--error" role="alert">
+              <mat-icon aria-hidden="true">error</mat-icon>
+              <span>{{ institutionalError() }}</span>
+            </div>
+          }
+
+          <form class="organization-admin-form" [formGroup]="institutionalForm" (ngSubmit)="saveInstitutional()">
+            <div class="organization-admin-form__grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Nombre comercial</mat-label>
+                <input
+                  matInput
+                  formControlName="tradeName"
+                  maxlength="150"
+                  placeholder="Ej. Centro de Psicología Integral"
+                  [readonly]="!canManage()"
+                />
+                @if (getInstitutionalFieldError('tradeName')) {
+                  <mat-error>{{ getInstitutionalFieldError('tradeName') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>RFC / Tax ID</mat-label>
+                <input
+                  matInput
+                  formControlName="taxId"
+                  maxlength="50"
+                  placeholder="Ej. ABC120304XYZ"
+                  [readonly]="!canManage()"
+                />
+                @if (getInstitutionalFieldError('taxId')) {
+                  <mat-error>{{ getInstitutionalFieldError('taxId') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Teléfono de contacto</mat-label>
+                <input
+                  matInput
+                  formControlName="phone"
+                  maxlength="30"
+                  placeholder="Ej. +52 55 1234 5678"
+                  [readonly]="!canManage()"
+                />
+                @if (getInstitutionalFieldError('phone')) {
+                  <mat-error>{{ getInstitutionalFieldError('phone') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Correo electrónico institucional</mat-label>
+                <input
+                  matInput
+                  formControlName="email"
+                  maxlength="255"
+                  placeholder="contacto@organizacion.com"
+                  [readonly]="!canManage()"
+                />
+                @if (getInstitutionalFieldError('email')) {
+                  <mat-error>{{ getInstitutionalFieldError('email') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="organization-admin-form__full-width">
+                <mat-label>Sitio web</mat-label>
+                <input
+                  matInput
+                  formControlName="website"
+                  maxlength="500"
+                  placeholder="https://organizacion.com"
+                  [readonly]="!canManage()"
+                />
+                @if (getInstitutionalFieldError('website')) {
+                  <mat-error>{{ getInstitutionalFieldError('website') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="organization-admin-form__full-width">
+                <mat-label>Dirección física</mat-label>
+                <textarea
+                  matInput
+                  formControlName="address"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="Av. Principal 123, Colonia Centro, Ciudad, Estado, C.P. 12345"
+                  [readonly]="!canManage()"
+                ></textarea>
+                @if (getInstitutionalFieldError('address')) {
+                  <mat-error>{{ getInstitutionalFieldError('address') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            @if (canManage()) {
+              <div class="organization-admin-form__actions">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="submit"
+                  [disabled]="
+                    institutionalForm.invalid ||
+                    isSavingInstitutional() ||
+                    isSaving() ||
+                    isChangingStatus() ||
+                    isCanonicalContextSynchronizationPending()
+                  "
+                >
+                  @if (isSavingInstitutional()) {
+                    <mat-spinner diameter="20" />
+                  }
+                  <span>{{ isSavingInstitutional() ? 'Guardando' : 'Guardar datos institucionales' }}</span>
+                </button>
               </div>
-              <div>
-                <dt>Creada</dt>
-                <dd>{{ currentOrganization.createdAt | date: 'medium' }}</dd>
+            } @else {
+              <p class="organization-admin-readonly">
+                Tienes acceso de consulta. La edición requiere la capability
+                <code>organization.manage</code>.
+              </p>
+            }
+          </form>
+        </app-section-card>
+
+        <!-- 3. Duración predeterminada de citas (Full-Width) -->
+        <app-section-card
+          title="Duración predeterminada de citas"
+          subtitle="Se aplica al crear nuevas citas de esta organización."
+        >
+          @if (
+            organizationConfigurationStore.settingsState() === 'LOADING' ||
+            organizationConfigurationStore.settingsState() === 'NOT_LOADED'
+          ) {
+            <p class="organization-configuration-state" role="status">Cargando ajustes…</p>
+          } @else if (organizationConfigurationStore.settingsState() === 'ERROR') {
+            <div class="organization-configuration-state" role="alert">
+              <span>{{ organizationConfigurationStore.settingsError() }}</span>
+              <button
+                mat-button
+                type="button"
+                (click)="organizationConfigurationStore.loadCurrent()"
+              >
+                Reintentar
+              </button>
+            </div>
+          } @else {
+            <form
+              class="organization-configuration-form"
+              [formGroup]="settingsForm"
+              (ngSubmit)="saveAppointmentDefault()"
+            >
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Duración predeterminada (minutos)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="1"
+                  max="1440"
+                  formControlName="defaultAppointmentDuration"
+                  [readonly]="!canManage()"
+                />
+                <mat-hint
+                  >Valor efectivo:
+                  {{ organizationConfigurationStore.effectiveAppointmentDuration() }} minutos.
+                  El valor predeterminado de la plataforma es 60 minutos.</mat-hint
+                >
+                @if (
+                  settingsForm.controls.defaultAppointmentDuration.hasError('min') ||
+                  settingsForm.controls.defaultAppointmentDuration.hasError('max')
+                ) {
+                  <mat-error>Usa un valor entre 1 y 1440 minutos.</mat-error>
+                }
+              </mat-form-field>
+              @if (organizationConfigurationStore.settingsSuccess()) {
+                <p class="organization-configuration-success" role="status">
+                  {{ organizationConfigurationStore.settingsSuccess() }}
+                </p>
+              }
+              @if (organizationConfigurationStore.settingsError()) {
+                <p class="organization-configuration-error" role="alert">
+                  {{ organizationConfigurationStore.settingsError() }}
+                </p>
+              }
+              @if (canManage()) {
+                <div class="organization-configuration-actions">
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="
+                      settingsForm.invalid || organizationConfigurationStore.settingsSaving()
+                    "
+                  >
+                    Guardar
+                  </button>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    (click)="resetAppointmentDefault()"
+                    [disabled]="organizationConfigurationStore.settingsSaving()"
+                  >
+                    Usar valor predeterminado
+                  </button>
+                </div>
+              } @else {
+                <p class="organization-admin-readonly">
+                  Tienes acceso de consulta; la edición requiere
+                  <code>organization.manage</code>.
+                </p>
+              }
+            </form>
+          }
+        </app-section-card>
+
+        <!-- 4. Identidad visual y branding (Full-Width) -->
+        <app-section-card
+          title="Identidad visual y branding"
+          subtitle="Personaliza el nombre visual, color primario y color de acento del tenant."
+        >
+          @if (
+            organizationConfigurationStore.brandingState() === 'LOADING' ||
+            organizationConfigurationStore.brandingState() === 'NOT_LOADED'
+          ) {
+            <p class="organization-configuration-state" role="status">
+              Cargando identidad visual…
+            </p>
+          } @else if (organizationConfigurationStore.brandingState() === 'ERROR') {
+            <div class="organization-configuration-state" role="alert">
+              <span>{{ organizationConfigurationStore.brandingError() }}</span
+              ><button
+                mat-button
+                type="button"
+                (click)="organizationConfigurationStore.loadCurrent()"
+              >
+                Reintentar
+              </button>
+            </div>
+          } @else {
+            <form
+              class="organization-configuration-form"
+              [formGroup]="brandingForm"
+              (ngSubmit)="saveBranding()"
+            >
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Nombre visible de marca (Visual Name)</mat-label>
+                <input
+                  matInput
+                  formControlName="visualName"
+                  placeholder="Ej. Clínica Bienestar Mental"
+                  maxlength="150"
+                  [readonly]="!canManage() || organizationConfigurationStore.brandingSaving()"
+                />
+                <mat-hint>Si se define, este nombre se muestra en encabezados y reportes.</mat-hint>
+                @if (brandingForm.controls.visualName.hasError('maxlength')) {
+                  <mat-error>El nombre no debe superar los 150 caracteres.</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Selector de Color Primario -->
+              <app-organization-color-picker
+                formControlName="primaryColor"
+                [label]="'Color primario de la organización'"
+                [hint]="'Se aplica a encabezados, navegación principal y elementos destacados.'"
+                [defaultFallback]="'#2563EB'"
+                [disabled]="!canManage() || organizationConfigurationStore.brandingSaving()"
+              />
+
+              <!-- Selector de Color de Acento -->
+              <app-organization-color-picker
+                formControlName="accentColor"
+                [label]="'Color de acento secundario'"
+                [hint]="'Se aplica a botones de acción secundaria, badges y acentos interactivos.'"
+                [defaultFallback]="'#0D9488'"
+                [disabled]="!canManage() || organizationConfigurationStore.brandingSaving()"
+              />
+
+              <!-- Vista previa de branding integrado -->
+              <div
+                class="organization-brand-preview-card"
+                [style.border-left-color]="brandingForm.controls.primaryColor.value || '#2563EB'"
+              >
+                <div class="organization-brand-preview-card__header">
+                  <span
+                    class="organization-brand-preview-card__badge"
+                    [style.background-color]="brandingForm.controls.primaryColor.value || '#2563EB'"
+                  ></span>
+                  <strong>
+                    {{ brandingForm.controls.visualName.value || currentOrganization.displayName }}
+                  </strong>
+                </div>
+                <p class="organization-brand-preview-card__desc">
+                  Vista previa reactiva de la identidad visual configurada para esta organización.
+                </p>
+                <div class="organization-brand-preview-card__tags">
+                  <span
+                    class="organization-brand-preview-card__tag"
+                    [style.background-color]="(brandingForm.controls.primaryColor.value || '#2563EB') + '15'"
+                    [style.color]="brandingForm.controls.primaryColor.value || '#2563EB'"
+                    [style.border-color]="(brandingForm.controls.primaryColor.value || '#2563EB') + '40'"
+                  >
+                    Primario: {{ brandingForm.controls.primaryColor.value || '#2563EB' }}
+                  </span>
+                  <span
+                    class="organization-brand-preview-card__tag"
+                    [style.background-color]="(brandingForm.controls.accentColor.value || '#0D9488') + '15'"
+                    [style.color]="brandingForm.controls.accentColor.value || '#0D9488'"
+                    [style.border-color]="(brandingForm.controls.accentColor.value || '#0D9488') + '40'"
+                  >
+                    Acento: {{ brandingForm.controls.accentColor.value || '#0D9488' }}
+                  </span>
+                </div>
               </div>
-              <div>
-                <dt>&Uacute;ltima actualizaci&oacute;n</dt>
-                <dd>{{ currentOrganization.updatedAt | date: 'medium' }}</dd>
-              </div>
-            </dl>
-          </app-section-card>
-        </div>
-      </div>
+
+              @if (organizationConfigurationStore.brandingSuccess()) {
+                <p class="organization-configuration-success" role="status">
+                  {{ organizationConfigurationStore.brandingSuccess() }}
+                </p>
+              }
+              @if (organizationConfigurationStore.brandingError()) {
+                <p class="organization-configuration-error" role="alert">
+                  {{ organizationConfigurationStore.brandingError() }}
+                </p>
+              }
+              @if (canManage()) {
+                <div class="organization-configuration-actions">
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="
+                      brandingForm.invalid || organizationConfigurationStore.brandingSaving()
+                    "
+                  >
+                    Guardar identidad visual
+                  </button>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    (click)="resetBranding()"
+                    [disabled]="organizationConfigurationStore.brandingSaving()"
+                  >
+                    Usar valores predeterminados
+                  </button>
+                </div>
+              } @else {
+                <p class="organization-admin-readonly">
+                  Tienes acceso de consulta; la edición requiere
+                  <code>organization.manage</code>.
+                </p>
+              }
+            </form>
+          }
+        </app-section-card>
+
+        <!-- 5. Logotipo de la organización (Full-Width) -->
+        <app-section-card
+          title="Logotipo de la organizaci&oacute;n"
+          subtitle="Imagen institucional protegida disponible solo mediante el contexto autenticado de la organizaci&oacute;n."
+        >
+          <app-organization-logo-dropzone
+            [canManage]="canManage()"
+            [organizationName]="currentOrganization.displayName"
+            (removeRequested)="openLogoRemoveConfirmation()"
+          />
+        </app-section-card>
       }
     }
   }

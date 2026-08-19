@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 
@@ -6,6 +7,8 @@ import { AuthService } from '../auth/auth.service';
 import { AuthStore } from '../auth/auth.store';
 import { ThemeService } from '../theme/theme.service';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
+import { OrganizationConfigurationStore } from '../organization-configuration/organization-configuration.store';
+import { OrganizationLogoStore } from '../organization-logo/organization-logo.store';
 import { NavbarComponent } from './navbar.component';
 
 const user: AuthUser = {
@@ -29,6 +32,13 @@ describe('NavbarComponent', () => {
     isActiveTenantReady: ReturnType<typeof vi.fn>;
     isAdminSuspendedContext: ReturnType<typeof vi.fn>;
   };
+  let organizationConfigurationStore: {
+    branding: ReturnType<typeof signal<any>>;
+  };
+  let organizationLogoStore: {
+    logoUrl: ReturnType<typeof signal<string | null>>;
+    isLogoPresent: ReturnType<typeof signal<boolean>>;
+  };
   let selectedOrganizationId: string;
 
   beforeEach(() => {
@@ -49,6 +59,13 @@ describe('NavbarComponent', () => {
       isActiveTenantReady: vi.fn(() => true),
       isAdminSuspendedContext: vi.fn(() => false),
     };
+    organizationConfigurationStore = {
+      branding: signal(null),
+    };
+    organizationLogoStore = {
+      logoUrl: signal(null),
+      isLogoPresent: signal(false),
+    };
 
     TestBed.configureTestingModule({
       imports: [NavbarComponent],
@@ -59,6 +76,14 @@ describe('NavbarComponent', () => {
         {
           provide: TenantContextStore,
           useValue: tenantContextStore,
+        },
+        {
+          provide: OrganizationConfigurationStore,
+          useValue: organizationConfigurationStore,
+        },
+        {
+          provide: OrganizationLogoStore,
+          useValue: organizationLogoStore,
         },
       ],
     });
@@ -228,6 +253,70 @@ describe('NavbarComponent', () => {
     completeSelection();
     await Promise.all([firstSwitch, duplicateSwitch]);
     expect(component.isSwitchingOrganization()).toBe(false);
+  });
+
+  it('projects tradeName then visualName then displayName in currentOrganizationDisplayName', () => {
+    // 1. With tradeName present
+    tenantContextStore.snapshot.mockReturnValue({
+      organization: {
+        id: 'org-1',
+        displayName: 'Base Display',
+        tradeName: 'Clinica San Rafael',
+      },
+    });
+    organizationConfigurationStore.branding.set({
+      rowState: 'PRESENT',
+      visualName: 'Visual Branding',
+      primaryColor: '#2563EB',
+      accentColor: '#0D9488',
+      updatedAt: '2026-08-19T00:00:00Z',
+    });
+    let fixture = TestBed.createComponent(NavbarComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.currentOrganizationDisplayName()).toBe('Clinica San Rafael');
+
+    // 2. Without tradeName, falls back to visualName
+    tenantContextStore.snapshot.mockReturnValue({
+      organization: {
+        id: 'org-1',
+        displayName: 'Base Display',
+      },
+    });
+    fixture = TestBed.createComponent(NavbarComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.currentOrganizationDisplayName()).toBe('Visual Branding');
+
+    // 3. Without visualName, falls back to displayName
+    organizationConfigurationStore.branding.set({
+      rowState: 'PRESENT',
+      visualName: null,
+      primaryColor: null,
+      accentColor: null,
+      updatedAt: '2026-08-19T00:00:00Z',
+    });
+    fixture = TestBed.createComponent(NavbarComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.currentOrganizationDisplayName()).toBe('Base Display');
+  });
+
+  it('renders logo img when logoUrl is available and falls back to icon when absent', () => {
+    tenantContextStore.snapshot.mockReturnValue({
+      organization: { id: 'org-1', displayName: 'Org With Logo' },
+    });
+    organizationLogoStore.logoUrl.set('/api/v1/organizations/org-1/logo');
+    let fixture = TestBed.createComponent(NavbarComponent);
+    fixture.detectChanges();
+
+    const logoImg = fixture.nativeElement.querySelector('.organization-control__logo-img');
+    expect(logoImg).not.toBeNull();
+    expect(logoImg.getAttribute('src')).toBe('/api/v1/organizations/org-1/logo');
+    expect(fixture.nativeElement.querySelector('.control-icon')).toBeNull();
+
+    organizationLogoStore.logoUrl.set(null);
+    fixture = TestBed.createComponent(NavbarComponent);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.organization-control__logo-img')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.control-icon')).not.toBeNull();
   });
 });
 

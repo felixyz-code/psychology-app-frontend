@@ -15,7 +15,7 @@ export function canonicalOrganizationBrandColor(value: string | null): string | 
   return isSafeOrganizationBrandColor(value) ? value.toUpperCase() : null;
 }
 
-function contrastRatio(first: string, second: string): number {
+export function contrastRatio(first: string, second: string): number {
   const luminance = (hex: string) => {
     const channels = [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16) / 255);
     const linear = channels.map((channel) =>

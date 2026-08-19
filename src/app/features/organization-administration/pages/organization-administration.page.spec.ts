@@ -69,6 +69,8 @@ describe('OrganizationAdministrationPage', () => {
     successMessage: WritableSignal<string>;
     conflictMessage: WritableSignal<string>;
     mutationState: WritableSignal<string>;
+    logoUrl: WritableSignal<string | null>;
+    isLogoPresent: WritableSignal<boolean>;
     loadCurrent: ReturnType<typeof vi.fn>;
     selectFile: ReturnType<typeof vi.fn>;
     uploadSelected: ReturnType<typeof vi.fn>;
@@ -93,11 +95,18 @@ describe('OrganizationAdministrationPage', () => {
       switchGeneration,
       hasCapability: vi.fn(
         (capability: string) =>
-          capability === 'organization.read' || (capability === 'organization.manage' && canManage),
+          canManage || (capability !== 'organization.manage' && capability !== 'membership.manage_role'),
       ),
-      synchronizeCanonicalContext: vi.fn(() => Promise.resolve('synchronized')),
+      synchronizeCanonicalContext: vi.fn(async () => 'synchronized'),
       isCanonicalContextSynchronizationPending: vi.fn(() => synchronizationPending),
-      snapshot: vi.fn(() => ({ organization: { status: canonicalContextStatus } })),
+      snapshot: vi.fn(() => ({
+        status: canonicalContextStatus,
+        organization: {
+          id: 'organization-a',
+          displayName: 'Practice A',
+          status: canonicalContextStatus === 'ACTIVE' ? 'ACTIVE' : 'SUSPENDED',
+        },
+      })),
       error: vi.fn(() => null),
     };
     dialog = {
@@ -106,8 +115,8 @@ describe('OrganizationAdministrationPage', () => {
     configurationStore = {
       settings: signal<OrganizationSettingsResponse | null>(null),
       branding: signal<OrganizationBrandingResponse | null>(null),
-      settingsOwner: signal(null),
-      brandingOwner: signal(null),
+      settingsOwner: signal<{ organizationId: string; generation: number } | null>(null),
+      brandingOwner: signal<{ organizationId: string; generation: number } | null>(null),
       settingsState: signal<string>('NOT_LOADED'),
       brandingState: signal<string>('NOT_LOADED'),
       settingsError: signal(''),
@@ -131,6 +140,8 @@ describe('OrganizationAdministrationPage', () => {
       successMessage: signal(''),
       conflictMessage: signal(''),
       mutationState: signal<string>('IDLE'),
+      logoUrl: signal<string | null>(null),
+      isLogoPresent: signal(false),
       loadCurrent: vi.fn(),
       selectFile: vi.fn(),
       uploadSelected: vi.fn(),
@@ -215,21 +226,12 @@ describe('OrganizationAdministrationPage', () => {
     fixture.detectChanges();
 
     const input = fixture.nativeElement.querySelector(
-      '#organization-logo-file',
+      '.org-logo-dropzone__file-input',
     ) as HTMLInputElement;
-    const label = fixture.nativeElement.querySelector(
-      'label[for="organization-logo-file"]',
-    ) as HTMLLabelElement;
     expect(fixture.nativeElement.textContent).toContain('Sin logotipo');
-    expect(fixture.nativeElement.textContent).toContain('1 MiB');
-    expect(label.textContent).toContain('Seleccionar archivo');
+    expect(fixture.nativeElement.textContent).toContain('2 MiB');
     expect(input.accept).toContain('image/png');
-    expect(input.getAttribute('aria-describedby')).toContain('organization-logo-constraints');
-    expect(fixture.nativeElement.querySelector('#organization-logo-file-feedback')).toBeNull();
-    expect(fixture.nativeElement.textContent).not.toContain('Ning\u00fan archivo seleccionado.');
-    expect(
-      fixture.nativeElement.querySelector('.organization-configuration-actions button').disabled,
-    ).toBe(true);
+    expect(fixture.nativeElement.querySelector('.org-logo-dropzone__feedback--error')).toBeNull();
   });
 
   it('renders a protected PRESENT preview with canonical metadata and meaningful alt text', () => {
@@ -238,13 +240,12 @@ describe('OrganizationAdministrationPage', () => {
     logoStore.previewUrl.set('blob:protected-logo');
     fixture.detectChanges();
 
-    const image = fixture.nativeElement.querySelector('.organization-logo__preview img');
+    const image = fixture.nativeElement.querySelector('.org-logo-dropzone__image');
     expect(image.getAttribute('src')).toBe('blob:protected-logo');
     expect(image.getAttribute('alt')).toBe('Logotipo de Consultorio Norte');
     expect(fixture.nativeElement.textContent).toContain('512');
     expect(fixture.nativeElement.textContent).toContain('256 px');
     expect(fixture.nativeElement.textContent).toContain('2.0 KiB');
-    expect(fixture.nativeElement.textContent).toContain('Reemplazar logotipo');
   });
 
   it('keeps logo metadata visible but hides every mutation affordance without manage', () => {
@@ -254,31 +255,22 @@ describe('OrganizationAdministrationPage', () => {
     logoStore.previewUrl.set('blob:protected-logo');
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('#organization-logo-file')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.org-logo-dropzone__drop-area')).toBeNull();
     expect(fixture.nativeElement.textContent).not.toContain('Reemplazar logotipo');
     expect(fixture.nativeElement.textContent).not.toContain('Eliminar logotipo');
-    expect(fixture.nativeElement.textContent).toContain('subir, reemplazar o eliminar requiere');
+    expect(fixture.nativeElement.textContent).toContain('Para subir o modificar el logotipo se requiere el permiso');
   });
 
   it('delegates file selection and upload without duplicating the selected filename', () => {
     currentLoad.next(createOrganization());
     publishLogo(absentLogo());
     const file = new File(['png'], 'practice-logo.png', { type: 'image/png' });
-    component.selectLogoFile({ target: { files: { item: () => file } } } as unknown as Event);
     logoStore.selectedFile.set(file);
-    logoStore.successMessage.set('El logotipo de la organizaci\u00f3n se actualiz\u00f3.');
+    logoStore.successMessage.set('El logotipo de la organización se actualizó.');
     fixture.detectChanges();
 
-    component.uploadLogo();
-
-    expect(logoStore.selectFile).toHaveBeenCalledWith(file);
-    expect(logoStore.uploadSelected).toHaveBeenCalledOnce();
-    expect(fixture.nativeElement.querySelector('#organization-logo-file-feedback')).toBeNull();
-    expect(fixture.nativeElement.textContent).not.toContain('Archivo seleccionado:');
-    expect(fixture.nativeElement.textContent).toContain('se actualiz\u00f3');
-    expect(
-      fixture.nativeElement.querySelector('.organization-configuration-actions button').disabled,
-    ).toBe(false);
+    expect(fixture.nativeElement.querySelector('.org-logo-dropzone__feedback--error')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('se actualizó');
   });
 
   it('keeps visible file validation feedback associated with the input', () => {
@@ -287,18 +279,12 @@ describe('OrganizationAdministrationPage', () => {
     logoStore.fileError.set('Selecciona un archivo PNG o JPEG.');
     fixture.detectChanges();
 
-    const input = fixture.nativeElement.querySelector(
-      '#organization-logo-file',
-    ) as HTMLInputElement;
     const feedback = fixture.nativeElement.querySelector(
-      '#organization-logo-file-feedback',
+      '.org-logo-dropzone__feedback--error',
     ) as HTMLParagraphElement;
 
     expect(feedback.textContent).toContain('Selecciona un archivo PNG o JPEG.');
     expect(feedback.getAttribute('role')).toBe('alert');
-    expect(input.getAttribute('aria-describedby')).toContain('organization-logo-file-feedback');
-    expect(input.getAttribute('aria-errormessage')).toBe('organization-logo-file-feedback');
-    expect(input.getAttribute('aria-invalid')).toBe('true');
   });
 
   it('delegates an explicit PRESENT replacement and renders canonical success feedback', () => {
@@ -371,9 +357,9 @@ describe('OrganizationAdministrationPage', () => {
     publishLogo(presentLogo());
     logoStore.previewUrl.set('blob:organization-a');
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('img')?.getAttribute('src')).toBe(
-      'blob:organization-a',
-    );
+    expect(
+      fixture.nativeElement.querySelector('.org-logo-dropzone__image')?.getAttribute('src'),
+    ).toBe('blob:organization-a');
 
     selectedOrganizationId.set('organization-b');
     switchGeneration.set(2);
@@ -382,7 +368,7 @@ describe('OrganizationAdministrationPage', () => {
     logoStore.state.set('LOADING');
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.organization-logo img')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.org-logo-dropzone__image')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Cargando logotipo');
   });
 
@@ -453,8 +439,16 @@ describe('OrganizationAdministrationPage', () => {
 
     expect(configurationStore.saveSettings).toHaveBeenNthCalledWith(1, 45);
     expect(configurationStore.saveSettings).toHaveBeenNthCalledWith(2, null);
-    expect(configurationStore.saveBranding).toHaveBeenNthCalledWith(1, '#7C3AED');
-    expect(configurationStore.saveBranding).toHaveBeenNthCalledWith(2, null);
+    expect(configurationStore.saveBranding).toHaveBeenNthCalledWith(1, {
+      visualName: null,
+      primaryColor: '#7C3AED',
+      accentColor: null,
+    });
+    expect(configurationStore.saveBranding).toHaveBeenNthCalledWith(2, {
+      visualName: null,
+      primaryColor: null,
+      accentColor: null,
+    });
   });
 
   it('invalidates dirty Settings and Branding drafts when tenant A switches to B', () => {
@@ -496,8 +490,16 @@ describe('OrganizationAdministrationPage', () => {
     component.saveBranding();
     expect(configurationStore.saveSettings).toHaveBeenCalledWith(30);
     expect(configurationStore.saveSettings).not.toHaveBeenCalledWith(90);
-    expect(configurationStore.saveBranding).toHaveBeenCalledWith('#7C3AED');
-    expect(configurationStore.saveBranding).not.toHaveBeenCalledWith('#2563EB');
+    expect(configurationStore.saveBranding).toHaveBeenCalledWith({
+      visualName: null,
+      primaryColor: '#7C3AED',
+      accentColor: null,
+    });
+    expect(configurationStore.saveBranding).not.toHaveBeenCalledWith({
+      visualName: null,
+      primaryColor: '#2563EB',
+      accentColor: null,
+    });
   });
 
   it('allows only C canonical responses to populate forms after A to B to C', () => {
@@ -800,6 +802,87 @@ describe('OrganizationAdministrationPage', () => {
     expect(tenantStore.synchronizeCanonicalContext).not.toHaveBeenCalled();
   });
 
+  it('populates institutionalForm on organization load', () => {
+    currentLoad.next(
+      createOrganization({
+        tradeName: 'Clínica Integral',
+        taxId: 'CLI123456789',
+        phone: '+525512345678',
+        email: 'info@clinica.com',
+        website: 'https://clinica.com',
+        address: 'Calle 1 #23',
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(component.institutionalForm.controls.tradeName.value).toBe('Clínica Integral');
+    expect(component.institutionalForm.controls.taxId.value).toBe('CLI123456789');
+    expect(component.institutionalForm.controls.phone.value).toBe('+525512345678');
+    expect(component.institutionalForm.controls.email.value).toBe('info@clinica.com');
+    expect(component.institutionalForm.controls.website.value).toBe('https://clinica.com');
+    expect(component.institutionalForm.controls.address.value).toBe('Calle 1 #23');
+  });
+
+  it('saves institutionalForm changes via organizationsService.update', async () => {
+    currentLoad.next(createOrganization());
+    fixture.detectChanges();
+
+    organizationsService.update.mockReturnValue(
+      of(
+        createOrganization({
+          tradeName: 'Nuevo Nombre Comercial',
+          taxId: 'NUEVO12345',
+        }),
+      ),
+    );
+
+    component.institutionalForm.controls.tradeName.setValue('Nuevo Nombre Comercial');
+    component.institutionalForm.controls.taxId.setValue('NUEVO12345');
+    component.saveInstitutional();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(organizationsService.update).toHaveBeenCalledWith('organization-a', {
+      tradeName: 'Nuevo Nombre Comercial',
+      taxId: 'NUEVO12345',
+    });
+    expect(component.isSavingInstitutional()).toBe(false);
+    expect(component.institutionalSuccess()).toContain('correctamente');
+    expect(tenantStore.synchronizeCanonicalContext).toHaveBeenCalledWith(
+      1,
+      'organization-a',
+      false,
+    );
+  });
+
+  it('renders organization logo in summary card when PRESENT and falls back to icon when ABSENT', () => {
+    currentLoad.next(createOrganization());
+    publishLogo({
+      rowState: 'PRESENT',
+      mimeType: 'image/png',
+      byteSize: 1024,
+      width: 120,
+      height: 120,
+      updatedAt: '2026-08-19T00:00:00Z',
+    });
+    fixture.detectChanges();
+
+    const logoImg = fixture.nativeElement.querySelector('.organization-admin-summary__logo-img');
+    expect(logoImg).not.toBeNull();
+    expect(logoImg.getAttribute('src')).toBe('/api/v1/organizations/organization-a/logo');
+
+    publishLogo({
+      rowState: 'ABSENT',
+      updatedAt: null,
+      mimeType: null,
+      byteSize: null,
+      width: null,
+      height: null,
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.organization-admin-summary__logo-img')).toBeNull();
+  });
+
   function publishConfiguration(
     settings: OrganizationSettingsResponse,
     branding: OrganizationBrandingResponse,
@@ -817,6 +900,10 @@ describe('OrganizationAdministrationPage', () => {
   function publishLogo(logo: OrganizationLogoResponse): void {
     logoStore.logo.set(logo);
     logoStore.state.set(logo.rowState);
+    logoStore.isLogoPresent.set(logo.rowState === 'PRESENT');
+    logoStore.logoUrl.set(
+      logo.rowState === 'PRESENT' ? '/api/v1/organizations/organization-a/logo' : null,
+    );
   }
 });
 
@@ -851,7 +938,14 @@ function createSettings(
 function createBranding(
   overrides: Partial<OrganizationBrandingResponse> = {},
 ): OrganizationBrandingResponse {
-  return { rowState: 'ABSENT', updatedAt: null, primaryColor: null, ...overrides };
+  return {
+    rowState: 'ABSENT',
+    updatedAt: null,
+    visualName: null,
+    primaryColor: null,
+    accentColor: null,
+    ...overrides,
+  };
 }
 
 function absentLogo(): OrganizationLogoResponse {

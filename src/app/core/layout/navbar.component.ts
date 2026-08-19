@@ -10,6 +10,8 @@ import { AuthService } from '../auth/auth.service';
 import { AuthStore } from '../auth/auth.store';
 import { ThemeService } from '../theme/theme.service';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
+import { OrganizationConfigurationStore } from '../organization-configuration/organization-configuration.store';
+import { OrganizationLogoStore } from '../organization-logo/organization-logo.store';
 import { BranchSwitcherComponent } from '../../shared/components/branch-switcher/branch-switcher.component';
 
 @Component({
@@ -31,6 +33,8 @@ export class NavbarComponent {
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
   readonly tenantContextStore = inject(TenantContextStore);
+  readonly organizationConfigurationStore = inject(OrganizationConfigurationStore);
+  readonly organizationLogoStore = inject(OrganizationLogoStore);
 
   readonly authStore = inject(AuthStore);
   readonly isSidebarCollapsed = input(false);
@@ -44,6 +48,20 @@ export class NavbarComponent {
       Boolean(this.tenantContextStore.snapshot()?.organization) &&
       this.tenantContextStore.selectableMemberships().length > 1,
   );
+
+  readonly currentOrganizationDisplayName = computed(() => {
+    const org = this.tenantContextStore.snapshot()?.organization as
+      | { displayName?: string; tradeName?: string; name?: string }
+      | undefined;
+    const branding = this.organizationConfigurationStore.branding();
+    return (
+      org?.tradeName ||
+      branding?.visualName ||
+      org?.displayName ||
+      org?.name ||
+      'Organización'
+    );
+  });
 
   getRoleLabel(role: string): string {
     const labels: Record<string, string> = {
