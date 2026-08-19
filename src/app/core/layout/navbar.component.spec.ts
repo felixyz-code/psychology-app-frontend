@@ -84,7 +84,7 @@ describe('NavbarComponent', () => {
 
     expect(brandElement).not.toBeNull();
     expect(logoElement).not.toBeNull();
-    expect(titleElement?.textContent).toContain('Psicologia App');
+    expect(titleElement?.textContent).toContain('PsiqueOS');
   });
 
   it('clears the authenticated session and navigates to login on logout', () => {
