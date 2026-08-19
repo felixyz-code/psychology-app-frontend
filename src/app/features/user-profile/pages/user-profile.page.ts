@@ -23,8 +23,18 @@ import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { UserProfileStore } from '../../../core/user-profile/user-profile.store';
+import {
+  COMMON_TIMEZONES,
+  REMINDER_OPTIONS,
+  SUPPORTED_LOCALES,
+  UserDateFormat,
+  UserTimeFormat,
+} from '../../../core/user-profile/user-profile.models';
 import { DigitalSignaturePadComponent } from '../components/digital-signature-pad/digital-signature-pad.component';
 
 @Component({
@@ -42,6 +52,9 @@ import { DigitalSignaturePadComponent } from '../components/digital-signature-pa
     MatProgressSpinnerModule,
     MatDividerModule,
     MatTooltipModule,
+    MatTabsModule,
+    MatSelectModule,
+    MatSlideToggleModule,
     DigitalSignaturePadComponent,
   ],
   templateUrl: './user-profile.page.html',
@@ -55,12 +68,33 @@ export class UserProfilePage implements OnInit {
   readonly specialties = signal<string[]>([]);
   readonly successMessage = signal<string | null>(null);
   readonly avatarError = signal<string | null>(null);
+  readonly detectedTimeZone = signal<string | null>(null);
+
+  timezonesList = [...COMMON_TIMEZONES];
+  readonly localesList = SUPPORTED_LOCALES;
+  readonly reminderOptions = REMINDER_OPTIONS;
 
   readonly profileForm: FormGroup = this.fb.group({
     professionalName: ['', [Validators.required, Validators.maxLength(150)]],
     licenseNumber: ['', [Validators.maxLength(100)]],
     phone: ['', [Validators.maxLength(30)]],
     bio: ['', [Validators.maxLength(2000)]],
+  });
+
+  readonly localizationForm: FormGroup = this.fb.group({
+    timeZone: ['America/Mexico_City', [Validators.required]],
+    timeFormat: ['TWELVE_HOUR' as UserTimeFormat, [Validators.required]],
+    dateFormat: ['DD_MM_YYYY' as UserDateFormat, [Validators.required]],
+    locale: ['es-MX', [Validators.required]],
+    weekStartsOn: [1, [Validators.required]],
+  });
+
+  readonly notificationsForm: FormGroup = this.fb.group({
+    emailNotifications: [true],
+    inAppNotifications: [true],
+    appointmentReminders: [true],
+    reminderAdvanceMinutes: [60, [Validators.required]],
+    sessionDigest: [true],
   });
 
   readonly userInitials = computed(() => {
@@ -87,10 +121,50 @@ export class UserProfilePage implements OnInit {
         this.specialties.set([...(p.specialties || [])]);
       }
     });
+
+    effect(() => {
+      const prefs = this.store.preferences();
+      if (prefs) {
+        if (prefs.timeZone && !this.timezonesList.includes(prefs.timeZone)) {
+          this.timezonesList = [prefs.timeZone, ...this.timezonesList];
+        }
+        this.localizationForm.patchValue({
+          timeZone: prefs.timeZone || 'America/Mexico_City',
+          timeFormat: prefs.timeFormat || 'TWELVE_HOUR',
+          dateFormat: prefs.dateFormat || 'DD_MM_YYYY',
+          locale: prefs.locale || 'es-MX',
+          weekStartsOn: prefs.weekStartsOn ?? 1,
+        });
+
+        this.notificationsForm.patchValue({
+          emailNotifications: prefs.emailNotifications ?? true,
+          inAppNotifications: prefs.inAppNotifications ?? true,
+          appointmentReminders: prefs.appointmentReminders ?? true,
+          reminderAdvanceMinutes: prefs.reminderAdvanceMinutes ?? 60,
+          sessionDigest: prefs.sessionDigest ?? true,
+        });
+      }
+    });
   }
 
   ngOnInit(): void {
     this.store.loadProfile();
+  }
+
+  detectBrowserTimeZone(): void {
+    try {
+      const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (detected) {
+        if (!this.timezonesList.includes(detected)) {
+          this.timezonesList = [detected, ...this.timezonesList];
+        }
+        this.localizationForm.patchValue({ timeZone: detected });
+        this.detectedTimeZone.set(detected);
+        this.showSuccess(`Zona horaria detectada: ${detected}`);
+      }
+    } catch {
+      // Fallback silently if Intl is not available
+    }
   }
 
   addSpecialty(event: MatChipInputEvent): void {
@@ -154,6 +228,52 @@ export class UserProfilePage implements OnInit {
       },
       () => {
         this.showSuccess('Datos de perfil profesional guardados exitosamente.');
+      },
+    );
+  }
+
+  submitLocalization(): void {
+    if (this.localizationForm.invalid) {
+      this.localizationForm.markAllAsTouched();
+      return;
+    }
+
+    const formVal = this.localizationForm.value;
+    this.store.updatePreferences(
+      {
+        timeZone: formVal.timeZone,
+        timeFormat: formVal.timeFormat,
+        dateFormat: formVal.dateFormat,
+        locale: formVal.locale,
+        weekStartsOn: Number(formVal.weekStartsOn),
+      },
+      () => {
+        this.showSuccess(
+          'Preferencias de localización y zona horaria guardadas con éxito.',
+        );
+      },
+    );
+  }
+
+  submitNotifications(): void {
+    if (this.notificationsForm.invalid) {
+      this.notificationsForm.markAllAsTouched();
+      return;
+    }
+
+    const formVal = this.notificationsForm.value;
+    this.store.updatePreferences(
+      {
+        emailNotifications: formVal.emailNotifications,
+        inAppNotifications: formVal.inAppNotifications,
+        appointmentReminders: formVal.appointmentReminders,
+        reminderAdvanceMinutes: Number(formVal.reminderAdvanceMinutes),
+        sessionDigest: formVal.sessionDigest,
+      },
+      () => {
+        this.showSuccess(
+          'Preferencias de notificaciones y recordatorios actualizadas con éxito.',
+        );
       },
     );
   }
