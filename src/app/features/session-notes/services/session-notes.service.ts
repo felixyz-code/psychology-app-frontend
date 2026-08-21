@@ -8,6 +8,7 @@ import {
   SessionNote,
   UpdateSessionNoteRequest,
 } from '../models/session-note.models';
+import { ClinicalPdfExportPayload } from '../../case-files/models/clinical-pdf.models';
 
 @Injectable({ providedIn: 'root' })
 export class SessionNotesService {
@@ -36,5 +37,9 @@ export class SessionNotesService {
 
   deleteSessionNote(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/session-notes/${id}`);
+  }
+
+  getPdfData(id: string): Observable<ClinicalPdfExportPayload> {
+    return this.http.get<ClinicalPdfExportPayload>(`${this.apiUrl}/session-notes/${id}/pdf-data`);
   }
 }

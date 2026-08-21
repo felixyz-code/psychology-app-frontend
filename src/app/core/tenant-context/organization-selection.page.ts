@@ -40,9 +40,22 @@ export class OrganizationSelectionPage {
 
   constructor() {
     effect(() => {
+      const state = this.tenantContextStore.state();
+      const snapshot = this.tenantContextStore.snapshot();
+
+      // Auto-redirect to dashboard if active tenant is already resolved or single membership
+      if (
+        state === 'ACTIVE_TENANT_READY' ||
+        snapshot?.status === 'ACTIVE_TENANT_READY' ||
+        snapshot?.tenantContext?.resolutionMode === 'SINGLE_MEMBERSHIP'
+      ) {
+        void this.router.navigate(['/dashboard'], { replaceUrl: true });
+        return;
+      }
+
       const preferredOrganizationId = this.tenantContextStore.preferredOrganizationId();
       if (
-        this.tenantContextStore.state() === 'AMBIGUOUS_SELECTION' &&
+        state === 'AMBIGUOUS_SELECTION' &&
         preferredOrganizationId &&
         !this.organizationControl.value
       ) {

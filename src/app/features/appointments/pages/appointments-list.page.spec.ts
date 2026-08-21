@@ -57,6 +57,31 @@ describe('AppointmentsListPage cancellation', () => {
     expect(getAppointments).toHaveBeenCalledTimes(1);
   });
 
+  it('opens reschedule dialog and reloads appointments on success', () => {
+    const dialog = TestBed.inject(MatDialog);
+    const dialogRef = { afterClosed: vi.fn(() => of(true)) };
+    (dialog.open as any).mockReturnValue(dialogRef);
+
+    const page = createPage();
+    page.openRescheduleAppointmentDialog(createAppointment());
+
+    expect(dialog.open).toHaveBeenCalled();
+    expect(page.successMessage()).toBe('La cita fue reprogramada correctamente.');
+    expect(getAppointments).toHaveBeenCalledTimes(2);
+  });
+
+  it('opens schedule blocks manager dialog', () => {
+    const dialog = TestBed.inject(MatDialog);
+    const dialogRef = { afterClosed: vi.fn(() => of(true)) };
+    (dialog.open as any).mockReturnValue(dialogRef);
+
+    const page = createPage();
+    page.openScheduleBlocksManager();
+
+    expect(dialog.open).toHaveBeenCalled();
+    expect(getAppointments).toHaveBeenCalledTimes(2);
+  });
+
   function createPage(): AppointmentsListPage {
     return TestBed.runInInjectionContext(() => new AppointmentsListPage());
   }

@@ -1,0 +1,223 @@
+<div class="assessment-runner">
+  @if (isLoading()) {
+    <div class="assessment-runner__state-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <h2>Cargando evaluación...</h2>
+      <p>Por favor espere un momento mientras preparamos su cuestionario.</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="assessment-runner__state-container assessment-runner__state-container--error">
+      <mat-icon class="assessment-runner__state-icon">error_outline</mat-icon>
+      <h2>No fue posible acceder</h2>
+      <p>{{ errorMessage() }}</p>
+    </div>
+  } @else if (isCompleted()) {
+    <div class="assessment-runner__state-container assessment-runner__state-container--success">
+      <div class="assessment-runner__success-badge">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <h2>¡Evaluación completada con éxito!</h2>
+      <p>
+        Sus respuestas han sido registradas y enviadas de forma segura a su profesional de la salud.
+      </p>
+      <p class="assessment-runner__subtext">
+        Ya puede cerrar esta pestaña de navegación. Muchas gracias por su tiempo y colaboración.
+      </p>
+    </div>
+  } @else {
+    <!-- Active Assessment Runner Layout -->
+    <header class="assessment-runner__header">
+      <div class="assessment-runner__header-container">
+        <div class="assessment-runner__branding">
+          <div class="assessment-runner__logo-box">
+            <mat-icon>psychology</mat-icon>
+          </div>
+          <div>
+            <h1 class="assessment-runner__title">
+              {{ definition()?.metadata?.title || 'Evaluación Psicométrica' }}
+            </h1>
+            <span class="assessment-runner__acronym">{{
+              definition()?.metadata?.acronym || 'Cuestionario Clínico'
+            }}</span>
+          </div>
+        </div>
+
+        <!-- Live Sync Status Indicator -->
+        <div class="assessment-runner__sync-status">
+          @if (syncStatus() === 'SAVED') {
+            <span class="assessment-runner__sync-badge assessment-runner__sync-badge--saved">
+              <mat-icon>cloud_done</mat-icon> Guardado
+            </span>
+          } @else if (syncStatus() === 'SAVING') {
+            <span class="assessment-runner__sync-badge assessment-runner__sync-badge--saving">
+              <mat-spinner diameter="14"></mat-spinner> Guardando...
+            </span>
+          } @else if (syncStatus() === 'OFFLINE_PENDING') {
+            <span class="assessment-runner__sync-badge assessment-runner__sync-badge--offline">
+              <mat-icon>cloud_off</mat-icon> Guardado en dispositivo
+            </span>
+          } @else if (syncStatus() === 'ERROR') {
+            <span
+              class="assessment-runner__sync-badge assessment-runner__sync-badge--error"
+              (click)="triggerAutoSave()"
+            >
+              <mat-icon>sync_problem</mat-icon> Reintentar guardado
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- Progress Bar & Count -->
+      <div class="assessment-runner__progress-bar-container">
+        <div class="assessment-runner__progress-meta">
+          <span
+            >Progreso: {{ answeredRequiredCount() }} de {{ totalRequiredItems() }} respondidas</span
+          >
+          <span>{{ progressPercentage() }}%</span>
+        </div>
+        <mat-progress-bar mode="determinate" [value]="progressPercentage()"></mat-progress-bar>
+      </div>
+    </header>
+
+    <main class="assessment-runner__main">
+      <!-- Patient Greeting and General Instructions -->
+      <section class="assessment-runner__instructions-card">
+        @if (administration()?.patient?.firstName) {
+          <h3>Hola, {{ administration()?.patient?.firstName }}</h3>
+        }
+        <p>
+          {{
+            definition()?.instructions?.generalInstructions ||
+              'Por favor responda las siguientes preguntas con la mayor honestidad posible. Sus respuestas son confidenciales y serán revisadas por su terapeuta.'
+          }}
+        </p>
+      </section>
+
+      <!-- Dynamic Items List -->
+      <div class="assessment-runner__items-list">
+        @for (item of items(); track item.code; let i = $index) {
+          <article
+            [id]="'item-' + item.code"
+            class="assessment-runner__item-card"
+            [class.assessment-runner__item-card--missing]="missingItemCodes().includes(item.code)"
+            [class.assessment-runner__item-card--answered]="
+              responses()[item.code] !== undefined &&
+              responses()[item.code] !== null &&
+              responses()[item.code] !== ''
+            "
+          >
+            <div class="assessment-runner__item-header">
+              <span class="assessment-runner__item-num">{{ item.sequenceNumber || i + 1 }}</span>
+              <div class="assessment-runner__item-prompt-wrapper">
+                <h4 class="assessment-runner__item-prompt">
+                  {{ item.prompt }}
+                  @if (item.required) {
+                    <span class="assessment-runner__required" title="Obligatoria">*</span>
+                  }
+                </h4>
+              </div>
+            </div>
+
+            <!-- Single Choice / Likert Options -->
+            @if (item.options && item.options.length > 0) {
+              <div
+                class="assessment-runner__options-grid"
+                role="radiogroup"
+                [attr.aria-label]="item.prompt"
+              >
+                @for (opt of item.options; track opt.value) {
+                  <button
+                    type="button"
+                    role="radio"
+                    [attr.aria-checked]="isOptionSelected(item.code, opt.value)"
+                    class="assessment-runner__option-button"
+                    [class.assessment-runner__option-button--selected]="
+                      isOptionSelected(item.code, opt.value)
+                    "
+                    (click)="selectOption(item.code, opt.value)"
+                  >
+                    <div class="assessment-runner__option-radio-circle"></div>
+                    <div class="assessment-runner__option-content">
+                      <span class="assessment-runner__option-label">{{ opt.label }}</span>
+                      @if (opt.description) {
+                        <span class="assessment-runner__option-desc">{{ opt.description }}</span>
+                      }
+                    </div>
+                  </button>
+                }
+              </div>
+            } @else if (item.itemType === 'BOOLEAN') {
+              <div class="assessment-runner__options-grid assessment-runner__options-grid--boolean">
+                <button
+                  type="button"
+                  class="assessment-runner__option-button"
+                  [class.assessment-runner__option-button--selected]="
+                    isOptionSelected(item.code, true)
+                  "
+                  (click)="selectOption(item.code, true)"
+                >
+                  <div class="assessment-runner__option-radio-circle"></div>
+                  <span>Sí</span>
+                </button>
+                <button
+                  type="button"
+                  class="assessment-runner__option-button"
+                  [class.assessment-runner__option-button--selected]="
+                    isOptionSelected(item.code, false)
+                  "
+                  (click)="selectOption(item.code, false)"
+                >
+                  <div class="assessment-runner__option-radio-circle"></div>
+                  <span>No</span>
+                </button>
+              </div>
+            }
+
+            @if (missingItemCodes().includes(item.code)) {
+              <div class="assessment-runner__item-error">
+                <mat-icon>info</mat-icon>
+                <span>Esta pregunta es obligatoria para completar la evaluación.</span>
+              </div>
+            }
+          </article>
+        }
+      </div>
+
+      <!-- Submission Footer -->
+      <footer class="assessment-runner__footer">
+        @if (formAlertMessage()) {
+          <div class="assessment-runner__footer-alert" role="alert">
+            <mat-icon>warning</mat-icon>
+            <span>{{ formAlertMessage() }}</span>
+          </div>
+        } @else if (missingItemCodes().length > 0) {
+          <div class="assessment-runner__footer-alert" role="alert">
+            <mat-icon>warning</mat-icon>
+            <span
+              >Faltan {{ missingItemCodes().length }} preguntas obligatorias por responder.</span
+            >
+          </div>
+        }
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="assessment-runner__submit-button"
+          [disabled]="isSubmitting()"
+          (click)="submitAssessment()"
+        >
+          @if (isSubmitting()) {
+            <mat-spinner diameter="20" class="assessment-runner__submit-spinner"></mat-spinner>
+            <span>Enviando evaluación...</span>
+          } @else {
+            <mat-icon>send</mat-icon>
+          }
+          @if (!isSubmitting()) {
+            <span>Finalizar y Entregar Evaluación</span>
+          }
+        </button>
+      </footer>
+    </main>
+  }
+</div>

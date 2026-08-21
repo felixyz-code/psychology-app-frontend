@@ -1,0 +1,528 @@
+<div class="builder-container">
+  <!-- Header -->
+  <header class="builder-header">
+    <div class="builder-header__titles">
+      <div class="builder-header__badge-row">
+        <a routerLink="/management/assessments" class="builder-header__back-link">
+          <mat-icon>arrow_back</mat-icon> Catálogo de Instrumentos
+        </a>
+        @if (isEditMode()) {
+          @if (isStock()) {
+            <span class="badge badge--system">Stock Global</span>
+          } @else {
+            <span class="badge badge--custom">Custom Clínica</span>
+          }
+          @if (isLocked()) {
+            <span class="badge badge--published">v{{ existingVersion()?.versionNumber }} Publicado (Inmutable)</span>
+          } @else {
+            <span class="badge badge--draft">Borrador v{{ existingVersion()?.versionNumber ?? 1 }}</span>
+          }
+        } @else {
+          <span class="badge badge--custom">Nuevo Instrumento Custom</span>
+          <span class="badge badge--draft">Borrador v1</span>
+        }
+      </div>
+      <h1 class="builder-header__title">
+        {{ isEditMode() ? metadataForm.controls.name.value || 'Constructor Psicométrico' : 'Nuevo Instrumento Psicométrico' }}
+      </h1>
+      <p class="builder-header__subtitle">
+        Diseñe reactivos estructurados, pesos numéricos, reglas de baremación clínica y alertas instantáneas (NOM-004 / ITC).
+      </p>
+    </div>
+
+    <div class="builder-header__actions">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="saveDraft()"
+        [disabled]="isSaving() || isPublishing() || isLocked()"
+      >
+        <mat-icon>save</mat-icon>
+        <span>{{ isSaving() ? 'Guardando...' : 'Guardar Borrador' }}</span>
+      </button>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="publish()"
+        [disabled]="isSaving() || isPublishing() || isLocked()"
+      >
+        <mat-icon>verified</mat-icon>
+        <span>{{ isPublishing() ? 'Publicando...' : 'Publicar Instrumento' }}</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Feedback Banners -->
+  @if (errorMessage()) {
+    <div class="alert alert--error" role="alert">
+      <mat-icon>error</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+  @if (successMessage()) {
+    <div class="alert alert--success" role="status">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+  @if (isLocked()) {
+    <div class="alert alert--warning" role="alert">
+      <mat-icon>lock</mat-icon>
+      <span>Esta versión se encuentra publicada o ya cuenta con administraciones clínicas. Para realizar cambios, guarde como borrador para crear automáticamente la versión <strong>v{{ (existingVersion()?.versionNumber ?? 1) + 1 }}</strong>.</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="builder-loading">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Cargando especificación psicométrica...</p>
+    </div>
+  } @else {
+    <!-- Main Stepper Wizard -->
+    <mat-stepper [linear]="false" class="builder-stepper">
+      <!-- STEP 1: Metadata -->
+      <mat-step [stepControl]="metadataForm">
+        <form [formGroup]="metadataForm" class="step-card">
+          <ng-template matStepLabel>1. Metadatos & Instrucciones</ng-template>
+
+          <h2 class="step-card__title">Información General del Instrumento</h2>
+          <p class="step-card__description">Configure el código mnemónico, título, referencia psicométrica e instrucciones para el paciente.</p>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Código del Instrumento (ej. PHQ-9, BAI)</mat-label>
+              <input matInput formControlName="code" placeholder="BAI-CUSTOM" uppercase />
+              <mat-hint>Código único identificador en el catálogo del tenant</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Título Formal del Instrumento</mat-label>
+              <input matInput formControlName="name" placeholder="Inventario de Ansiedad de Beck" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Población Objetivo</mat-label>
+              <input matInput formControlName="targetPopulation" placeholder="Población adulta (>= 18 años)" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tiempo Estimado (minutos)</mat-label>
+              <input matInput type="number" formControlName="estimatedTimeMinutes" min="1" max="180" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Modo de Aplicación</mat-label>
+              <mat-select formControlName="administrationMode">
+                <mat-option value="SELF_ADMINISTERED">Autoaplicado (Paciente responde remotamente)</mat-option>
+                <mat-option value="CLINICIAN_ADMINISTERED">Heteroaplicado (Evaluador / Psicólogo en consulta)</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Descripción Clínica</mat-label>
+              <textarea matInput formControlName="description" rows="2" placeholder="Objetivo clínico, constructo evaluado y fundamentación."></textarea>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="form-field--full">
+            <mat-label>Instrucciones para el Paciente / Evaluador</mat-label>
+            <textarea matInput formControlName="generalInstructions" rows="3" placeholder="Indique claramente las instrucciones temporales y de formato de respuesta."></textarea>
+          </mat-form-field>
+
+          <div class="step-card__footer">
+            <button mat-flat-button color="primary" matStepperNext type="button">
+              Continuar a Reactivos <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- STEP 2: Items & Likert Bank -->
+      <mat-step [stepControl]="itemsForm">
+        <form [formGroup]="itemsForm" class="step-card">
+          <ng-template matStepLabel>2. Reactivos & Ítems</ng-template>
+
+          <div class="step-card__header-flex">
+            <div>
+              <h2 class="step-card__title">Banco de Reactivos e Ítems Psicométricos</h2>
+              <p class="step-card__description">Defina las preguntas, opciones de escala Likert y ponderaciones numéricas de cada reactivo.</p>
+            </div>
+            <button mat-flat-button color="primary" type="button" (click)="addItem()">
+              <mat-icon>add</mat-icon> Agregar Reactivo
+            </button>
+          </div>
+
+          <div class="items-list" formArrayName="items">
+            @for (itemGroup of itemsArray.controls; track $index) {
+              <div class="item-card" [formGroupName]="$index">
+                <div class="item-card__header">
+                  <div class="item-card__badge-row">
+                    <span class="item-card__num">#{{ $index + 1 }}</span>
+                    <mat-form-field appearance="outline" class="item-card__code-field">
+                      <mat-label>Código</mat-label>
+                      <input matInput formControlName="code" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="item-card__quick-actions">
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      class="btn--sm"
+                      (click)="apply4PointLikert($index)"
+                      matTooltip="Escala 0-3: Nunca, Varios días, Más de la mitad, Casi diario"
+                    >
+                      Likert 4 pts (0-3)
+                    </button>
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      class="btn--sm"
+                      (click)="apply5PointLikert($index)"
+                      matTooltip="Escala 1-5: Totalmente en desacuerdo a Totalmente de acuerdo"
+                    >
+                      Likert 5 pts (1-5)
+                    </button>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      type="button"
+                      (click)="removeItem($index)"
+                      aria-label="Eliminar reactivo"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <mat-form-field appearance="outline" class="form-field--full">
+                  <mat-label>Enunciado / Pregunta del Reactivo</mat-label>
+                  <input matInput formControlName="prompt" placeholder="Texto claro de la pregunta o síntoma evaluado" />
+                </mat-form-field>
+
+                <div class="item-card__options-section">
+                  <p class="item-card__options-title">Opciones de Respuesta y Ponderaciones Numéricas (Weight):</p>
+                  <div class="options-grid" formArrayName="options">
+                    @for (optGroup of getItemOptionsArray($index).controls; track $index; let optIdx = $index) {
+                      <div class="option-pill" [formGroupName]="optIdx">
+                        <input
+                          type="text"
+                          formControlName="label"
+                          class="option-pill__input-label"
+                          placeholder="Etiqueta"
+                        />
+                        <span class="option-pill__weight-tag">
+                          Peso:
+                          <input
+                            type="number"
+                            formControlName="weight"
+                            class="option-pill__input-weight"
+                          />
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (itemsArray.length === 0) {
+              <div class="empty-state">
+                <mat-icon class="empty-state__icon">quiz</mat-icon>
+                <p>No hay reactivos registrados. Agregue el primer reactivo para continuar.</p>
+                <button mat-flat-button color="primary" type="button" (click)="addItem()">
+                  <mat-icon>add</mat-icon> Agregar Reactivo
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="step-card__footer">
+            <button mat-button matStepperPrevious type="button">Atrás</button>
+            <button mat-flat-button color="primary" matStepperNext type="button">
+              Continuar a Baremos <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- STEP 3: Scoring & Strata -->
+      <mat-step [stepControl]="scoringForm">
+        <form [formGroup]="scoringForm" class="step-card">
+          <ng-template matStepLabel>3. Baremos & Puntos de Corte</ng-template>
+
+          <div class="step-card__header-flex">
+            <div>
+              <h2 class="step-card__title">Estratificación Clínica y Baremos de Severidad</h2>
+              <p class="step-card__description">Defina los intervalos numéricos de puntuación y su clasificación de severidad sintomática.</p>
+            </div>
+            <div class="btn-group">
+              <button mat-stroked-button type="button" (click)="addDefaultStrata()">
+                <mat-icon>auto_fix_high</mat-icon> Cargar 4 Niveles Estándar
+              </button>
+              <button mat-flat-button color="primary" type="button" (click)="addStratum()">
+                <mat-icon>add</mat-icon> Agregar Estrato
+              </button>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Cálculo Psicométrico</mat-label>
+              <mat-select formControlName="scoringType">
+                <mat-option value="SUM">Suma Simple de Ponderaciones (SUM)</mat-option>
+                <mat-option value="SUBSCALES">Dimensiones / Subescalas Multidimensionales</mat-option>
+                <mat-option value="WEIGHTED_COMPOSITE">Compuesto Ponderado</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="score-bounds-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Puntaje Mínimo</mat-label>
+                <input matInput type="number" formControlName="minScore" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Puntaje Máximo</mat-label>
+                <input matInput type="number" formControlName="maxScore" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="strata-list" formArrayName="strata">
+            @for (stGroup of strataArray.controls; track $index) {
+              <div class="stratum-row" [formGroupName]="$index">
+                <mat-form-field appearance="outline" class="stratum-row__code">
+                  <mat-label>Código</mat-label>
+                  <input matInput formControlName="code" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="stratum-row__range">
+                  <mat-label>Mín</mat-label>
+                  <input matInput type="number" formControlName="min" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="stratum-row__range">
+                  <mat-label>Máx</mat-label>
+                  <input matInput type="number" formControlName="max" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="stratum-row__severity">
+                  <mat-label>Severidad Clínica</mat-label>
+                  <mat-select formControlName="severity">
+                    <mat-option value="NONE">Nula / Mínima (NONE)</mat-option>
+                    <mat-option value="MILD">Leve (MILD)</mat-option>
+                    <mat-option value="MODERATE">Moderada (MODERATE)</mat-option>
+                    <mat-option value="MODERATELY_SEVERE">Moderadamente Grave</mat-option>
+                    <mat-option value="SEVERE">Grave (SEVERE)</mat-option>
+                    <mat-option value="CRITICAL">Crítica (CRITICAL)</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="stratum-row__title">
+                  <mat-label>Título / Diagnóstico</mat-label>
+                  <input matInput formControlName="title" placeholder="Depresión Moderada" />
+                </mat-form-field>
+
+                <button
+                  mat-icon-button
+                  color="warn"
+                  type="button"
+                  (click)="removeStratum($index)"
+                  aria-label="Eliminar estrato"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="step-card__footer">
+            <button mat-button matStepperPrevious type="button">Atrás</button>
+            <button mat-flat-button color="primary" matStepperNext type="button">
+              Continuar a Alertas <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- STEP 4: Clinical Alerts -->
+      <mat-step [stepControl]="alertsForm">
+        <form [formGroup]="alertsForm" class="step-card">
+          <ng-template matStepLabel>4. Alertas Clínicas</ng-template>
+
+          <div class="step-card__header-flex">
+            <div>
+              <h2 class="step-card__title">Reglas de Alerta Crítica Inmediata</h2>
+              <p class="step-card__description">Configure reglas de detección temprana ante reactivos de alto riesgo (ej. ideación autolesiva, violencia, crisis).</p>
+            </div>
+            <button mat-flat-button color="primary" type="button" (click)="addAlert()">
+              <mat-icon>add_alert</mat-icon> Agregar Alerta
+            </button>
+          </div>
+
+          <div class="alerts-list" formArrayName="clinicalAlerts">
+            @for (alGroup of alertsArray.controls; track $index) {
+              <div class="alert-rule-card" [formGroupName]="$index">
+                <div class="alert-rule-card__row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Reactivo Gatillo</mat-label>
+                    <mat-select formControlName="itemCode">
+                      @for (item of liveDefinition().items; track item.code) {
+                        <mat-option [value]="item.code">{{ item.code }} — {{ item.prompt | slice:0:35 }}...</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Condición de Disparo</mat-label>
+                    <mat-select formControlName="triggerCondition">
+                      <mat-option value="WEIGHT_GREATER_THAN_OR_EQUAL">Peso Numérico >= Umbral</mat-option>
+                      <mat-option value="WEIGHT_GREATER_THAN">Peso Numérico > Umbral</mat-option>
+                      <mat-option value="EQUALS">Valor Igual a</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Umbral</mat-label>
+                    <input matInput type="number" formControlName="thresholdValue" />
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nivel de Severidad</mat-label>
+                    <mat-select formControlName="severity">
+                      <mat-option value="INFO">Informativa (INFO)</mat-option>
+                      <mat-option value="WARNING">Advertencia (WARNING)</mat-option>
+                      <mat-option value="CRITICAL">Riesgo Crítico (CRITICAL)</mat-option>
+                      <mat-option value="EMERGENCY">Emergencia (EMERGENCY)</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    type="button"
+                    (click)="removeAlert($index)"
+                    aria-label="Eliminar regla de alerta"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+
+                <mat-form-field appearance="outline" class="form-field--full">
+                  <mat-label>Mensaje Clínico de Alerta para el Expediente</mat-label>
+                  <input matInput formControlName="message" placeholder="ALERTA: El paciente reportó ideación o conductas de riesgo." />
+                </mat-form-field>
+              </div>
+            }
+
+            @if (alertsArray.length === 0) {
+              <div class="empty-state">
+                <mat-icon class="empty-state__icon">notifications_off</mat-icon>
+                <p>No se han configurado alertas clínicas automáticas para este instrumento.</p>
+              </div>
+            }
+          </div>
+
+          <div class="step-card__footer">
+            <button mat-button matStepperPrevious type="button">Atrás</button>
+            <button mat-flat-button color="primary" matStepperNext type="button">
+              Probar en Simulador <mat-icon>play_circle</mat-icon>
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- STEP 5: Interactive Live Simulator -->
+      <mat-step>
+        <div class="step-card">
+          <ng-template matStepLabel>5. Simulador en Vivo</ng-template>
+
+          <h2 class="step-card__title">Simulador Interactivo de Evaluación Psicométrica</h2>
+          <p class="step-card__description">
+            Responda a los reactivos diseñados para verificar en tiempo real el cálculo del motor psicométrico, la estratificación de severidad y el disparo de alertas de riesgo.
+          </p>
+
+          <!-- Live Score Dashboard Widget -->
+          <div class="simulator-dashboard">
+            <div class="simulator-score-box">
+              <span class="simulator-score-box__label">Puntuación Total</span>
+              <span class="simulator-score-box__value">
+                {{ liveScoringResult().rawScore }}
+                <span class="simulator-score-box__max">/ {{ liveScoringResult().maxPossibleScore }}</span>
+              </span>
+              <mat-progress-bar mode="determinate" [value]="liveScoringResult().normalizedScore"></mat-progress-bar>
+              <span class="simulator-score-box__pct">{{ liveScoringResult().normalizedScore }}% de severidad normalizada</span>
+            </div>
+
+            <div class="simulator-strata-box" [attr.data-severity]="liveScoringResult().strataSeverity">
+              <span class="simulator-strata-box__label">Diagnóstico / Estratificación</span>
+              <h3 class="simulator-strata-box__title">{{ liveScoringResult().strataTitle || 'Sin respuesta' }}</h3>
+              <p class="simulator-strata-box__desc">{{ liveScoringResult().strataDescription || 'Responda a los reactivos para obtener la estratificación clínica.' }}</p>
+            </div>
+          </div>
+
+          <!-- Real-time Clinical Risk Alerts Triggered -->
+          @if (liveScoringResult().flags.length > 0) {
+            <div class="simulator-alerts">
+              <h4 class="simulator-alerts__title">
+                <mat-icon>warning</mat-icon> Alertas Clínicas Detonadas en Vivo ({{ liveScoringResult().flags.length }})
+              </h4>
+              @for (flag of liveScoringResult().flags; track flag.itemCode) {
+                <div class="simulator-alert-pill" [attr.data-severity]="flag.severity">
+                  <strong>{{ flag.itemCode }}:</strong> {{ flag.message }}
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Interactive Questions Runner Preview -->
+          <div class="simulator-questions">
+            <h3 class="simulator-questions__heading">{{ liveDefinition().instructions?.generalInstructions }}</h3>
+
+            @for (item of liveDefinition().items; track item.code; let qIdx = $index) {
+              <div class="simulator-question-card">
+                <p class="simulator-question-card__prompt">
+                  <span class="simulator-question-card__num">{{ qIdx + 1 }}.</span> {{ item.prompt }}
+                </p>
+
+                <div class="simulator-question-card__options">
+                  @for (opt of item.options; track opt.value) {
+                    <button
+                      type="button"
+                      class="simulator-opt-btn"
+                      [class.simulator-opt-btn--selected]="simulatorResponses()[item.code] === opt.value"
+                      (click)="setSimulatorResponse(item.code, opt.value)"
+                    >
+                      <span class="simulator-opt-btn__weight">({{ opt.weight }} pts)</span>
+                      <span class="simulator-opt-btn__label">{{ opt.label }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="step-card__footer">
+            <button mat-button matStepperPrevious type="button">Atrás</button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="publish()"
+              [disabled]="isSaving() || isPublishing() || isLocked()"
+            >
+              <mat-icon>verified</mat-icon> Publicar Instrumento para Uso Clínico
+            </button>
+          </div>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  }
+</div>

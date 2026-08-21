@@ -1,0 +1,50 @@
+﻿<div class="attachment-delete-dialog">
+  <div class="attachment-delete-dialog__header">
+    <div class="attachment-delete-dialog__icon" aria-hidden="true">
+      <mat-icon>warning</mat-icon>
+    </div>
+    <h2>Eliminar archivo adjunto</h2>
+  </div>
+
+  <div class="attachment-delete-dialog__content">
+    <p>
+      &iquest;Est&aacute;s seguro de que deseas eliminar permanentemente el archivo
+      <strong>"{{ attachment.originalName }}"</strong> del expediente cl&iacute;nico?
+    </p>
+
+    <p class="attachment-delete-dialog__warning">
+      Esta acci&oacute;n quedar&aacute; registrada en la bit&aacute;cora de auditor&iacute;a y no se puede deshacer.
+    </p>
+
+    @if (errorMessage()) {
+      <p class="attachment-delete-dialog__error" role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+  </div>
+
+  <div class="attachment-delete-dialog__actions">
+    <button
+      mat-button
+      type="button"
+      [disabled]="isDeleting()"
+      (click)="close(false)"
+    >
+      Cancelar
+    </button>
+    <button
+      mat-flat-button
+      color="warn"
+      type="button"
+      [disabled]="isDeleting()"
+      (click)="confirm()"
+    >
+      @if (isDeleting()) {
+        <mat-spinner diameter="18" />
+        <span>Eliminando...</span>
+      } @else {
+        <span>Eliminar</span>
+      }
+    </button>
+  </div>
+</div>

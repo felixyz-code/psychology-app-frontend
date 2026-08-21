@@ -21,6 +21,10 @@
 }
 
 .documents-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
   min-width: 0;
 }
 

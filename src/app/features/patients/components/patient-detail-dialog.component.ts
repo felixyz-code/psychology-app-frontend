@@ -58,6 +58,10 @@ import { SessionNoteFormDialogComponent } from '../../session-notes/components/s
 import { SessionNote } from '../../session-notes/models/session-note.models';
 import { Patient } from '../models/patient.models';
 import { PatientFormDialogComponent } from './patient-form-dialog.component';
+import { CaseFileAttachmentsComponent } from '../../case-files/components/case-file-attachments/case-file-attachments.component';
+import { AssessmentListComponent } from '../../assessments/components/assessment-list/assessment-list.component';
+import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/components/clinical-document-preview-dialog.component';
+import { ClinicalDocumentType } from '../../case-files/models/clinical-pdf.models';
 
 interface PatientDetailDialogData {
   patient: Patient;
@@ -76,6 +80,8 @@ interface PatientDetailDialogData {
     MatProgressSpinnerModule,
     MatTooltipModule,
     ActionCardComponent,
+    AssessmentListComponent,
+    CaseFileAttachmentsComponent,
     ClinicalTimelineComponent,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
@@ -110,6 +116,7 @@ export class PatientDetailDialogComponent {
 
   readonly workspaceContent = viewChild<ElementRef<HTMLElement>>('workspaceContent');
   readonly documentsSection = viewChild<ElementRef<HTMLElement>>('documentsSection');
+  readonly attachmentsSection = viewChild<ElementRef<HTMLElement>>('attachmentsSection');
   readonly patient = signal(this.data.patient);
   readonly caseFileId = signal(this.data.caseFileId?.trim() ?? '');
 
@@ -423,6 +430,58 @@ export class PatientDetailDialogComponent {
     });
   }
 
+  openClinicalPdfDialog(
+    noteId?: string,
+    documentType: ClinicalDocumentType = 'NOM_004_EVOLUTION_NOTE',
+  ): void {
+    const targetCaseFileId = this.caseFile()?.id || this.caseFileId();
+    if (!targetCaseFileId) return;
+
+    this.caseFilesService
+      .getClinicalPdfData(targetCaseFileId, noteId)
+      .subscribe({
+        next: (payload) => {
+          this.dialog.open(ClinicalDocumentPreviewDialogComponent, {
+            data: {
+              payload,
+              initialDocumentType: documentType,
+              caseFileId: targetCaseFileId,
+              noteId,
+            },
+            width: '90vw',
+            maxWidth: '960px',
+            maxHeight: '94vh',
+            panelClass: 'app-clinical-preview-dialog-panel',
+            autoFocus: false,
+            restoreFocus: true,
+          });
+        },
+      });
+  }
+
+  openConsentPdfDialog(): void {
+    const targetCaseFileId = this.caseFile()?.id || this.caseFileId();
+    if (!targetCaseFileId) return;
+
+    this.caseFilesService.getConsentPdfData(targetCaseFileId).subscribe({
+      next: (payload) => {
+        this.dialog.open(ClinicalDocumentPreviewDialogComponent, {
+          data: {
+            payload,
+            initialDocumentType: 'INFORMED_CONSENT',
+            caseFileId: targetCaseFileId,
+          },
+          width: '90vw',
+          maxWidth: '960px',
+          maxHeight: '94vh',
+          panelClass: 'app-clinical-preview-dialog-panel',
+          autoFocus: false,
+          restoreFocus: true,
+        });
+      },
+    });
+  }
+
   openEditPatientDialog(): void {
     const scrollTop = this.workspaceContent()?.nativeElement.scrollTop ?? 0;
     const dialogRef = this.dialog.open(PatientFormDialogComponent, {
@@ -730,6 +789,13 @@ export class PatientDetailDialogComponent {
 
   scrollToDocuments(): void {
     this.documentsSection()?.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
+  scrollToAttachments(): void {
+    this.attachmentsSection()?.nativeElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     });

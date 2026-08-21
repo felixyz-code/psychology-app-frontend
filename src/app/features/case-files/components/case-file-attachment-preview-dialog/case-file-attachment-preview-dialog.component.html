@@ -1,0 +1,88 @@
+<div class="attachment-preview-dialog">
+  <div class="attachment-preview-dialog__header">
+    <div class="attachment-preview-dialog__identity">
+      <div class="attachment-preview-dialog__icon-badge" aria-hidden="true">
+        <mat-icon>{{ getPreviewIcon() }}</mat-icon>
+      </div>
+
+      <div>
+        <h3 class="attachment-preview-dialog__title" [title]="attachment.originalName">
+          {{ attachment.originalName }}
+        </h3>
+        <p class="attachment-preview-dialog__meta">
+          {{ getPreviewTypeLabel() }} &bull; {{ attachment.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+    </div>
+
+    <button
+      mat-icon-button
+      type="button"
+      aria-label="Cerrar vista previa"
+      (click)="close()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  @if (attachment.notes) {
+    <div class="attachment-preview-dialog__notes">
+      <strong>Observaciones clínicas:</strong>
+      <p>{{ attachment.notes }}</p>
+    </div>
+  }
+
+  <div class="attachment-preview-dialog__body">
+    @if (isLoading()) {
+      <div class="attachment-preview-dialog__state" aria-live="polite">
+        <mat-spinner diameter="40" />
+        <p>Cargando vista previa del archivo...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="attachment-preview-dialog__state attachment-preview-dialog__state--error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ errorMessage() }}</p>
+        <button mat-stroked-button type="button" (click)="retry()">Reintentar</button>
+      </div>
+    } @else if (previewKind() === 'pdf' && previewResourceUrl()) {
+      <iframe
+        class="attachment-preview-dialog__frame"
+        [src]="previewResourceUrl()"
+        title="Vista previa del documento PDF"
+      ></iframe>
+    } @else if (previewKind() === 'image' && previewResourceUrl()) {
+      <div class="attachment-preview-dialog__image-container">
+        <img
+          class="attachment-preview-dialog__image"
+          [src]="previewResourceUrl()"
+          [alt]="attachment.originalName"
+        />
+      </div>
+    } @else {
+      <div class="attachment-preview-dialog__state">
+        <mat-icon>info</mat-icon>
+        <p>Este formato de archivo no admite vista previa directa. Descárgalo para consultarlo.</p>
+      </div>
+    }
+  </div>
+
+  <div class="attachment-preview-dialog__actions">
+    <button mat-button type="button" (click)="close()">Cerrar</button>
+    <button
+      mat-flat-button
+      type="button"
+      [disabled]="isDownloading()"
+      (click)="download()"
+    >
+      @if (isDownloading()) {
+        <mat-spinner diameter="18" />
+        <span>Descargando...</span>
+      } @else {
+        <ng-container>
+          <mat-icon>download</mat-icon>
+          <span>Descargar</span>
+        </ng-container>
+      }
+    </button>
+  </div>
+</div>

@@ -1,0 +1,149 @@
+<div class="assessment-result-dialog">
+  <div class="assessment-result-dialog__header">
+    <div>
+      <h2 mat-dialog-title class="assessment-result-dialog__title">
+        <mat-icon class="assessment-result-dialog__icon">analytics</mat-icon>
+        <span
+          >Resultado:
+          {{
+            administration.instrumentVersion?.instrument?.name || 'Evaluación Psicométrica'
+          }}</span
+        >
+      </h2>
+      <p class="assessment-result-dialog__subtitle">
+        {{ administration.instrumentVersion?.instrument?.code }} - Versión
+        {{ administration.instrumentVersion?.versionNumber || 1 }}
+      </p>
+    </div>
+    <div class="assessment-result-dialog__meta">
+      <span
+        ><strong>Paciente:</strong> {{ administration.patient?.firstName }}
+        {{ administration.patient?.lastName }}</span
+      >
+      <span
+        ><strong>Completado:</strong>
+        {{ administration.completedAt | date: 'dd/MM/yyyy HH:mm' }}</span
+      >
+    </div>
+  </div>
+
+  <mat-dialog-content class="assessment-result-dialog__content">
+    @if (result) {
+      <!-- Overall Score & Diagnosis Banner -->
+      <section class="assessment-result-dialog__banner">
+        <div class="assessment-result-dialog__score-box">
+          <span class="assessment-result-dialog__score-label">Puntaje Total</span>
+          <span class="assessment-result-dialog__score-value">{{ result.rawScore }}</span>
+          @if (result.normalizedScore !== null && result.normalizedScore !== undefined) {
+            <span class="assessment-result-dialog__score-norm"
+              >Percentil / Normalizado: {{ result.normalizedScore }}</span
+            >
+          }
+        </div>
+
+        <div class="assessment-result-dialog__diagnosis-box">
+          <span class="assessment-result-dialog__diag-label">Estratificación Clínica:</span>
+          <div class="assessment-result-dialog__diag-badge-row">
+            <h3 class="assessment-result-dialog__strata-title">
+              {{ result.strataTitle || result.strataCode || 'Evaluación' }}
+            </h3>
+            <app-status-badge
+              [label]="result.severity || 'Completado'"
+              [variant]="getSeverityVariant(result.severity)"
+            ></app-status-badge>
+          </div>
+        </div>
+      </section>
+
+      <!-- Clinical Risk Flags -->
+      @if (getFlags().length > 0) {
+        <section class="assessment-result-dialog__flags">
+          <div class="assessment-result-dialog__flag-header">
+            <mat-icon class="assessment-result-dialog__flag-icon">warning</mat-icon>
+            <h4>Alertas Clínicas Detectadas (NOM-004-SSA3-2012)</h4>
+          </div>
+          <div class="assessment-result-dialog__flag-list">
+            @for (flag of getFlags(); track flag.code || flag.title) {
+              <div
+                class="assessment-result-dialog__flag-item assessment-result-dialog__flag-item--{{
+                  (flag.severity || 'warning').toLowerCase()
+                }}"
+              >
+                <strong>{{ flag.title || flag.code }}:</strong>
+                {{ flag.message || flag.description }}
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Subscales Breakdown -->
+      @if (getSubscales().length > 0) {
+        <section class="assessment-result-dialog__subscales">
+          <h4>Desglose por Subescalas / Dimensiones</h4>
+          <div class="assessment-result-dialog__subscale-grid">
+            @for (sub of getSubscales(); track sub.scaleCode) {
+              <div class="assessment-result-dialog__subscale-card">
+                <span class="assessment-result-dialog__subscale-name">{{
+                  sub.scaleName || sub.scaleCode
+                }}</span>
+                <span class="assessment-result-dialog__subscale-score">{{ sub.rawScore }} pts</span>
+                @if (sub.strataTitle) {
+                  <span class="assessment-result-dialog__subscale-strata">{{ sub.strataTitle }}</span>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Item Responses Table -->
+      @if (administration.responses && administration.responses.length > 0) {
+        <section class="assessment-result-dialog__responses">
+          <h4>Reactivos y Respuestas Registradas</h4>
+          <div class="assessment-result-dialog__table-wrapper">
+            <table class="assessment-result-dialog__table">
+              <thead>
+                <tr>
+                  <th>Ítem</th>
+                  <th>Respuesta</th>
+                  <th>Ponderación</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (resp of administration.responses; track resp.id || resp.itemCode) {
+                  <tr>
+                    <td>
+                      <code>{{ resp.itemCode }}</code>
+                    </td>
+                    <td>{{ resp.responseValue }}</td>
+                    <td>
+                      {{
+                        resp.numericWeight !== null && resp.numericWeight !== undefined
+                          ? resp.numericWeight
+                          : '-'
+                      }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+    } @else {
+      <div class="assessment-result-dialog__no-result">
+        <mat-icon>pending_actions</mat-icon>
+        <p>Esta evaluación aún no ha sido completada o está en proceso.</p>
+      </div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="assessment-result-dialog__actions">
+    <button mat-button type="button" (click)="print()">
+      <mat-icon>print</mat-icon>
+      <span>Imprimir</span>
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="close()">Cerrar</button>
+  </mat-dialog-actions>
+</div>

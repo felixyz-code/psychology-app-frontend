@@ -1,11 +1,16 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
-import { AuditLogEntry } from '../../models/audit-log.models';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { AuditLogEntry, AuditSeverity } from '../../models/audit-log.models';
+import {
+  AuditActionLabelPipe,
+  AuditResourceLabelPipe,
+} from '../../pipes/audit-format.pipes';
 
 @Component({
   selector: 'app-audit-log-detail-dialog',
@@ -17,10 +22,13 @@ import { AuditLogEntry } from '../../models/audit-log.models';
     MatIconModule,
     MatChipsModule,
     MatDividerModule,
+    MatTooltipModule,
+    AuditResourceLabelPipe,
+    AuditActionLabelPipe,
   ],
   template: `
-    <div class="audit-detail-container">
-      <div class="dialog-header">
+    <div class="audit-dialog">
+      <div class="audit-dialog__header">
         <div class="header-title">
           <mat-icon class="header-icon">policy</mat-icon>
           <div>
@@ -33,7 +41,7 @@ import { AuditLogEntry } from '../../models/audit-log.models';
         </button>
       </div>
 
-      <mat-dialog-content class="dialog-body">
+      <div class="audit-dialog__content">
         <!-- Overview Grid -->
         <div class="grid-section">
           <div class="info-card">
@@ -42,15 +50,24 @@ import { AuditLogEntry } from '../../models/audit-log.models';
           </div>
 
           <div class="info-card">
+            <span class="info-label">Nivel de Severidad</span>
+            <span class="severity-badge" [ngClass]="getSeverityClass(data.severity)">
+              {{ data.severity || 'INFO' }}
+            </span>
+          </div>
+
+          <div class="info-card">
             <span class="info-label">Acción Forense</span>
             <span class="action-chip" [ngClass]="getActionClass(data.action)">{{
-              data.action
+              data.action | auditActionLabel
             }}</span>
+            <span class="raw-code" *ngIf="data.action">{{ data.action }}</span>
           </div>
 
           <div class="info-card">
             <span class="info-label">Tipo de Recurso</span>
-            <span class="info-value font-mono">{{ data.resourceType }}</span>
+            <span class="info-value font-semibold">{{ data.resourceType | auditResourceLabel }}</span>
+            <span class="raw-code" *ngIf="data.resourceType">{{ data.resourceType }}</span>
           </div>
 
           <div class="info-card">
@@ -106,7 +123,7 @@ import { AuditLogEntry } from '../../models/audit-log.models';
               [class.text-success]="(data.statusCode || 200) < 400"
               [class.text-danger]="(data.statusCode || 200) >= 400"
             >
-              {{ data.statusCode || 200 }}
+              HTTP {{ data.statusCode || 200 }}
             </span>
           </div>
 
@@ -124,6 +141,15 @@ import { AuditLogEntry } from '../../models/audit-log.models';
             <mat-icon>data_object</mat-icon>
             <h3>Metadata y Parámetros Auditados</h3>
             <span class="compliance-pill">Sanitizado para NOM-004 / HIPAA</span>
+            <button
+              *ngIf="data.details && hasKeys(data.details)"
+              mat-stroked-button
+              class="copy-btn"
+              (click)="copyPayload()"
+            >
+              <mat-icon>{{ copiedSignal() ? 'check' : 'content_copy' }}</mat-icon>
+              {{ copiedSignal() ? '¡Copiado!' : 'Copiar JSON' }}
+            </button>
           </div>
 
           <pre class="json-payload" *ngIf="data.details && hasKeys(data.details); else noDetails">{{
@@ -135,24 +161,49 @@ import { AuditLogEntry } from '../../models/audit-log.models';
             </div>
           </ng-template>
         </div>
-      </mat-dialog-content>
+      </div>
 
-      <mat-dialog-actions align="end" class="dialog-footer">
+      <div class="audit-dialog__actions">
         <button mat-button mat-dialog-close>Cerrar</button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
   styles: [
     `
-      .audit-detail-container {
-        padding: 8px 16px 16px 16px;
-        max-width: 680px;
-      }
-      .dialog-header {
+      .audit-dialog {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
+        flex-direction: column;
+        max-height: 85vh;
+        padding: 1.5rem;
+        box-sizing: border-box;
+        overflow: hidden;
+
+        &__header {
+          flex-shrink: 0;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          margin-bottom: 1.25rem;
+        }
+
+        &__content {
+          flex: 1 1 auto;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding-right: 4px;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        &__actions,
+        mat-dialog-actions {
+          flex-shrink: 0;
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 1rem;
+          padding: 0;
+        }
       }
       .header-title {
         display: flex;
@@ -204,8 +255,52 @@ import { AuditLogEntry } from '../../models/audit-log.models';
         font-size: 13px;
         color: #212529;
       }
+      .font-semibold {
+        font-weight: 600;
+      }
       .font-mono {
         font-family: monospace;
+      }
+      .raw-code {
+        font-size: 10px;
+        color: #94a3b8;
+        font-family: monospace;
+        margin-top: 2px;
+      }
+      .severity-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        width: fit-content;
+      }
+      .severity-badge.critical {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+      }
+      .severity-badge.high {
+        background: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffe0b2;
+      }
+      .severity-badge.medium {
+        background: #fffde7;
+        color: #f57f17;
+        border: 1px solid #fff59d;
+      }
+      .severity-badge.low {
+        background: #e3f2fd;
+        color: #1565c0;
+        border: 1px solid #bbdefb;
+      }
+      .severity-badge.info {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
       }
       .actor-info,
       .branch-info {
@@ -283,6 +378,7 @@ import { AuditLogEntry } from '../../models/audit-log.models';
         align-items: center;
         gap: 8px;
         margin-bottom: 8px;
+        flex-wrap: wrap;
       }
       .details-header h3 {
         margin: 0;
@@ -296,7 +392,19 @@ import { AuditLogEntry } from '../../models/audit-log.models';
         color: #2e7d32;
         border-radius: 10px;
         font-weight: 600;
+      }
+      .copy-btn {
         margin-left: auto;
+        font-size: 11px;
+        height: 28px;
+        line-height: 28px;
+        padding: 0 8px;
+      }
+      .copy-btn mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        margin-right: 4px;
       }
       .json-payload {
         background: #1e1e1e;
@@ -352,6 +460,7 @@ import { AuditLogEntry } from '../../models/audit-log.models';
 export class AuditLogDetailDialogComponent {
   readonly data = inject<AuditLogEntry>(MAT_DIALOG_DATA);
   readonly dialogRef = inject(MatDialogRef<AuditLogDetailDialogComponent>);
+  readonly copiedSignal = signal<boolean>(false);
 
   get formattedDetails(): string {
     try {
@@ -363,6 +472,30 @@ export class AuditLogDetailDialogComponent {
 
   hasKeys(obj: any): boolean {
     return obj && typeof obj === 'object' && Object.keys(obj).length > 0;
+  }
+
+  copyPayload(): void {
+    if (!this.data.details) return;
+    navigator.clipboard.writeText(this.formattedDetails).then(() => {
+      this.copiedSignal.set(true);
+      setTimeout(() => this.copiedSignal.set(false), 2000);
+    });
+  }
+
+  getSeverityClass(severity?: AuditSeverity): string {
+    switch (severity) {
+      case 'CRITICAL':
+        return 'critical';
+      case 'HIGH':
+        return 'high';
+      case 'MEDIUM':
+        return 'medium';
+      case 'LOW':
+        return 'low';
+      case 'INFO':
+      default:
+        return 'info';
+    }
   }
 
   getActionClass(action: string): string {

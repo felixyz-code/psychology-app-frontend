@@ -92,7 +92,16 @@ export class OrganizationConfigurationStore {
       });
   }
 
-  saveBranding(value: string | null): void {
+  saveBranding(
+    input:
+      | string
+      | null
+      | {
+          visualName?: string | null;
+          primaryColor: string | null;
+          accentColor?: string | null;
+        },
+  ): void {
     const scope = this.scope();
     const canonical = this.branding();
     if (
@@ -103,22 +112,68 @@ export class OrganizationConfigurationStore {
       this.brandingSaving()
     )
       return;
-    const normalized = value === null ? null : canonicalOrganizationBrandColor(value);
-    if (value !== null && !normalized) {
-      this.brandingError.set('Usa un color hexadecimal #RRGGBB con contraste suficiente.');
+
+    const data =
+      typeof input === 'string' || input === null
+        ? {
+            visualName: canonical.visualName,
+            primaryColor: input,
+            accentColor: canonical.accentColor,
+          }
+        : {
+            visualName:
+              input.visualName !== undefined ? input.visualName : canonical.visualName,
+            primaryColor: input.primaryColor,
+            accentColor:
+              input.accentColor !== undefined ? input.accentColor : canonical.accentColor,
+          };
+
+    const normalizedPrimary =
+      data.primaryColor === null ? null : canonicalOrganizationBrandColor(data.primaryColor);
+    if (data.primaryColor !== null && !normalizedPrimary) {
+      this.brandingError.set('Usa un color primario hexadecimal #RRGGBB con contraste suficiente.');
       return;
     }
-    if (canonical.primaryColor === normalized) return;
+
+    const normalizedAccent =
+      data.accentColor === null || data.accentColor === undefined
+        ? null
+        : canonicalOrganizationBrandColor(data.accentColor);
+    if (data.accentColor !== null && data.accentColor !== undefined && !normalizedAccent) {
+      this.brandingError.set('Usa un color de acento hexadecimal #RRGGBB con contraste suficiente.');
+      return;
+    }
+
+    const normalizedVisualName =
+      data.visualName && data.visualName.trim().length > 0
+        ? data.visualName.trim()
+        : null;
+
+    if (
+      canonical.primaryColor === normalizedPrimary &&
+      canonical.accentColor === normalizedAccent &&
+      canonical.visualName === normalizedVisualName
+    ) {
+      return;
+    }
+
     this.brandingSaving.set(true);
     this.brandingError.set('');
     this.brandingSuccess.set('');
     this.api
-      .updateBranding(scope.organizationId, this.brandingRequest(canonical, normalized))
+      .updateBranding(
+        scope.organizationId,
+        this.brandingRequest(canonical, {
+          visualName: normalizedVisualName,
+          primaryColor: normalizedPrimary,
+          accentColor: normalizedAccent,
+        }),
+      )
       .subscribe({
         next: (response) => {
           if (this.current(scope)) {
             this.applyBranding(response, scope);
-            this.brandingSuccess.set('El acento de la organización se actualizó.');
+            this.brandingSuccess.set('La identidad visual de la organización se actualizó.');
             this.brandingSaving.set(false);
           }
         },
@@ -248,12 +303,18 @@ export class OrganizationConfigurationStore {
   private applyBranding(value: OrganizationBrandingResponse, scope: Scope): void {
     this.branding.set(value);
     this.brandingOwner.set(this.canonicalScope(scope));
-    this.applyAccent(value.primaryColor);
+    this.applyAccent(value.primaryColor, value.accentColor);
   }
-  private applyAccent(value: string | null): void {
+  private applyAccent(primaryColor: string | null, accentColor?: string | null): void {
+    const safePrimary = canonicalOrganizationBrandColor(primaryColor);
+    const safeAccent = canonicalOrganizationBrandColor(accentColor ?? null);
+    document.documentElement.style.setProperty(
+      '--app-org-brand-primary',
+      safePrimary ?? PLATFORM_ORGANIZATION_BRAND_ACCENT,
+    );
     document.documentElement.style.setProperty(
       '--app-org-brand-accent',
-      canonicalOrganizationBrandColor(value) ?? PLATFORM_ORGANIZATION_BRAND_ACCENT,
+      safeAccent ?? safePrimary ?? PLATFORM_ORGANIZATION_BRAND_ACCENT,
     );
   }
   private reset(): void {
@@ -270,7 +331,7 @@ export class OrganizationConfigurationStore {
     this.brandingSaving.set(false);
     this.settingsSuccess.set('');
     this.brandingSuccess.set('');
-    this.applyAccent(null);
+    this.applyAccent(null, null);
   }
   private scope(): Scope | null {
     const organizationId = this.tenant.selectedOrganizationId();
@@ -301,11 +362,20 @@ export class OrganizationConfigurationStore {
   }
   private brandingRequest(
     c: OrganizationBrandingResponse,
-    value: string | null,
+    branding: {
+      visualName?: string | null;
+      primaryColor: string | null;
+      accentColor?: string | null;
+    },
   ): OrganizationBrandingUpdateRequest {
+    const payload = {
+      visualName: branding.visualName ?? null,
+      primaryColor: branding.primaryColor,
+      accentColor: branding.accentColor ?? null,
+    };
     return c.rowState === 'ABSENT'
-      ? { primaryColor: value, expectedRowState: 'ABSENT' }
-      : { primaryColor: value, expectedUpdatedAt: c.updatedAt! };
+      ? { ...payload, expectedRowState: 'ABSENT' }
+      : { ...payload, expectedUpdatedAt: c.updatedAt! };
   }
 }
 

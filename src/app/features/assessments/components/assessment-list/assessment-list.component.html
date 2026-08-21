@@ -1,0 +1,155 @@
+<app-section-card
+  title="Evaluaciones Psicométricas"
+  subtitle="Instrumentos administrados, escalas diagnósticas y seguimiento psicométrico del paciente."
+>
+  <div sectionCardActions class="assessment-list__header-actions">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      class="assessment-list__assign-button"
+      (click)="openAssignDialog()"
+    >
+      <mat-icon>add_task</mat-icon>
+      <span>Nueva Evaluación</span>
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="assessment-list__loading" aria-live="polite">
+      <mat-spinner diameter="24"></mat-spinner>
+      <span>Cargando evaluaciones psicométricas...</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="assessment-list__alert assessment-list__alert--error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  } @else if (assessments().length === 0) {
+    <div class="assessment-list__empty">
+      <mat-icon class="assessment-list__empty-icon">quiz</mat-icon>
+      <h4>Sin evaluaciones psicométricas</h4>
+      <p>No se han asignado instrumentos psicométricos a este paciente todavía.</p>
+      <button mat-stroked-button color="primary" type="button" (click)="openAssignDialog()">
+        <mat-icon>add</mat-icon>
+        <span>Asignar Primera Evaluación</span>
+      </button>
+    </div>
+  } @else {
+    <div class="assessment-list__table-container">
+      <table mat-table [dataSource]="assessments()" class="assessment-list__table">
+        <!-- Instrument Column -->
+        <ng-container matColumnDef="instrument">
+          <th mat-header-cell *matHeaderCellDef>Instrumento</th>
+          <td mat-cell *matCellDef="let admin">
+            <div class="assessment-list__instrument-cell">
+              <strong>{{ admin.instrumentVersion?.instrument?.code || 'Test' }}</strong>
+              <span>{{ admin.instrumentVersion?.instrument?.name }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let admin">
+            <app-status-badge
+              [label]="getStatusLabel(admin.status)"
+              [variant]="getStatusVariant(admin.status)"
+            ></app-status-badge>
+          </td>
+        </ng-container>
+
+        <!-- Score & Severity Column -->
+        <ng-container matColumnDef="score">
+          <th mat-header-cell *matHeaderCellDef>Resultado / Severidad</th>
+          <td mat-cell *matCellDef="let admin">
+            @if (admin.result) {
+              <div class="assessment-list__score-cell">
+                <span class="assessment-list__score-badge">{{ admin.result.rawScore }} pts</span>
+                <app-status-badge
+                  [label]="admin.result.strataTitle || admin.result.severity || 'Resultado'"
+                  [variant]="getSeverityVariant(admin.result.severity)"
+                ></app-status-badge>
+                @if (hasRiskFlags(admin)) {
+                  <span class="assessment-list__risk-badge" matTooltip="Alerta clínica detectada en reactivos críticos (NOM-004-SSA3-2012)">
+                    <mat-icon class="assessment-list__risk-icon">warning</mat-icon>
+                    <span>{{ getRiskAlertsCount(admin) === 1 ? '1 Alerta' : (getRiskAlertsCount(admin) + ' Alertas') }}</span>
+                  </span>
+                }
+              </div>
+            } @else {
+              <span class="assessment-list__pending">-</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Assigned Date Column -->
+        <ng-container matColumnDef="assignedAt">
+          <th mat-header-cell *matHeaderCellDef>Asignada</th>
+          <td mat-cell *matCellDef="let admin">
+            {{ admin.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <!-- Completed Date Column -->
+        <ng-container matColumnDef="completedAt">
+          <th mat-header-cell *matHeaderCellDef>Finalizada</th>
+          <td mat-cell *matCellDef="let admin">
+            {{ (admin.completedAt | date: 'dd/MM/yyyy HH:mm') || 'Pendiente' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let admin">
+            <div class="assessment-list__actions-cell">
+              @if (admin.status === 'COMPLETED') {
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  type="button"
+                  (click)="openResultDialog(admin)"
+                >
+                  <mat-icon>visibility</mat-icon>
+                  <span>Resultados</span>
+                </button>
+              } @else if (admin.status === 'ASSIGNED' || admin.status === 'IN_PROGRESS') {
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Copiar enlace remoto para paciente"
+                  (click)="copyRunnerLink(admin)"
+                >
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  matTooltip="Llenar prueba en consultorio"
+                  (click)="openRunnerTab(admin)"
+                >
+                  <mat-icon>play_arrow</mat-icon>
+                  <span>Aplicar</span>
+                </button>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  }
+</app-section-card>
+
+@if (patientId) {
+  <div style="margin-top: 2rem;">
+    <app-assessment-longitudinal
+      [patientId]="patientId"
+      [patientName]="patientName"
+    ></app-assessment-longitudinal>
+  </div>
+}

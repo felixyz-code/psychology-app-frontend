@@ -1,0 +1,172 @@
+<div class="manager-container">
+  <div mat-dialog-title class="dialog-header">
+    <div class="header-icon">
+      <mat-icon>event_busy</mat-icon>
+    </div>
+    <div class="header-content">
+      <h2>Gestión de Bloqueos de Horario</h2>
+      <p class="subtitle">Bloquee franjas horarias por descansos, capacitaciones o eventos clínicos</p>
+    </div>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <div *ngIf="errorMessage()" class="alert-banner alert-danger">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+
+    <div *ngIf="successMessage()" class="alert-banner alert-success">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
+
+    <div class="toolbar-section">
+      <button
+        type="button"
+        mat-flat-button
+        color="primary"
+        (click)="toggleCreateForm()"
+      >
+        <mat-icon>{{ showCreateForm() ? 'expand_less' : 'add' }}</mat-icon>
+        <span>{{ showCreateForm() ? 'Ocultar formulario' : 'Nuevo bloqueo de horario' }}</span>
+      </button>
+    </div>
+
+    <!-- Collapsible Creation Form -->
+    <div *ngIf="showCreateForm()" class="create-form-container">
+      <h3>Crear nuevo bloqueo</h3>
+      <form [formGroup]="blockForm" (ngSubmit)="createBlock()" class="block-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Título del bloqueo</mat-label>
+            <input matInput formControlName="title" placeholder="Ej. Capacitación NOM-004, Vacaciones" />
+            <mat-error *ngIf="blockForm.controls.title.hasError('required')">
+              El título es obligatorio.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row dates-row">
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Inicio</mat-label>
+            <input matInput type="datetime-local" formControlName="startTime" />
+            <mat-error *ngIf="blockForm.controls.startTime.hasError('required')">
+              La fecha y hora de inicio son obligatorias.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Fin</mat-label>
+            <input matInput type="datetime-local" formControlName="endTime" />
+            <mat-error *ngIf="blockForm.controls.endTime.hasError('required')">
+              La fecha y hora de fin son obligatorias.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Motivo o justificación (opcional)</mat-label>
+            <textarea
+              matInput
+              rows="2"
+              formControlName="reason"
+              placeholder="Detalles sobre el bloqueo de agenda"
+            ></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" mat-button (click)="toggleCreateForm()" [disabled]="isCreating()">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            mat-flat-button
+            color="primary"
+            [disabled]="blockForm.invalid || isCreating()"
+          >
+            <mat-spinner *ngIf="isCreating()" diameter="18" class="button-spinner"></mat-spinner>
+            <span *ngIf="!isCreating()">Crear Bloqueo</span>
+            <span *ngIf="isCreating()">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Blocks Table -->
+    <div class="blocks-table-container">
+      <div *ngIf="isLoading()" class="loading-state">
+        <mat-spinner diameter="32"></mat-spinner>
+        <span>Cargando bloqueos de horario...</span>
+      </div>
+
+      <div *ngIf="!isLoading() && blocks().length === 0" class="empty-state">
+        <mat-icon>event_available</mat-icon>
+        <p>No hay bloqueos de horario registrados actualmente.</p>
+      </div>
+
+      <table
+        mat-table
+        [dataSource]="blocks()"
+        *ngIf="!isLoading() && blocks().length > 0"
+        class="blocks-table"
+      >
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>Título</th>
+          <td mat-cell *matCellDef="let block" class="font-medium">
+            {{ block.title }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="startTime">
+          <th mat-header-cell *matHeaderCellDef>Desde</th>
+          <td mat-cell *matCellDef="let block">
+            {{ block.startTime | date: 'dd/MM/yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="endTime">
+          <th mat-header-cell *matHeaderCellDef>Hasta</th>
+          <td mat-cell *matCellDef="let block">
+            {{ block.endTime | date: 'dd/MM/yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="reason">
+          <th mat-header-cell *matHeaderCellDef>Motivo</th>
+          <td mat-cell *matCellDef="let block" class="reason-cell">
+            {{ block.reason || '-' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Acciones</th>
+          <td mat-cell *matCellDef="let block" class="text-right">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteBlock(block)"
+              [disabled]="deletingBlockId() === block.id"
+              matTooltip="Eliminar bloqueo"
+              [matTooltipShowDelay]="150"
+              aria-label="Eliminar bloqueo"
+            >
+              <mat-spinner *ngIf="deletingBlockId() === block.id" diameter="18"></mat-spinner>
+              <mat-icon *ngIf="deletingBlockId() !== block.id">delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button type="button" (click)="close()">
+      Cerrar
+    </button>
+  </mat-dialog-actions>
+</div>

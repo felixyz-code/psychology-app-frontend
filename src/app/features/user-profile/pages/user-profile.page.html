@@ -1,0 +1,523 @@
+<div class="profile-page">
+  <!-- Header Card / Avatar Section -->
+  <mat-card class="profile-page__header-card">
+    <div class="profile-page__header-content">
+      <div class="profile-page__avatar-wrapper">
+        @if (store.avatarUrl(); as avatarUrl) {
+          <img
+            [src]="avatarUrl"
+            class="profile-page__avatar-img"
+            alt="Foto de perfil"
+          />
+        } @else {
+          <div class="profile-page__avatar-placeholder" aria-hidden="true">
+            {{ userInitials() }}
+          </div>
+        }
+
+        <div class="profile-page__avatar-actions">
+          <input
+            #avatarInput
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            style="display: none;"
+            (change)="onAvatarFileSelected($event)"
+          />
+          <button
+            mat-mini-fab
+            color="primary"
+            type="button"
+            class="profile-page__avatar-btn-upload"
+            [disabled]="store.isUploadingAvatar()"
+            matTooltip="Cambiar foto de perfil"
+            (click)="avatarInput.click()"
+          >
+            <mat-icon>photo_camera</mat-icon>
+          </button>
+
+          @if (store.hasAvatar()) {
+            <button
+              mat-mini-fab
+              color="warn"
+              type="button"
+              class="profile-page__avatar-btn-remove"
+              [disabled]="store.isUploadingAvatar()"
+              matTooltip="Eliminar foto"
+              (click)="removeAvatar()"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="profile-page__identity">
+        <div class="profile-page__name-row">
+          <h1 class="profile-page__title">
+            {{ store.profile()?.professionalName || 'Mi Perfil Profesional' }}
+          </h1>
+          <span class="profile-page__role-badge">
+            {{ store.profile()?.role === 'ADMIN' ? 'Administrador' : 'Profesional de Salud Mental' }}
+          </span>
+        </div>
+        <p class="profile-page__email">{{ store.profile()?.email }}</p>
+        <p class="profile-page__meta">
+          <span>Cédula: {{ store.profile()?.licenseNumber || 'Sin registrar' }}</span>
+          <span class="profile-page__meta-dot">•</span>
+          <span>Especialidades: {{ store.profile()?.specialties?.length || 0 }} registradas</span>
+          <span class="profile-page__meta-dot">•</span>
+          <span>Zona: {{ store.preferences()?.timeZone || 'America/Mexico_City' }}</span>
+        </p>
+      </div>
+    </div>
+  </mat-card>
+
+  @if (successMessage()) {
+    <div class="alert alert--success" role="status">
+      <mat-icon class="alert__icon">check_circle</mat-icon>
+      <div class="alert__content">{{ successMessage() }}</div>
+    </div>
+  }
+
+  @if (store.errorMessage() || store.preferencesError() || avatarError()) {
+    <div class="alert alert--danger" role="alert">
+      <mat-icon class="alert__icon">error_outline</mat-icon>
+      <div class="alert__content">
+        {{ store.errorMessage() || store.preferencesError() || avatarError() }}
+      </div>
+    </div>
+  }
+
+  <!-- Tabbed Navigation Container -->
+  <mat-tab-group class="profile-page__tabs" animationDuration="200ms">
+    
+    <!-- Tab 1: Datos Profesionales y Firma -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="profile-page__tab-icon">badge</mat-icon>
+        <span>Perfil Profesional</span>
+      </ng-template>
+
+      <div class="profile-page__tab-body">
+        <!-- Professional Information Form -->
+        <mat-card class="profile-page__card">
+          <mat-card-header class="profile-page__card-header">
+            <div class="profile-page__card-title-group">
+              <mat-icon class="profile-page__card-icon">assignment_ind</mat-icon>
+              <div>
+                <h2 mat-card-title>Datos Profesionales y Colegiados</h2>
+                <mat-card-subtitle>
+                  Información que aparecerá en tus expedientes, notas y reportes clínicos emitidos.
+                </mat-card-subtitle>
+              </div>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content class="profile-page__card-body">
+            <form [formGroup]="profileForm" (ngSubmit)="submitProfile()" class="profile-form">
+              <div class="profile-form__grid-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nombre profesional completo</mat-label>
+                  <input
+                    matInput
+                    formControlName="professionalName"
+                    placeholder="Ej. Lic. / Mtro. / Dr. Juan Pérez"
+                  />
+                  <mat-hint>Título y nombre tal como deseas que figure en reportes.</mat-hint>
+                  @if (profileForm.get('professionalName')?.hasError('required')) {
+                    <mat-error>El nombre profesional es obligatorio.</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Cédula profesional / Licencia</mat-label>
+                  <input
+                    matInput
+                    formControlName="licenseNumber"
+                    placeholder="Ej. 12345678"
+                  />
+                  <mat-hint>Cédula legal o registro oficial de ejercicio profesional.</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <div class="profile-form__grid-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Teléfono de contacto profesional</mat-label>
+                  <input
+                    matInput
+                    formControlName="phone"
+                    placeholder="Ej. +52 55 1234 5678"
+                  />
+                  <mat-hint>Teléfono visible para citas y contacto clínico.</mat-hint>
+                </mat-form-field>
+
+                <div class="profile-form__specialties-container">
+                  <mat-form-field appearance="outline" class="profile-form__chips-field">
+                    <mat-label>Especialidades y Enfoques Terapéuticos</mat-label>
+                    <mat-chip-grid #chipGrid aria-label="Especialidades">
+                      @for (spec of specialties(); track spec) {
+                        <mat-chip-row (removed)="removeSpecialty(spec)">
+                          {{ spec }}
+                          <button matChipRemove [attr.aria-label]="'Remover ' + spec">
+                            <mat-icon>cancel</mat-icon>
+                          </button>
+                        </mat-chip-row>
+                      }
+                      <input
+                        placeholder="Escribe y presiona Enter..."
+                        [matChipInputFor]="chipGrid"
+                        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                        (matChipInputTokenEnd)="addSpecialty($event)"
+                      />
+                    </mat-chip-grid>
+                    <mat-hint>Presiona Enter o coma para añadir una especialidad.</mat-hint>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- Sugerencias rápidas de especialidades -->
+              <div class="profile-form__suggestions">
+                <span class="profile-form__suggestions-label">Sugerencias rápidas:</span>
+                <div class="profile-form__suggestions-chips">
+                  <button
+                    type="button"
+                    class="profile-form__suggestion-btn"
+                    (click)="addSuggestedSpecialty('Terapia Cognitivo-Conductual')"
+                  >
+                    + TCC
+                  </button>
+                  <button
+                    type="button"
+                    class="profile-form__suggestion-btn"
+                    (click)="addSuggestedSpecialty('Psicología Clínica')"
+                  >
+                    + Psicología Clínica
+                  </button>
+                  <button
+                    type="button"
+                    class="profile-form__suggestion-btn"
+                    (click)="addSuggestedSpecialty('Neuropsicología')"
+                  >
+                    + Neuropsicología
+                  </button>
+                  <button
+                    type="button"
+                    class="profile-form__suggestion-btn"
+                    (click)="addSuggestedSpecialty('Psicoterapia Infantil')"
+                  >
+                    + Infantil
+                  </button>
+                  <button
+                    type="button"
+                    class="profile-form__suggestion-btn"
+                    (click)="addSuggestedSpecialty('Terapia Familiar y Pareja')"
+                  >
+                    + Pareja y Familia
+                  </button>
+                </div>
+              </div>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Semblanza profesional / Resumen curricular</mat-label>
+                <textarea
+                  matInput
+                  rows="4"
+                  formControlName="bio"
+                  placeholder="Describe tu trayectoria, enfoques y experiencia clínica..."
+                ></textarea>
+                <mat-hint align="end">{{ profileForm.get('bio')?.value?.length || 0 }} / 2000</mat-hint>
+              </mat-form-field>
+
+              <div class="profile-form__submit-row">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="submit"
+                  class="profile-form__btn-submit"
+                  [disabled]="store.isSaving()"
+                >
+                  @if (store.isSaving()) {
+                    <ng-container>
+                      <mat-spinner diameter="18" />
+                      <span>Guardando...</span>
+                    </ng-container>
+                  } @else {
+                    <ng-container>
+                      <mat-icon>save</mat-icon>
+                      <span>Guardar datos profesionales</span>
+                    </ng-container>
+                  }
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Digital Signature Card -->
+        <mat-card class="profile-page__card">
+          <mat-card-content class="profile-page__card-body">
+            <app-digital-signature-pad />
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Tab 2: Localización y Horarios -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="profile-page__tab-icon">schedule</mat-icon>
+        <span>Zona Horaria y Localización</span>
+      </ng-template>
+
+      <div class="profile-page__tab-body">
+        <mat-card class="profile-page__card">
+          <mat-card-header class="profile-page__card-header">
+            <div class="profile-page__card-title-group">
+              <mat-icon class="profile-page__card-icon">public</mat-icon>
+              <div>
+                <h2 mat-card-title>Configuración de Zona Horaria y Región</h2>
+                <mat-card-subtitle>
+                  Define tu zona horaria para la sincronización de citas, calendario y formato de fecha y hora.
+                </mat-card-subtitle>
+              </div>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content class="profile-page__card-body">
+            <form [formGroup]="localizationForm" (ngSubmit)="submitLocalization()" class="profile-form">
+              
+              <!-- Zona Horaria con auto-detección -->
+              <div class="profile-form__tz-row">
+                <mat-form-field appearance="outline" class="profile-form__tz-field">
+                  <mat-label>Zona Horaria Canónica (IANA)</mat-label>
+                  <mat-select formControlName="timeZone">
+                    @for (tz of timezonesList; track tz) {
+                      <mat-option [value]="tz">{{ tz }}</mat-option>
+                    }
+                  </mat-select>
+                  <mat-hint>Zona horaria aplicada para tus agendas, citas y marcas temporales.</mat-hint>
+                </mat-form-field>
+
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  type="button"
+                  class="profile-form__btn-detect-tz"
+                  (click)="detectBrowserTimeZone()"
+                  matTooltip="Consultar zona horaria detectada por tu navegador web"
+                >
+                  <mat-icon>my_location</mat-icon>
+                  <span>Detectar automáticamente</span>
+                </button>
+              </div>
+
+              <div class="profile-form__grid-2">
+                <!-- Formato de Hora -->
+                <mat-form-field appearance="outline">
+                  <mat-label>Formato de Hora</mat-label>
+                  <mat-select formControlName="timeFormat">
+                    <mat-option value="TWELVE_HOUR">12 Horas (ej. 02:30 PM)</mat-option>
+                    <mat-option value="TWENTY_FOUR_HOUR">24 Horas (ej. 14:30)</mat-option>
+                  </mat-select>
+                  <mat-hint>Visualización en agendas clínicas y reportes.</mat-hint>
+                </mat-form-field>
+
+                <!-- Formato de Fecha -->
+                <mat-form-field appearance="outline">
+                  <mat-label>Formato de Fecha</mat-label>
+                  <mat-select formControlName="dateFormat">
+                    <mat-option value="DD_MM_YYYY">DD/MM/YYYY (ej. 19/08/2026)</mat-option>
+                    <mat-option value="YYYY_MM_DD">YYYY-MM-DD (ISO 8601)</mat-option>
+                    <mat-option value="MM_DD_YYYY">MM/DD/YYYY (EE. UU.)</mat-option>
+                  </mat-select>
+                  <mat-hint>Formato aplicado en tablas y expedientes clínicos.</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <div class="profile-form__grid-2">
+                <!-- Idioma y Locale -->
+                <mat-form-field appearance="outline">
+                  <mat-label>Idioma y Configuración Regional</mat-label>
+                  <mat-select formControlName="locale">
+                    @for (loc of localesList; track loc.code) {
+                      <mat-option [value]="loc.code">
+                        {{ loc.flag }} {{ loc.label }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  <mat-hint>Idioma predeterminado para formatos numéricos y calendarios.</mat-hint>
+                </mat-form-field>
+
+                <!-- Primer día de la semana -->
+                <mat-form-field appearance="outline">
+                  <mat-label>Primer día de la semana</mat-label>
+                  <mat-select formControlName="weekStartsOn">
+                    <mat-option [value]="1">Lunes (Estándar clínico)</mat-option>
+                    <mat-option [value]="0">Domingo</mat-option>
+                  </mat-select>
+                  <mat-hint>Alineación inicial en la vista de calendario y citas.</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <div class="profile-form__submit-row">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="submit"
+                  class="profile-form__btn-submit"
+                  [disabled]="store.isSavingPreferences()"
+                >
+                  @if (store.isSavingPreferences()) {
+                    <ng-container>
+                      <mat-spinner diameter="18" />
+                      <span>Guardando...</span>
+                    </ng-container>
+                  } @else {
+                    <ng-container>
+                      <mat-icon>save</mat-icon>
+                      <span>Guardar preferencias de localización</span>
+                    </ng-container>
+                  }
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Tab 3: Notificaciones y Recordatorios -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="profile-page__tab-icon">notifications</mat-icon>
+        <span>Notificaciones</span>
+      </ng-template>
+
+      <div class="profile-page__tab-body">
+        <mat-card class="profile-page__card">
+          <mat-card-header class="profile-page__card-header">
+            <div class="profile-page__card-title-group">
+              <mat-icon class="profile-page__card-icon">tune</mat-icon>
+              <div>
+                <h2 mat-card-title>Canales de Notificación y Recordatorios</h2>
+                <mat-card-subtitle>
+                  Personaliza cómo y cuándo recibir alertas sobre citas, sesiones y actividad clínica.
+                </mat-card-subtitle>
+              </div>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content class="profile-page__card-body">
+            <form [formGroup]="notificationsForm" (ngSubmit)="submitNotifications()" class="profile-form">
+              
+              <div class="profile-form__toggles-list">
+                <!-- Toggle Correo Electrónico -->
+                <div class="profile-form__toggle-item">
+                  <div class="profile-form__toggle-info">
+                    <span class="profile-form__toggle-title">Notificaciones por Correo Electrónico</span>
+                    <span class="profile-form__toggle-desc">
+                      Recibir correos sobre cambios en citas, asignación de pacientes e invitaciones.
+                    </span>
+                  </div>
+                  <mat-slide-toggle
+                    formControlName="emailNotifications"
+                    color="primary"
+                    aria-label="Activar notificaciones por correo"
+                  />
+                </div>
+
+                <mat-divider />
+
+                <!-- Toggle Notificaciones In-App -->
+                <div class="profile-form__toggle-item">
+                  <div class="profile-form__toggle-info">
+                    <span class="profile-form__toggle-title">Notificaciones en el Sistema (In-App)</span>
+                    <span class="profile-form__toggle-desc">
+                      Mostrar alertas y avisos en el panel de notificaciones dentro de PsiqueOS.
+                    </span>
+                  </div>
+                  <mat-slide-toggle
+                    formControlName="inAppNotifications"
+                    color="primary"
+                    aria-label="Activar notificaciones en la app"
+                  />
+                </div>
+
+                <mat-divider />
+
+                <!-- Toggle Recordatorios de Citas -->
+                <div class="profile-form__toggle-item">
+                  <div class="profile-form__toggle-info">
+                    <span class="profile-form__toggle-title">Recordatorios Automáticos de Citas</span>
+                    <span class="profile-form__toggle-desc">
+                      Avisos de proximidad de consulta médica o sesión psicoterapéutica programada.
+                    </span>
+                  </div>
+                  <mat-slide-toggle
+                    formControlName="appointmentReminders"
+                    color="primary"
+                    aria-label="Activar recordatorios de citas"
+                  />
+                </div>
+
+                <!-- Select Anticipación de Recordatorios -->
+                @if (notificationsForm.get('appointmentReminders')?.value) {
+                  <div class="profile-form__reminder-select">
+                    <mat-form-field appearance="outline" class="profile-form__full-width">
+                      <mat-label>Anticipación del Recordatorio</mat-label>
+                      <mat-select formControlName="reminderAdvanceMinutes">
+                        @for (opt of reminderOptions; track opt.value) {
+                          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-hint>Tiempo de antelación con el que se enviará el recordatorio previo a la sesión.</mat-hint>
+                    </mat-form-field>
+                  </div>
+                }
+
+                <mat-divider />
+
+                <!-- Toggle Resumen de Sesiones -->
+                <div class="profile-form__toggle-item">
+                  <div class="profile-form__toggle-info">
+                    <span class="profile-form__toggle-title">Resumen Semanal de Actividad Clínica</span>
+                    <span class="profile-form__toggle-desc">
+                      Recibir un consolidado periódico con sesiones completadas, asistencias y notas pendientes.
+                    </span>
+                  </div>
+                  <mat-slide-toggle
+                    formControlName="sessionDigest"
+                    color="primary"
+                    aria-label="Activar resumen semanal de actividad"
+                  />
+                </div>
+              </div>
+
+              <div class="profile-form__submit-row">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="submit"
+                  class="profile-form__btn-submit"
+                  [disabled]="store.isSavingPreferences()"
+                >
+                  @if (store.isSavingPreferences()) {
+                    <ng-container>
+                      <mat-spinner diameter="18" />
+                      <span>Guardando...</span>
+                    </ng-container>
+                  } @else {
+                    <ng-container>
+                      <mat-icon>save</mat-icon>
+                      <span>Guardar preferencias de notificaciones</span>
+                    </ng-container>
+                  }
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
