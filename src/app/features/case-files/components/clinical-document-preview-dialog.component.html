@@ -18,7 +18,7 @@
     </button>
   </header>
 
-  <div class="clinical-preview-dialog__toolbar">
+  <div class="clinical-preview-dialog__toolbar clinical-preview-dialog__template-selector">
     <div class="clinical-preview-dialog__tabs" role="tablist" aria-label="Formatos de documento">
       @for (doc of documentTypes; track doc.type) {
         <button
@@ -51,7 +51,7 @@
     </div>
   }
 
-  <div class="preview-stage">
+  <div class="clinical-preview-dialog__viewer-container preview-stage">
     <div class="document-render-container" [innerHTML]="sanitizedHtml()"></div>
   </div>
 

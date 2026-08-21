@@ -1,0 +1,207 @@
+.case-file-attachments {
+  &__upload-box {
+    margin-bottom: 1.5rem;
+  }
+
+  &__hidden-input {
+    display: none;
+  }
+
+  &__dropzone {
+    border: 2px dashed var(--mat-sys-outline-variant, #cbd5e1);
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    background-color: var(--mat-sys-surface-container-lowest, #f8fafc);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    &:hover,
+    &--active {
+      border-color: var(--mat-sys-primary, #0284c7);
+      background-color: rgba(2, 132, 199, 0.04);
+    }
+
+    &--has-file {
+      border-style: solid;
+      border-color: var(--mat-sys-outline, #94a3b8);
+      background-color: #ffffff;
+      cursor: default;
+    }
+  }
+
+  &__dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  &__upload-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: var(--mat-sys-primary, #0284c7);
+  }
+
+  &__prompt {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--mat-sys-on-surface, #1e293b);
+
+    strong {
+      color: var(--mat-sys-primary, #0284c7);
+    }
+  }
+
+  &__hint {
+    font-size: 0.8125rem;
+    color: var(--mat-sys-outline, #64748b);
+  }
+
+  &__selected-file {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 500px;
+    padding: 0.75rem 1rem;
+    background: var(--mat-sys-surface-container-low, #f1f5f9);
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  &__file-icon {
+    color: var(--mat-sys-primary, #0284c7);
+  }
+
+  &__file-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    text-align: left;
+    overflow: hidden;
+
+    strong {
+      font-size: 0.875rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    span {
+      font-size: 0.75rem;
+      color: var(--mat-sys-outline, #64748b);
+    }
+  }
+
+  &__form {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--mat-sys-surface-container-low, #f8fafc);
+    border-radius: 8px;
+    border: 1px solid var(--mat-sys-outline-variant, #e2e8f0);
+  }
+
+  &__form-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__category-option,
+  &__selected-category-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
+  }
+
+  &__form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+
+    button {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      .mdc-button__label {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+      }
+
+      mat-icon {
+        font-size: 18px !important;
+        width: 18px !important;
+        height: 18px !important;
+        line-height: 18px !important;
+        margin: 0 !important;
+      }
+    }
+  }
+
+  &__feedback {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+
+    &--error {
+      background-color: #fef2f2;
+      color: #dc2626;
+    }
+
+    &--success {
+      background-color: #f0fdf4;
+      color: #16a34a;
+    }
+  }
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+    gap: 0.75rem;
+    color: var(--mat-sys-outline, #64748b);
+  }
+
+  &__name-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  &__file-title {
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface, #1e293b);
+  }
+
+  &__file-note {
+    font-size: 0.75rem;
+    color: var(--mat-sys-outline, #64748b);
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

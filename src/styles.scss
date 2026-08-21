@@ -5,9 +5,15 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
-html {
+html,
+body {
   height: 100%;
-  background: #f8fafc;
+  margin: 0;
+  padding: 0;
+  background-color: var(--mat-sys-surface, #f8fafc);
+}
+
+html {
   font-family: var(--app-font-family, 'Roboto', sans-serif);
   @include mat.theme(
     (
@@ -640,12 +646,24 @@ body.dark-theme .app-status-badge--no-show {
   max-height: 88vh !important;
 }
 
+.app-document-preview-panel,
+.app-clinical-preview-dialog-panel {
+  max-width: 960px !important;
+  width: 90vw !important;
+}
+
 .app-document-preview-panel .mat-mdc-dialog-container,
 .app-document-preview-panel .mat-mdc-dialog-inner-container,
 .app-document-preview-panel .mdc-dialog,
 .app-document-preview-panel .mdc-dialog__container,
 .app-document-preview-panel .mat-mdc-dialog-surface,
-.app-document-preview-panel .mdc-dialog__surface {
+.app-document-preview-panel .mdc-dialog__surface,
+.app-clinical-preview-dialog-panel .mat-mdc-dialog-container,
+.app-clinical-preview-dialog-panel .mat-mdc-dialog-inner-container,
+.app-clinical-preview-dialog-panel .mdc-dialog,
+.app-clinical-preview-dialog-panel .mdc-dialog__container,
+.app-clinical-preview-dialog-panel .mat-mdc-dialog-surface,
+.app-clinical-preview-dialog-panel .mdc-dialog__surface {
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -654,7 +672,8 @@ body.dark-theme .app-status-badge--no-show {
   overflow: hidden;
 }
 
-.app-document-preview-panel .mat-mdc-dialog-inner-container {
+.app-document-preview-panel .mat-mdc-dialog-inner-container,
+.app-clinical-preview-dialog-panel .mat-mdc-dialog-inner-container {
   padding: 0.5rem;
 }
 

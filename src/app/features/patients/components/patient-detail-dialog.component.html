@@ -120,6 +120,12 @@
             (triggered)="scrollToDocuments()"
           />
           <app-action-card
+            icon="attach_file"
+            label="Ver adjuntos"
+            [disabled]="!caseFile()"
+            (triggered)="scrollToAttachments()"
+          />
+          <app-action-card
             icon="picture_as_pdf"
             label="Documentos PDF"
             [disabled]="!caseFile()"
@@ -438,6 +444,13 @@
           uploadButtonLabel="Nuevo documento"
           (documentsLoaded)="documents.set($event)"
           (documentsChanged)="refreshWorkspaceData()"
+        />
+      </div>
+
+      <div #attachmentsSection>
+        <app-case-file-attachments
+          [caseFileId]="currentCaseFile.id"
+          (attachmentChanged)="refreshWorkspaceData()"
         />
       </div>
     }
