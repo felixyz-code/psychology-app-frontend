@@ -38,11 +38,11 @@
 
   @if (selectedDocType() === 'THERAPEUTIC_PRESCRIPTION') {
     <div class="clinical-preview-dialog__custom-editor">
-      <mat-form-field appearance="outline" class="clinical-preview-dialog__textarea">
+      <mat-form-field appearance="outline" class="clinical-preview-dialog__textarea" subscriptSizing="dynamic">
         <mat-label>Indicaciones y Prescripción Terapéutica (Editable)</mat-label>
         <textarea
           matInput
-          rows="3"
+          rows="2"
           [ngModel]="customIndications()"
           (ngModelChange)="customIndications.set($event)"
           placeholder="Escribe las indicaciones terapéuticas..."
