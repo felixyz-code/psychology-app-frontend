@@ -92,6 +92,84 @@ describe('AppointmentsService', () => {
     expect(request.request.method).toBe('DELETE');
     request.flush(null);
   });
+
+  it('posts reschedule appointment request', () => {
+    const payload = {
+      scheduledAt: '2026-08-25T15:00:00.000Z',
+      durationMinutes: 45,
+      reason: 'Paciente solicitó cambio',
+    };
+
+    service.rescheduleAppointment('appointment-1', payload).subscribe();
+
+    const request = httpTesting.expectOne('/api/appointments/appointment-1/reschedule');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(payload);
+    request.flush(createAppointment());
+  });
+
+  it('gets availability with query params', () => {
+    service
+      .getAvailability({
+        therapistId: 'therapist-1',
+        date: '2026-08-25',
+        durationMinutes: 60,
+        startHour: 8,
+        endHour: 18,
+      })
+      .subscribe();
+
+    const request = httpTesting.expectOne(
+      '/api/appointments/availability?therapistId=therapist-1&date=2026-08-25&durationMinutes=60&startHour=8&endHour=18',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush({
+      therapistId: 'therapist-1',
+      date: '2026-08-25',
+      slotDurationMinutes: 60,
+      slots: [],
+    });
+  });
+
+  it('gets schedule blocks with filters', () => {
+    service
+      .getScheduleBlocks({
+        therapistId: 'therapist-1',
+        startDate: '2026-08-01',
+        endDate: '2026-08-31',
+      })
+      .subscribe();
+
+    const request = httpTesting.expectOne(
+      '/api/schedule-blocks?therapistId=therapist-1&startDate=2026-08-01&endDate=2026-08-31',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
+
+  it('creates a schedule block', () => {
+    const payload = {
+      title: 'Capacitación',
+      reason: 'Curso',
+      startTime: '2026-08-25T14:00:00.000Z',
+      endTime: '2026-08-25T16:00:00.000Z',
+    };
+
+    service.createScheduleBlock(payload).subscribe();
+
+    const request = httpTesting.expectOne('/api/schedule-blocks');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(payload);
+    request.flush({ id: 'block-1', ...payload });
+  });
+
+  it('deletes a schedule block', () => {
+    service.deleteScheduleBlock('block-1').subscribe();
+
+    const request = httpTesting.expectOne('/api/schedule-blocks/block-1');
+    expect(request.request.method).toBe('DELETE');
+    request.flush({ id: 'block-1' });
+  });
 });
 
 function createAppointment(): Appointment {

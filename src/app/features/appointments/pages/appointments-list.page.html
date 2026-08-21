@@ -5,6 +5,16 @@
     [breadcrumbs]="[{ label: 'Dashboard', url: '/dashboard' }, { label: 'Citas' }]"
   >
     <button
+      mat-stroked-button
+      type="button"
+      class="app-page-header-action"
+      [disabled]="isLoading()"
+      (click)="openScheduleBlocksManager()"
+    >
+      <mat-icon>event_busy</mat-icon>
+      <span>Bloqueos de horario</span>
+    </button>
+    <button
       mat-flat-button
       type="button"
       class="app-page-header-action"
@@ -316,6 +326,22 @@
                       <mat-icon>edit</mat-icon>
                     </button>
 
+                    @if (appointment.status === 'SCHEDULED') {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        matTooltip="Reprogramar cita"
+                        [matTooltipShowDelay]="150"
+                        [disabled]="cancellingAppointmentId() !== null"
+                        (click)="stopRowClick($event); openRescheduleAppointmentDialog(appointment)"
+                        [attr.aria-label]="
+                          'Reprogramar cita de ' + getPatientName(appointment.patientId)
+                        "
+                      >
+                        <mat-icon>update</mat-icon>
+                      </button>
+                    }
+
                     @if (appointment.status !== 'CANCELLED') {
                       <button
                         mat-icon-button
@@ -362,8 +388,6 @@
                 tabindex="0"
                 role="button"
                 [attr.aria-label]="'Ver detalle de la cita de ' + getPatientName(row.patientId)"
-                matTooltip="Ver detalle"
-                [matTooltipShowDelay]="150"
                 (click)="openAppointmentDetailDialog(row)"
                 (keydown.enter)="openAppointmentDetailDialog(row)"
                 (keydown.space)="
