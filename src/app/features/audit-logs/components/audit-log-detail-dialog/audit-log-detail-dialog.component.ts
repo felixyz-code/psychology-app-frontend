@@ -27,8 +27,8 @@ import {
     AuditActionLabelPipe,
   ],
   template: `
-    <div class="audit-detail-container">
-      <div class="dialog-header">
+    <div class="audit-dialog">
+      <div class="audit-dialog__header">
         <div class="header-title">
           <mat-icon class="header-icon">policy</mat-icon>
           <div>
@@ -41,7 +41,7 @@ import {
         </button>
       </div>
 
-      <mat-dialog-content class="dialog-body">
+      <div class="audit-dialog__content">
         <!-- Overview Grid -->
         <div class="grid-section">
           <div class="info-card">
@@ -161,24 +161,49 @@ import {
             </div>
           </ng-template>
         </div>
-      </mat-dialog-content>
+      </div>
 
-      <mat-dialog-actions align="end" class="dialog-footer">
+      <div class="audit-dialog__actions">
         <button mat-button mat-dialog-close>Cerrar</button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
   styles: [
     `
-      .audit-detail-container {
-        padding: 8px 16px 16px 16px;
-        max-width: 680px;
-      }
-      .dialog-header {
+      .audit-dialog {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
+        flex-direction: column;
+        max-height: 85vh;
+        padding: 1.5rem;
+        box-sizing: border-box;
+        overflow: hidden;
+
+        &__header {
+          flex-shrink: 0;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          margin-bottom: 1.25rem;
+        }
+
+        &__content {
+          flex: 1 1 auto;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding-right: 4px;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        &__actions,
+        mat-dialog-actions {
+          flex-shrink: 0;
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 1rem;
+          padding: 0;
+        }
       }
       .header-title {
         display: flex;

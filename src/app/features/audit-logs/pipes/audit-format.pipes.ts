@@ -35,6 +35,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   CLINICAL_DOCUMENT_UPLOAD: 'Carga de Documento',
   CLINICAL_DOCUMENT_DELETE: 'Eliminación de Documento',
   CLINICAL_DOCUMENT_EXPORT: 'Exportación de Documento Clínico',
+  CLINICAL_DOCUMENT_VIEW: 'Previsualización de Documento Clínico',
   CLINICAL_ATTACHMENT_UPLOAD: 'Carga de Adjunto Clínico',
   CLINICAL_ATTACHMENT_READ: 'Consulta de Adjuntos Clínicos',
   CLINICAL_ATTACHMENT_DOWNLOAD: 'Descarga de Adjunto Clínico',

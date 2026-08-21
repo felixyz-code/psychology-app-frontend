@@ -42,6 +42,7 @@ describe('AuditFormatPipes', () => {
       expect(pipe.transform('CLINICAL_PATIENT_READ')).toBe('Consulta de Paciente');
       expect(pipe.transform('CLINICAL_DOCUMENT_DELETE')).toBe('Eliminación de Documento');
       expect(pipe.transform('CLINICAL_DOCUMENT_EXPORT')).toBe('Exportación de Documento Clínico');
+      expect(pipe.transform('CLINICAL_DOCUMENT_VIEW')).toBe('Previsualización de Documento Clínico');
       expect(pipe.transform('CLINICAL_ATTACHMENT_UPLOAD')).toBe('Carga de Adjunto Clínico');
       expect(pipe.transform('CLINICAL_ATTACHMENT_READ')).toBe('Consulta de Adjuntos Clínicos');
       expect(pipe.transform('CLINICAL_ATTACHMENT_DOWNLOAD')).toBe('Descarga de Adjunto Clínico');

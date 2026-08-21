@@ -125,6 +125,7 @@ describe('NavbarComponent', () => {
     const titleElement = fixture.nativeElement.querySelector('.navbar__title');
 
     expect(brandElement).not.toBeNull();
+    expect(brandElement.getAttribute('href')).toBe('/dashboard');
     expect(logoElement).not.toBeNull();
     expect(titleElement?.textContent).toContain('PsiqueOS');
   });
