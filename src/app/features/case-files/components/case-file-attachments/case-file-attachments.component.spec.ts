@@ -62,8 +62,16 @@ describe('CaseFileAttachmentsComponent', () => {
       open: vi.fn().mockReturnValue({ afterClosed: () => of(true) }),
     };
 
-    globalThis.URL.createObjectURL = vi.fn().mockReturnValue('blob:http://localhost/mock-blob');
-    globalThis.URL.revokeObjectURL = vi.fn();
+    Object.defineProperty(globalThis.URL, 'createObjectURL', {
+      writable: true,
+      configurable: true,
+      value: vi.fn().mockReturnValue('blob:http://localhost/mock-blob'),
+    });
+    Object.defineProperty(globalThis.URL, 'revokeObjectURL', {
+      writable: true,
+      configurable: true,
+      value: vi.fn(),
+    });
 
     await TestBed.configureTestingModule({
       imports: [CaseFileAttachmentsComponent],
