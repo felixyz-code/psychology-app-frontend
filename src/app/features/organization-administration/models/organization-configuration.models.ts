@@ -10,7 +10,9 @@ export interface OrganizationSettingsResponse {
 export interface OrganizationBrandingResponse {
   rowState: OrganizationConfigurationRowState;
   updatedAt: string | null;
+  visualName: string | null;
   primaryColor: string | null;
+  accentColor: string | null;
 }
 
 export type OrganizationSettingsUpdateRequest =
@@ -18,5 +20,15 @@ export type OrganizationSettingsUpdateRequest =
   | { defaultAppointmentDuration: number | null; expectedUpdatedAt: string };
 
 export type OrganizationBrandingUpdateRequest =
-  | { primaryColor: string | null; expectedRowState: 'ABSENT' }
-  | { primaryColor: string | null; expectedUpdatedAt: string };
+  | {
+      visualName?: string | null;
+      primaryColor: string | null;
+      accentColor?: string | null;
+      expectedRowState: 'ABSENT';
+    }
+  | {
+      visualName?: string | null;
+      primaryColor: string | null;
+      accentColor?: string | null;
+      expectedUpdatedAt: string;
+    };

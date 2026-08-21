@@ -17,6 +17,7 @@ describe('OrganizationSelectionPage', () => {
   }>;
   let tenantStore: {
     state: ReturnType<typeof vi.fn>;
+    snapshot: ReturnType<typeof vi.fn>;
     isLoading: ReturnType<typeof vi.fn>;
     isActiveTenantReady: ReturnType<typeof vi.fn>;
     isAdminSuspendedContext: ReturnType<typeof vi.fn>;
@@ -46,6 +47,7 @@ describe('OrganizationSelectionPage', () => {
     ];
     tenantStore = {
       state: vi.fn(() => tenantState),
+      snapshot: vi.fn(() => null),
       isLoading: vi.fn(() => false),
       isActiveTenantReady: vi.fn(() => true),
       isAdminSuspendedContext: vi.fn(() => false),
@@ -158,5 +160,25 @@ describe('OrganizationSelectionPage', () => {
     expect(fixture.nativeElement.textContent).toContain(
       'No tienes una organizacion activa disponible.',
     );
+  });
+
+  it('automatically redirects to dashboard when state is ACTIVE_TENANT_READY', async () => {
+    tenantStore.state.mockReturnValue('ACTIVE_TENANT_READY');
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [OrganizationSelectionPage],
+      providers: [
+        { provide: TenantContextStore, useValue: tenantStore },
+        { provide: Router, useValue: router },
+        { provide: AuthService, useValue: authService },
+      ],
+    });
+
+    const localFixture = TestBed.createComponent(OrganizationSelectionPage);
+    localFixture.detectChanges();
+    await localFixture.whenStable();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/dashboard'], { replaceUrl: true });
   });
 });

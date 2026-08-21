@@ -29,6 +29,7 @@ export type TenantResolutionMode = 'EXPLICIT' | 'SINGLE_MEMBERSHIP';
 export type TenantCapability =
   | 'appointment.manage'
   | 'appointment.read'
+  | 'assessment.template_manage'
   | 'audit.read'
   | 'case_file.create'
   | 'case_file.read'
@@ -68,6 +69,7 @@ export type TenantCapability =
 export const TENANT_CAPABILITIES: readonly TenantCapability[] = [
   'appointment.manage',
   'appointment.read',
+  'assessment.template_manage',
   'audit.read',
   'case_file.create',
   'case_file.read',

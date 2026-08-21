@@ -1,0 +1,111 @@
+<div class="reschedule-dialog">
+  <div mat-dialog-title class="reschedule-dialog__header">
+    <div class="header-icon">
+      <mat-icon>update</mat-icon>
+    </div>
+    <div class="header-content">
+      <h2>Reprogramar Cita</h2>
+      <p class="subtitle">Paciente: <strong>{{ patientName }}</strong></p>
+    </div>
+  </div>
+
+  <mat-dialog-content class="reschedule-dialog__content">
+    <div *ngIf="errorMessage()" class="alert-banner alert-danger">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+
+    <form [formGroup]="rescheduleForm" class="reschedule-dialog__form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nueva fecha y hora</mat-label>
+          <input matInput type="datetime-local" formControlName="scheduledAt" />
+          <mat-error *ngIf="rescheduleForm.controls.scheduledAt.hasError('required')">
+            La fecha y hora son obligatorias.
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="reschedule-dialog__row-duration">
+        <mat-form-field appearance="outline" class="duration-field">
+          <mat-label>Duración (minutos)</mat-label>
+          <input matInput type="number" min="15" step="5" formControlName="durationMinutes" />
+        </mat-form-field>
+
+        <button
+          type="button"
+          mat-stroked-button
+          color="primary"
+          class="availability-button"
+          (click)="checkAvailability()"
+          [disabled]="isLoadingSlots()"
+        >
+          <mat-icon *ngIf="!isLoadingSlots()">event_available</mat-icon>
+          <mat-spinner *ngIf="isLoadingSlots()" diameter="18"></mat-spinner>
+          <span>Consultar slots libres</span>
+        </button>
+      </div>
+
+      <div *ngIf="availableSlots().length > 0" class="reschedule-dialog__slots-section">
+        <div class="slots-header">
+          <span class="slots-title">Horarios del día:</span>
+          <span class="slots-hint">Haga clic en un horario libre para seleccionarlo</span>
+        </div>
+        <div class="reschedule-dialog__slots-grid">
+          <button
+            type="button"
+            *ngFor="let slot of availableSlots()"
+            class="slot-card"
+            [class.slot-available]="slot.available"
+            [class.slot-occupied]="!slot.available"
+            [disabled]="!slot.available"
+            (click)="selectSlot(slot)"
+            [attr.aria-label]="slot.startTime | date: 'HH:mm'"
+          >
+            <span class="slot-time">{{ slot.startTime | date: 'HH:mm' }}</span>
+            <span
+              class="slot-badge"
+              [class.badge-free]="slot.available"
+              [class.badge-busy]="!slot.available && slot.conflictType === 'APPOINTMENT'"
+              [class.badge-block]="!slot.available && slot.conflictType === 'SCHEDULE_BLOCK'"
+            >
+              {{ slot.available ? 'Libre' : (slot.conflictType === 'SCHEDULE_BLOCK' ? 'Bloqueo' : 'Ocupado') }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Motivo de reprogramación (Auditoría NOM-004)</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            formControlName="reason"
+            placeholder="Especifique el motivo clínico u operativo del cambio de horario"
+          ></textarea>
+          <mat-error *ngIf="rescheduleForm.controls.reason.hasError('required')">
+            El motivo de reprogramación es obligatorio para trazabilidad clínica.
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="reschedule-dialog__footer">
+    <button mat-button type="button" (click)="close()" [disabled]="isSubmitting()">
+      Cancelar
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="submit()"
+      [disabled]="rescheduleForm.invalid || isSubmitting()"
+    >
+      <mat-spinner *ngIf="isSubmitting()" diameter="18" class="button-spinner"></mat-spinner>
+      <span *ngIf="!isSubmitting()">Confirmar Reprogramación</span>
+      <span *ngIf="isSubmitting()">Guardando...</span>
+    </button>
+  </mat-dialog-actions>
+</div>

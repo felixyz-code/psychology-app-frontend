@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -15,6 +15,8 @@ describe('AuditTrailViewerPage', () => {
   let auditLogsServiceMock: {
     findAll: ReturnType<typeof vi.fn>;
     findOne: ReturnType<typeof vi.fn>;
+    exportViaApi: ReturnType<typeof vi.fn>;
+    downloadBlob: ReturnType<typeof vi.fn>;
     exportToCsv: ReturnType<typeof vi.fn>;
     exportToJson: ReturnType<typeof vi.fn>;
   };
@@ -33,6 +35,7 @@ describe('AuditTrailViewerPage', () => {
         action: 'CLINICAL_PATIENT_READ',
         resourceType: 'Patient',
         resourceId: 'patient-1',
+        severity: 'INFO',
         ipAddress: '192.168.1.1',
         statusCode: 200,
         executionTimeMs: 10,
@@ -65,6 +68,8 @@ describe('AuditTrailViewerPage', () => {
     auditLogsServiceMock = {
       findAll: vi.fn().mockReturnValue(of(mockLogsResponse)),
       findOne: vi.fn().mockReturnValue(of(mockLogsResponse.items[0])),
+      exportViaApi: vi.fn().mockReturnValue(of(new Blob(['test'], { type: 'text/csv' }))),
+      downloadBlob: vi.fn(),
       exportToCsv: vi.fn(),
       exportToJson: vi.fn(),
     };
@@ -108,8 +113,9 @@ describe('AuditTrailViewerPage', () => {
     expect(component.branchesSignal().length).toBe(1);
   });
 
-  it('should reload logs when filter changes', () => {
+  it('should reload logs when filter changes including severity', () => {
     component.selectedBranchId = 'b-1';
+    component.selectedSeverity = 'CRITICAL';
     component.selectedResourceType = 'Patient';
     component.searchTerm = 'CLINICAL';
     component.onFilterChange();
@@ -118,6 +124,7 @@ describe('AuditTrailViewerPage', () => {
       limit: 50,
       offset: 0,
       branchId: 'b-1',
+      severity: 'CRITICAL',
       resourceType: 'Patient',
       search: 'CLINICAL',
     });
@@ -142,7 +149,18 @@ describe('AuditTrailViewerPage', () => {
     });
   });
 
-  it('should trigger exports on service', () => {
+  it('should trigger exports on service via API and handle download', () => {
+    component.exportCsv();
+    expect(auditLogsServiceMock.exportViaApi).toHaveBeenCalledWith(expect.any(Object), 'csv');
+    expect(auditLogsServiceMock.downloadBlob).toHaveBeenCalled();
+
+    component.exportJson();
+    expect(auditLogsServiceMock.exportViaApi).toHaveBeenCalledWith(expect.any(Object), 'json');
+    expect(auditLogsServiceMock.downloadBlob).toHaveBeenCalled();
+  });
+
+  it('should fallback to client export if API export fails', () => {
+    auditLogsServiceMock.exportViaApi.mockReturnValue(throwError(() => new Error('API Error')));
     component.exportCsv();
     expect(auditLogsServiceMock.exportToCsv).toHaveBeenCalledWith(mockLogsResponse.items);
 
@@ -150,10 +168,16 @@ describe('AuditTrailViewerPage', () => {
     expect(auditLogsServiceMock.exportToJson).toHaveBeenCalledWith(mockLogsResponse.items);
   });
 
-  it('should compute correct CSS class for different forensic action categories', () => {
+  it('should compute correct CSS class for different forensic action categories and severities', () => {
     expect(component.getActionClass('CLINICAL_PATIENT_READ')).toBe('read');
     expect(component.getActionClass('CLINICAL_NOTE_CREATE')).toBe('mutation');
     expect(component.getActionClass('CLINICAL_DOCUMENT_DELETE')).toBe('delete');
     expect(component.getActionClass('AUTH_ROLE_CHANGE')).toBe('security');
+
+    expect(component.getSeverityClass('CRITICAL')).toBe('critical');
+    expect(component.getSeverityClass('HIGH')).toBe('high');
+    expect(component.getSeverityClass('MEDIUM')).toBe('medium');
+    expect(component.getSeverityClass('LOW')).toBe('low');
+    expect(component.getSeverityClass('INFO')).toBe('info');
   });
 });

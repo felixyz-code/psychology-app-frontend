@@ -1,0 +1,176 @@
+.signature-pad {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.signature-pad__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.signature-pad__title-group {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.signature-pad__icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+  color: var(--app-color-primary);
+  margin-top: 2px;
+}
+
+.signature-pad__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--app-color-text-main);
+}
+
+.signature-pad__subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--app-color-text-muted);
+  line-height: 1.4;
+  max-width: 42rem;
+}
+
+.signature-pad__active-preview {
+  margin-bottom: 0.5rem;
+}
+
+.signature-pad__preview-card {
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: var(--app-color-surface-muted);
+  border: 1px solid var(--app-color-card-border);
+  display: grid;
+  gap: 1rem;
+}
+
+.signature-pad__preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.signature-pad__preview-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.signature-pad__preview-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 110px;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+}
+
+.signature-pad__preview-img {
+  max-height: 90px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.signature-pad__editor {
+  display: grid;
+  gap: 1rem;
+}
+
+.signature-pad__canvas-container {
+  position: relative;
+  background: #ffffff;
+  border: 2px dashed var(--app-color-card-border);
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+  height: 190px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.signature-pad__canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.signature-pad__canvas-guide {
+  position: absolute;
+  bottom: 26px;
+  left: 20px;
+  right: 20px;
+  border-bottom: 1px solid #cbd5e1;
+  pointer-events: none;
+
+  span {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    position: absolute;
+    bottom: 2px;
+    right: 0;
+    font-weight: 500;
+  }
+}
+
+.signature-pad__error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: var(--app-color-danger-soft);
+  color: var(--app-color-danger-text);
+  font-size: 0.84rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.signature-pad__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.signature-pad__draw-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.signature-pad__divider {
+  color: var(--app-color-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.signature-pad__upload-action {
+  display: flex;
+  align-items: center;
+}

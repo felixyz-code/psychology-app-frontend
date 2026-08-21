@@ -44,6 +44,8 @@ import { AppointmentDetailDialogComponent } from '../components/appointment-deta
 import { AppointmentsCalendarComponent } from '../components/appointments-calendar.component';
 import { AppointmentsDailyAgendaComponent } from '../components/appointments-daily-agenda.component';
 import { AppointmentFormDialogComponent } from '../components/appointment-form-dialog.component';
+import { RescheduleAppointmentDialogComponent } from '../components/reschedule-appointment-dialog.component';
+import { ScheduleBlocksManagerComponent } from '../components/schedule-blocks-manager.component';
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
 import { AppointmentsService } from '../services/appointments.service';
 import { APPOINTMENT_STATUSES } from '../utils/appointment-presenters';
@@ -373,6 +375,41 @@ export class AppointmentsListPage {
       if (created) {
         this.loadAppointments();
       }
+    });
+  }
+
+  openRescheduleAppointmentDialog(appointment: Appointment): void {
+    this.successMessage.set('');
+
+    const dialogRef = this.dialog.open(RescheduleAppointmentDialogComponent, {
+      width: '92vw',
+      maxWidth: '560px',
+      maxHeight: '90vh',
+      autoFocus: false,
+      data: {
+        appointment,
+        patientName: this.getPatientName(appointment.patientId),
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((rescheduled) => {
+      if (rescheduled) {
+        this.successMessage.set('La cita fue reprogramada correctamente.');
+        this.loadAppointments();
+      }
+    });
+  }
+
+  openScheduleBlocksManager(): void {
+    const dialogRef = this.dialog.open(ScheduleBlocksManagerComponent, {
+      width: '92vw',
+      maxWidth: '800px',
+      maxHeight: '90vh',
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.loadAppointments();
     });
   }
 

@@ -24,6 +24,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'assessment-runner/:accessToken',
+    loadComponent: () =>
+      import('./features/assessments/pages/assessment-runner/assessment-runner.page').then(
+        (m) => m.AssessmentRunnerPage,
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard, tenantContextGuard],
     loadComponent: () =>
@@ -118,11 +125,27 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'management/assessments',
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'assessment.template_manage' },
+        loadChildren: () =>
+          import('./features/assessments/assessment-management.routes').then(
+            (m) => m.assessmentManagementRoutes,
+          ),
+      },
+      {
         path: 'audit-trail',
         canActivate: [activeTenantGuard, capabilityGuard],
         data: { requiredCapability: 'audit.read' },
         loadChildren: () =>
           import('./features/audit-logs/audit-logs.routes').then((m) => m.auditLogsRoutes),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/user-profile/pages/user-profile.page').then(
+            (m) => m.UserProfilePage,
+          ),
       },
       {
         path: '',

@@ -1,0 +1,85 @@
+<div class="clinical-preview-dialog">
+  <header class="clinical-preview-dialog__header">
+    <div class="clinical-preview-dialog__title-area">
+      <span class="clinical-preview-dialog__eyebrow">Documentación Clínica Oficial</span>
+      <h2>Previsualización de Documento</h2>
+      <p>
+        Generación de documentos clínicos y legales con membrete institucional y firma digitalizada.
+      </p>
+    </div>
+
+    <button
+      mat-icon-button
+      type="button"
+      aria-label="Cerrar ventana"
+      (click)="close()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="clinical-preview-dialog__toolbar clinical-preview-dialog__template-selector">
+    <div class="clinical-preview-dialog__tabs" role="tablist" aria-label="Formatos de documento">
+      @for (doc of documentTypes; track doc.type) {
+        <button
+          type="button"
+          class="clinical-preview-dialog__tab"
+          [class.clinical-preview-dialog__tab--active]="selectedDocType() === doc.type"
+          role="tab"
+          [attr.aria-selected]="selectedDocType() === doc.type"
+          (click)="selectDocType(doc.type)"
+        >
+          <mat-icon>{{ doc.icon }}</mat-icon>
+          <span>{{ doc.label }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (selectedDocType() === 'THERAPEUTIC_PRESCRIPTION') {
+    <div class="clinical-preview-dialog__custom-editor">
+      <mat-form-field appearance="outline" class="clinical-preview-dialog__textarea" subscriptSizing="dynamic">
+        <mat-label>Indicaciones y Prescripción Terapéutica (Editable)</mat-label>
+        <textarea
+          matInput
+          rows="2"
+          [ngModel]="customIndications()"
+          (ngModelChange)="customIndications.set($event)"
+          placeholder="Escribe las indicaciones terapéuticas..."
+        ></textarea>
+      </mat-form-field>
+    </div>
+  }
+
+  <div class="clinical-preview-dialog__viewer-container preview-stage">
+    <div class="document-render-container" [innerHTML]="sanitizedHtml()"></div>
+  </div>
+
+  <footer class="clinical-preview-dialog__footer">
+    <div class="clinical-preview-dialog__footer-meta">
+      <span>Paciente: <strong>{{ data.payload.patient.fullName }}</strong></span>
+      <span>•</span>
+      <span>Terapeuta: <strong>{{ data.payload.therapist.professionalName }}</strong></span>
+      @if (data.payload.therapist.licenseNumber) {
+        <span>• Céd: {{ data.payload.therapist.licenseNumber }}</span>
+      }
+    </div>
+
+    <div class="clinical-preview-dialog__footer-buttons">
+      <button mat-button type="button" (click)="close()">Cerrar</button>
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="download()"
+        matTooltip="Descargar copia del documento"
+      >
+        <mat-icon>download</mat-icon>
+        <span>Descargar</span>
+      </button>
+      <button mat-flat-button color="primary" type="button" (click)="print()">
+        <mat-icon>print</mat-icon>
+        <span>Imprimir / Guardar PDF</span>
+      </button>
+    </div>
+  </footer>
+</div>

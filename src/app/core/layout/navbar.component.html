@@ -11,9 +11,31 @@
       <mat-icon>menu</mat-icon>
     </button>
 
-    <div class="navbar__brand">
-      <span class="navbar__title">Psicologia App</span>
-    </div>
+    <a
+      class="navbar__brand header-brand"
+      [routerLink]="['/dashboard']"
+      aria-label="Ir al panel principal PsiqueOS"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="26"
+        height="26"
+        fill="none"
+        stroke="#38bdf8"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="navbar__logo header-brand__logo"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <line x1="12" y1="2" x2="12" y2="22" />
+        <path d="M4 6v5a8 8 0 0 0 16 0V6" />
+        <line x1="8" y1="22" x2="16" y2="22" />
+      </svg>
+      <span class="navbar__title header-brand__title">PsiqueOS</span>
+    </a>
   </div>
 
   <div class="navbar__right-pane">
@@ -26,14 +48,21 @@
             [matMenuTriggerFor]="organizationMenu"
             [disabled]="isSwitchingOrganization()"
             [attr.aria-busy]="isSwitchingOrganization()"
-            [attr.aria-label]="'Cambiar organización: ' + organization.displayName"
+            [attr.aria-label]="'Cambiar organización: ' + currentOrganizationDisplayName()"
           >
             @if (isSwitchingOrganization()) {
               <mat-spinner diameter="16" aria-label="Cambiando organización" />
+            } @else if (organizationLogoStore.logoUrl(); as logoUrl) {
+              <img
+                [src]="logoUrl"
+                class="organization-control__logo-img"
+                alt=""
+                aria-hidden="true"
+              />
             } @else {
               <mat-icon class="control-icon" aria-hidden="true">business</mat-icon>
             }
-            <span class="control-label">{{ organization.displayName }}</span>
+            <span class="control-label">{{ currentOrganizationDisplayName() }}</span>
             <mat-icon class="organization-control__chevron" aria-hidden="true"
               >expand_more</mat-icon
             >
@@ -65,18 +94,25 @@
         } @else {
           <div
             class="organization-control organization-identity"
-            [attr.aria-label]="'Organización actual: ' + organization.displayName"
+            [attr.aria-label]="'Organización actual: ' + currentOrganizationDisplayName()"
           >
-            <mat-icon class="control-icon" aria-hidden="true">business</mat-icon>
-            <span class="control-label">{{ organization.displayName }}</span>
+            @if (organizationLogoStore.logoUrl(); as logoUrl) {
+              <img
+                [src]="logoUrl"
+                class="organization-control__logo-img"
+                alt=""
+                aria-hidden="true"
+              />
+            } @else {
+              <mat-icon class="control-icon" aria-hidden="true">business</mat-icon>
+            }
+            <span class="control-label">{{ currentOrganizationDisplayName() }}</span>
           </div>
         }
       }
 
       <app-branch-switcher />
     </div>
-
-    <div class="navbar__spacer"></div>
 
     @if (tenantContextStore.preferredPersistenceState() === 'ERROR') {
       <span
@@ -105,7 +141,11 @@
           [matMenuTriggerFor]="userMenu"
           aria-label="Abrir menu de usuario"
         >
-          <div class="user-avatar" aria-hidden="true">{{ user.name.charAt(0) }}</div>
+          @if (userProfileStore.avatarUrl(); as avatarUrl) {
+            <img [src]="avatarUrl" class="user-menu__avatar-img" alt="Avatar de usuario" />
+          } @else {
+            <div class="user-avatar" aria-hidden="true">{{ user.name.charAt(0) }}</div>
+          }
           <div class="user-info">
             <span class="user-name">{{ user.name }}</span>
             <span class="user-role">{{ getRoleLabel(user.role) }}</span>
@@ -120,9 +160,13 @@
           panelClass="navbar-user-menu-panel"
         >
           <div class="navbar-user-menu__summary">
-            <span class="navbar-user-menu__avatar" aria-hidden="true">{{
-              user.name.charAt(0)
-            }}</span>
+            @if (userProfileStore.avatarUrl(); as avatarUrl) {
+              <img [src]="avatarUrl" class="navbar-user-menu__avatar-img" alt="Avatar de usuario" />
+            } @else {
+              <span class="navbar-user-menu__avatar" aria-hidden="true">{{
+                user.name.charAt(0)
+              }}</span>
+            }
             <span class="navbar-user-menu__identity">
               <span class="navbar-user-menu__name">{{ user.name }}</span>
               <span class="navbar-user-menu__role">{{ getRoleLabel(user.role) }}</span>
@@ -142,6 +186,11 @@
               aria-label="Cambiar tema"
             />
           </div>
+
+          <a class="navbar-user-menu__action" mat-menu-item routerLink="/profile">
+            <mat-icon>badge</mat-icon>
+            <span>Mi perfil profesional</span>
+          </a>
 
           <button class="navbar-user-menu__action" mat-menu-item type="button" (click)="logout()">
             <mat-icon>logout</mat-icon>

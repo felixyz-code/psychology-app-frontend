@@ -168,6 +168,14 @@ describe('SessionNotesService', () => {
 
     expect(receivedError).toMatchObject({ status: 503, statusText: 'Service Unavailable' });
   });
+
+  it('gets session note pdf export data from session-notes pdf-data endpoint', () => {
+    service.getPdfData('note-1').subscribe();
+
+    const request = httpTesting.expectOne('/api/session-notes/note-1/pdf-data');
+    expect(request.request.method).toBe('GET');
+    request.flush({});
+  });
 });
 
 function createSessionNote(): SessionNote {

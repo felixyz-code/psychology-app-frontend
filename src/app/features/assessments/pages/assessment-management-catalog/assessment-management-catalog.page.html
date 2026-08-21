@@ -1,0 +1,265 @@
+<div class="catalog-page">
+  <!-- 1. Page Header (Outside card on page base background) -->
+  <header class="catalog-header">
+    <div class="catalog-header__titles">
+      <h1 class="catalog-header__title">Gestión de Instrumentos Psicométricos</h1>
+      <p class="catalog-header__subtitle">
+        Administre el catálogo clínico, visibilidad por organización, versionado inmutable y creación de cuestionarios personalizados.
+      </p>
+    </div>
+
+    <div class="catalog-header__actions">
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="createNewInstrument()"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Nuevo Instrumento</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Feedback Alerts -->
+  @if (errorMessage()) {
+    <div class="alert alert--error" role="alert">
+      <mat-icon>error</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+  @if (successMessage()) {
+    <div class="alert alert--success" role="status">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="catalog-page__loading">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Cargando catálogo psicométrico...</p>
+    </div>
+  } @else {
+    <!-- 2 & 3. Main Unified White Card -->
+    <div class="catalog-card">
+      <!-- 2. Standard Design System Tabs Navigation Bar -->
+      <nav class="catalog-tabs" aria-label="Filtros de catálogo">
+        <button
+          type="button"
+          class="catalog-tab-btn"
+          [class.catalog-tab-btn--active]="selectedCategory() === 'ALL'"
+          (click)="setCategory('ALL')"
+        >
+          <span>Todos</span>
+          <span class="catalog-tab-count">({{ instruments().length }})</span>
+        </button>
+        <button
+          type="button"
+          class="catalog-tab-btn"
+          [class.catalog-tab-btn--active]="selectedCategory() === 'SYSTEM'"
+          (click)="setCategory('SYSTEM')"
+        >
+          <span>Estandarizados / Stock</span>
+        </button>
+        <button
+          type="button"
+          class="catalog-tab-btn"
+          [class.catalog-tab-btn--active]="selectedCategory() === 'CUSTOM'"
+          (click)="setCategory('CUSTOM')"
+        >
+          <span>Personalizados / Custom</span>
+        </button>
+        <button
+          type="button"
+          class="catalog-tab-btn"
+          [class.catalog-tab-btn--active]="selectedCategory() === 'ENABLED'"
+          (click)="setCategory('ENABLED')"
+        >
+          <span>Habilitados</span>
+        </button>
+        <button
+          type="button"
+          class="catalog-tab-btn"
+          [class.catalog-tab-btn--active]="selectedCategory() === 'DISABLED'"
+          (click)="setCategory('DISABLED')"
+        >
+          <span>Deshabilitados</span>
+        </button>
+      </nav>
+
+      <!-- Search Toolbar -->
+      <div class="catalog-toolbar">
+        <div class="catalog-search">
+          <mat-icon class="catalog-search__icon">search</mat-icon>
+          <input
+            type="text"
+            class="catalog-search__input"
+            placeholder="Buscar por código, nombre o descripción..."
+            [formControl]="searchControl"
+          />
+          @if (searchControl.value) {
+            <button
+              mat-icon-button
+              type="button"
+              class="catalog-search__clear"
+              aria-label="Limpiar búsqueda"
+              (click)="searchControl.setValue('')"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Table of Instruments -->
+      <div class="table-responsive">
+        <table mat-table [dataSource]="filteredInstruments()" class="catalog-table">
+          <!-- Instrument Column -->
+          <ng-container matColumnDef="instrument">
+            <th mat-header-cell *matHeaderCellDef>INSTRUMENTO</th>
+            <td mat-cell *matCellDef="let inst">
+              <div class="instrument-cell">
+                <span class="instrument-cell__code">{{ inst.code }}</span>
+                <strong class="instrument-cell__name">{{ inst.name }}</strong>
+                <span class="instrument-cell__target">{{ inst.targetPopulation || 'Población general' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>TIPO</th>
+            <td mat-cell *matCellDef="let inst">
+              @if (inst.isSystem) {
+                <span class="badge badge--system">
+                  <mat-icon class="badge__icon">public</mat-icon> Stock Global
+                </span>
+              } @else {
+                <span class="badge badge--custom">
+                  <mat-icon class="badge__icon">business</mat-icon> Custom Clínica
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Version Column -->
+          <ng-container matColumnDef="version">
+            <th mat-header-cell *matHeaderCellDef>VERSIÓN ACTIVA</th>
+            <td mat-cell *matCellDef="let inst">
+              @if (inst.publishedVersion) {
+                <span class="badge badge--published">
+                  v{{ inst.publishedVersion.versionNumber }} Publicado
+                </span>
+              } @else if (inst.draftVersion) {
+                <span class="badge badge--draft">
+                  v{{ inst.draftVersion.versionNumber }} Borrador
+                </span>
+              } @else {
+                <span class="badge badge--deprecated">Sin versión</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Administrations Column -->
+          <ng-container matColumnDef="administrations">
+            <th mat-header-cell *matHeaderCellDef>EVALUACIONES</th>
+            <td mat-cell *matCellDef="let inst">
+              <span class="admin-count">
+                <mat-icon>assignment_turned_in</mat-icon>
+                {{ inst.hasActiveAdministrations ? 'En uso clínico' : '0 aplicaciones' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Visibility Toggle Column -->
+          <ng-container matColumnDef="visibility">
+            <th mat-header-cell *matHeaderCellDef>HABILITADO</th>
+            <td mat-cell *matCellDef="let inst">
+              <mat-slide-toggle
+                color="primary"
+                [checked]="inst.isEnabled !== false"
+                [disabled]="isToggling()[inst.id]"
+                (change)="toggleVisibility(inst, $event)"
+                [matTooltip]="(inst.isEnabled !== false) ? 'Habilitado para asignación clínica en esta clínica' : 'Deshabilitado temporalmente'"
+              >
+                {{ (inst.isEnabled !== false) ? 'Activo' : 'Pausado' }}
+              </mat-slide-toggle>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-right">ACCIONES</th>
+            <td mat-cell *matCellDef="let inst" class="text-right">
+              <div class="actions-cell">
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="btn-simulate"
+                  (click)="openSimulator(inst)"
+                  matTooltip="Ejecutar simulador interactivo"
+                >
+                  <mat-icon>play_circle</mat-icon>
+                  <span>Simular</span>
+                </button>
+
+                <button
+                  mat-icon-button
+                  [matMenuTriggerFor]="actionsMenu"
+                  aria-label="Más opciones"
+                >
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+
+                <mat-menu #actionsMenu="matMenu">
+                  @if (!inst.isSystem) {
+                    @if (inst.draftVersion) {
+                      <button mat-menu-item (click)="editDraft(inst)">
+                        <mat-icon>edit</mat-icon>
+                        <span>Editar Borrador (v{{ inst.draftVersion.versionNumber }})</span>
+                      </button>
+                      <button mat-menu-item (click)="publishVersion(inst, inst.draftVersion)">
+                        <mat-icon>verified</mat-icon>
+                        <span>Publicar Versión (v{{ inst.draftVersion.versionNumber }})</span>
+                      </button>
+                    } @else {
+                      <button mat-menu-item (click)="createNewVersion(inst)">
+                        <mat-icon>add_circle_outline</mat-icon>
+                        <span>Crear Nueva Versión (v{{ (inst.latestVersion?.versionNumber ?? 1) + 1 }})</span>
+                      </button>
+                    }
+
+                    @if (inst.publishedVersion) {
+                      <button mat-menu-item (click)="deprecateVersion(inst, inst.publishedVersion)">
+                        <mat-icon>archive</mat-icon>
+                        <span>Deprecar Versión (v{{ inst.publishedVersion.versionNumber }})</span>
+                      </button>
+                    }
+                  } @else {
+                    <button mat-menu-item (click)="openSimulator(inst)">
+                      <mat-icon>visibility</mat-icon>
+                      <span>Ver Definición Stock</span>
+                    </button>
+                  }
+                </mat-menu>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+
+        @if (filteredInstruments().length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-state__icon">search_off</mat-icon>
+            <h3>No se encontraron instrumentos</h3>
+            <p>No hay instrumentos psicométricos que coincidan con los filtros o búsqueda aplicados.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

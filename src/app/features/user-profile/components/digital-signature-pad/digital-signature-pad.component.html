@@ -1,0 +1,126 @@
+<div class="signature-pad">
+  <div class="signature-pad__header">
+    <div class="signature-pad__title-group">
+      <mat-icon class="signature-pad__icon">draw</mat-icon>
+      <div>
+        <h3 class="signature-pad__title">Firma Digitalizada Profesional</h3>
+        <p class="signature-pad__subtitle">
+          Esta firma se insertará de forma protegida en tus notas clínicas, recetas y reportes de evaluación conforme a la NOM-004-SSA3-2012.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  @if (store.signatureUrl(); as signatureUrl) {
+    <div class="signature-pad__active-preview">
+      <div class="signature-pad__preview-card">
+        <div class="signature-pad__preview-header">
+          <span class="signature-pad__preview-badge">
+            <mat-icon>verified</mat-icon>
+            Firma activa registrada
+          </span>
+          <button
+            mat-stroked-button
+            color="warn"
+            type="button"
+            class="signature-pad__remove-btn"
+            [disabled]="store.isUploadingSignature()"
+            (click)="removeSignature()"
+          >
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar firma</span>
+          </button>
+        </div>
+
+        <div class="signature-pad__preview-image-container">
+          <img
+            [src]="signatureUrl"
+            class="signature-pad__preview-img"
+            alt="Firma digital registrada"
+          />
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="signature-pad__editor">
+    <div class="signature-pad__canvas-container">
+      <canvas
+        #signatureCanvas
+        class="signature-pad__canvas"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp()"
+        (pointercancel)="onPointerCancel()"
+      ></canvas>
+      <div class="signature-pad__canvas-guide" aria-hidden="true">
+        <span>Línea base de firma</span>
+      </div>
+    </div>
+
+    @if (uploadError()) {
+      <div class="signature-pad__error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ uploadError() }}</span>
+      </div>
+    }
+
+    <div class="signature-pad__actions">
+      <div class="signature-pad__draw-actions">
+        <button
+          mat-button
+          type="button"
+          class="signature-pad__btn-clear"
+          [disabled]="!hasCanvasStrokes() || store.isUploadingSignature()"
+          (click)="clearCanvas()"
+        >
+          <mat-icon>ink_eraser</mat-icon>
+          <span>Limpiar trazo</span>
+        </button>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="signature-pad__btn-save"
+          [disabled]="!hasCanvasStrokes() || store.isUploadingSignature()"
+          (click)="saveCanvasSignature()"
+        >
+          @if (store.isUploadingSignature()) {
+            <ng-container>
+              <mat-spinner diameter="18" />
+              <span>Guardando...</span>
+            </ng-container>
+          } @else {
+            <ng-container>
+              <mat-icon>check</mat-icon>
+              <span>Guardar trazo</span>
+            </ng-container>
+          }
+        </button>
+      </div>
+
+      <div class="signature-pad__divider">o</div>
+
+      <div class="signature-pad__upload-action">
+        <input
+          #fileInput
+          type="file"
+          accept="image/png,image/jpeg"
+          style="display: none;"
+          (change)="onFileSelected($event)"
+        />
+        <button
+          mat-stroked-button
+          type="button"
+          class="signature-pad__btn-upload"
+          [disabled]="store.isUploadingSignature()"
+          (click)="fileInput.click()"
+        >
+          <mat-icon>upload_file</mat-icon>
+          <span>Subir imagen escaneada</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

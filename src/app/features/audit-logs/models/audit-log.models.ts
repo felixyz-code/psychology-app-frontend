@@ -1,3 +1,5 @@
+export type AuditSeverity = 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
 export interface AuditLogUser {
   id: string;
   name: string;
@@ -19,6 +21,7 @@ export interface AuditLogEntry {
   action: string;
   resourceType: string;
   resourceId?: string | null;
+  severity?: AuditSeverity;
   ipAddress?: string | null;
   userAgent?: string | null;
   statusCode?: number | null;
@@ -37,14 +40,20 @@ export interface AuditLogsPaginatedResponse {
 }
 
 export interface AuditLogsFilterParams {
+  tenantId?: string;
   branchId?: string;
   userId?: string;
+  resource?: string;
   resourceType?: string;
   resourceId?: string;
   action?: string;
+  severity?: AuditSeverity;
   from?: string;
   to?: string;
+  startDate?: string;
+  endDate?: string;
   search?: string;
+  format?: 'csv' | 'json';
   limit?: number;
   offset?: number;
 }

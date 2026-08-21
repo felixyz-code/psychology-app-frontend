@@ -130,7 +130,9 @@ describe('OrganizationConfigurationStore', () => {
     completeInitial(settings(), branding({ rowState: 'ABSENT' }));
     store.saveBranding('#7C3AED');
     expect(api.updateBranding).toHaveBeenLastCalledWith('organization-a', {
+      visualName: null,
       primaryColor: '#7C3AED',
+      accentColor: null,
       expectedRowState: 'ABSENT',
     });
 
@@ -140,7 +142,9 @@ describe('OrganizationConfigurationStore', () => {
     );
     store.saveBranding('#2563EB');
     expect(api.updateBranding).toHaveBeenLastCalledWith('organization-b', {
+      visualName: null,
       primaryColor: '#2563EB',
+      accentColor: null,
       expectedUpdatedAt: 'branding-v2',
     });
   });
@@ -415,5 +419,12 @@ function settings(
 function branding(
   overrides: Partial<OrganizationBrandingResponse> = {},
 ): OrganizationBrandingResponse {
-  return { rowState: 'ABSENT', updatedAt: null, primaryColor: null, ...overrides };
+  return {
+    rowState: 'ABSENT',
+    updatedAt: null,
+    visualName: null,
+    primaryColor: null,
+    accentColor: null,
+    ...overrides,
+  };
 }

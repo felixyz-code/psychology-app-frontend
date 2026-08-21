@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { environment } from '../../../environments/environment';
 import {
   OrganizationLogoMimeType,
   OrganizationLogoResponse,
@@ -19,7 +20,7 @@ export interface OrganizationLogoCanonicalScope {
   readonly generation: number;
 }
 
-const MAX_LOGO_BYTES = 1_048_576;
+const MAX_LOGO_BYTES = 2_097_152;
 const ACCEPTED_MIME_TYPES = new Set<OrganizationLogoMimeType>(['image/png', 'image/jpeg']);
 const ACCEPTED_EXTENSION = /\.(?:png|jpe?g)$/i;
 
@@ -40,6 +41,11 @@ export class OrganizationLogoStore {
   readonly successMessage = signal('');
   readonly conflictMessage = signal('');
   readonly mutationState = signal<OrganizationLogoMutationState>('IDLE');
+
+  readonly isLogoPresent = computed(
+    () => this.logo()?.rowState === 'PRESENT' && Boolean(this.previewUrl()),
+  );
+  readonly logoUrl = computed(() => this.previewUrl());
 
   constructor() {
     effect(() => {
@@ -73,7 +79,7 @@ export class OrganizationLogoStore {
     }
     if (file.size > MAX_LOGO_BYTES) {
       this.selectedFile.set(null);
-      this.fileError.set('El archivo supera el m\u00e1ximo permitido de 1 MiB.');
+      this.fileError.set('El archivo supera el máximo permitido de 2 MiB.');
       return;
     }
     if (!ACCEPTED_MIME_TYPES.has(file.type as OrganizationLogoMimeType)) {
