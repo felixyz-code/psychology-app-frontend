@@ -7,6 +7,9 @@ import { MatCardModule } from '@angular/material/card';
   imports: [MatCardModule],
   templateUrl: './section-card.component.html',
   styleUrl: './section-card.component.scss',
+  host: {
+    '[attr.title]': 'null',
+  },
 })
 export class SectionCardComponent {
   readonly title = input.required<string>();

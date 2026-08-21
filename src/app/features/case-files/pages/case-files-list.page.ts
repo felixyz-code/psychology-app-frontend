@@ -31,6 +31,7 @@ import { PatientFormDialogComponent } from '../../patients/components/patient-fo
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { CaseFileFormDialogComponent } from '../components/case-file-form-dialog.component';
+import { ClinicalDocumentPreviewDialogComponent } from '../components/clinical-document-preview-dialog.component';
 import { CaseFile } from '../models/case-file.models';
 import { CaseFilesService } from '../services/case-files.service';
 
@@ -251,6 +252,22 @@ export class CaseFilesListPage {
       if (updated) {
         this.loadCaseFiles();
       }
+    });
+  }
+
+  openClinicalPdfDialog(caseFile: CaseFile): void {
+    this.caseFilesService.getClinicalPdfData(caseFile.id).subscribe({
+      next: (payload) => {
+        this.dialog.open(ClinicalDocumentPreviewDialogComponent, {
+          data: {
+            payload,
+            initialDocumentType: 'NOM_004_EVOLUTION_NOTE',
+            caseFileId: caseFile.id,
+          },
+          panelClass: 'app-dialog-panel',
+          maxWidth: '95vw',
+        });
+      },
     });
   }
 

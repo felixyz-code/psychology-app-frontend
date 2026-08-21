@@ -59,6 +59,8 @@ import { SessionNote } from '../../session-notes/models/session-note.models';
 import { Patient } from '../models/patient.models';
 import { PatientFormDialogComponent } from './patient-form-dialog.component';
 import { AssessmentListComponent } from '../../assessments/components/assessment-list/assessment-list.component';
+import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/components/clinical-document-preview-dialog.component';
+import { ClinicalDocumentType } from '../../case-files/models/clinical-pdf.models';
 
 interface PatientDetailDialogData {
   patient: Patient;
@@ -422,6 +424,50 @@ export class PatientDetailDialogComponent {
       if (created) {
         this.loadWorkspace();
       }
+    });
+  }
+
+  openClinicalPdfDialog(
+    noteId?: string,
+    documentType: ClinicalDocumentType = 'NOM_004_EVOLUTION_NOTE',
+  ): void {
+    const targetCaseFileId = this.caseFile()?.id || this.caseFileId();
+    if (!targetCaseFileId) return;
+
+    this.caseFilesService
+      .getClinicalPdfData(targetCaseFileId, noteId)
+      .subscribe({
+        next: (payload) => {
+          this.dialog.open(ClinicalDocumentPreviewDialogComponent, {
+            data: {
+              payload,
+              initialDocumentType: documentType,
+              caseFileId: targetCaseFileId,
+              noteId,
+            },
+            panelClass: 'app-dialog-panel',
+            maxWidth: '95vw',
+          });
+        },
+      });
+  }
+
+  openConsentPdfDialog(): void {
+    const targetCaseFileId = this.caseFile()?.id || this.caseFileId();
+    if (!targetCaseFileId) return;
+
+    this.caseFilesService.getConsentPdfData(targetCaseFileId).subscribe({
+      next: (payload) => {
+        this.dialog.open(ClinicalDocumentPreviewDialogComponent, {
+          data: {
+            payload,
+            initialDocumentType: 'INFORMED_CONSENT',
+            caseFileId: targetCaseFileId,
+          },
+          panelClass: 'app-dialog-panel',
+          maxWidth: '95vw',
+        });
+      },
     });
   }
 

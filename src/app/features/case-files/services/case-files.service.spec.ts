@@ -56,6 +56,25 @@ describe('CaseFilesService', () => {
 
     expect(receivedError).toMatchObject({ status: 500, statusText: 'Internal Server Error' });
   });
+
+  it('gets clinical pdf data with and without noteId', () => {
+    service.getClinicalPdfData('cf-1', 'note-1').subscribe();
+    const req1 = httpTesting.expectOne('/api/case-files/cf-1/notes/note-1/pdf-data');
+    expect(req1.request.method).toBe('GET');
+    req1.flush({});
+
+    service.getClinicalPdfData('cf-1').subscribe();
+    const req2 = httpTesting.expectOne('/api/case-files/cf-1/pdf-data');
+    expect(req2.request.method).toBe('GET');
+    req2.flush({});
+  });
+
+  it('gets consent pdf data', () => {
+    service.getConsentPdfData('cf-1').subscribe();
+    const req = httpTesting.expectOne('/api/case-files/cf-1/consent-data');
+    expect(req.request.method).toBe('GET');
+    req.flush({});
+  });
 });
 
 function createWorkspace(): CaseFileWorkspaceResponse {
