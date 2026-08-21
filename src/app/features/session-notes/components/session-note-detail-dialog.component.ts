@@ -1,10 +1,14 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/components/clinical-document-preview-dialog.component';
+import { ClinicalDocumentType } from '../../case-files/models/clinical-pdf.models';
 import { SessionNote } from '../models/session-note.models';
+import { SessionNotesService } from '../services/session-notes.service';
 import { SessionNoteWorkspaceComponent } from './session-note-workspace.component';
 
 interface SessionNoteDetailDialogData {
@@ -24,6 +28,7 @@ type SessionNoteDetailDialogResult =
     MatButtonModule,
     MatDialogModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     SessionNoteWorkspaceComponent,
   ],
   templateUrl: './session-note-detail-dialog.component.html',
@@ -34,11 +39,36 @@ export class SessionNoteDetailDialogComponent {
   private readonly dialogRef = inject(
     MatDialogRef<SessionNoteDetailDialogComponent, SessionNoteDetailDialogResult>,
   );
+  private readonly sessionNotesService = inject(SessionNotesService);
+  private readonly dialog = inject(MatDialog);
 
   readonly sessionNote = this.data.sessionNote;
+  readonly isGeneratingPdf = signal(false);
 
   getTitle(): string {
     return this.sessionNote.title?.trim() || 'Sesion sin titulo';
+  }
+
+  openPdfPreview(type: ClinicalDocumentType = 'NOM_004_EVOLUTION_NOTE'): void {
+    this.isGeneratingPdf.set(true);
+    this.sessionNotesService.getPdfData(this.sessionNote.id).subscribe({
+      next: (payload) => {
+        this.isGeneratingPdf.set(false);
+        this.dialog.open(ClinicalDocumentPreviewDialogComponent, {
+          data: {
+            payload,
+            initialDocumentType: type,
+            caseFileId: this.sessionNote.caseFileId,
+            noteId: this.sessionNote.id,
+          },
+          panelClass: 'app-dialog-panel',
+          maxWidth: '95vw',
+        });
+      },
+      error: () => {
+        this.isGeneratingPdf.set(false);
+      },
+    });
   }
 
   close(): void {

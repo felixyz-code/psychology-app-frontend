@@ -142,6 +142,16 @@
                   <button
                     mat-icon-button
                     type="button"
+                    [attr.aria-label]="'Generar documento clínico de ' + getPatientName(caseFile)"
+                    matTooltip="Documento clínico (PDF)"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); openClinicalPdfDialog(caseFile)"
+                  >
+                    <mat-icon>picture_as_pdf</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
                     [attr.aria-label]="'Editar expediente de ' + getPatientName(caseFile)"
                     matTooltip="Editar expediente"
                     [matTooltipShowDelay]="150"
@@ -161,8 +171,6 @@
               tabindex="0"
               role="button"
               [attr.aria-label]="'Abrir paciente ' + getPatientName(row)"
-              matTooltip="Abrir paciente"
-              [matTooltipShowDelay]="150"
               (click)="openPatientDetailDialog(row)"
               (keydown.enter)="openPatientDetailDialog(row)"
               (keydown.space)="

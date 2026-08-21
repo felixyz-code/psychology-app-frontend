@@ -9,6 +9,7 @@ import {
   CreateCaseFileRequest,
   UpdateCaseFileRequest,
 } from '../models/case-file.models';
+import { ClinicalPdfExportPayload } from '../models/clinical-pdf.models';
 
 @Injectable({ providedIn: 'root' })
 export class CaseFilesService {
@@ -39,5 +40,18 @@ export class CaseFilesService {
 
   updateCaseFile(id: string, payload: UpdateCaseFileRequest): Observable<CaseFile> {
     return this.http.patch<CaseFile>(`${this.apiUrl}/case-files/${id}`, payload);
+  }
+
+  getClinicalPdfData(caseFileId: string, noteId?: string): Observable<ClinicalPdfExportPayload> {
+    const url = noteId
+      ? `${this.apiUrl}/case-files/${caseFileId}/notes/${noteId}/pdf-data`
+      : `${this.apiUrl}/case-files/${caseFileId}/pdf-data`;
+    return this.http.get<ClinicalPdfExportPayload>(url);
+  }
+
+  getConsentPdfData(caseFileId: string): Observable<ClinicalPdfExportPayload> {
+    return this.http.get<ClinicalPdfExportPayload>(
+      `${this.apiUrl}/case-files/${caseFileId}/consent-data`,
+    );
   }
 }

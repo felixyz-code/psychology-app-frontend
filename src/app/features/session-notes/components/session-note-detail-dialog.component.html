@@ -22,7 +22,30 @@
   </div>
 
   <footer class="session-note-detail-dialog__footer">
-    <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
-    <button mat-flat-button type="button" (click)="edit()">Editar</button>
+    <div style="display: flex; gap: 8px;">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="isGeneratingPdf()"
+        (click)="openPdfPreview('NOM_004_EVOLUTION_NOTE')"
+      >
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>Nota NOM-004</span>
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="isGeneratingPdf()"
+        (click)="openPdfPreview('THERAPEUTIC_PRESCRIPTION')"
+      >
+        <mat-icon>receipt_long</mat-icon>
+        <span>Receta / Indicaciones</span>
+      </button>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
+      <button mat-flat-button type="button" (click)="edit()">Editar</button>
+    </div>
   </footer>
 </div>

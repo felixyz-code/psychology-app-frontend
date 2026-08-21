@@ -10,6 +10,9 @@ export type MetricCardVariant = 'blue' | 'green' | 'amber' | 'violet';
   imports: [MatCardModule, MatIconModule],
   templateUrl: './metric-card.component.html',
   styleUrl: './metric-card.component.scss',
+  host: {
+    '[attr.title]': 'null',
+  },
 })
 export class MetricCardComponent {
   readonly icon = input.required<string>();
