@@ -25,7 +25,7 @@ describe('AuditLogsService', () => {
     httpTestingController.verify();
   });
 
-  it('should fetch paginated audit logs with filters', () => {
+  it('should fetch paginated audit logs with filters including severity and aliases', () => {
     const mockResponse: AuditLogsPaginatedResponse = {
       items: [
         {
@@ -33,6 +33,7 @@ describe('AuditLogsService', () => {
           timestamp: '2026-08-17T12:00:00.000Z',
           action: 'CLINICAL_PATIENT_READ',
           resourceType: 'Patient',
+          severity: 'INFO',
         },
       ],
       total: 1,
@@ -42,9 +43,13 @@ describe('AuditLogsService', () => {
 
     service
       .findAll({
+        tenantId: 'org-1',
         branchId: 'branch-1',
         resourceType: 'Patient',
         action: 'CLINICAL_PATIENT_READ',
+        severity: 'INFO',
+        startDate: '2026-08-01T00:00:00.000Z',
+        endDate: '2026-08-31T23:59:59.999Z',
         limit: 25,
         offset: 0,
       })
@@ -56,9 +61,13 @@ describe('AuditLogsService', () => {
     const req = httpTestingController.expectOne((request) => {
       return (
         request.url === baseUrl &&
+        request.params.get('tenantId') === 'org-1' &&
         request.params.get('branchId') === 'branch-1' &&
         request.params.get('resourceType') === 'Patient' &&
         request.params.get('action') === 'CLINICAL_PATIENT_READ' &&
+        request.params.get('severity') === 'INFO' &&
+        request.params.get('startDate') === '2026-08-01T00:00:00.000Z' &&
+        request.params.get('endDate') === '2026-08-31T23:59:59.999Z' &&
         request.params.get('limit') === '25' &&
         request.params.get('offset') === '0'
       );
@@ -75,6 +84,7 @@ describe('AuditLogsService', () => {
       action: 'CLINICAL_NOTE_CREATE',
       resourceType: 'SessionNote',
       resourceId: 'note-456',
+      severity: 'MEDIUM',
     };
 
     service.findOne('log-123').subscribe((res) => {
@@ -86,6 +96,34 @@ describe('AuditLogsService', () => {
     req.flush(mockEntry);
   });
 
+  it('should export audit logs via API endpoint', () => {
+    const mockBlob = new Blob(['ID,Timestamp\n1,2026-08-19'], { type: 'text/csv' });
+
+    service
+      .exportViaApi(
+        {
+          branchId: 'branch-1',
+          severity: 'HIGH',
+        },
+        'csv',
+      )
+      .subscribe((blob) => {
+        expect(blob).toBeDefined();
+      });
+
+    const req = httpTestingController.expectOne((request) => {
+      return (
+        request.url === `${baseUrl}/export` &&
+        request.params.get('format') === 'csv' &&
+        request.params.get('branchId') === 'branch-1' &&
+        request.params.get('severity') === 'HIGH'
+      );
+    });
+
+    expect(req.request.method).toBe('GET');
+    req.flush(mockBlob);
+  });
+
   it('should trigger CSV and JSON export without crashing', () => {
     const mockItems: AuditLogEntry[] = [
       {
@@ -93,11 +131,9 @@ describe('AuditLogsService', () => {
         timestamp: '2026-08-17T12:00:00.000Z',
         action: 'CLINICAL_PATIENT_READ',
         resourceType: 'Patient',
+        severity: 'INFO',
       },
     ];
-
-    // Mock URL and createElement
-    const createElementSpy = vi.spyOn(document, 'createElement');
 
     expect(() => service.exportToCsv(mockItems)).not.toThrow();
     expect(() => service.exportToJson(mockItems)).not.toThrow();

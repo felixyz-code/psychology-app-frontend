@@ -17,9 +17,17 @@ import { MatMenuModule } from '@angular/material/menu';
 
 import { AuditLogsService } from '../services/audit-logs.service';
 import { BranchesService } from '../../../core/services/branches.service';
-import { AuditLogEntry, AuditLogsFilterParams } from '../models/audit-log.models';
+import {
+  AuditLogEntry,
+  AuditLogsFilterParams,
+  AuditSeverity,
+} from '../models/audit-log.models';
 import { Branch } from '../../../core/models/branch.models';
 import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-dialog/audit-log-detail-dialog.component';
+import {
+  AuditActionLabelPipe,
+  AuditResourceLabelPipe,
+} from '../pipes/audit-format.pipes';
 
 @Component({
   selector: 'app-audit-trail-viewer',
@@ -40,6 +48,8 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
     MatTooltipModule,
     MatDialogModule,
     MatMenuModule,
+    AuditResourceLabelPipe,
+    AuditActionLabelPipe,
   ],
   template: `
     <div class="audit-trail-container">
@@ -101,18 +111,32 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
             </mat-select>
           </mat-form-field>
 
+          <!-- Severity Filter -->
+          <mat-form-field appearance="outline" class="filter-item">
+            <mat-label>Severidad</mat-label>
+            <mat-select [(ngModel)]="selectedSeverity" (selectionChange)="onFilterChange()">
+              <mat-option [value]="''">Todas las Severidades</mat-option>
+              <mat-option value="CRITICAL">Crítica (CRITICAL)</mat-option>
+              <mat-option value="HIGH">Alta (HIGH)</mat-option>
+              <mat-option value="MEDIUM">Media (MEDIUM)</mat-option>
+              <mat-option value="LOW">Baja (LOW)</mat-option>
+              <mat-option value="INFO">Informativa (INFO)</mat-option>
+            </mat-select>
+          </mat-form-field>
+
           <!-- Resource Type Filter -->
           <mat-form-field appearance="outline" class="filter-item">
             <mat-label>Tipo de Recurso</mat-label>
             <mat-select [(ngModel)]="selectedResourceType" (selectionChange)="onFilterChange()">
               <mat-option [value]="''">Todos los Recursos</mat-option>
-              <mat-option value="Patient">Paciente</mat-option>
-              <mat-option value="SessionNote">Nota de Sesión</mat-option>
+              <mat-option value="SessionNote">Nota de Evolución</mat-option>
+              <mat-option value="Document">Documento Clínico</mat-option>
               <mat-option value="CaseFile">Expediente Clínico</mat-option>
-              <mat-option value="Document">Documento / Archivo</mat-option>
+              <mat-option value="Patient">Paciente</mat-option>
               <mat-option value="Appointment">Cita</mat-option>
-              <mat-option value="Branch">Sede</mat-option>
+              <mat-option value="PsychologistProfile">Perfil Profesional</mat-option>
               <mat-option value="PaefAgreement">Convenio Corporativo</mat-option>
+              <mat-option value="Branch">Sede / Sucursal</mat-option>
               <mat-option value="Organization">Organización</mat-option>
             </mat-select>
           </mat-form-field>
@@ -136,13 +160,13 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
               matInput
               [(ngModel)]="searchTerm"
               (keyup.enter)="onFilterChange()"
-              placeholder="Ej. CLINICAL, paciente..."
+              placeholder="Ej. Paciente, Lectura de Nota..."
             />
             <button
               *ngIf="searchTerm"
               matSuffix
               mat-icon-button
-              aria-label="Clear"
+              aria-label="Limpiar búsqueda"
               (click)="searchTerm = ''; onFilterChange()"
             >
               <mat-icon>close</mat-icon>
@@ -162,31 +186,47 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
           <table mat-table [dataSource]="logsSignal()" class="audit-table">
             <!-- Timestamp Column -->
             <ng-container matColumnDef="timestamp">
-              <th mat-header-cell *matHeaderCellDef>Fecha y Hora</th>
-              <td mat-cell *matCellDef="let row">
+              <th mat-header-cell *matHeaderCellDef class="col-timestamp">Fecha y Hora</th>
+              <td mat-cell *matCellDef="let row" class="col-timestamp">
                 <div class="timestamp-box">
                   <span class="date-str">{{ row.timestamp | date: 'dd/MM/yyyy' }}</span>
-                  <span class="time-str">{{ row.timestamp | date: 'HH:mm:ss.SSS' }}</span>
+                  <span class="time-str">{{ row.timestamp | date: 'HH:mm:ss' }}</span>
                 </div>
+              </td>
+            </ng-container>
+
+            <!-- Severity Column -->
+            <ng-container matColumnDef="severity">
+              <th mat-header-cell *matHeaderCellDef class="col-severity">Severidad</th>
+              <td mat-cell *matCellDef="let row" class="col-severity">
+                <span class="severity-pill" [ngClass]="getSeverityClass(row.severity)">
+                  {{ row.severity || 'INFO' }}
+                </span>
               </td>
             </ng-container>
 
             <!-- Actor Column -->
             <ng-container matColumnDef="actor">
-              <th mat-header-cell *matHeaderCellDef>Actor</th>
-              <td mat-cell *matCellDef="let row">
+              <th mat-header-cell *matHeaderCellDef class="col-actor">Actor</th>
+              <td mat-cell *matCellDef="let row" class="col-actor">
                 <div class="actor-box">
-                  <span class="actor-name">{{ row.user?.name || row.userId || 'Sistema' }}</span>
-                  <span class="actor-email" *ngIf="row.user?.email">{{ row.user?.email }}</span>
-                  <span class="role-pill" *ngIf="row.actorRole">{{ row.actorRole }}</span>
+                  <div class="actor-header">
+                    <span class="actor-name" [matTooltip]="row.user?.name || row.userId || 'Sistema'">
+                      {{ row.user?.name || row.userId || 'Sistema' }}
+                    </span>
+                    <span class="role-pill" *ngIf="row.actorRole">{{ row.actorRole }}</span>
+                  </div>
+                  <span class="actor-email" *ngIf="row.user?.email" [matTooltip]="row.user.email">
+                    {{ row.user.email }}
+                  </span>
                 </div>
               </td>
             </ng-container>
 
             <!-- Branch Column -->
             <ng-container matColumnDef="branch">
-              <th mat-header-cell *matHeaderCellDef>Sede</th>
-              <td mat-cell *matCellDef="let row">
+              <th mat-header-cell *matHeaderCellDef class="col-branch">Sede</th>
+              <td mat-cell *matCellDef="let row" class="col-branch">
                 <div class="branch-box">
                   <span *ngIf="row.branch" class="branch-pill" [matTooltip]="row.branch.name">
                     <mat-icon class="pill-icon">business</mat-icon>
@@ -199,41 +239,26 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
 
             <!-- Action Column -->
             <ng-container matColumnDef="action">
-              <th mat-header-cell *matHeaderCellDef>Acción Forense</th>
-              <td mat-cell *matCellDef="let row">
-                <div class="action-box">
-                  <span class="action-chip" [ngClass]="getActionClass(row.action)">
-                    {{ row.action }}
-                  </span>
-                </div>
+              <th mat-header-cell *matHeaderCellDef class="col-action">Acción Forense</th>
+              <td mat-cell *matCellDef="let row" class="col-action">
+                <span
+                  class="action-chip"
+                  [ngClass]="getActionClass(row.action)"
+                  [matTooltip]="row.action"
+                >
+                  {{ row.action | auditActionLabel }}
+                </span>
               </td>
             </ng-container>
 
             <!-- Resource Column -->
             <ng-container matColumnDef="resource">
-              <th mat-header-cell *matHeaderCellDef>Recurso Afectado</th>
-              <td mat-cell *matCellDef="let row">
+              <th mat-header-cell *matHeaderCellDef class="col-resource">Recurso</th>
+              <td mat-cell *matCellDef="let row" class="col-resource">
                 <div class="resource-box">
-                  <span class="resource-type">{{ row.resourceType }}</span>
-                  <span class="resource-id" [class.text-muted]="!row.resourceId">{{
-                    row.resourceId || '—'
-                  }}</span>
-                </div>
-              </td>
-            </ng-container>
-
-            <!-- Network / IP Column -->
-            <ng-container matColumnDef="network">
-              <th mat-header-cell *matHeaderCellDef>Origen</th>
-              <td mat-cell *matCellDef="let row">
-                <div class="network-box">
-                  <span class="ip-address font-mono">{{ row.ipAddress || '—' }}</span>
-                  <span
-                    class="status-code"
-                    [class.ok]="(row.statusCode || 200) < 400"
-                    [class.err]="(row.statusCode || 200) >= 400"
-                  >
-                    HTTP {{ row.statusCode || 200 }}
+                  <span class="resource-type">{{ row.resourceType | auditResourceLabel }}</span>
+                  <span class="resource-id" [class.text-muted]="!row.resourceId" [matTooltip]="row.resourceId || ''">
+                    {{ row.resourceId || '—' }}
                   </span>
                 </div>
               </td>
@@ -241,13 +266,13 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
 
             <!-- Actions Column -->
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef class="text-right">Detalle</th>
-              <td mat-cell *matCellDef="let row" class="text-right">
+              <th mat-header-cell *matHeaderCellDef class="col-actions text-right">Ver</th>
+              <td mat-cell *matCellDef="let row" class="col-actions text-right">
                 <button
                   mat-icon-button
                   color="primary"
                   (click)="openDetail(row)"
-                  matTooltip="Ver detalle forense y diff"
+                  matTooltip="Ver detalle forense y payload"
                 >
                   <mat-icon>visibility</mat-icon>
                 </button>
@@ -289,26 +314,28 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
   styles: [
     `
       .audit-trail-container {
-        padding: 24px;
+        padding: 20px;
         max-width: 1400px;
         margin: 0 auto;
+        width: 100%;
+        box-sizing: border-box;
       }
       .header-banner {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
         flex-wrap: wrap;
         gap: 16px;
       }
       .title-group {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 14px;
       }
       .icon-circle {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
         border-radius: 12px;
         background: #e3f2fd;
         display: flex;
@@ -317,133 +344,202 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
       }
       .icon-circle mat-icon {
         color: #1565c0;
-        font-size: 28px;
-        width: 28px;
-        height: 28px;
+        font-size: 26px;
+        width: 26px;
+        height: 26px;
       }
       .title-group h1 {
         margin: 0;
-        font-size: 24px;
+        font-size: 22px;
         font-weight: 700;
-        color: var(--app-color-heading);
+        color: var(--app-color-heading, #1e293b);
       }
       .subtitle {
-        margin: 4px 0 0 0;
+        margin: 3px 0 0 0;
         font-size: 13px;
-        color: var(--app-color-muted);
+        color: var(--app-color-muted, #64748b);
       }
       .header-actions {
         display: flex;
-        gap: 12px;
+        gap: 10px;
       }
       .filter-card {
-        padding: 20px 24px;
-        margin-bottom: 24px;
-        border-radius: 14px;
-        border: 1px solid var(--app-color-card-border);
-        background: var(--app-color-card-bg);
-        box-shadow: var(--app-shadow-card);
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        border: 1px solid var(--app-color-card-border, #e2e8f0);
+        background: var(--app-color-card-bg, #ffffff);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       }
       .filters-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 10px;
+      }
+      .filter-item {
+        width: 100%;
       }
       .search-item {
         grid-column: span 2;
       }
+      @media (max-width: 768px) {
+        .search-item {
+          grid-column: span 1;
+        }
+      }
       .table-card {
-        position: relative;
-        border-radius: 14px;
-        border: 1px solid var(--app-color-card-border);
-        background: var(--app-color-card-bg);
-        box-shadow: var(--app-shadow-card);
+        border-radius: 12px;
+        border: 1px solid var(--app-color-card-border, #e2e8f0);
+        background: var(--app-color-card-bg, #ffffff);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         overflow: hidden;
+        position: relative;
+        width: 100%;
       }
       .table-responsive {
+        width: 100%;
         overflow-x: auto;
       }
       .audit-table {
         width: 100%;
+        table-layout: auto;
         border-collapse: collapse;
       }
-      .audit-table th.mat-header-cell,
-      .audit-table td.mat-cell {
+      th.mat-header-cell {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #64748b;
+        letter-spacing: 0.5px;
+        padding: 10px 12px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      td.mat-cell {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
         vertical-align: middle;
-        padding: 12px 16px;
-        border-bottom: 1px solid #e0e0e0;
       }
       .audit-row {
         cursor: pointer;
-        transition: background-color 0.15s ease;
+        transition: background 0.12s ease-in-out;
       }
       .audit-row:hover {
-        background-color: #f8f9fa;
+        background: #f8fafc;
       }
-      .timestamp-box,
-      .actor-box,
-      .branch-box,
-      .action-box,
-      .resource-box,
-      .network-box {
+      .timestamp-box {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        min-height: 40px;
-        gap: 2px;
+        line-height: 1.3;
       }
       .date-str {
-        display: block;
-        font-weight: 600;
-        font-size: 13px;
+        font-weight: 500;
+        font-size: 12px;
+        color: #1e293b;
+        white-space: nowrap;
       }
       .time-str {
-        display: block;
-        font-size: 11px;
-        color: #6c757d;
+        font-size: 0.75rem;
+        color: #64748b;
         font-family: monospace;
+        white-space: nowrap;
+      }
+      .severity-pill {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .severity-pill.critical {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+      }
+      .severity-pill.high {
+        background: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffe0b2;
+      }
+      .severity-pill.medium {
+        background: #fffde7;
+        color: #f57f17;
+        border: 1px solid #fff59d;
+      }
+      .severity-pill.low {
+        background: #e3f2fd;
+        color: #1565c0;
+        border: 1px solid #bbdefb;
+      }
+      .severity-pill.info {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+      }
+      .actor-box {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+        max-width: 200px;
+      }
+      .actor-header {
+        display: flex;
+        align-items: center;
+        gap: 5px;
       }
       .actor-name {
         font-weight: 600;
-        font-size: 13px;
+        font-size: 12px;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .actor-email {
-        font-size: 11px;
-        color: #6c757d;
+        font-size: 0.75rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .role-pill {
-        display: inline-block;
-        font-size: 10px;
-        padding: 1px 6px;
-        background: #f1f3f5;
+        font-size: 9px;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 1px 5px;
         border-radius: 4px;
         font-weight: 600;
-        width: fit-content;
+        white-space: nowrap;
+      }
+      .branch-box {
+        white-space: nowrap;
       }
       .branch-pill {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        padding: 2px 8px;
-        background: #e8f5e9;
-        color: #2e7d32;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-        width: fit-content;
-      }
-      .pill-icon {
-        font-size: 14px;
-        width: 14px;
-        height: 14px;
-      }
-      .action-chip {
-        display: inline-block;
-        padding: 3px 8px;
+        gap: 3px;
+        background: #f1f5f9;
+        color: #334155;
+        padding: 2px 6px;
         border-radius: 4px;
         font-size: 11px;
         font-weight: 600;
-        width: fit-content;
+      }
+      .pill-icon {
+        font-size: 13px;
+        width: 13px;
+        height: 13px;
+      }
+      .action-chip {
+        display: inline-block;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
       }
       .action-chip.read {
         background: #e3f2fd;
@@ -461,17 +557,35 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
         background: #f3e5f5;
         color: #6a1b9a;
       }
+      .resource-box {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+        max-width: 160px;
+      }
       .resource-type {
         font-weight: 600;
         font-size: 12px;
+        color: #1e293b;
+        white-space: nowrap;
       }
       .resource-id {
-        font-size: 11px;
-        color: #6c757d;
+        font-size: 10px;
         font-family: monospace;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .network-box {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+        white-space: nowrap;
       }
       .ip-address {
-        font-size: 12px;
+        font-size: 11px;
+        color: #334155;
       }
       .status-code {
         font-size: 10px;
@@ -483,17 +597,8 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
       .status-code.err {
         color: #c62828;
       }
-      .font-mono {
-        font-family: monospace;
-      }
-      .text-muted {
-        color: #6c757d;
-      }
-      .text-xs {
-        font-size: 11px;
-      }
-      .text-right {
-        text-align: right;
+      .col-actions {
+        width: 48px;
       }
       .loading-overlay {
         position: absolute;
@@ -501,7 +606,7 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(255, 255, 255, 0.7);
+        background: rgba(255, 255, 255, 0.75);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -510,16 +615,28 @@ import { AuditLogDetailDialogComponent } from '../components/audit-log-detail-di
         z-index: 10;
       }
       .empty-state {
-        padding: 48px;
+        padding: 40px;
         text-align: center;
-        color: #6c757d;
+        color: #64748b;
       }
       .empty-state mat-icon {
-        font-size: 48px;
-        width: 48px;
-        height: 48px;
-        margin-bottom: 8px;
-        opacity: 0.5;
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+        margin-bottom: 6px;
+        opacity: 0.4;
+      }
+      .text-right {
+        text-align: right;
+      }
+      .text-muted {
+        color: #94a3b8;
+      }
+      .text-xs {
+        font-size: 11px;
+      }
+      .font-mono {
+        font-family: monospace;
       }
     `,
   ],
@@ -537,12 +654,21 @@ export class AuditTrailViewerPage implements OnInit {
   readonly pageSizeSignal = signal<number>(50);
 
   selectedBranchId = '';
+  selectedSeverity = '';
   selectedResourceType = '';
   fromDate = '';
   toDate = '';
   searchTerm = '';
 
-  displayedColumns = ['timestamp', 'actor', 'branch', 'action', 'resource', 'network', 'actions'];
+  displayedColumns = [
+    'timestamp',
+    'severity',
+    'actor',
+    'branch',
+    'action',
+    'resource',
+    'actions',
+  ];
 
   ngOnInit(): void {
     this.loadBranches();
@@ -556,20 +682,23 @@ export class AuditTrailViewerPage implements OnInit {
     });
   }
 
-  loadLogs(): void {
-    this.loadingSignal.set(true);
-
-    const filter: AuditLogsFilterParams = {
+  getFilterParams(): AuditLogsFilterParams {
+    return {
       limit: this.pageSizeSignal(),
       offset: this.pageIndexSignal() * this.pageSizeSignal(),
       ...(this.selectedBranchId && { branchId: this.selectedBranchId }),
+      ...(this.selectedSeverity && { severity: this.selectedSeverity as AuditSeverity }),
       ...(this.selectedResourceType && { resourceType: this.selectedResourceType }),
       ...(this.fromDate && { from: new Date(this.fromDate + 'T00:00:00.000Z').toISOString() }),
       ...(this.toDate && { to: new Date(this.toDate + 'T23:59:59.999Z').toISOString() }),
       ...(this.searchTerm && { search: this.searchTerm.trim() }),
     };
+  }
 
-    this.auditService.findAll(filter).subscribe({
+  loadLogs(): void {
+    this.loadingSignal.set(true);
+
+    this.auditService.findAll(this.getFilterParams()).subscribe({
       next: (res) => {
         this.logsSignal.set(res.items);
         this.totalSignal.set(res.total);
@@ -602,11 +731,45 @@ export class AuditTrailViewerPage implements OnInit {
   }
 
   exportCsv(): void {
-    this.auditService.exportToCsv(this.logsSignal());
+    const filters = this.getFilterParams();
+    this.auditService.exportViaApi(filters, 'csv').subscribe({
+      next: (blob) => {
+        const dateStr = new Date().toISOString().split('T')[0];
+        this.auditService.downloadBlob(blob, `audit_trail_export_${dateStr}.csv`);
+      },
+      error: () => {
+        this.auditService.exportToCsv(this.logsSignal());
+      },
+    });
   }
 
   exportJson(): void {
-    this.auditService.exportToJson(this.logsSignal());
+    const filters = this.getFilterParams();
+    this.auditService.exportViaApi(filters, 'json').subscribe({
+      next: (blob) => {
+        const dateStr = new Date().toISOString().split('T')[0];
+        this.auditService.downloadBlob(blob, `audit_trail_export_${dateStr}.json`);
+      },
+      error: () => {
+        this.auditService.exportToJson(this.logsSignal());
+      },
+    });
+  }
+
+  getSeverityClass(severity?: AuditSeverity): string {
+    switch (severity) {
+      case 'CRITICAL':
+        return 'critical';
+      case 'HIGH':
+        return 'high';
+      case 'MEDIUM':
+        return 'medium';
+      case 'LOW':
+        return 'low';
+      case 'INFO':
+      default:
+        return 'info';
+    }
   }
 
   getActionClass(action: string): string {
