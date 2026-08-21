@@ -1,0 +1,244 @@
+<app-section-card [title]="title()" [subtitle]="subtitle()">
+  <!-- Upload / Drag and Drop Area -->
+  <div class="case-file-attachments__upload-box">
+    <div
+      class="case-file-attachments__dropzone"
+      [class.case-file-attachments__dropzone--active]="isDragging()"
+      [class.case-file-attachments__dropzone--has-file]="selectedFile() !== null"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      (click)="triggerFileInput()"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="triggerFileInput()"
+      (keydown.space)="triggerFileInput()"
+    >
+      <input
+        #fileInput
+        type="file"
+        class="case-file-attachments__hidden-input"
+        accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,application/pdf,image/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        (change)="onFileChange($event)"
+      />
+
+      <div class="case-file-attachments__dropzone-content">
+        @if (selectedFile(); as file) {
+          <div class="case-file-attachments__selected-file">
+            <mat-icon class="case-file-attachments__file-icon">description</mat-icon>
+            <div class="case-file-attachments__file-details">
+              <strong>{{ file.name }}</strong>
+              <span>{{ formatBytes(file.size) }}</span>
+            </div>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="$event.stopPropagation(); clearSelectedFile()"
+              matTooltip="Quitar archivo seleccionado"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        } @else {
+          <mat-icon class="case-file-attachments__upload-icon">cloud_upload</mat-icon>
+          <p class="case-file-attachments__prompt">
+            <strong>Arrastra y suelta tu archivo aquí</strong> o haz clic para seleccionarlo
+          </p>
+          <span class="case-file-attachments__hint">
+            Formatos soportados: PDF, JPG, PNG, WEBP, DOC, DOCX (Máx. 10 MB)
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Upload Options Form -->
+    @if (selectedFile()) {
+      <div class="case-file-attachments__form">
+        <div class="case-file-attachments__form-row">
+          <mat-form-field appearance="outline" class="case-file-attachments__category-field">
+            <mat-label>Categoría clínica</mat-label>
+            <mat-select [ngModel]="selectedCategory()" (ngModelChange)="selectedCategory.set($event)">
+              <mat-select-trigger>
+                <div class="case-file-attachments__selected-category-trigger">
+                  <mat-icon>{{ getCategoryIcon(selectedCategory()) }}</mat-icon>
+                  <span>{{ getCategoryLabel(selectedCategory()) }}</span>
+                </div>
+              </mat-select-trigger>
+              @for (option of categoryOptions; track option.value) {
+                <mat-option [value]="option.value">
+                  <div class="case-file-attachments__category-option">
+                    <mat-icon>{{ option.icon }}</mat-icon>
+                    <span>{{ option.label }}</span>
+                  </div>
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="case-file-attachments__notes-field">
+            <mat-label>Observaciones / Notas (Opcional)</mat-label>
+            <input
+              matInput
+              [ngModel]="notes()"
+              (ngModelChange)="notes.set($event)"
+              placeholder="Ej. Estudio psicométrico escolar de 3er grado"
+              maxlength="255"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="case-file-attachments__form-actions">
+          <button
+            mat-button
+            type="button"
+            [disabled]="isUploading()"
+            (click)="clearSelectedFile()"
+          >
+            Cancelar
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="isUploading()"
+            (click)="uploadAttachment()"
+          >
+            @if (isUploading()) {
+              <mat-spinner diameter="18" />
+              <span>Subiendo archivo...</span>
+            } @else {
+              <ng-container>
+                <mat-icon>upload_file</mat-icon>
+                <span>Subir adjunto</span>
+              </ng-container>
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Feedback messages -->
+    @if (fileValidationError()) {
+      <div class="case-file-attachments__feedback case-file-attachments__feedback--error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ fileValidationError() }}</span>
+      </div>
+    }
+
+    @if (uploadSuccessMessage()) {
+      <div class="case-file-attachments__feedback case-file-attachments__feedback--success" role="status">
+        <mat-icon>check_circle</mat-icon>
+        <span>{{ uploadSuccessMessage() }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Attachments List -->
+  @if (isLoading()) {
+    <div class="case-file-attachments__loading">
+      <mat-spinner diameter="32" />
+      <p>Cargando archivos adjuntos...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="case-file-attachments__feedback case-file-attachments__feedback--error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+      <button mat-button type="button" (click)="loadAttachments()">Reintentar</button>
+    </div>
+  } @else if (attachments().length > 0) {
+    <div class="case-file-attachments__table-wrapper app-table-wrapper">
+      <table mat-table [dataSource]="attachments()" class="app-data-table">
+        <!-- Category Column -->
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Categoría</th>
+          <td mat-cell *matCellDef="let attachment">
+            <app-status-badge
+              [label]="getCategoryLabel(attachment.category)"
+              [variant]="getCategoryVariant(attachment.category)"
+            />
+          </td>
+        </ng-container>
+
+        <!-- File Name & Notes Column -->
+        <ng-container matColumnDef="fileName">
+          <th mat-header-cell *matHeaderCellDef>Nombre del archivo</th>
+          <td mat-cell *matCellDef="let attachment">
+            <div class="case-file-attachments__name-cell">
+              <strong class="case-file-attachments__file-title" [title]="attachment.originalName">
+                {{ attachment.originalName }}
+              </strong>
+              @if (attachment.notes) {
+                <span class="case-file-attachments__file-note" [title]="attachment.notes">
+                  {{ attachment.notes }}
+                </span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Size Column -->
+        <ng-container matColumnDef="size">
+          <th mat-header-cell *matHeaderCellDef>Tamaño</th>
+          <td mat-cell *matCellDef="let attachment">
+            {{ formatBytes(attachment.sizeBytes) }}
+          </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Fecha de carga</th>
+          <td mat-cell *matCellDef="let attachment">
+            {{ attachment.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let attachment">
+            <div class="case-file-attachments__actions app-table-actions">
+              @if (canPreview(attachment)) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Previsualizar archivo"
+                  [attr.aria-label]="'Previsualizar ' + attachment.originalName"
+                  (click)="preview(attachment)"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
+              }
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Descargar archivo"
+                [attr.aria-label]="'Descargar ' + attachment.originalName"
+                (click)="download(attachment)"
+              >
+                <mat-icon>download</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Eliminar archivo"
+                [attr.aria-label]="'Eliminar ' + attachment.originalName"
+                (click)="openDeleteDialog(attachment)"
+              >
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  } @else {
+    <app-data-table-empty-state
+      icon="folder_open"
+      title="Sin archivos adjuntos"
+      message="No se han cargado estudios previos, reportes o identificaciones para este expediente."
+    />
+  }
+</app-section-card>

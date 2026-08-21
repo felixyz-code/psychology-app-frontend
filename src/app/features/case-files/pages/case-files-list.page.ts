@@ -264,8 +264,12 @@ export class CaseFilesListPage {
             initialDocumentType: 'NOM_004_EVOLUTION_NOTE',
             caseFileId: caseFile.id,
           },
-          panelClass: 'app-dialog-panel',
-          maxWidth: '95vw',
+          width: '90vw',
+          maxWidth: '960px',
+          maxHeight: '94vh',
+          panelClass: 'app-clinical-preview-dialog-panel',
+          autoFocus: false,
+          restoreFocus: true,
         });
       },
     });

@@ -58,6 +58,7 @@ import { SessionNoteFormDialogComponent } from '../../session-notes/components/s
 import { SessionNote } from '../../session-notes/models/session-note.models';
 import { Patient } from '../models/patient.models';
 import { PatientFormDialogComponent } from './patient-form-dialog.component';
+import { CaseFileAttachmentsComponent } from '../../case-files/components/case-file-attachments/case-file-attachments.component';
 import { AssessmentListComponent } from '../../assessments/components/assessment-list/assessment-list.component';
 import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/components/clinical-document-preview-dialog.component';
 import { ClinicalDocumentType } from '../../case-files/models/clinical-pdf.models';
@@ -80,6 +81,7 @@ interface PatientDetailDialogData {
     MatTooltipModule,
     ActionCardComponent,
     AssessmentListComponent,
+    CaseFileAttachmentsComponent,
     ClinicalTimelineComponent,
     DataTableEmptyStateComponent,
     DataTableToolbarComponent,
@@ -114,6 +116,7 @@ export class PatientDetailDialogComponent {
 
   readonly workspaceContent = viewChild<ElementRef<HTMLElement>>('workspaceContent');
   readonly documentsSection = viewChild<ElementRef<HTMLElement>>('documentsSection');
+  readonly attachmentsSection = viewChild<ElementRef<HTMLElement>>('attachmentsSection');
   readonly patient = signal(this.data.patient);
   readonly caseFileId = signal(this.data.caseFileId?.trim() ?? '');
 
@@ -445,8 +448,12 @@ export class PatientDetailDialogComponent {
               caseFileId: targetCaseFileId,
               noteId,
             },
-            panelClass: 'app-dialog-panel',
-            maxWidth: '95vw',
+            width: '90vw',
+            maxWidth: '960px',
+            maxHeight: '94vh',
+            panelClass: 'app-clinical-preview-dialog-panel',
+            autoFocus: false,
+            restoreFocus: true,
           });
         },
       });
@@ -464,8 +471,12 @@ export class PatientDetailDialogComponent {
             initialDocumentType: 'INFORMED_CONSENT',
             caseFileId: targetCaseFileId,
           },
-          panelClass: 'app-dialog-panel',
-          maxWidth: '95vw',
+          width: '90vw',
+          maxWidth: '960px',
+          maxHeight: '94vh',
+          panelClass: 'app-clinical-preview-dialog-panel',
+          autoFocus: false,
+          restoreFocus: true,
         });
       },
     });
@@ -778,6 +789,13 @@ export class PatientDetailDialogComponent {
 
   scrollToDocuments(): void {
     this.documentsSection()?.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
+  scrollToAttachments(): void {
+    this.attachmentsSection()?.nativeElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     });
