@@ -29,3 +29,59 @@ export interface UpdateAppointmentRequest {
   status?: AppointmentStatus;
   notes?: string | null;
 }
+
+export interface RescheduleAppointmentRequest {
+  scheduledAt: string;
+  durationMinutes?: number;
+  reason?: string;
+}
+
+export interface AvailabilitySlot {
+  startTime: string;
+  endTime: string;
+  available: boolean;
+  conflictType?: 'APPOINTMENT' | 'SCHEDULE_BLOCK';
+  title?: string;
+}
+
+export interface AvailabilityResponse {
+  therapistId: string;
+  date: string;
+  slotDurationMinutes: number;
+  slots: AvailabilitySlot[];
+}
+
+export interface AvailabilityQuery {
+  therapistId: string;
+  date: string;
+  durationMinutes?: number;
+  startHour?: number;
+  endHour?: number;
+}
+
+export interface ScheduleBlock {
+  id: string;
+  organizationId?: string | null;
+  therapistId: string;
+  title: string;
+  reason?: string | null;
+  startTime: string;
+  endTime: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateScheduleBlockRequest {
+  therapistId?: string;
+  title: string;
+  reason?: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface QueryScheduleBlocksParams {
+  therapistId?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
