@@ -14,6 +14,8 @@ describe('AuditFormatPipes', () => {
       expect(pipe.transform('SessionNote')).toBe('Nota de Evolución');
       expect(pipe.transform('Document')).toBe('Documento Clínico');
       expect(pipe.transform('CaseFile')).toBe('Expediente Clínico');
+      expect(pipe.transform('CaseFileAttachment')).toBe('Adjunto de Expediente');
+      expect(pipe.transform('ScheduleBlock')).toBe('Bloqueo de Agenda');
       expect(pipe.transform('Patient')).toBe('Paciente');
       expect(pipe.transform('Appointment')).toBe('Cita');
       expect(pipe.transform('PsychologistProfile')).toBe('Perfil Profesional');
@@ -39,6 +41,15 @@ describe('AuditFormatPipes', () => {
       expect(pipe.transform('CLINICAL_CASE_FILE_READ')).toBe('Consulta de Expediente');
       expect(pipe.transform('CLINICAL_PATIENT_READ')).toBe('Consulta de Paciente');
       expect(pipe.transform('CLINICAL_DOCUMENT_DELETE')).toBe('Eliminación de Documento');
+      expect(pipe.transform('CLINICAL_DOCUMENT_EXPORT')).toBe('Exportación de Documento Clínico');
+      expect(pipe.transform('CLINICAL_ATTACHMENT_UPLOAD')).toBe('Carga de Adjunto Clínico');
+      expect(pipe.transform('CLINICAL_ATTACHMENT_READ')).toBe('Consulta de Adjuntos Clínicos');
+      expect(pipe.transform('CLINICAL_ATTACHMENT_DOWNLOAD')).toBe('Descarga de Adjunto Clínico');
+      expect(pipe.transform('CLINICAL_ATTACHMENT_VIEW')).toBe('Previsualización de Adjunto');
+      expect(pipe.transform('CLINICAL_ATTACHMENT_DELETE')).toBe('Eliminación de Adjunto Clínico');
+      expect(pipe.transform('CLINICAL_APPOINTMENT_RESCHEDULED')).toBe('Reprogramación de Cita');
+      expect(pipe.transform('CLINICAL_SCHEDULE_BLOCK_CREATED')).toBe('Creación de Bloqueo de Agenda');
+      expect(pipe.transform('CLINICAL_SCHEDULE_BLOCK_DELETED')).toBe('Eliminación de Bloqueo de Agenda');
       expect(pipe.transform('AUTH_ROLE_CHANGE')).toBe('Cambio de Rol');
       expect(pipe.transform('AUTH_LOGIN')).toBe('Inicio de Sesión');
     });

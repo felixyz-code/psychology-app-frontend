@@ -132,6 +132,8 @@ import {
               <mat-option value="SessionNote">Nota de Evolución</mat-option>
               <mat-option value="Document">Documento Clínico</mat-option>
               <mat-option value="CaseFile">Expediente Clínico</mat-option>
+              <mat-option value="CaseFileAttachment">Adjunto de Expediente</mat-option>
+              <mat-option value="ScheduleBlock">Bloqueo de Agenda</mat-option>
               <mat-option value="Patient">Paciente</mat-option>
               <mat-option value="Appointment">Cita</mat-option>
               <mat-option value="PsychologistProfile">Perfil Profesional</mat-option>

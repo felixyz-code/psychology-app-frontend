@@ -1,4 +1,4 @@
-﻿:host {
+:host {
   display: block;
 }
 
@@ -94,8 +94,19 @@
 
   &__custom-editor {
     flex-shrink: 0;
-    padding: 6px 0;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+    padding: 0;
+
+    mat-form-field {
+      width: 100%;
+      font-size: 12px;
+    }
+
+    textarea {
+      min-height: 42px;
+      max-height: 70px;
+      resize: vertical;
+    }
   }
 
   &__textarea {
