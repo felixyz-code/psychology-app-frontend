@@ -110,5 +110,9 @@ describe('app routes', () => {
       canActivate: [activeTenantGuard, capabilityGuard],
       data: { requiredCapability: 'invitation.read' },
     });
+    expect(childRoutes.find((route) => route.path === 'notification-templates')).toMatchObject({
+      canActivate: [activeTenantGuard, capabilityGuard],
+      data: { requiredCapability: 'notification_template.read' },
+    });
   });
 });

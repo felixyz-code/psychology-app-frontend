@@ -1,0 +1,188 @@
+<div class="template-editor-dialog">
+  <div class="template-editor-dialog__header">
+    <div class="template-editor-dialog__title-group">
+      <mat-icon class="template-editor-dialog__icon">
+        {{ isEditMode() ? 'edit_note' : 'post_add' }}
+      </mat-icon>
+      <div>
+        <h2 mat-dialog-title class="template-editor-dialog__title">
+          {{ isEditMode() ? 'Editar Plantilla de Notificación' : 'Nueva Plantilla de Notificación' }}
+        </h2>
+        <p class="template-editor-dialog__subtitle">
+          Personaliza el mensaje transaccional multicanal y añade variables dinámicas en tiempo real.
+        </p>
+      </div>
+    </div>
+
+    <button
+      mat-stroked-button
+      type="button"
+      class="dialog-close-btn"
+      aria-label="Cerrar ventana"
+      (click)="onCancel()"
+    >
+      <mat-icon>close</mat-icon>
+      <span>Cerrar</span>
+    </button>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="template-editor-dialog__error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <div class="template-editor-dialog__body">
+    <!-- LEFT: FORM CONFIGURATION -->
+    <form [formGroup]="form" class="template-editor-dialog__form">
+      <div class="form-row">
+        <!-- Canal -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Canal de Entrega</mat-label>
+          <mat-select formControlName="channel" [disabled]="isEditMode()">
+            @for (ch of channelOptions; track ch.value) {
+              <mat-option [value]="ch.value">{{ ch.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Tipo de Evento -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Evento Desencadenador</mat-label>
+          <mat-select formControlName="eventType" [disabled]="isEditMode()">
+            @for (ev of eventTypeOptions; track ev.value) {
+              <mat-option [value]="ev.value">{{ ev.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Nombre de la Plantilla -->
+      <mat-form-field appearance="outline" class="form-field form-field--full">
+        <mat-label>Nombre Descriptivo</mat-label>
+        <input
+          matInput
+          formControlName="name"
+          placeholder="Ej. Confirmación WhatsApp Estándar"
+          maxlength="150"
+        />
+        @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+          <mat-error>El nombre de la plantilla es obligatorio.</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Asunto (Solo si Canal es EMAIL) -->
+      @if (form.get('channel')?.value === 'EMAIL') {
+        <mat-form-field appearance="outline" class="form-field form-field--full">
+          <mat-label>Línea de Asunto (Email Subject)</mat-label>
+          <input
+            #subjectInput
+            matInput
+            formControlName="subject"
+            placeholder="Ej. Confirmación de tu cita en la clínica"
+            maxlength="255"
+            (focus)="activeField.set('subject')"
+          />
+          @if (form.get('subject')?.hasError('required') && form.get('subject')?.touched) {
+            <mat-error>El asunto es obligatorio para plantillas de Email.</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <!-- Panel de Variables Dinámicas Rápidas -->
+      <div class="variables-panel">
+        <div class="variables-panel__header">
+          <div class="variables-panel__title">
+            <mat-icon>data_object</mat-icon>
+            <span>Variables Disponibles (Clic para insertar en {{ activeField() === 'subject' ? 'Asunto' : 'Cuerpo' }})</span>
+          </div>
+          <span class="variables-panel__hint">Sintaxis: {{ '{{nombreVariable}}' }}</span>
+        </div>
+
+        <div class="variables-panel__chips" role="list">
+          @for (v of variables(); track v.key) {
+            <button
+              type="button"
+              class="var-chip"
+              [matTooltip]="v.description + ' (Ej: ' + v.exampleValue + ')'"
+              (click)="insertVariable(v.key)"
+            >
+              + {{ '{{' + v.key + '}}' }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Cuerpo del Mensaje -->
+      <mat-form-field appearance="outline" class="form-field form-field--full body-field">
+        <mat-label>Cuerpo del Mensaje / Contenido</mat-label>
+        <textarea
+          #bodyTextarea
+          matInput
+          formControlName="body"
+          rows="6"
+          placeholder="Redacta el mensaje usando las variables disponibles..."
+          (focus)="activeField.set('body')"
+        ></textarea>
+        @if (form.get('body')?.hasError('required') && form.get('body')?.touched) {
+          <mat-error>El cuerpo del mensaje no puede estar vacío.</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Slide Toggle Activo -->
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="isActive" color="primary">
+          Plantilla activa para envíos automáticos
+        </mat-slide-toggle>
+      </div>
+    </form>
+
+    <!-- RIGHT: REAL-TIME PREVIEW -->
+    <div class="template-editor-dialog__preview">
+      <div class="preview-header">
+        <mat-icon>visibility</mat-icon>
+        <h3>Vista Previa en Tiempo Real</h3>
+      </div>
+
+      <app-template-preview-card
+        [channel]="form.get('channel')?.value"
+        [eventType]="form.get('eventType')?.value"
+        [name]="form.get('name')?.value"
+        [subject]="form.get('subject')?.value"
+        [body]="form.get('body')?.value"
+      />
+    </div>
+  </div>
+
+  <div class="template-editor-dialog__footer">
+    <button
+      mat-stroked-button
+      type="button"
+      class="dialog-close-btn"
+      (click)="onCancel()"
+      [disabled]="isSaving()"
+    >
+      Cancelar
+    </button>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      class="save-btn action-button"
+      (click)="onSave()"
+      [disabled]="isSaving() || form.invalid"
+    >
+      @if (isSaving()) {
+        <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
+        <span>Guardando...</span>
+      } @else {
+        <ng-container>
+          <mat-icon>save</mat-icon>
+          <span>{{ isEditMode() ? 'Guardar Cambios' : 'Crear Plantilla' }}</span>
+        </ng-container>
+      }
+    </button>
+  </div>
+</div>

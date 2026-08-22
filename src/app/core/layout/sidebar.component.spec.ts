@@ -82,4 +82,10 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Finanzas');
   });
+
+  it('renders Plantillas link when notification_template.read is granted', async () => {
+    capabilities.update((current) => [...current, 'notification_template.read']);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Plantillas');
+  });
 });

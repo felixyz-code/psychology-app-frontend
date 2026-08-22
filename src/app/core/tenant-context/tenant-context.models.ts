@@ -52,6 +52,8 @@ export type TenantCapability =
   | 'membership.reactivate'
   | 'membership.remove'
   | 'membership.suspend'
+  | 'notification_template.manage'
+  | 'notification_template.read'
   | 'organization.manage'
   | 'organization.read'
   | 'ownership.transfer'
@@ -92,6 +94,8 @@ export const TENANT_CAPABILITIES: readonly TenantCapability[] = [
   'membership.reactivate',
   'membership.remove',
   'membership.suspend',
+  'notification_template.manage',
+  'notification_template.read',
   'organization.manage',
   'organization.read',
   'ownership.transfer',

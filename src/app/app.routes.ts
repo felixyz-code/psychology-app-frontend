@@ -134,6 +134,15 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'notification-templates',
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'notification_template.read' },
+        loadChildren: () =>
+          import('./features/notification-templates/notification-templates.routes').then(
+            (m) => m.notificationTemplatesRoutes,
+          ),
+      },
+      {
         path: 'audit-trail',
         canActivate: [activeTenantGuard, capabilityGuard],
         data: { requiredCapability: 'audit.read' },
