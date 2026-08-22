@@ -164,12 +164,26 @@ import {
       </div>
 
       <div class="audit-dialog__actions">
-        <button mat-button mat-dialog-close>Cerrar</button>
+        <button mat-stroked-button mat-dialog-close class="dialog-close-btn">Cerrar</button>
       </div>
     </div>
   `,
   styles: [
     `
+      .dialog-close-btn {
+        border: 1px solid #cbd5e1 !important;
+        background-color: #f8fafc !important;
+        color: #334155 !important;
+        font-weight: 500;
+        border-radius: 10px;
+        transition: background-color 150ms ease, border-color 150ms ease;
+
+        &:hover:not(:disabled) {
+          background-color: #f1f5f9 !important;
+          border-color: #94a3b8 !important;
+        }
+      }
+
       .audit-dialog {
         display: flex;
         flex-direction: column;

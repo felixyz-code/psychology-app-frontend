@@ -224,6 +224,20 @@
   padding: 0.75rem 0.5rem 0.25rem;
   border-top: 1px solid var(--app-color-card-border);
   background: var(--app-color-dialog-bg);
+
+  .dialog-close-btn {
+    border: 1px solid #cbd5e1 !important;
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: background-color 150ms ease, border-color 150ms ease;
+
+    &:hover:not(:disabled) {
+      background-color: #f1f5f9 !important;
+      border-color: #94a3b8 !important;
+    }
+  }
 }
 
 .patient-detail-dialog__notes-list,
