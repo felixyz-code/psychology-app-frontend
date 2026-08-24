@@ -52,6 +52,13 @@ export const routes: Routes = [
   },
   {
     path: '',
+    pathMatch: 'full',
+    canActivate: [anonymousOnlyGuard],
+    loadComponent: () =>
+      import('./features/landing/landing-page.component').then((m) => m.LandingPageComponent),
+  },
+  {
+    path: '',
     canActivate: [authGuard, tenantContextGuard],
     loadComponent: () =>
       import('./core/layout/main-layout.component').then((m) => m.MainLayoutComponent),
