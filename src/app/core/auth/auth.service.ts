@@ -6,6 +6,8 @@ import { environment } from '../../../environments/environment';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { TENANT_HTTP_MODE } from '../tenant-context/tenant-http-context';
 import {
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   FreelancerBootstrapRequest,
   FreelancerBootstrapResponse,
   LoginRequest,
@@ -94,6 +96,17 @@ export class AuthService {
           ),
         );
       }),
+    );
+  }
+
+  forgotPassword(email: string): Observable<ForgotPasswordResponse> {
+    const context = new HttpContext().set(TENANT_HTTP_MODE, 'PUBLIC');
+    const body: ForgotPasswordRequest = { email };
+
+    return this.http.post<ForgotPasswordResponse>(
+      this.apiUrl + '/auth/forgot-password',
+      body,
+      { context },
     );
   }
 

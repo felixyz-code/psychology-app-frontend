@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,12 +10,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from './auth.service';
-import { LoginRequest } from './auth.models';
-import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { AuthBrandPanelComponent } from './components/auth-brand-panel.component';
 
 @Component({
-  selector: 'app-login-page',
+  selector: 'app-forgot-password-page',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -28,24 +26,21 @@ import { AuthBrandPanelComponent } from './components/auth-brand-panel.component
     RouterLink,
     AuthBrandPanelComponent,
   ],
-  templateUrl: './login.page.html',
-  styleUrl: './login.page.scss',
+  templateUrl: './forgot-password.page.html',
+  styleUrl: './forgot-password.page.scss',
 })
-export class LoginPage {
+export class ForgotPasswordPage {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
-  private readonly tenantContextStore = inject(TenantContextStore);
-  private readonly router = inject(Router);
 
   readonly isLoading = signal(false);
+  readonly isSubmitted = signal(false);
   readonly errorMessage = signal('');
-  readonly hidePassword = signal(true);
-  readonly signupRoute = '/signup';
-  readonly forgotPasswordRoute = '/forgot-password';
+  readonly submittedEmail = signal('');
+  readonly loginRoute = '/login';
 
-  readonly loginForm = this.formBuilder.nonNullable.group({
+  readonly forgotPasswordForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]],
   });
 
   submit(): void {
@@ -53,45 +48,40 @@ export class LoginPage {
       return;
     }
 
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
+    if (this.forgotPasswordForm.invalid) {
+      this.forgotPasswordForm.markAllAsTouched();
       return;
     }
 
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    const credentials: LoginRequest = this.loginForm.getRawValue();
+    const email = this.forgotPasswordForm.controls.email.value.trim();
 
     this.authService
-      .login(credentials)
+      .forgotPassword(email)
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: () => {
-          void this.router.navigate([
-            this.tenantContextStore.isActiveTenantReady() ||
-            this.tenantContextStore.isAdminSuspendedContext()
-              ? '/dashboard'
-              : '/organization-selection',
-          ]);
+          this.submittedEmail.set(email);
+          this.isSubmitted.set(true);
         },
         error: () => {
-          this.errorMessage.set('Correo o contraseña incorrectos.');
+          this.errorMessage.set(
+            'No fue posible procesar la solicitud en este momento. Intenta nuevamente más tarde.',
+          );
         },
       });
   }
 
-  togglePasswordVisibility(): void {
-    this.hidePassword.update((value) => !value);
+  reset(): void {
+    this.isSubmitted.set(false);
+    this.errorMessage.set('');
+    this.forgotPasswordForm.reset();
   }
 
   hasEmailError(errorCode: 'required' | 'email'): boolean {
-    const control = this.loginForm.controls.email;
-    return control.touched && control.hasError(errorCode);
-  }
-
-  hasPasswordError(errorCode: 'required'): boolean {
-    const control = this.loginForm.controls.password;
+    const control = this.forgotPasswordForm.controls.email;
     return control.touched && control.hasError(errorCode);
   }
 }

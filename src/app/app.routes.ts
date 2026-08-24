@@ -16,6 +16,12 @@ export const routes: Routes = [
     loadComponent: () => import('./core/auth/signup.page').then((m) => m.SignupPage),
   },
   {
+    path: 'forgot-password',
+    canActivate: [anonymousOnlyGuard],
+    loadComponent: () =>
+      import('./core/auth/forgot-password.page').then((m) => m.ForgotPasswordPage),
+  },
+  {
     path: 'organization-selection',
     canActivate: [authGuard],
     loadComponent: () =>
