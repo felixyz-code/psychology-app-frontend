@@ -93,7 +93,7 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="reschedule-dialog__footer">
-    <button mat-button type="button" (click)="close()" [disabled]="isSubmitting()">
+    <button mat-stroked-button type="button" class="dialog-close-btn" (click)="close()" [disabled]="isSubmitting()">
       Cancelar
     </button>
     <button

@@ -1,0 +1,127 @@
+<div class="preview-container">
+  @if (showChannelSwitcher()) {
+    <div class="channel-switcher" role="tablist" aria-label="Seleccionar canal de previsualización">
+      <button
+        type="button"
+        class="channel-btn"
+        [class.channel-btn--active]="currentChannel() === 'WHATSAPP'"
+        (click)="selectChannel('WHATSAPP')"
+      >
+        <mat-icon>chat</mat-icon>
+        WhatsApp
+      </button>
+      <button
+        type="button"
+        class="channel-btn"
+        [class.channel-btn--active]="currentChannel() === 'EMAIL'"
+        (click)="selectChannel('EMAIL')"
+      >
+        <mat-icon>mail</mat-icon>
+        Email
+      </button>
+      <button
+        type="button"
+        class="channel-btn"
+        [class.channel-btn--active]="currentChannel() === 'SMS'"
+        (click)="selectChannel('SMS')"
+      >
+        <mat-icon>sms</mat-icon>
+        SMS
+      </button>
+    </div>
+  }
+
+  <!-- 1. WHATSAPP MOCKUP -->
+  @if (currentChannel() === 'WHATSAPP') {
+    <div class="mockup-whatsapp">
+      <div class="mockup-whatsapp__header">
+        <div class="mockup-whatsapp__avatar">
+          <mat-icon>local_hospital</mat-icon>
+        </div>
+        <div class="mockup-whatsapp__contact">
+          <span class="mockup-whatsapp__name">{{ organizationName() }}</span>
+          <span class="mockup-whatsapp__status">en línea • Cuenta de Empresa</span>
+        </div>
+        <div class="mockup-whatsapp__actions">
+          <mat-icon>videocam</mat-icon>
+          <mat-icon>call</mat-icon>
+          <mat-icon>more_vert</mat-icon>
+        </div>
+      </div>
+
+      <div class="mockup-whatsapp__chat-body">
+        <div class="mockup-whatsapp__date-badge">HOY</div>
+
+        <div class="mockup-whatsapp__bubble">
+          <div class="mockup-whatsapp__event-tag">{{ eventTypeLabel() }}</div>
+          <div class="mockup-whatsapp__text" [innerHTML]="renderedBodyFormatted()"></div>
+          <div class="mockup-whatsapp__footer">
+            <span class="mockup-whatsapp__time">10:45 AM</span>
+            <mat-icon class="mockup-whatsapp__check">done_all</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 2. SMS MOCKUP -->
+  @if (currentChannel() === 'SMS') {
+    <div class="mockup-sms">
+      <div class="mockup-sms__header">
+        <div class="mockup-sms__back"><mat-icon>chevron_left</mat-icon></div>
+        <div class="mockup-sms__sender">
+          <span class="mockup-sms__sender-name">{{ organizationName() }}</span>
+          <span class="mockup-sms__sender-sub">Mensaje de Texto • SMS</span>
+        </div>
+        <div class="mockup-sms__info"><mat-icon>info</mat-icon></div>
+      </div>
+
+      <div class="mockup-sms__chat-body">
+        <div class="mockup-sms__timestamp">Hoy, 10:45 AM</div>
+
+        <div class="mockup-sms__bubble">
+          <div class="mockup-sms__text">{{ renderedBody() }}</div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 3. EMAIL MOCKUP -->
+  @if (currentChannel() === 'EMAIL') {
+    <div class="mockup-email">
+      <div class="mockup-email__envelope-header">
+        <div class="mockup-email__field">
+          <span class="mockup-email__label">De:</span>
+          <span class="mockup-email__val">{{ organizationName() }} &lt;notificaciones&#64;psiqueos.com&gt;</span>
+        </div>
+        <div class="mockup-email__field">
+          <span class="mockup-email__label">Para:</span>
+          <span class="mockup-email__val">Ana Sofía Rodríguez &lt;paciente&#64;ejemplo.com&gt;</span>
+        </div>
+        <div class="mockup-email__field mockup-email__field--subject">
+          <span class="mockup-email__label">Asunto:</span>
+          <span class="mockup-email__val mockup-email__val--bold">{{ renderedSubject() }}</span>
+        </div>
+      </div>
+
+      <div class="mockup-email__document">
+        <div class="mockup-email__brand-banner">
+          <div class="mockup-email__logo">
+            <mat-icon>psychology</mat-icon>
+            <span>{{ organizationName() }}</span>
+          </div>
+          <span class="mockup-email__badge">{{ eventTypeLabel() }}</span>
+        </div>
+
+        <div class="mockup-email__content">
+          <div class="mockup-email__body" [innerHTML]="renderedBodyFormatted()"></div>
+        </div>
+
+        <div class="mockup-email__footer">
+          <p>Este es un correo automático confidencial emitido a través de <strong>PsiqueOS</strong>.</p>
+          <p>Para soporte o consultas, contacta a {{ organizationName() }}.</p>
+        </div>
+      </div>
+    </div>
+  }
+</div>

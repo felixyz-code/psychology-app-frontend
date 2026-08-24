@@ -1,0 +1,304 @@
+<div class="notification-templates-page">
+  <!-- PAGE HEADER & ACTIONS -->
+  <header class="page-header">
+    <div class="page-header__content">
+      <div class="page-header__eyebrow">
+        <mat-icon>chat</mat-icon>
+        <span>Comunicaciones Transaccionales &bull; Mensajería</span>
+      </div>
+      <h1 class="page-header__title">Plantillas de Notificación Multicanal</h1>
+      <p class="page-header__subtitle">
+        Gestiona y personaliza las comunicaciones automatizadas por WhatsApp, Email y SMS para confirmaciones y recordatorios.
+      </p>
+    </div>
+
+    <div class="page-header__actions">
+      <button
+        mat-stroked-button
+        type="button"
+        class="seed-btn"
+        (click)="seedDefaults()"
+        [disabled]="isSeeding() || isLoading()"
+      >
+        <mat-icon>auto_fix_high</mat-icon>
+        <span>{{ isSeeding() ? 'Restaurando...' : 'Plantillas Sugeridas' }}</span>
+      </button>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        class="create-btn"
+        (click)="openCreateDialog()"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Nueva Plantilla</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- METRICS OVERVIEW -->
+  <section class="metrics-grid" aria-label="Resumen de plantillas">
+    <app-metric-card
+      title="Total de Plantillas"
+      [value]="totalTemplatesCount().toString()"
+      icon="dynamic_feed"
+      variant="blue"
+    />
+    <app-metric-card
+      title="WhatsApp"
+      [value]="whatsappCount().toString()"
+      icon="chat"
+      variant="green"
+    />
+    <app-metric-card
+      title="Correo Electrónico"
+      [value]="emailCount().toString()"
+      icon="mail"
+      variant="violet"
+    />
+    <app-metric-card
+      title="Mensajes SMS"
+      [value]="smsCount().toString()"
+      icon="sms"
+      variant="amber"
+    />
+  </section>
+
+  <!-- ERROR ALERT -->
+  @if (errorMessage()) {
+    <div class="alert-banner alert-banner--error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- MAIN WORKSPACE: FILTERS & CONTENT -->
+  <div class="workspace-grid">
+    <!-- LEFT PANEL: TABLE & FILTERS -->
+    <div class="table-card">
+      <!-- FILTER TOOLBAR -->
+      <div class="filters-bar">
+        <div class="channel-chips" role="tablist" aria-label="Filtrar por canal">
+          @for (ch of channelOptions; track ch.value) {
+            <button
+              type="button"
+              class="filter-chip"
+              [class.filter-chip--active]="selectedChannelFilter() === ch.value"
+              (click)="onChannelChange(ch.value)"
+            >
+              <mat-icon>{{ ch.icon }}</mat-icon>
+              <span>{{ ch.label }}</span>
+            </button>
+          }
+        </div>
+
+        <div class="secondary-filters">
+          <mat-form-field appearance="outline" class="search-input">
+            <mat-icon matPrefix>search</mat-icon>
+            <mat-label>Buscar plantilla...</mat-label>
+            <input
+              matInput
+              [ngModel]="searchQuery()"
+              (ngModelChange)="onSearchQueryChange($event)"
+              placeholder="Por nombre o contenido"
+            />
+            @if (searchQuery()) {
+              <button matSuffix mat-icon-button aria-label="Limpiar búsqueda" (click)="onSearchQueryChange('')">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="event-select">
+            <mat-label>Evento</mat-label>
+            <mat-select
+              [ngModel]="selectedEventTypeFilter()"
+              (ngModelChange)="onEventTypeChange($event)"
+            >
+              @for (ev of eventTypeOptions; track ev.value) {
+                <mat-option [value]="ev.value">{{ ev.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- LOADING STATE -->
+      @if (isLoading()) {
+        <div class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Cargando catálogo de plantillas...</p>
+        </div>
+      } @else if (filteredTemplates().length === 0) {
+        <!-- EMPTY STATE -->
+        <div class="empty-state">
+          <mat-icon class="empty-state__icon">mark_email_unread</mat-icon>
+          <h3>No se encontraron plantillas</h3>
+          <p>
+            {{ templates().length === 0 ? 'Esta organización aún no tiene plantillas configuradas.' : 'No hay plantillas que coincidan con los filtros seleccionados.' }}
+          </p>
+          <div class="empty-state__actions">
+            @if (templates().length === 0) {
+              <button mat-stroked-button (click)="seedDefaults()" [disabled]="isSeeding()">
+                <mat-icon>auto_fix_high</mat-icon>
+                <span>Cargar Plantillas Sugeridas</span>
+              </button>
+            }
+            <button mat-flat-button color="primary" (click)="openCreateDialog()">
+              <mat-icon>add</mat-icon>
+              <span>Crear Primera Plantilla</span>
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- DATA TABLE -->
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="filteredTemplates()" class="templates-table">
+            <!-- Canal -->
+            <ng-container matColumnDef="channel">
+              <th mat-header-cell *matHeaderCellDef>Canal</th>
+              <td mat-cell *matCellDef="let tpl">
+                <div class="channel-badge channel-badge--{{ tpl.channel | lowercase }}">
+                  <mat-icon>{{ getChannelIcon(tpl.channel) }}</mat-icon>
+                  <span>{{ getChannelLabel(tpl.channel) }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Evento -->
+            <ng-container matColumnDef="eventType">
+              <th mat-header-cell *matHeaderCellDef>Evento</th>
+              <td mat-cell *matCellDef="let tpl">
+                <span class="event-tag">{{ getEventTypeLabel(tpl.eventType) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Nombre -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Nombre</th>
+              <td mat-cell *matCellDef="let tpl" class="name-cell">
+                <div class="template-name-info">
+                  <span class="template-name-info__title">{{ tpl.name }}</span>
+                  @if (tpl.subject) {
+                    <span class="template-name-info__subject">Asunto: {{ tpl.subject }}</span>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Variables -->
+            <ng-container matColumnDef="variables">
+              <th mat-header-cell *matHeaderCellDef>Variables</th>
+              <td mat-cell *matCellDef="let tpl">
+                <span class="var-badge" [matTooltip]="(tpl.variables || []).join(', ')">
+                  {{ (tpl.variables || []).length }} dinámicas
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Estado -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let tpl">
+                <mat-slide-toggle
+                  [checked]="tpl.isActive"
+                  color="primary"
+                  (change)="toggleActive(tpl, $event)"
+                  [matTooltip]="tpl.isActive ? 'Desactivar plantilla' : 'Activar plantilla'"
+                >
+                  <span class="status-label" [class.status-label--active]="tpl.isActive">
+                    {{ tpl.isActive ? 'Activa' : 'Inactiva' }}
+                  </span>
+                </mat-slide-toggle>
+              </td>
+            </ng-container>
+
+            <!-- Acciones -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="actions-col">Acciones</th>
+              <td mat-cell *matCellDef="let tpl" class="actions-col">
+                <div class="row-actions">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="action-btn action-btn--preview"
+                    [class.action-btn--selected]="selectedTemplateForPreview()?.id === tpl.id"
+                    matTooltip="Previsualizar"
+                    (click)="selectForPreview(tpl)"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="action-btn action-btn--edit"
+                    matTooltip="Editar"
+                    (click)="openEditDialog(tpl)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="action-btn action-btn--delete"
+                    matTooltip="Eliminar"
+                    (click)="deleteTemplate(tpl)"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns"
+              class="mat-mdc-row"
+              [class.table-row--selected]="selectedTemplateForPreview()?.id === row.id"
+              [class.selected-row]="selectedTemplateForPreview()?.id === row.id"
+              (click)="selectForPreview(row)"
+            ></tr>
+          </table>
+        </div>
+      }
+    </div>
+
+    <!-- RIGHT PANEL: DYNAMIC LIVE PREVIEW STICKY CARD -->
+    @if (selectedTemplateForPreview()) {
+      <div class="preview-panel">
+        <div class="preview-panel__card">
+          <div class="preview-panel__header">
+            <div class="preview-panel__title-group">
+              <mat-icon>devices</mat-icon>
+              <h3>Simulador de Entrega</h3>
+            </div>
+            <button
+              mat-stroked-button
+              type="button"
+              class="edit-preview-btn"
+              (click)="openEditDialog(selectedTemplateForPreview()!)"
+            >
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+          </div>
+
+          <div class="preview-panel__body">
+            <app-template-preview-card
+              [channel]="selectedTemplateForPreview()!.channel"
+              [eventType]="selectedTemplateForPreview()!.eventType"
+              [name]="selectedTemplateForPreview()!.name"
+              [subject]="selectedTemplateForPreview()!.subject"
+              [body]="selectedTemplateForPreview()!.body"
+              [showChannelSwitcher]="false"
+            />
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

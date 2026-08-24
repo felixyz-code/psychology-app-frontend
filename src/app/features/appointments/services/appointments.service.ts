@@ -1,8 +1,9 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { TENANT_HTTP_MODE } from '../../../core/tenant-context/tenant-http-context';
 import {
   Appointment,
   AvailabilityQuery,
@@ -10,8 +11,10 @@ import {
   CreateAppointmentRequest,
   CreateScheduleBlockRequest,
   QueryScheduleBlocksParams,
+  PublicTeleconsultationRoom,
   RescheduleAppointmentRequest,
   ScheduleBlock,
+  TeleconsultationRoom,
   UpdateAppointmentRequest,
 } from '../models/appointment.models';
 
@@ -92,6 +95,46 @@ export class AppointmentsService {
 
   deleteScheduleBlock(id: string): Observable<ScheduleBlock> {
     return this.http.delete<ScheduleBlock>(`${this.apiUrl}/schedule-blocks/${id}`);
+  }
+
+  // ─── Teleconsultation ──────────────────────────────────────────────────────
+
+  createTeleconsultationRoom(appointmentId: string): Observable<TeleconsultationRoom> {
+    return this.http.post<TeleconsultationRoom>(
+      `${this.apiUrl}/appointments/${appointmentId}/teleconsultation-room`,
+      {},
+    );
+  }
+
+  getTeleconsultationRoom(appointmentId: string): Observable<TeleconsultationRoom> {
+    return this.http.get<TeleconsultationRoom>(
+      `${this.apiUrl}/appointments/${appointmentId}/teleconsultation-room`,
+    );
+  }
+
+  activateTeleconsultationRoom(appointmentId: string): Observable<TeleconsultationRoom> {
+    return this.http.post<TeleconsultationRoom>(
+      `${this.apiUrl}/appointments/${appointmentId}/teleconsultation-room/activate`,
+      {},
+    );
+  }
+
+  terminateTeleconsultationRoom(appointmentId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/appointments/${appointmentId}/teleconsultation-room`,
+    );
+  }
+
+  getPublicTeleconsultationRoom(
+    roomCode: string,
+    token: string,
+  ): Observable<PublicTeleconsultationRoom> {
+    const params = new HttpParams().set('token', token);
+    const context = new HttpContext().set(TENANT_HTTP_MODE, 'PUBLIC');
+    return this.http.get<PublicTeleconsultationRoom>(
+      `${this.apiUrl}/teleconsultation/access/${roomCode}`,
+      { params, context },
+    );
   }
 }
 

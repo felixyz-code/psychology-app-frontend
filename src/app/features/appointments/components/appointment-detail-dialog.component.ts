@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
 import { AuthStore } from '../../../core/auth/auth.store';
@@ -10,6 +10,10 @@ import {
   StatusBadgeVariant,
 } from '../../../shared/components/status-badge/status-badge.component';
 import { Appointment, AppointmentStatus } from '../models/appointment.models';
+import {
+  TeleconsultationRoomDialogComponent,
+  TeleconsultationRoomDialogData,
+} from './teleconsultation-room-dialog.component';
 
 interface AppointmentDetailDialogData {
   appointment: Appointment;
@@ -34,6 +38,7 @@ export class AppointmentDetailDialogComponent {
 
   private readonly data = inject<AppointmentDetailDialogData>(MAT_DIALOG_DATA);
   private readonly authStore = inject(AuthStore);
+  private readonly dialog = inject(MatDialog);
   private readonly dialogRef = inject(
     MatDialogRef<
       AppointmentDetailDialogComponent,
@@ -52,6 +57,25 @@ export class AppointmentDetailDialogComponent {
     this.dialogRef.close({
       action: 'edit',
       appointment: this.appointment,
+    });
+  }
+
+  canStartTeleconsultation(): boolean {
+    return (
+      this.appointment.status === 'SCHEDULED' ||
+      this.appointment.status === 'COMPLETED'
+    );
+  }
+
+  openTeleconsultation(): void {
+    const dialogData: TeleconsultationRoomDialogData = {
+      appointmentId: this.appointment.id,
+    };
+    this.dialog.open(TeleconsultationRoomDialogComponent, {
+      data: dialogData,
+      width: '640px',
+      maxWidth: '95vw',
+      disableClose: false,
     });
   }
 

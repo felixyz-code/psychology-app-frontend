@@ -210,6 +210,25 @@
       @if (
         tenantContextStore.isActiveTenantReady() &&
         !tenantContextStore.isCanonicalContextSynchronizationPending() &&
+        tenantContextStore.hasCapability('notification_template.read')
+      ) {
+        <a
+          routerLink="/notification-templates"
+          routerLinkActive="sidebar__link--active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="sidebar__link"
+          (click)="navSelected.emit()"
+        >
+          <mat-icon>chat</mat-icon>
+          <span class="sidebar__content">
+            <span class="sidebar__title">Plantillas</span>
+          </span>
+        </a>
+      }
+
+      @if (
+        tenantContextStore.isActiveTenantReady() &&
+        !tenantContextStore.isCanonicalContextSynchronizationPending() &&
         tenantContextStore.hasCapability('audit.read')
       ) {
         <a

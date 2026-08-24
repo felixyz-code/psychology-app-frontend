@@ -31,6 +31,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'teleconsulta/:roomCode',
+    loadComponent: () =>
+      import('./features/teleconsultation/pages/teleconsultation-room-view.page').then(
+        (m) => m.TeleconsultationRoomViewPage,
+      ),
+  },
+  {
+    path: 'teleconsulta',
+    loadComponent: () =>
+      import('./features/teleconsultation/pages/teleconsultation-room-view.page').then(
+        (m) => m.TeleconsultationRoomViewPage,
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard, tenantContextGuard],
     loadComponent: () =>
@@ -131,6 +145,15 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/assessments/assessment-management.routes').then(
             (m) => m.assessmentManagementRoutes,
+          ),
+      },
+      {
+        path: 'notification-templates',
+        canActivate: [activeTenantGuard, capabilityGuard],
+        data: { requiredCapability: 'notification_template.read' },
+        loadChildren: () =>
+          import('./features/notification-templates/notification-templates.routes').then(
+            (m) => m.notificationTemplatesRoutes,
           ),
       },
       {

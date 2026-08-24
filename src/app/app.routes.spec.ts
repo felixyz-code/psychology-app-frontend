@@ -12,6 +12,16 @@ describe('app routes', () => {
     expect(loginRoute?.loadComponent).toBeDefined();
   });
 
+  it('exposes public teleconsultation routes outside the protected shell without auth guard', () => {
+    const paramRoute = routes.find((route) => route.path === 'teleconsulta/:roomCode');
+    const directRoute = routes.find((route) => route.path === 'teleconsulta');
+
+    expect(paramRoute?.canActivate).toBeUndefined();
+    expect(paramRoute?.loadComponent).toBeDefined();
+    expect(directRoute?.canActivate).toBeUndefined();
+    expect(directRoute?.loadComponent).toBeDefined();
+  });
+
   it('exposes signup to anonymous users through the narrowly scoped anonymous-only policy', () => {
     const signupRoute = routes.find((route) => route.path === 'signup');
 
@@ -109,6 +119,10 @@ describe('app routes', () => {
     expect(childRoutes.find((route) => route.path === 'invitation-administration')).toMatchObject({
       canActivate: [activeTenantGuard, capabilityGuard],
       data: { requiredCapability: 'invitation.read' },
+    });
+    expect(childRoutes.find((route) => route.path === 'notification-templates')).toMatchObject({
+      canActivate: [activeTenantGuard, capabilityGuard],
+      data: { requiredCapability: 'notification_template.read' },
     });
   });
 });
