@@ -82,6 +82,17 @@
   <footer class="appointment-detail-dialog__actions app-dialog__actions">
     <button mat-button class="app-secondary-button" type="button" (click)="close()">Cerrar</button>
     <div class="appointment-detail-dialog__actions-group app-dialog__actions-group">
+      @if (canStartTeleconsultation()) {
+        <button
+          mat-stroked-button
+          type="button"
+          class="teleconsult-action-btn"
+          (click)="openTeleconsultation()"
+        >
+          <mat-icon>videocam</mat-icon>
+          Teleconsulta
+        </button>
+      }
       <button
         mat-flat-button
         type="button"
