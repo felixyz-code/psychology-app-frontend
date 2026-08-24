@@ -38,41 +38,44 @@
       <!-- Desktop Nav Links -->
       <nav class="landing-header__nav" aria-label="Navegación principal">
         <button type="button" class="landing-header__nav-link" (click)="scrollToSection('caracteristicas')">
-          Características
+          {{ 'landing.nav.features' | translate }}
         </button>
         <button type="button" class="landing-header__nav-link" (click)="scrollToSection('planes')">
-          Planes y Precios
+          {{ 'landing.nav.pricing' | translate }}
         </button>
         <button type="button" class="landing-header__nav-link" (click)="scrollToSection('seguridad')">
-          Seguridad & NOM-004
+          {{ 'landing.nav.security' | translate }}
         </button>
         <button type="button" class="landing-header__nav-link" (click)="scrollToSection('faq')">
-          Preguntas Frecuentes
+          {{ 'landing.nav.faq' | translate }}
         </button>
       </nav>
 
       <!-- Desktop Actions -->
       <div class="landing-header__actions">
+        <!-- Language Switcher -->
+        <app-language-switcher variant="segmented" class="landing-lang-switcher" />
+
         <!-- Theme Toggle -->
         <button
           type="button"
           class="landing-theme-toggle-btn"
           (click)="toggleTheme()"
-          [attr.aria-label]="isDarkTheme() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
-          [title]="isDarkTheme() ? 'Modo Claro' : 'Modo Oscuro'"
+          [attr.aria-label]="isDarkTheme() ? ('common.lightTheme' | translate) : ('common.darkTheme' | translate)"
+          [title]="isDarkTheme() ? ('common.lightTheme' | translate) : ('common.darkTheme' | translate)"
         >
           <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>
 
         <a routerLink="/sandbox" class="landing-btn landing-btn--ghost">
           <mat-icon class="landing-btn__icon">science</mat-icon>
-          <span>Sandbox Demo</span>
+          <span>{{ 'landing.nav.sandbox' | translate }}</span>
         </a>
         <a routerLink="/login" class="landing-btn landing-btn--ghost">
-          Iniciar Sesión
+          {{ 'landing.nav.login' | translate }}
         </a>
         <a routerLink="/signup" class="landing-btn landing-btn--primary">
-          <span>Comenzar Gratis</span>
+          <span>{{ 'landing.nav.startFree' | translate }}</span>
           <mat-icon class="landing-btn__icon">arrow_forward</mat-icon>
         </a>
       </div>
@@ -83,7 +86,7 @@
         class="landing-header__mobile-toggle"
         (click)="toggleMobileMenu()"
         [attr.aria-expanded]="mobileMenuOpen()"
-        aria-label="Abrir menú de navegación"
+        [attr.aria-label]="'landing.nav.mobileToggle' | translate"
       >
         <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
       </button>
@@ -95,31 +98,34 @@
         <nav class="landing-mobile-drawer__links">
           <button type="button" class="landing-mobile-drawer__link" (click)="scrollToSection('caracteristicas')">
             <mat-icon>featured_play_list</mat-icon>
-            <span>Características</span>
+            <span>{{ 'landing.nav.features' | translate }}</span>
           </button>
           <button type="button" class="landing-mobile-drawer__link" (click)="scrollToSection('planes')">
             <mat-icon>sell</mat-icon>
-            <span>Planes y Precios</span>
+            <span>{{ 'landing.nav.pricing' | translate }}</span>
           </button>
           <button type="button" class="landing-mobile-drawer__link" (click)="scrollToSection('seguridad')">
             <mat-icon>verified_user</mat-icon>
-            <span>Seguridad & NOM-004</span>
+            <span>{{ 'landing.nav.security' | translate }}</span>
           </button>
           <button type="button" class="landing-mobile-drawer__link" (click)="scrollToSection('faq')">
             <mat-icon>help_outline</mat-icon>
-            <span>Preguntas Frecuentes</span>
+            <span>{{ 'landing.nav.faq' | translate }}</span>
           </button>
           <a routerLink="/sandbox" (click)="closeMobileMenu()" class="landing-mobile-drawer__link">
             <mat-icon>science</mat-icon>
-            <span>Explorar Sandbox Demo</span>
+            <span>{{ 'landing.nav.demo' | translate }}</span>
           </a>
         </nav>
         <div class="landing-mobile-drawer__actions">
+          <div class="landing-mobile-drawer__lang-row" style="display: flex; justify-content: center; margin-bottom: 12px;">
+            <app-language-switcher variant="segmented" />
+          </div>
           <a routerLink="/login" (click)="closeMobileMenu()" class="landing-btn landing-btn--ghost landing-btn--full">
-            Iniciar Sesión
+            {{ 'landing.nav.login' | translate }}
           </a>
           <a routerLink="/signup" (click)="closeMobileMenu()" class="landing-btn landing-btn--primary landing-btn--full">
-            Comenzar Gratis (14 Días)
+            {{ 'landing.hero.startTrial' | translate }}
           </a>
         </div>
       </div>
@@ -134,38 +140,37 @@
       <div class="landing-hero__badge-wrapper">
         <div class="landing-hero__badge">
           <mat-icon class="landing-hero__badge-icon">verified</mat-icon>
-          <span>Software Clínico Especializado en Salud Mental</span>
+          <span>{{ 'landing.hero.badge' | translate }}</span>
         </div>
       </div>
 
       <h1 class="landing-hero__headline">
-        El Sistema Operativo Integral para <span class="landing-text-gradient">Profesionales de la Salud Mental</span>
+        {{ 'landing.hero.titleHighlight' | translate }} <span class="landing-text-gradient">{{ 'landing.hero.titleRest' | translate }}</span>
       </h1>
 
       <p class="landing-hero__subheadline">
-        Gestiona expedientes bajo la <strong>NOM-004-SSA3</strong>, aplica <strong>baterías psicométricas baremadas</strong> y
-        conéctate mediante <strong>teleconsulta médica cifrada</strong> en una sola plataforma diseñada para terapeutas y clínicas de alto nivel.
+        {{ 'landing.hero.subtitle' | translate }}
       </p>
 
       <div class="landing-hero__ctas">
         <a routerLink="/signup" class="landing-btn landing-btn--primary landing-btn--large">
-          <span>Crear Cuenta Gratis</span>
+          <span>{{ 'landing.hero.startTrial' | translate }}</span>
           <mat-icon class="landing-btn__icon">arrow_forward</mat-icon>
         </a>
         <a routerLink="/sandbox" class="landing-btn landing-btn--secondary landing-btn--large">
           <mat-icon class="landing-btn__icon">science</mat-icon>
-          <span>Explorar Sandbox en Vivo</span>
+          <span>{{ 'landing.hero.trySandbox' | translate }}</span>
         </a>
       </div>
 
       <p class="landing-hero__microcopy">
         <mat-icon class="landing-hero__microcopy-icon">check_circle</mat-icon>
-        14 días de prueba gratuita · Sin tarjeta de crédito · Configuración en 2 minutos
+        {{ 'landing.cta.noCreditCard' | translate }}
       </p>
 
       <!-- Trust Badges Row -->
       <div class="landing-trust-bar">
-        @for (badge of trustBadges; track badge.label) {
+        @for (badge of trustBadges(); track badge.label) {
           <div class="landing-trust-bar__item">
             <div class="landing-trust-bar__icon-box">
               <mat-icon>{{ badge.icon }}</mat-icon>
@@ -191,7 +196,7 @@
           </div>
 
           <!-- Interactive Workspace Tabs Switcher -->
-          <div class="landing-preview-card__tabs" role="tablist" aria-label="Módulos interactivos de PsiqueOS">
+          <div class="landing-preview-card__tabs" role="tablist" [attr.aria-label]="'landing.preview.sectionTitle' | translate">
             <button
               type="button"
               role="tab"
@@ -201,7 +206,7 @@
               (click)="setPreviewTab('soap')"
             >
               <mat-icon>description</mat-icon>
-              <span>Expediente SOAP</span>
+              <span>{{ 'landing.preview.tabs.soap' | translate }}</span>
             </button>
             <button
               type="button"
@@ -212,7 +217,7 @@
               (click)="setPreviewTab('teleconsultation')"
             >
               <mat-icon>videocam</mat-icon>
-              <span>Teleconsulta Cifrada</span>
+              <span>{{ 'landing.preview.tabs.teleconsultation' | translate }}</span>
             </button>
             <button
               type="button"
@@ -223,7 +228,7 @@
               (click)="setPreviewTab('psychometrics')"
             >
               <mat-icon>psychology</mat-icon>
-              <span>Batería Psicométrica</span>
+              <span>{{ 'landing.preview.tabs.psychometrics' | translate }}</span>
             </button>
             <button
               type="button"
@@ -234,7 +239,7 @@
               (click)="setPreviewTab('paef')"
             >
               <mat-icon>corporate_fare</mat-icon>
-              <span>Convenios PAEF</span>
+              <span>{{ 'landing.preview.tabs.paef' | translate }}</span>
             </button>
           </div>
 

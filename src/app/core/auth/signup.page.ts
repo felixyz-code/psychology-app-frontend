@@ -54,6 +54,10 @@ export function utf8MaxBytes(maxBytes: number): ValidatorFn {
   };
 }
 
+import { LanguageSwitcherComponent } from '../i18n/components/language-switcher.component';
+import { TranslatePipe } from '../i18n/translate.pipe';
+import { I18nService } from '../i18n/i18n.service';
+
 @Component({
   selector: 'app-signup-page',
   standalone: true,
@@ -68,6 +72,8 @@ export function utf8MaxBytes(maxBytes: number): ValidatorFn {
     MatProgressSpinnerModule,
     NgClass,
     AuthBrandPanelComponent,
+    LanguageSwitcherComponent,
+    TranslatePipe,
   ],
   templateUrl: './signup.page.html',
   styleUrl: './signup.page.scss',
@@ -78,6 +84,7 @@ export class SignupPage {
   private readonly authStore = inject(AuthStore);
   private readonly tenantContextStore = inject(TenantContextStore);
   private readonly router = inject(Router);
+  readonly i18n = inject(I18nService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly loginRoute = '/login';

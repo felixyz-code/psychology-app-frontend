@@ -21,6 +21,9 @@ import {
   SandboxAssessmentItem,
 } from '../services/sandbox-state.service';
 import { DemoTourGuideComponent } from '../components/demo-tour-guide/demo-tour-guide.component';
+import { LanguageSwitcherComponent } from '../../../core/i18n/components/language-switcher.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-sandbox-page',
@@ -34,6 +37,8 @@ import { DemoTourGuideComponent } from '../components/demo-tour-guide/demo-tour-
     MatChipsModule,
     MatTooltipModule,
     DemoTourGuideComponent,
+    LanguageSwitcherComponent,
+    TranslatePipe,
   ],
   templateUrl: './sandbox.page.html',
   styleUrl: './sandbox.page.scss',
@@ -42,6 +47,7 @@ import { DemoTourGuideComponent } from '../components/demo-tour-guide/demo-tour-
 export class SandboxPageComponent {
   readonly sandboxState = inject(SandboxStateService);
   private readonly themeService = inject(ThemeService);
+  readonly i18n = inject(I18nService);
 
   readonly isDarkTheme = this.themeService.isDarkTheme;
 

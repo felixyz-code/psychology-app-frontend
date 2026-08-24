@@ -11,6 +11,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from './auth.service';
 import { AuthBrandPanelComponent } from './components/auth-brand-panel.component';
+import { LanguageSwitcherComponent } from '../i18n/components/language-switcher.component';
+import { TranslatePipe } from '../i18n/translate.pipe';
+import { I18nService } from '../i18n/i18n.service';
 
 @Component({
   selector: 'app-forgot-password-page',
@@ -25,6 +28,8 @@ import { AuthBrandPanelComponent } from './components/auth-brand-panel.component
     MatProgressSpinnerModule,
     RouterLink,
     AuthBrandPanelComponent,
+    LanguageSwitcherComponent,
+    TranslatePipe,
   ],
   templateUrl: './forgot-password.page.html',
   styleUrl: './forgot-password.page.scss',
@@ -32,6 +37,7 @@ import { AuthBrandPanelComponent } from './components/auth-brand-panel.component
 export class ForgotPasswordPage {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  readonly i18n = inject(I18nService);
 
   readonly isLoading = signal(false);
   readonly isSubmitted = signal(false);

@@ -1,17 +1,17 @@
 <!-- Floating Tour Guide Widget -->
-<aside class="tour-guide-container" [class.tour-guide-container--minimized]="isMinimized()" aria-label="Guía interactiva de demostración">
+<aside class="tour-guide-container" [class.tour-guide-container--minimized]="isMinimized()" [attr.aria-label]="'sandbox.tour.badge' | translate">
   @if (isMinimized()) {
     <!-- Minimized Floating Action Pill -->
     <button
       type="button"
       class="tour-launcher-btn"
       (click)="toggleMinimize()"
-      aria-label="Abrir Tour Guiado Interactivo"
-      title="Continuar Tour Guiado"
+      [attr.aria-label]="'sandbox.tour.reopenBtn' | translate"
+      [title]="'sandbox.tour.reopenBtn' | translate"
     >
       <div class="tour-launcher-btn__pulse" aria-hidden="true"></div>
       <mat-icon class="tour-launcher-btn__icon">tour</mat-icon>
-      <span class="tour-launcher-btn__text">Tour Guiado PsiqueOS</span>
+      <span class="tour-launcher-btn__text">{{ 'sandbox.tour.launcherText' | translate }}</span>
       <span class="tour-launcher-btn__step-chip">{{ currentStepIndex() + 1 }}/{{ steps.length }}</span>
     </button>
   } @else {
@@ -21,15 +21,15 @@
       <header class="tour-card__header">
         <div class="tour-card__header-meta">
           <span class="tour-card__badge">{{ currentStep().badge }}</span>
-          <span class="tour-card__step-indicator">Paso {{ currentStepIndex() + 1 }} de {{ steps.length }}</span>
+          <span class="tour-card__step-indicator">{{ 'sandbox.tour.stepCount' | translate:{ current: currentStepIndex() + 1, total: steps.length } }}</span>
         </div>
         <div class="tour-card__header-actions">
           <button
             type="button"
             class="tour-icon-btn"
             (click)="toggleMinimize()"
-            aria-label="Minimizar guía"
-            title="Minimizar"
+            [attr.aria-label]="'common.close' | translate"
+            [title]="'common.close' | translate"
           >
             <mat-icon>remove</mat-icon>
           </button>
@@ -37,8 +37,8 @@
             type="button"
             class="tour-icon-btn"
             (click)="skipTour()"
-            aria-label="Cerrar guía"
-            title="Cerrar Tour"
+            [attr.aria-label]="'sandbox.tour.skipBtn' | translate"
+            [title]="'sandbox.tour.skipBtn' | translate"
           >
             <mat-icon>close</mat-icon>
           </button>
@@ -86,10 +86,10 @@
           class="tour-btn tour-btn--secondary"
           (click)="prevStep()"
           [disabled]="isFirstStep()"
-          aria-label="Paso anterior"
+          [attr.aria-label]="'sandbox.tour.prevBtn' | translate"
         >
           <mat-icon>arrow_back</mat-icon>
-          <span>Anterior</span>
+          <span>{{ 'sandbox.tour.prevBtn' | translate }}</span>
         </button>
 
         <div class="tour-card__footer-right">
@@ -98,9 +98,9 @@
               type="button"
               class="tour-btn tour-btn--primary"
               (click)="nextStep()"
-              aria-label="Siguiente paso"
+              [attr.aria-label]="'sandbox.tour.nextBtn' | translate"
             >
-              <span>Siguiente</span>
+              <span>{{ 'sandbox.tour.nextBtn' | translate }}</span>
               <mat-icon>arrow_forward</mat-icon>
             </button>
           } @else {
@@ -110,7 +110,7 @@
               aria-label="Crear cuenta real en PsiqueOS"
             >
               <mat-icon>bolt</mat-icon>
-              <span>Crear Cuenta Gratis</span>
+              <span>{{ 'sandbox.tour.finishBtn' | translate }}</span>
             </a>
           }
         </div>

@@ -1,40 +1,41 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslatePipe } from '../../i18n/translate.pipe';
+import { I18nService } from '../../i18n/i18n.service';
 
 @Component({
   selector: 'app-auth-brand-panel',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [MatIconModule, TranslatePipe],
   templateUrl: './auth-brand-panel.component.html',
   styleUrl: './auth-brand-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthBrandPanelComponent {
-  readonly features = [
+  private readonly i18n = inject(I18nService);
+
+  readonly features = computed(() => [
     {
       icon: 'description',
-      title: 'Expediente Clínico NOM-004-SSA3',
-      description:
-        'Notas de evolución SOAP, historia clínica estructurada y consentimientos informados con trazabilidad normativa.',
+      title: this.i18n.t('auth.brand.features.nom004.title'),
+      description: this.i18n.t('auth.brand.features.nom004.description'),
     },
     {
       icon: 'videocam',
-      title: 'Teleconsulta Cifrada E2E',
-      description:
-        'Salas virtuales seguras con tokens efímeros, sin descargas y listas para videoconsultas de alta fidelidad.',
+      title: this.i18n.t('auth.brand.features.teleconsultation.title'),
+      description: this.i18n.t('auth.brand.features.teleconsultation.description'),
     },
     {
       icon: 'psychology',
-      title: 'Batería Psicométrica Integrada',
-      description:
-        'Aplicación remota de reactivos estandarizados, corrección baremada automática y reportes longitudinales.',
+      title: this.i18n.t('auth.brand.features.psychometrics.title'),
+      description: this.i18n.t('auth.brand.features.psychometrics.description'),
     },
-  ];
+  ]);
 
-  readonly badges = [
-    { icon: 'lock', label: 'Cifrado AES-256 / TLS 1.3' },
-    { icon: 'verified_user', label: 'NOM-004 / NOM-024' },
-    { icon: 'shield', label: 'Multi-Tenant Aislado' },
-    { icon: 'cloud_done', label: '99.9% Alta Disponibilidad' },
-  ];
+  readonly badges = computed(() => [
+    { icon: 'lock', label: this.i18n.t('auth.brand.badges.encrypted') },
+    { icon: 'verified_user', label: this.i18n.t('auth.brand.badges.mexicanNorms') },
+    { icon: 'shield', label: this.i18n.t('landing.hero.trustBadges.multiTenant') },
+    { icon: 'cloud_done', label: this.i18n.t('landing.hero.trustBadges.sla') },
+  ]);
 }
