@@ -29,6 +29,13 @@ describe('app routes', () => {
     expect(signupRoute?.loadComponent).toBeDefined();
   });
 
+  it('exposes forgot-password to anonymous users through the anonymous-only policy', () => {
+    const forgotPasswordRoute = routes.find((route) => route.path === 'forgot-password');
+
+    expect(forgotPasswordRoute?.canActivate).toEqual([anonymousOnlyGuard]);
+    expect(forgotPasswordRoute?.loadComponent).toBeDefined();
+  });
+
   it('exposes organization selection behind authentication but outside tenant resolution', () => {
     const selectionRoute = routes.find((route) => route.path === 'organization-selection');
 

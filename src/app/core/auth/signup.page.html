@@ -1,204 +1,277 @@
-<section class="signup-page">
-  <mat-card class="signup-card">
-    <mat-card-header class="signup-card__header">
-      <div class="signup-card__eyebrow">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="18"
-          height="18"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="auth-card__logo-isotype"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <line x1="12" y1="2" x2="12" y2="22" />
-          <path d="M4 6v5a8 8 0 0 0 16 0V6" />
-          <line x1="8" y1="22" x2="16" y2="22" />
-        </svg>
-        <span>PsiqueOS</span>
-      </div>
-      <h1 mat-card-title>Crea tu cuenta</h1>
-      <mat-card-subtitle>
-        Configura tu perfil profesional y el espacio clínico de tu consultorio.
-      </mat-card-subtitle>
-    </mat-card-header>
+<div class="auth-split-layout">
+  <!-- Left Side: Brand Showcase Panel -->
+  <app-auth-brand-panel class="auth-split-layout__brand" />
 
-    <mat-card-content>
-      <form class="signup-form" [formGroup]="signupForm" (ngSubmit)="submit()">
-        <div class="signup-form__grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Nombre completo</mat-label>
+  <!-- Right Side: Form Card Area -->
+  <main class="auth-split-layout__form-area">
+    <mat-card class="auth-card auth-card--wide">
+      <mat-card-header class="auth-card__header">
+        <div class="auth-card__eyebrow">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="auth-card__logo-isotype"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <line x1="12" y1="2" x2="12" y2="22" />
+            <path d="M4 6v5a8 8 0 0 0 16 0V6" />
+            <line x1="8" y1="22" x2="16" y2="22" />
+          </svg>
+          <span>PsiqueOS</span>
+        </div>
+        <h1 mat-card-title class="auth-card__title">Crea tu consultorio</h1>
+        <mat-card-subtitle class="auth-card__subtitle">
+          Configura tu perfil profesional y el espacio clínico de tu práctica.
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form class="auth-form" [formGroup]="signupForm" (ngSubmit)="submit()">
+          <!-- Personal & Email Identity Grid -->
+          <div class="auth-form__grid">
+            <mat-form-field appearance="outline" class="auth-form__field">
+              <mat-label>Nombre completo</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="name"
+                autocomplete="name"
+                maxlength="150"
+                placeholder="Dr(a). Nombre Apellido"
+                (blur)="trimField('name')"
+              />
+              <mat-icon matSuffix class="auth-form__field-icon">person_outline</mat-icon>
+              @if (hasControlError('name', 'trimmedRequired')) {
+                <mat-error>El nombre completo es obligatorio.</mat-error>
+              }
+              @if (hasControlError('name', 'maxlength')) {
+                <mat-error>Usa máximo 150 caracteres.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="auth-form__field">
+              <mat-label>Correo electrónico profesional</mat-label>
+              <input
+                matInput
+                type="email"
+                formControlName="email"
+                autocomplete="email"
+                maxlength="255"
+                placeholder="psicologo@ejemplo.com"
+                (blur)="trimField('email')"
+              />
+              <mat-icon matSuffix class="auth-form__field-icon">mail_outline</mat-icon>
+              @if (hasControlError('email', 'trimmedRequired')) {
+                <mat-error>El correo electrónico es obligatorio.</mat-error>
+              }
+              @if (hasControlError('email', 'email')) {
+                <mat-error>Ingresa un correo electrónico válido.</mat-error>
+              }
+              @if (hasControlError('email', 'asciiOnly')) {
+                <mat-error>Usa un correo con caracteres ASCII válidos.</mat-error>
+              }
+              @if (hasControlError('email', 'maxlength')) {
+                <mat-error>Usa máximo 255 caracteres.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Organization / Practice Name -->
+          <mat-form-field appearance="outline" class="auth-form__field">
+            <mat-label>Nombre de tu consultorio o clínica</mat-label>
             <input
               matInput
               type="text"
-              formControlName="name"
-              autocomplete="name"
-              maxlength="150"
-              (blur)="trimField('name')"
-            />
-            @if (hasControlError('name', 'trimmedRequired')) {
-              <mat-error>El nombre es obligatorio.</mat-error>
-            }
-            @if (hasControlError('name', 'maxlength')) {
-              <mat-error>Usa máximo 150 caracteres.</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Correo electrónico</mat-label>
-            <input
-              matInput
-              type="email"
-              formControlName="email"
-              autocomplete="email"
+              formControlName="organizationName"
+              autocomplete="organization"
               maxlength="255"
-              (blur)="trimField('email')"
+              placeholder="Centro de Psicología Integral"
+              (blur)="trimField('organizationName')"
             />
-            @if (hasControlError('email', 'trimmedRequired')) {
-              <mat-error>El correo es obligatorio.</mat-error>
+            <mat-icon matSuffix class="auth-form__field-icon">business</mat-icon>
+            <mat-hint>Será el nombre visible de tu espacio de trabajo clínico.</mat-hint>
+            @if (hasControlError('organizationName', 'trimmedRequired')) {
+              <mat-error>El nombre del consultorio es obligatorio.</mat-error>
             }
-            @if (hasControlError('email', 'email')) {
-              <mat-error>Ingresa un correo válido.</mat-error>
-            }
-            @if (hasControlError('email', 'asciiOnly')) {
-              <mat-error>Usa un correo con caracteres ASCII.</mat-error>
-            }
-            @if (hasControlError('email', 'maxlength')) {
+            @if (hasControlError('organizationName', 'maxlength')) {
               <mat-error>Usa máximo 255 caracteres.</mat-error>
             }
           </mat-form-field>
-        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Nombre de tu consultorio o clínica</mat-label>
-          <input
-            matInput
-            type="text"
-            formControlName="organizationName"
-            autocomplete="organization"
-            maxlength="255"
-            (blur)="trimField('organizationName')"
-          />
-          <mat-hint>Será el nombre visible de tu espacio de trabajo.</mat-hint>
-          @if (hasControlError('organizationName', 'trimmedRequired')) {
-            <mat-error>El nombre del consultorio es obligatorio.</mat-error>
-          }
-          @if (hasControlError('organizationName', 'maxlength')) {
-            <mat-error>Usa máximo 255 caracteres.</mat-error>
-          }
-        </mat-form-field>
-
-        <div class="signup-form__grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Contraseña</mat-label>
-            <input
-              matInput
-              [type]="hidePassword() ? 'password' : 'text'"
-              formControlName="password"
-              autocomplete="new-password"
-            />
-            <button
-              mat-icon-button
-              matSuffix
-              type="button"
-              [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
-              [attr.aria-pressed]="!hidePassword()"
-              (click)="togglePasswordVisibility()"
-            >
-              <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
-            </button>
-            @if (hasControlError('password', 'required')) {
-              <mat-error>La contraseña es obligatoria.</mat-error>
-            }
-            @if (hasControlError('password', 'minlength')) {
-              <mat-error>Usa al menos 12 caracteres.</mat-error>
-            }
-            @if (hasControlError('password', 'utf8MaxBytes')) {
-              <mat-error>La contraseña no puede superar 72 bytes UTF-8.</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Confirmar contraseña</mat-label>
-            <input
-              matInput
-              [type]="hideConfirmPassword() ? 'password' : 'text'"
-              formControlName="confirmPassword"
-              autocomplete="new-password"
-            />
-            <button
-              mat-icon-button
-              matSuffix
-              type="button"
-              [attr.aria-label]="
-                hideConfirmPassword()
-                  ? 'Mostrar confirmación de contraseña'
-                  : 'Ocultar confirmación de contraseña'
-              "
-              [attr.aria-pressed]="!hideConfirmPassword()"
-              (click)="toggleConfirmPasswordVisibility()"
-            >
-              <mat-icon>{{ hideConfirmPassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
-            </button>
-            @if (hasControlError('confirmPassword', 'required')) {
-              <mat-error>Confirma tu contraseña.</mat-error>
-            }
-            @if (hasPasswordMismatch()) {
-              <mat-error>Las contraseñas deben coincidir exactamente.</mat-error>
-            }
-          </mat-form-field>
-        </div>
-
-        @if (errorMessage()) {
-          <div
-            class="signup-form__feedback"
-            [class.signup-form__feedback--partial]="accountCreated()"
-            role="alert"
-          >
-            <p>{{ errorMessage() }}</p>
-            @if (canRetryContext()) {
+          <!-- Password & Confirm Password Grid -->
+          <div class="auth-form__grid">
+            <mat-form-field appearance="outline" class="auth-form__field">
+              <mat-label>Contraseña</mat-label>
+              <input
+                matInput
+                [type]="hidePassword() ? 'password' : 'text'"
+                formControlName="password"
+                autocomplete="new-password"
+                placeholder="Mínimo 12 caracteres"
+              />
               <button
-                mat-stroked-button
+                mat-icon-button
+                matSuffix
                 type="button"
-                [disabled]="isRecoveringContext()"
-                (click)="retryContext()"
+                [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+                [attr.aria-pressed]="!hidePassword()"
+                (click)="togglePasswordVisibility()"
+                class="auth-form__visibility-btn"
               >
-                @if (isRecoveringContext()) {
-                  <mat-spinner diameter="18" />
-                  <span>Preparando...</span>
-                } @else {
-                  <span>Intentar continuar</span>
-                }
+                <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
               </button>
-            }
+              @if (hasControlError('password', 'required')) {
+                <mat-error>La contraseña es obligatoria.</mat-error>
+              }
+              @if (hasControlError('password', 'minlength')) {
+                <mat-error>Usa al menos 12 caracteres.</mat-error>
+              }
+              @if (hasControlError('password', 'utf8MaxBytes')) {
+                <mat-error>La contraseña no puede superar 72 bytes UTF-8.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="auth-form__field">
+              <mat-label>Confirmar contraseña</mat-label>
+              <input
+                matInput
+                [type]="hideConfirmPassword() ? 'password' : 'text'"
+                formControlName="confirmPassword"
+                autocomplete="new-password"
+                placeholder="Repite tu contraseña"
+              />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                [attr.aria-label]="
+                  hideConfirmPassword()
+                    ? 'Mostrar confirmación de contraseña'
+                    : 'Ocultar confirmación de contraseña'
+                "
+                [attr.aria-pressed]="!hideConfirmPassword()"
+                (click)="toggleConfirmPasswordVisibility()"
+                class="auth-form__visibility-btn"
+              >
+                <mat-icon>{{ hideConfirmPassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+              </button>
+              @if (hasControlError('confirmPassword', 'required')) {
+                <mat-error>Confirma tu contraseña.</mat-error>
+              }
+              @if (hasPasswordMismatch()) {
+                <mat-error>Las contraseñas deben coincidir exactamente.</mat-error>
+              }
+            </mat-form-field>
           </div>
-        }
 
-        <button
-          class="signup-form__submit"
-          mat-flat-button
-          color="primary"
-          type="submit"
-          [disabled]="submissionLocked()"
-        >
-          @if (isSubmitting()) {
-            <mat-spinner diameter="20" />
-            <span>Creando cuenta...</span>
-          } @else {
-            <span>Crear cuenta y consultorio</span>
+          <!-- Password Strength Meter Card -->
+          @if (passwordValue()) {
+            <div class="password-meter" [ngClass]="passwordStrengthClass()">
+              <div class="password-meter__header">
+                <span class="password-meter__label">Seguridad de la contraseña:</span>
+                <span class="password-meter__status">{{ passwordStrengthLabel() }}</span>
+              </div>
+
+              <!-- 4-segment progress bar -->
+              <div class="password-meter__bar">
+                <div class="password-meter__segment" [class.password-meter__segment--filled]="passwordScore() >= 1"></div>
+                <div class="password-meter__segment" [class.password-meter__segment--filled]="passwordScore() >= 2"></div>
+                <div class="password-meter__segment" [class.password-meter__segment--filled]="passwordScore() >= 3"></div>
+                <div class="password-meter__segment" [class.password-meter__segment--filled]="passwordScore() >= 4"></div>
+              </div>
+
+              <!-- Real-time Checklist Criteria -->
+              <div class="password-meter__checklist">
+                <div class="password-meter__check-item" [class.password-meter__check-item--valid]="hasMinLength()">
+                  <mat-icon class="password-meter__check-icon">
+                    {{ hasMinLength() ? 'check_circle' : 'radio_button_unchecked' }}
+                  </mat-icon>
+                  <span>Mínimo 12 caracteres</span>
+                </div>
+
+                <div class="password-meter__check-item" [class.password-meter__check-item--valid]="hasUppercase() && hasLowercase()">
+                  <mat-icon class="password-meter__check-icon">
+                    {{ (hasUppercase() && hasLowercase()) ? 'check_circle' : 'radio_button_unchecked' }}
+                  </mat-icon>
+                  <span>Mayúsculas y minúsculas</span>
+                </div>
+
+                <div class="password-meter__check-item" [class.password-meter__check-item--valid]="hasNumberOrSymbol()">
+                  <mat-icon class="password-meter__check-icon">
+                    {{ hasNumberOrSymbol() ? 'check_circle' : 'radio_button_unchecked' }}
+                  </mat-icon>
+                  <span>Números o caracteres especiales</span>
+                </div>
+              </div>
+            </div>
           }
-        </button>
 
-        <p class="signup-form__alternate">
-          ¿Ya tienes una cuenta?
-          <a [routerLink]="loginRoute">Iniciar sesión</a>
-        </p>
-      </form>
-    </mat-card-content>
-  </mat-card>
-</section>
+          <!-- Error Alert Banner -->
+          @if (errorMessage()) {
+            <div
+              class="auth-form__alert auth-form__alert--error"
+              [class.auth-form__alert--partial]="accountCreated()"
+              role="alert"
+            >
+              <mat-icon class="auth-form__alert-icon">
+                {{ accountCreated() ? 'info_outline' : 'error_outline' }}
+              </mat-icon>
+              <div class="auth-form__alert-content">
+                <p class="auth-form__alert-msg">{{ errorMessage() }}</p>
+                @if (canRetryContext()) {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="auth-form__retry-btn"
+                    [disabled]="isRecoveringContext()"
+                    (click)="retryContext()"
+                  >
+                    @if (isRecoveringContext()) {
+                      <mat-spinner diameter="18" />
+                      <span>Preparando...</span>
+                    } @else {
+                      <span>Intentar continuar</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Submit Button -->
+          <button
+            class="auth-form__submit"
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="submissionLocked()"
+          >
+            @if (isSubmitting()) {
+              <mat-spinner diameter="20" />
+              <span>Creando consultorio...</span>
+            } @else {
+              <span class="auth-form__submit-content">
+                <span>Crear cuenta y consultorio</span>
+                <mat-icon class="auth-form__submit-icon">arrow_forward</mat-icon>
+              </span>
+            }
+          </button>
+
+          <!-- Alternate Login Link -->
+          <p class="auth-form__alternate">
+            ¿Ya tienes una cuenta?
+            <a [routerLink]="loginRoute">Iniciar sesión</a>
+          </p>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </main>
+</div>

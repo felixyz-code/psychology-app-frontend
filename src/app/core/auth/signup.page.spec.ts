@@ -345,16 +345,44 @@ describe('SignupPage', () => {
     expect(page.loginRoute).toBe('/login');
   });
 
-  it('renders the product eyebrow and one signup task heading', () => {
+  it('renders the product eyebrow, brand panel and signup title', () => {
     const fixture = TestBed.createComponent(SignupPage);
     fixture.detectChanges();
 
     const nativeElement = fixture.nativeElement as HTMLElement;
-    expect(nativeElement.querySelector('.signup-card__eyebrow')?.textContent?.trim()).toContain(
+    expect(nativeElement.querySelector('app-auth-brand-panel')).toBeTruthy();
+    expect(nativeElement.querySelector('.auth-card__eyebrow')?.textContent?.trim()).toContain(
       'PsiqueOS',
     );
-    const headings = nativeElement.querySelectorAll('h1');
-    expect(headings).toHaveLength(1);
-    expect(headings[0].textContent?.trim()).toBe('Crea tu cuenta');
+    const title = nativeElement.querySelector('.auth-card__title');
+    expect(title?.textContent?.trim()).toBe('Crea tu consultorio');
+  });
+
+  it('calculates password strength reactively', () => {
+    expect(page.passwordStrengthLabel()).toBe('Sin ingresar');
+    expect(page.passwordStrengthClass()).toBe('strength--none');
+
+    page.signupForm.controls.password.setValue('short');
+    expect(page.hasMinLength()).toBe(false);
+    expect(page.passwordStrengthLabel()).toBe('Débil');
+    expect(page.passwordStrengthClass()).toBe('strength--weak');
+
+    page.signupForm.controls.password.setValue('twelvecharacterslong');
+    expect(page.hasMinLength()).toBe(true);
+    expect(page.hasLowercase()).toBe(true);
+    expect(page.hasUppercase()).toBe(false);
+    expect(page.passwordStrengthLabel()).toBe('Regular');
+    expect(page.passwordStrengthClass()).toBe('strength--fair');
+
+    page.signupForm.controls.password.setValue('TwelveCharsLong');
+    expect(page.hasUppercase()).toBe(true);
+    expect(page.passwordStrengthLabel()).toBe('Buena');
+    expect(page.passwordStrengthClass()).toBe('strength--good');
+
+    page.signupForm.controls.password.setValue('TwelveChars123!');
+    expect(page.hasNumberOrSymbol()).toBe(true);
+    expect(page.passwordScore()).toBe(4);
+    expect(page.passwordStrengthLabel()).toBe('Excelente');
+    expect(page.passwordStrengthClass()).toBe('strength--strong');
   });
 });
