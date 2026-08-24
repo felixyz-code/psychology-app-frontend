@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { Title, Meta } from '@angular/platform-browser';
 import { LandingPageComponent } from './landing-page.component';
 import { ThemeService } from '../../core/theme/theme.service';
 
@@ -18,6 +19,10 @@ describe('LandingPageComponent', () => {
     component = fixture.componentInstance;
     themeService = TestBed.inject(ThemeService);
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('should create the landing page component successfully', () => {
@@ -132,5 +137,19 @@ describe('LandingPageComponent', () => {
       block: 'start',
     });
     expect(component.mobileMenuOpen()).toBe(false);
+  });
+
+  it('sets canonical SEO title and meta tags on initialization', () => {
+    const titleService = TestBed.inject(Title);
+    const metaService = TestBed.inject(Meta);
+
+    expect(titleService.getTitle()).toBe(
+      'PsiqueOS | Sistema Operativo Clínico para Profesionales de la Salud Mental',
+    );
+    expect(metaService.getTag("name='description'")?.content).toContain('NOM-004-SSA3');
+    expect(metaService.getTag("property='og:title'")?.content).toBe(
+      'PsiqueOS | Sistema Operativo Clínico para Profesionales de la Salud Mental',
+    );
+    expect(metaService.getTag("property='og:type'")?.content).toBe('website');
   });
 });

@@ -1,5 +1,6 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
+import { Title, Meta } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
@@ -104,5 +105,16 @@ describe('LoginPage', () => {
     expect(page.hidePassword()).toBe(false);
     page.togglePasswordVisibility();
     expect(page.hidePassword()).toBe(true);
+  });
+
+  it('sets SEO title and meta tags on initialization', () => {
+    const titleService = TestBed.inject(Title);
+    const metaService = TestBed.inject(Meta);
+    page.ngOnInit();
+
+    expect(titleService.getTitle()).toBe('Iniciar Sesión | PsiqueOS');
+    expect(metaService.getTag("name='description'")?.content).toContain('PsiqueOS');
+    expect(metaService.getTag("property='og:title'")?.content).toBe('Iniciar Sesión | PsiqueOS');
+    expect(metaService.getTag("property='og:type'")?.content).toBe('website');
   });
 });
