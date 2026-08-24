@@ -102,3 +102,17 @@ export interface TeleconsultationRoom {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface PublicTeleconsultationRoom {
+  id: string;
+  roomCode: string;
+  provider: string;
+  status: TeleconsultationRoomStatus;
+  expiresAt: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  organizationName: string;
+  psychologistName: string;
+  patientName: string;
+}
+

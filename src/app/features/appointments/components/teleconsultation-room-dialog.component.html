@@ -110,6 +110,18 @@
 
     <!-- Action buttons -->
     <div class="teleconsult-dialog__actions">
+      @if (canJoinCall()) {
+        <button
+          mat-flat-button
+          color="primary"
+          class="action-btn action-btn--join"
+          (click)="joinVideoCall()"
+        >
+          <mat-icon>videocam</mat-icon>
+          Entrar a la videollamada
+        </button>
+      }
+
       @if (canActivate()) {
         <button
           mat-flat-button

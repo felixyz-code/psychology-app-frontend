@@ -7,6 +7,7 @@ import {
   CreateAppointmentRequest,
   UpdateAppointmentRequest,
 } from '../models/appointment.models';
+import { TENANT_HTTP_MODE } from '../../../core/tenant-context/tenant-http-context';
 import { AppointmentsService } from './appointments.service';
 
 describe('AppointmentsService', () => {
@@ -169,6 +170,18 @@ describe('AppointmentsService', () => {
     const request = httpTesting.expectOne('/api/schedule-blocks/block-1');
     expect(request.request.method).toBe('DELETE');
     request.flush({ id: 'block-1' });
+  });
+
+  it('gets public teleconsultation room with token and PUBLIC http mode', () => {
+    service.getPublicTeleconsultationRoom('room-123', 'tok-456').subscribe();
+
+    const request = httpTesting.expectOne((req) =>
+      req.url === '/api/teleconsultation/access/room-123' &&
+      req.params.get('token') === 'tok-456',
+    );
+    expect(request.request.method).toBe('GET');
+    expect(request.request.context.get(TENANT_HTTP_MODE)).toBe('PUBLIC');
+    request.flush({ id: 'room-1', roomCode: 'room-123' });
   });
 });
 

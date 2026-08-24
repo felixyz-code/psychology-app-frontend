@@ -31,6 +31,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'teleconsulta/:roomCode',
+    loadComponent: () =>
+      import('./features/teleconsultation/pages/teleconsultation-room-view.page').then(
+        (m) => m.TeleconsultationRoomViewPage,
+      ),
+  },
+  {
+    path: 'teleconsulta',
+    loadComponent: () =>
+      import('./features/teleconsultation/pages/teleconsultation-room-view.page').then(
+        (m) => m.TeleconsultationRoomViewPage,
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard, tenantContextGuard],
     loadComponent: () =>

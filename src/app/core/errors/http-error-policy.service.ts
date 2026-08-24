@@ -59,7 +59,7 @@ export class HttpErrorPolicyService {
   }
 
   private handleUnauthorizedRequest(requestUrl: string): void {
-    if (this.isLoginRequest(requestUrl) || !this.authStore.isAuthenticated()) {
+    if (this.isPublicRequest(requestUrl) || !this.authStore.isAuthenticated()) {
       return;
     }
 
@@ -76,7 +76,12 @@ export class HttpErrorPolicyService {
     });
   }
 
-  private isLoginRequest(requestUrl: string): boolean {
-    return requestUrl.split('?')[0].endsWith('/auth/login');
+  private isPublicRequest(requestUrl: string): boolean {
+    const cleanUrl = requestUrl.split('?')[0];
+    return (
+      cleanUrl.endsWith('/auth/login') ||
+      cleanUrl.includes('/teleconsultation/access') ||
+      cleanUrl.includes('/assessments/public')
+    );
   }
 }

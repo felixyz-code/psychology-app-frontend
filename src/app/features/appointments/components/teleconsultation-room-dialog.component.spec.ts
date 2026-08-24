@@ -163,6 +163,36 @@ describe('TeleconsultationRoomDialogComponent', () => {
     expect(component.room()?.status).toBe('TERMINATED');
   });
 
+  it('canJoinCall is true for PENDING and ACTIVE', () => {
+    const { component } = createComponent();
+
+    component.room.set({ ...MOCK_ROOM, status: 'PENDING' });
+    expect(component.canJoinCall()).toBe(true);
+
+    component.room.set({ ...MOCK_ROOM, status: 'ACTIVE' });
+    expect(component.canJoinCall()).toBe(true);
+
+    component.room.set({ ...MOCK_ROOM, status: 'EXPIRED' });
+    expect(component.canJoinCall()).toBe(false);
+
+    component.room.set({ ...MOCK_ROOM, status: 'TERMINATED' });
+    expect(component.canJoinCall()).toBe(false);
+  });
+
+  it('joinVideoCall opens window with teleconsulta room URL', () => {
+    const { component } = createComponent();
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    component.joinVideoCall();
+
+    expect(openSpy).toHaveBeenCalledWith(
+      `/teleconsulta/${MOCK_ROOM.roomCode}?token=${MOCK_ROOM.patientToken}`,
+      '_blank',
+      'noopener,noreferrer',
+    );
+    openSpy.mockRestore();
+  });
+
   it('close calls dialogRef.close with current room', () => {
     const { component } = createComponent();
     component.close();
