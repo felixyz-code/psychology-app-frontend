@@ -51,6 +51,16 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'sandbox',
+    loadComponent: () =>
+      import('./features/sandbox/pages/sandbox.page').then((m) => m.SandboxPageComponent),
+  },
+  {
+    path: 'demo',
+    loadComponent: () =>
+      import('./features/sandbox/pages/sandbox.page').then((m) => m.SandboxPageComponent),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [anonymousOnlyGuard],
