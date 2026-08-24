@@ -1,11 +1,13 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  OnInit,
   signal,
   computed,
   inject,
 } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
+import { Title, Meta } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -74,9 +76,11 @@ import { I18nService } from '../../core/i18n/i18n.service';
   styleUrl: './landing-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LandingPageComponent {
+export class LandingPageComponent implements OnInit {
   private readonly themeService = inject(ThemeService);
   private readonly document = inject(DOCUMENT);
+  private readonly titleService = inject(Title);
+  private readonly metaService = inject(Meta);
   readonly i18n = inject(I18nService);
 
   readonly isDarkTheme = this.themeService.isDarkTheme;
@@ -87,6 +91,26 @@ export class LandingPageComponent {
   readonly mobileMenuOpen = signal<boolean>(false);
   readonly expandedFaqIndices = signal<number[]>([0]); // First FAQ open by default
   readonly activeFeatureCategory = signal<string>('all');
+
+  ngOnInit(): void {
+    this.titleService.setTitle('PsiqueOS | Sistema Operativo Clínico para Profesionales de la Salud Mental');
+    this.metaService.updateTag({
+      name: 'description',
+      content:
+        'PsiqueOS - Sistema Operativo Clínico para Profesionales de la Salud Mental. Expediente clínico electrónico bajo NOM-004-SSA3, notas de evolución SOAP, batería psicométrica baremada, teleconsulta cifrada y convenios corporativos PAEF.',
+    });
+    this.metaService.updateTag({
+      property: 'og:title',
+      content: 'PsiqueOS | Sistema Operativo Clínico para Profesionales de la Salud Mental',
+    });
+    this.metaService.updateTag({
+      property: 'og:description',
+      content:
+        'PsiqueOS - Sistema Operativo Clínico para Profesionales de la Salud Mental. Expediente clínico electrónico bajo NOM-004-SSA3, notas de evolución SOAP, batería psicométrica baremada, teleconsulta cifrada y convenios corporativos PAEF.',
+    });
+    this.metaService.updateTag({ property: 'og:type', content: 'website' });
+    this.metaService.updateTag({ property: 'og:image', content: 'assets/images/og-psiqueos.png' });
+  }
 
   // Trust Badges
   readonly trustBadges = computed(() => [

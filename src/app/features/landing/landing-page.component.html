@@ -67,14 +67,19 @@
           <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>
 
-        <a routerLink="/sandbox" class="landing-btn landing-btn--ghost">
+        <a
+          routerLink="/sandbox"
+          class="landing-btn landing-btn--ghost landing-header__sandbox-btn"
+          [title]="'landing.nav.sandbox' | translate"
+          [attr.aria-label]="'landing.nav.sandbox' | translate"
+        >
           <mat-icon class="landing-btn__icon">science</mat-icon>
-          <span>{{ 'landing.nav.sandbox' | translate }}</span>
+          <span class="landing-header__sandbox-text">{{ 'landing.nav.sandbox' | translate }}</span>
         </a>
-        <a routerLink="/login" class="landing-btn landing-btn--ghost">
+        <a routerLink="/login" class="landing-btn landing-btn--ghost landing-header__login-btn">
           {{ 'landing.nav.login' | translate }}
         </a>
-        <a routerLink="/signup" class="landing-btn landing-btn--primary">
+        <a routerLink="/signup" class="landing-btn landing-btn--primary landing-header__cta-btn">
           <span>{{ 'landing.nav.startFree' | translate }}</span>
           <mat-icon class="landing-btn__icon">arrow_forward</mat-icon>
         </a>

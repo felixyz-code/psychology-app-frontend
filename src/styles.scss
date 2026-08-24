@@ -2307,15 +2307,19 @@ button.btn--reset,
 }
 
 // =============================================================================
+// =============================================================================
 // Landing Page Global Theme & Layout Styles
 // =============================================================================
 
 .landing-layout {
   position: relative;
   width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 .landing-container {
@@ -2323,6 +2327,11 @@ button.btn--reset,
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
+  box-sizing: border-box;
+
+  @media (max-width: 1280px) {
+    padding: 0 1rem;
+  }
 }
 
 .landing-ambient-glow {
@@ -2383,8 +2392,8 @@ button.btn--reset,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.15rem;
+  gap: 0.4rem;
+  padding: 0.55rem 1.15rem;
   font-size: 0.9375rem;
   font-weight: 600;
   border-radius: 12px;
@@ -2395,6 +2404,13 @@ button.btn--reset,
   user-select: none;
   white-space: nowrap;
   flex-shrink: 0;
+  box-sizing: border-box;
+
+  @media (max-width: 1366px) {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+    gap: 0.35rem;
+  }
 
   &__icon {
     font-size: 1.15rem;
@@ -2407,6 +2423,9 @@ button.btn--reset,
     color: #ffffff;
     border-color: var(--app-color-primary, #2563eb);
     box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: max-content;
 
     &:hover {
       background-color: #1d4ed8;
@@ -2475,6 +2494,8 @@ button.btn--reset,
   top: 0;
   z-index: 100;
   width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
   height: 4.5rem;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(14px);
@@ -2487,20 +2508,37 @@ button.btn--reset,
     border-bottom-color: rgba(51, 65, 85, 0.7);
   }
 
+  .landing-container {
+    max-width: 100%;
+    padding: 0 1.5rem;
+    box-sizing: border-box;
+
+    @media (min-width: 1440px) {
+      padding: 0 2rem;
+    }
+  }
+
   &__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 100%;
+    width: 100%;
+    gap: 0.75rem;
+    box-sizing: border-box;
   }
 
   &__brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.65rem;
     text-decoration: none;
     cursor: pointer;
     flex-shrink: 0;
+
+    @media (max-width: 1280px) {
+      gap: 0.5rem;
+    }
   }
 
   &__logo-box {
@@ -2513,6 +2551,12 @@ button.btn--reset,
     border-radius: 10px;
     color: #ffffff;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    flex-shrink: 0;
+
+    @media (max-width: 1200px) {
+      width: 2.25rem;
+      height: 2.25rem;
+    }
   }
 
   &__brand-text {
@@ -2526,6 +2570,10 @@ button.btn--reset,
     color: var(--app-color-heading, #0f172a);
     letter-spacing: -0.02em;
     line-height: 1.1;
+
+    @media (max-width: 1200px) {
+      font-size: 1.125rem;
+    }
   }
 
   &__brand-pill {
@@ -2534,23 +2582,32 @@ button.btn--reset,
     text-transform: uppercase;
     color: var(--app-color-primary, #2563eb);
     letter-spacing: 0.04em;
+
+    @media (max-width: 1200px) {
+      font-size: 0.625rem;
+    }
   }
 
   &__nav {
     display: none;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.5rem;
 
-    @media (min-width: 1080px) {
+    @media (min-width: 1024px) {
       display: flex;
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 1440px) {
+      gap: 0.75rem;
     }
   }
 
   &__nav-link {
     background: none;
     border: none;
-    padding: 0.45rem 0.65rem;
-    font-size: 0.875rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8125rem;
     font-weight: 500;
     color: var(--app-color-text, #334155);
     border-radius: 8px;
@@ -2575,6 +2632,32 @@ button.btn--reset,
     }
   }
 
+  &__sandbox-btn {
+    @media (max-width: 1400px) {
+      padding: 0.45rem 0.6rem;
+    }
+  }
+
+  &__sandbox-text {
+    @media (max-width: 1400px) {
+      display: none;
+    }
+  }
+
+  &__login-btn,
+  &__cta-btn {
+    @media (max-width: 1366px) {
+      padding: 0.45rem 0.75rem;
+      font-size: 0.85rem;
+    }
+  }
+
+  &__cta-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: max-content;
+  }
+
   &__mobile-toggle {
     display: flex;
     align-items: center;
@@ -2587,7 +2670,7 @@ button.btn--reset,
     height: 2.5rem;
     cursor: pointer;
 
-    @media (min-width: 1080px) {
+    @media (min-width: 1024px) {
       display: none;
     }
   }
