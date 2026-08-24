@@ -14,6 +14,9 @@ import { OrganizationConfigurationStore } from '../organization-configuration/or
 import { OrganizationLogoStore } from '../organization-logo/organization-logo.store';
 import { UserProfileStore } from '../user-profile/user-profile.store';
 import { BranchSwitcherComponent } from '../../shared/components/branch-switcher/branch-switcher.component';
+import { LanguageSwitcherComponent } from '../i18n/components/language-switcher.component';
+import { TranslatePipe } from '../i18n/translate.pipe';
+import { I18nService } from '../i18n/i18n.service';
 
 @Component({
   selector: 'app-navbar',
@@ -26,6 +29,8 @@ import { BranchSwitcherComponent } from '../../shared/components/branch-switcher
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     BranchSwitcherComponent,
+    LanguageSwitcherComponent,
+    TranslatePipe,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
@@ -34,6 +39,7 @@ export class NavbarComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
+  readonly i18n = inject(I18nService);
   readonly tenantContextStore = inject(TenantContextStore);
   readonly organizationConfigurationStore = inject(OrganizationConfigurationStore);
   readonly organizationLogoStore = inject(OrganizationLogoStore);

@@ -32,23 +32,23 @@
 
       <div class="auth-brand-panel__pill">
         <mat-icon class="auth-brand-panel__pill-icon">health_and_safety</mat-icon>
-        <span>Software Clínico Especializado</span>
+        <span>{{ 'auth.brand.specializedSoftware' | translate }}</span>
       </div>
     </header>
 
     <!-- Hero Value Statement -->
     <div class="auth-brand-panel__hero">
       <h1 class="auth-brand-panel__headline">
-        La plataforma integral para profesionales de la salud mental.
+        {{ 'auth.brand.tagline' | translate }}
       </h1>
       <p class="auth-brand-panel__subheadline">
-        Gestión clínica moderna, confidencial y eficiente, diseñada para psicólogos, terapeutas y consultorios de alto nivel.
+        {{ 'auth.brand.subheadline' | translate }}
       </p>
     </div>
 
     <!-- 3 Value Proposition Highlight Cards -->
     <div class="auth-brand-panel__features">
-      @for (feature of features; track feature.title) {
+      @for (feature of features(); track feature.title) {
         <div class="auth-brand-panel__feature-card">
           <div class="auth-brand-panel__feature-icon-box">
             <mat-icon>{{ feature.icon }}</mat-icon>
@@ -63,9 +63,9 @@
 
     <!-- Security & Trust Badges Footer -->
     <footer class="auth-brand-panel__footer">
-      <p class="auth-brand-panel__footer-label">Estándares de seguridad y cumplimiento</p>
+      <p class="auth-brand-panel__footer-label">{{ 'auth.brand.footer' | translate }}</p>
       <div class="auth-brand-panel__badges">
-        @for (badge of badges; track badge.label) {
+        @for (badge of badges(); track badge.label) {
           <div class="auth-brand-panel__badge-item">
             <mat-icon class="auth-brand-panel__badge-icon">{{ badge.icon }}</mat-icon>
             <span>{{ badge.label }}</span>

@@ -1,0 +1,187 @@
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+/* =========================================================================
+   1. SLEEK SEGMENTED PILL
+   ========================================================================= */
+.lang-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px 3px 6px;
+  background-color: var(--surface-container-low, rgba(148, 163, 184, 0.1));
+  border: 1px solid var(--outline-variant, rgba(148, 163, 184, 0.22));
+  border-radius: 9999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    border-color: var(--primary, #0284c7);
+  }
+
+  &__globe {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    color: var(--on-surface-variant, #64748b);
+    opacity: 0.85;
+    margin-right: 1px;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 7px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--on-surface-variant, #64748b);
+    background: transparent;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: all 0.18s ease-in-out;
+
+    &:hover:not(&--active) {
+      color: var(--on-surface, #0f172a);
+      background-color: rgba(148, 163, 184, 0.15);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary, #0284c7);
+      outline-offset: 1px;
+    }
+
+    &--active {
+      color: #ffffff;
+      background-color: var(--primary, #0284c7);
+      box-shadow: 0 1px 4px rgba(2, 132, 199, 0.35);
+      font-weight: 700;
+    }
+  }
+
+  &__divider {
+    font-size: 0.6875rem;
+    color: var(--outline-variant, rgba(148, 163, 184, 0.4));
+    line-height: 1;
+  }
+}
+
+/* =========================================================================
+   2. DROPDOWN MENU TRIGGER
+   ========================================================================= */
+.lang-menu-wrapper {
+  display: inline-flex;
+}
+
+.lang-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  height: 2rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  color: var(--on-surface, inherit);
+  border: 1px solid var(--outline-variant, rgba(148, 163, 184, 0.2));
+  background: var(--surface-container-low, rgba(148, 163, 184, 0.08));
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: var(--surface-container-high, rgba(148, 163, 184, 0.15));
+    border-color: var(--primary, #0284c7);
+  }
+
+  &__globe {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.8;
+  }
+
+  &__name {
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+  }
+
+  &__icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.6;
+    margin-left: -2px;
+  }
+}
+
+.lang-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+
+  &--active {
+    font-weight: 600;
+    color: var(--primary, #0284c7);
+  }
+
+  &__name {
+    font-size: 0.875rem;
+  }
+
+  &__check {
+    margin-left: auto;
+    font-size: 1.125rem;
+    color: var(--primary, #0284c7);
+  }
+}
+
+/* =========================================================================
+   3. COMPACT TOGGLE BUTTON (Discreet for Auth Cards & Headers)
+   ========================================================================= */
+.lang-compact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  height: 1.75rem;
+  background: var(--surface-container-low, rgba(148, 163, 184, 0.1));
+  border: 1px solid var(--outline-variant, rgba(148, 163, 184, 0.2));
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--on-surface-variant, #64748b);
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  &__icon {
+    font-size: 0.9375rem;
+    width: 0.9375rem;
+    height: 0.9375rem;
+    opacity: 0.85;
+  }
+
+  &__label {
+    line-height: 1;
+  }
+
+  &:hover {
+    color: var(--primary, #0284c7);
+    background: var(--surface-container-high, rgba(148, 163, 184, 0.2));
+    border-color: var(--primary, #0284c7);
+    transform: translateY(-0.5px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary, #0284c7);
+    outline-offset: 1px;
+  }
+}

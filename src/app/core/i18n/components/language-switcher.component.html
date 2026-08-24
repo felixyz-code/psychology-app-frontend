@@ -1,0 +1,74 @@
+@if (variant() === 'segmented') {
+  <div
+    class="lang-pill"
+    [class]="customClass()"
+    role="group"
+    [attr.aria-label]="'common.selectLanguage' | translate"
+  >
+    <mat-icon class="lang-pill__globe" aria-hidden="true">language</mat-icon>
+    <button
+      type="button"
+      class="lang-pill__btn"
+      [class.lang-pill__btn--active]="currentLang() === 'es'"
+      [attr.aria-pressed]="currentLang() === 'es'"
+      aria-label="Español"
+      (click)="switchLanguage('es')"
+    >
+      ES
+    </button>
+    <span class="lang-pill__divider" aria-hidden="true">/</span>
+    <button
+      type="button"
+      class="lang-pill__btn"
+      [class.lang-pill__btn--active]="currentLang() === 'en'"
+      [attr.aria-pressed]="currentLang() === 'en'"
+      aria-label="English"
+      (click)="switchLanguage('en')"
+    >
+      EN
+    </button>
+  </div>
+} @else if (variant() === 'menu') {
+  <div class="lang-menu-wrapper" [class]="customClass()">
+    <button
+      mat-button
+      type="button"
+      [matMenuTriggerFor]="langMenu"
+      class="lang-menu-trigger"
+      [attr.aria-label]="'common.selectLanguage' | translate"
+    >
+      <mat-icon class="lang-menu-trigger__globe" aria-hidden="true">language</mat-icon>
+      <span class="lang-menu-trigger__name">{{ currentMeta().shortLabel }}</span>
+      <mat-icon class="lang-menu-trigger__icon">expand_more</mat-icon>
+    </button>
+
+    <mat-menu #langMenu="matMenu" class="lang-dropdown-menu">
+      @for (lang of supportedLanguages; track lang) {
+        <button
+          mat-menu-item
+          type="button"
+          class="lang-menu-item"
+          [class.lang-menu-item--active]="currentLang() === lang"
+          (click)="switchLanguage(lang)"
+        >
+          <span class="lang-menu-item__name">{{ metadata[lang].name }} ({{ metadata[lang].shortLabel }})</span>
+          @if (currentLang() === lang) {
+            <mat-icon class="lang-menu-item__check">check</mat-icon>
+          }
+        </button>
+      }
+    </mat-menu>
+  </div>
+} @else if (variant() === 'compact') {
+  <button
+    type="button"
+    class="lang-compact-btn"
+    [class]="customClass()"
+    [attr.aria-label]="'common.switchLanguage' | translate"
+    [title]="'common.switchLanguage' | translate"
+    (click)="i18n.toggleLanguage()"
+  >
+    <mat-icon class="lang-compact-btn__icon" aria-hidden="true">language</mat-icon>
+    <span class="lang-compact-btn__label">{{ currentMeta().shortLabel }}</span>
+  </button>
+}

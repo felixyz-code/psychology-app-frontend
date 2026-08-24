@@ -55,10 +55,21 @@ export interface ClinicalFeature {
   category: 'clinical' | 'telehealth' | 'admin' | 'security';
 }
 
+import { LanguageSwitcherComponent } from '../../core/i18n/components/language-switcher.component';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { I18nService } from '../../core/i18n/i18n.service';
+
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatIconModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MatIconModule,
+    MatButtonModule,
+    LanguageSwitcherComponent,
+    TranslatePipe,
+  ],
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,6 +77,7 @@ export interface ClinicalFeature {
 export class LandingPageComponent {
   private readonly themeService = inject(ThemeService);
   private readonly document = inject(DOCUMENT);
+  readonly i18n = inject(I18nService);
 
   readonly isDarkTheme = this.themeService.isDarkTheme;
 
@@ -77,12 +89,28 @@ export class LandingPageComponent {
   readonly activeFeatureCategory = signal<string>('all');
 
   // Trust Badges
-  readonly trustBadges = [
-    { icon: 'verified_user', label: 'NOM-004-SSA3 / NOM-024', desc: 'Cumplimiento Normativo Oficial' },
-    { icon: 'lock', label: 'Cifrado AES-256 / TLS 1.3', desc: 'Seguridad de Grado Bancario' },
-    { icon: 'domain', label: 'Multi-Sedes & Multi-Tenant', desc: 'Aislamiento Lógico Seguro' },
-    { icon: 'bolt', label: '99.9% Disponibilidad SLA', desc: 'Infraestructura Cloud de Alta Resiliencia' },
-  ];
+  readonly trustBadges = computed(() => [
+    {
+      icon: 'verified_user',
+      label: this.i18n.t('landing.hero.trustBadges.nom'),
+      desc: this.i18n.isSpanish() ? 'Cumplimiento Normativo Oficial' : 'Official Regulatory Compliance',
+    },
+    {
+      icon: 'lock',
+      label: this.i18n.t('landing.hero.trustBadges.aes'),
+      desc: this.i18n.isSpanish() ? 'Seguridad de Grado Bancario' : 'Bank-Grade Medical Security',
+    },
+    {
+      icon: 'domain',
+      label: this.i18n.t('landing.hero.trustBadges.multiTenant'),
+      desc: this.i18n.isSpanish() ? 'Aislamiento Lógico Seguro' : 'Secure Logical Isolation',
+    },
+    {
+      icon: 'bolt',
+      label: this.i18n.t('landing.hero.trustBadges.sla'),
+      desc: this.i18n.isSpanish() ? 'Infraestructura Cloud de Alta Resiliencia' : 'High-Resilience Cloud Infra',
+    },
+  ]);
 
   // Clinical Features Grid
   readonly clinicalFeatures: ClinicalFeature[] = [

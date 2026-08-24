@@ -12,6 +12,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { SandboxStateService, SandboxView } from '../../services/sandbox-state.service';
 
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
+import { I18nService } from '../../../../core/i18n/i18n.service';
+
 export interface TourStep {
   stepNumber: number;
   view: SandboxView;
@@ -25,13 +28,14 @@ export interface TourStep {
 @Component({
   selector: 'app-demo-tour-guide',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatIconModule, MatButtonModule],
+  imports: [CommonModule, RouterLink, MatIconModule, MatButtonModule, TranslatePipe],
   templateUrl: './demo-tour-guide.component.html',
   styleUrl: './demo-tour-guide.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DemoTourGuideComponent {
   private readonly sandboxState = inject(SandboxStateService);
+  readonly i18n = inject(I18nService);
 
   readonly tourCompleted = output<void>();
 

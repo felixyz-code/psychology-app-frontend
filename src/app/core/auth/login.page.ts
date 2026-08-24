@@ -13,6 +13,9 @@ import { AuthService } from './auth.service';
 import { LoginRequest } from './auth.models';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { AuthBrandPanelComponent } from './components/auth-brand-panel.component';
+import { LanguageSwitcherComponent } from '../i18n/components/language-switcher.component';
+import { TranslatePipe } from '../i18n/translate.pipe';
+import { I18nService } from '../i18n/i18n.service';
 
 @Component({
   selector: 'app-login-page',
@@ -27,6 +30,8 @@ import { AuthBrandPanelComponent } from './components/auth-brand-panel.component
     MatProgressSpinnerModule,
     RouterLink,
     AuthBrandPanelComponent,
+    LanguageSwitcherComponent,
+    TranslatePipe,
   ],
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
@@ -36,6 +41,7 @@ export class LoginPage {
   private readonly authService = inject(AuthService);
   private readonly tenantContextStore = inject(TenantContextStore);
   private readonly router = inject(Router);
+  readonly i18n = inject(I18nService);
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');

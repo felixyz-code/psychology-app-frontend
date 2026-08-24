@@ -2,15 +2,15 @@
   <!-- ========================================================================= -->
   <!-- 1. PERSISTENT TOP DEMO BANNER -->
   <!-- ========================================================================= -->
-  <aside class="sandbox-banner" aria-label="Aviso de modo demostración">
+  <aside class="sandbox-banner" [attr.aria-label]="'sandbox.banner.demoMode' | translate">
     <div class="sandbox-banner__inner">
       <div class="sandbox-banner__badge-group">
         <span class="sandbox-banner__pill">
           <mat-icon class="sandbox-banner__pill-icon">science</mat-icon>
-          <span>MODO SANDBOX DEMO</span>
+          <span>{{ 'sandbox.banner.demoMode' | translate }}</span>
         </span>
         <span class="sandbox-banner__text">
-          Estás explorando el Sandbox interactivo de <strong>PsiqueOS</strong> con datos clínicos simulados.
+          {{ 'sandbox.banner.description' | translate }}
         </span>
       </div>
 
@@ -19,15 +19,15 @@
           type="button"
           class="sandbox-banner__btn-ghost"
           (click)="resetAllData()"
-          title="Restablecer datos de prueba"
+          [title]="'sandbox.banner.resetBtn' | translate"
         >
           <mat-icon>restart_alt</mat-icon>
-          <span>Restablecer Demo</span>
+          <span>{{ 'sandbox.banner.resetBtn' | translate }}</span>
         </button>
 
         <a routerLink="/signup" class="sandbox-banner__btn-cta">
           <mat-icon>rocket_launch</mat-icon>
-          <span>Crear Cuenta Real (14 Días Gratis)</span>
+          <span>{{ 'sandbox.banner.createAccount' | translate }}</span>
         </a>
       </div>
     </div>
@@ -40,7 +40,7 @@
     <div class="sandbox-header__inner">
       <!-- Brand & Clinic Info -->
       <div class="sandbox-header__brand-block">
-        <a routerLink="/" class="sandbox-header__brand-link" title="Volver al inicio">
+        <a routerLink="/" class="sandbox-header__brand-link" [title]="'sandbox.header.backToHome' | translate">
           <div class="sandbox-header__logo-box">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -70,18 +70,18 @@
       <div class="sandbox-header__patient-switcher">
         <label for="patient-select" class="sandbox-header__patient-label">
           <mat-icon>person</mat-icon>
-          <span>Paciente Activo:</span>
+          <span>{{ 'sandbox.patientSelector.label' | translate }}</span>
         </label>
         <select
           id="patient-select"
           class="sandbox-patient-dropdown"
           [value]="selectedPatientId()"
           (change)="onPatientSelectChange($event)"
-          aria-label="Seleccionar paciente de prueba"
+          [attr.aria-label]="'sandbox.patientSelector.switchCase' | translate"
         >
           @for (p of patients(); track p.id) {
             <option [value]="p.id">
-              {{ p.fullName }} ({{ p.age }}a · {{ p.diagnosisCode }})
+              {{ p.fullName }} ({{ p.age }}{{ 'sandbox.patientSelector.ageYears' | translate }} · {{ p.diagnosisCode }})
             </option>
           }
         </select>
@@ -89,24 +89,26 @@
 
       <!-- Utility Actions -->
       <div class="sandbox-header__utilities">
+        <app-language-switcher variant="segmented" />
+
         <button
           type="button"
           class="sandbox-util-btn"
           (click)="toggleTheme()"
-          [attr.aria-label]="isDarkTheme() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
-          [title]="isDarkTheme() ? 'Modo Claro' : 'Modo Oscuro'"
+          [attr.aria-label]="isDarkTheme() ? ('common.lightTheme' | translate) : ('common.darkTheme' | translate)"
+          [title]="isDarkTheme() ? ('common.lightTheme' | translate) : ('common.darkTheme' | translate)"
         >
           <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>
 
         <a routerLink="/login" class="sandbox-util-btn sandbox-util-btn--text">
-          <span>Iniciar Sesión</span>
+          <span>{{ 'landing.nav.login' | translate }}</span>
         </a>
       </div>
     </div>
 
     <!-- Workspace Navigation Tabs -->
-    <nav class="sandbox-nav" aria-label="Navegación del Sandbox">
+    <nav class="sandbox-nav" [attr.aria-label]="'sandbox.tabs.dashboard' | translate">
       <div class="sandbox-nav__container">
         <button
           type="button"
@@ -116,7 +118,7 @@
           (click)="setView('dashboard')"
         >
           <mat-icon>dashboard</mat-icon>
-          <span>Dashboard Clínico</span>
+          <span>{{ 'sandbox.tabs.dashboard' | translate }}</span>
         </button>
 
         <button
@@ -127,7 +129,7 @@
           (click)="setView('soap')"
         >
           <mat-icon>description</mat-icon>
-          <span>Expediente SOAP</span>
+          <span>{{ 'sandbox.tabs.soap' | translate }}</span>
           <span class="sandbox-nav-tab__pill">NOM-004</span>
         </button>
 
@@ -139,7 +141,7 @@
           (click)="setView('psychometrics')"
         >
           <mat-icon>psychology</mat-icon>
-          <span>Batería Psicométrica</span>
+          <span>{{ 'sandbox.tabs.psychometrics' | translate }}</span>
         </button>
 
         <button
@@ -150,7 +152,7 @@
           (click)="setView('teleconsultation')"
         >
           <mat-icon>videocam</mat-icon>
-          <span>Teleconsulta Cifrada</span>
+          <span>{{ 'sandbox.tabs.teleconsultation' | translate }}</span>
           <span class="sandbox-nav-tab__live-dot" aria-hidden="true"></span>
         </button>
 
@@ -162,7 +164,7 @@
           (click)="setView('appointments')"
         >
           <mat-icon>calendar_month</mat-icon>
-          <span>Agenda Médica</span>
+          <span>{{ 'sandbox.tabs.schedule' | translate }}</span>
         </button>
       </div>
     </nav>
@@ -202,9 +204,9 @@
               <mat-icon>people_outline</mat-icon>
             </div>
             <div class="metric-card__content">
-              <span class="metric-card__label">Pacientes Activos</span>
+              <span class="metric-card__label">{{ 'sandbox.dashboard.activePatients' | translate }}</span>
               <span class="metric-card__value">{{ metrics().activePatientsCount }}</span>
-              <span class="metric-card__subtext">100% bajo expediente NOM-004</span>
+              <span class="metric-card__subtext">100% NOM-004</span>
             </div>
           </div>
 
@@ -213,9 +215,9 @@
               <mat-icon>event_available</mat-icon>
             </div>
             <div class="metric-card__content">
-              <span class="metric-card__label">Consultas del Mes</span>
+              <span class="metric-card__label">{{ 'sandbox.dashboard.scheduledToday' | translate }}</span>
               <span class="metric-card__value">{{ metrics().monthlySessionsCount }}</span>
-              <span class="metric-card__subtext">+14% vs mes anterior</span>
+              <span class="metric-card__subtext">+14%</span>
             </div>
           </div>
 
@@ -224,9 +226,9 @@
               <mat-icon>psychology</mat-icon>
             </div>
             <div class="metric-card__content">
-              <span class="metric-card__label">Baterías Psicométricas</span>
+              <span class="metric-card__label">{{ 'sandbox.dashboard.gad7Average' | translate }}</span>
               <span class="metric-card__value">{{ metrics().completedAssessmentsCount }}</span>
-              <span class="metric-card__subtext">Baremación automatizada</span>
+              <span class="metric-card__subtext">Auto Scoring</span>
             </div>
           </div>
 
@@ -235,9 +237,9 @@
               <mat-icon>trending_up</mat-icon>
             </div>
             <div class="metric-card__content">
-              <span class="metric-card__label">Tasa de Adherencia</span>
+              <span class="metric-card__label">{{ 'sandbox.dashboard.notesCompleted' | translate }}</span>
               <span class="metric-card__value">{{ metrics().adherenceRatePercentage }}%</span>
-              <span class="metric-card__subtext">Asistencia a sesiones</span>
+              <span class="metric-card__subtext">{{ 'common.active' | translate }}</span>
             </div>
           </div>
         </div>
