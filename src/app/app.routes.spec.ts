@@ -30,6 +30,16 @@ describe('app routes', () => {
     expect(directRoute?.loadComponent).toBeDefined();
   });
 
+  it('exposes public interactive sandbox and demo routes without auth guard', () => {
+    const sandboxRoute = routes.find((route) => route.path === 'sandbox');
+    const demoRoute = routes.find((route) => route.path === 'demo');
+
+    expect(sandboxRoute?.canActivate).toBeUndefined();
+    expect(sandboxRoute?.loadComponent).toBeDefined();
+    expect(demoRoute?.canActivate).toBeUndefined();
+    expect(demoRoute?.loadComponent).toBeDefined();
+  });
+
   it('exposes signup to anonymous users through the narrowly scoped anonymous-only policy', () => {
     const signupRoute = routes.find((route) => route.path === 'signup');
 

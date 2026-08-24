@@ -64,6 +64,10 @@
           <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>
 
+        <a routerLink="/sandbox" class="landing-btn landing-btn--ghost">
+          <mat-icon class="landing-btn__icon">science</mat-icon>
+          <span>Sandbox Demo</span>
+        </a>
         <a routerLink="/login" class="landing-btn landing-btn--ghost">
           Iniciar Sesión
         </a>
@@ -105,6 +109,10 @@
             <mat-icon>help_outline</mat-icon>
             <span>Preguntas Frecuentes</span>
           </button>
+          <a routerLink="/sandbox" (click)="closeMobileMenu()" class="landing-mobile-drawer__link">
+            <mat-icon>science</mat-icon>
+            <span>Explorar Sandbox Demo</span>
+          </a>
         </nav>
         <div class="landing-mobile-drawer__actions">
           <a routerLink="/login" (click)="closeMobileMenu()" class="landing-btn landing-btn--ghost landing-btn--full">
@@ -144,10 +152,10 @@
           <span>Crear Cuenta Gratis</span>
           <mat-icon class="landing-btn__icon">arrow_forward</mat-icon>
         </a>
-        <button type="button" class="landing-btn landing-btn--secondary landing-btn--large" (click)="scrollToSection('planes')">
-          <mat-icon class="landing-btn__icon">payments</mat-icon>
-          <span>Conocer Planes & Precios</span>
-        </button>
+        <a routerLink="/sandbox" class="landing-btn landing-btn--secondary landing-btn--large">
+          <mat-icon class="landing-btn__icon">science</mat-icon>
+          <span>Explorar Sandbox en Vivo</span>
+        </a>
       </div>
 
       <p class="landing-hero__microcopy">
