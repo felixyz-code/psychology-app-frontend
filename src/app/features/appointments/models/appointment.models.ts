@@ -85,3 +85,20 @@ export interface QueryScheduleBlocksParams {
   endDate?: string;
 }
 
+// ─── Teleconsultation ────────────────────────────────────────────────────────
+
+export type TeleconsultationRoomStatus = 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'TERMINATED';
+
+export interface TeleconsultationRoom {
+  id: string;
+  appointmentId: string;
+  organizationId: string | null;
+  roomCode: string;
+  provider: string;
+  therapistPasscode: string;
+  patientToken: string;
+  expiresAt: string;
+  status: TeleconsultationRoomStatus;
+  createdAt: string;
+  updatedAt: string;
+}

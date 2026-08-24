@@ -1,0 +1,148 @@
+<div class="teleconsult-dialog">
+  <!-- Header -->
+  <div class="teleconsult-dialog__header">
+    <div class="teleconsult-dialog__title-group">
+      <mat-icon class="teleconsult-dialog__icon">videocam</mat-icon>
+      <div>
+        <h2 class="teleconsult-dialog__title">Sala de Teleconsulta</h2>
+        <p class="teleconsult-dialog__subtitle">Sesión clínica segura y privada</p>
+      </div>
+    </div>
+    <button mat-icon-button (click)="close()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Error banner -->
+  @if (error()) {
+    <div class="teleconsult-dialog__error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Loading spinner -->
+  @if (isLoading() && !room()) {
+    <div class="teleconsult-dialog__loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Preparando sala segura...</p>
+    </div>
+  }
+
+  <!-- Room details -->
+  @if (room()) {
+    <div class="teleconsult-dialog__content">
+
+      <!-- Status badge -->
+      <div class="teleconsult-dialog__status-row">
+        <span class="status-badge" [ngClass]="statusClass()">
+          <span class="status-badge__dot"></span>
+          {{ statusLabel() }}
+        </span>
+        <span class="teleconsult-dialog__expires">
+          <mat-icon>schedule</mat-icon>
+          Expira: {{ expiresAtDisplay() }}
+        </span>
+      </div>
+
+      <!-- Room code -->
+      <div class="room-info-card">
+        <div class="room-info-card__label">
+          <mat-icon>key</mat-icon>
+          Código de sala
+        </div>
+        <div class="room-info-card__value">
+          <code class="room-code">{{ room()!.roomCode }}</code>
+          <button
+            mat-icon-button
+            class="copy-btn"
+            [matTooltip]="copiedField() === 'roomCode' ? '¡Copiado!' : 'Copiar código'"
+            (click)="copyToClipboard(room()!.roomCode, 'roomCode')"
+            aria-label="Copiar código de sala"
+          >
+            <mat-icon>{{ copiedField() === 'roomCode' ? 'check' : 'content_copy' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Therapist passcode -->
+      <div class="room-info-card">
+        <div class="room-info-card__label">
+          <mat-icon>lock</mat-icon>
+          Código del terapeuta
+        </div>
+        <div class="room-info-card__value">
+          <code class="therapist-code">{{ room()!.therapistPasscode }}</code>
+          <button
+            mat-icon-button
+            class="copy-btn"
+            [matTooltip]="copiedField() === 'passcode' ? '¡Copiado!' : 'Copiar código'"
+            (click)="copyToClipboard(room()!.therapistPasscode, 'passcode')"
+            aria-label="Copiar código de terapeuta"
+          >
+            <mat-icon>{{ copiedField() === 'passcode' ? 'check' : 'content_copy' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Patient access link -->
+      <div class="room-info-card room-info-card--patient">
+        <div class="room-info-card__label">
+          <mat-icon>person</mat-icon>
+          Link de acceso para el paciente
+        </div>
+        <div class="room-info-card__value room-info-card__value--link">
+          <span class="patient-url">{{ patientAccessUrl() }}</span>
+          <button
+            mat-flat-button
+            color="primary"
+            class="copy-link-btn"
+            (click)="copyToClipboard(patientAccessUrl(), 'patientUrl')"
+            aria-label="Copiar link de paciente"
+          >
+            <mat-icon>{{ copiedField() === 'patientUrl' ? 'check' : 'share' }}</mat-icon>
+            {{ copiedField() === 'patientUrl' ? '¡Copiado!' : 'Copiar link' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Action buttons -->
+    <div class="teleconsult-dialog__actions">
+      @if (canActivate()) {
+        <button
+          mat-flat-button
+          color="accent"
+          class="action-btn action-btn--activate"
+          [disabled]="isLoading()"
+          (click)="activateRoom()"
+        >
+          @if (isLoading()) {
+            <mat-spinner diameter="18" color="accent"></mat-spinner>
+          } @else {
+            <mat-icon>{{ room()?.status === 'EXPIRED' ? 'refresh' : 'play_circle' }}</mat-icon>
+          }
+          {{ room()?.status === 'EXPIRED' ? 'Reactivar sala' : 'Activar sala' }}
+        </button>
+      }
+
+      @if (canTerminate()) {
+        <button
+          mat-stroked-button
+          color="warn"
+          class="action-btn action-btn--terminate"
+          [disabled]="isLoading()"
+          (click)="terminateRoom()"
+        >
+          <mat-icon>stop_circle</mat-icon>
+          Terminar sesión
+        </button>
+      }
+
+      <button mat-button class="action-btn action-btn--close" (click)="close()">
+        Cerrar
+      </button>
+    </div>
+  }
+</div>
