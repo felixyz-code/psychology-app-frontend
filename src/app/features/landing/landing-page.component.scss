@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--app-color-app-bg, #f8fafc);
+  color: var(--app-color-text, #0f172a);
+  font-family: var(--app-font-family, 'Roboto', sans-serif);
+  overflow-x: hidden;
+}

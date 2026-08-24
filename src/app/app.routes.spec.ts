@@ -5,6 +5,14 @@ import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-cont
 import { routes } from './app.routes';
 
 describe('app routes', () => {
+  it('exposes the public commercial landing page at the root route for anonymous visitors', () => {
+    const landingRoute = routes.find((route) => route.path === '' && route.pathMatch === 'full');
+
+    expect(landingRoute).toBeDefined();
+    expect(landingRoute?.canActivate).toEqual([anonymousOnlyGuard]);
+    expect(landingRoute?.loadComponent).toBeDefined();
+  });
+
   it('keeps login as the public route outside the protected shell', () => {
     const loginRoute = routes.find((route) => route.path === 'login');
 
@@ -44,7 +52,7 @@ describe('app routes', () => {
   });
 
   it('keeps the root shell protected by the real auth guard', () => {
-    const shellRoute = routes.find((route) => route.path === '');
+    const shellRoute = routes.find((route) => route.path === '' && route.children !== undefined);
 
     expect(shellRoute?.canActivate).toEqual([authGuard, tenantContextGuard]);
     expect(shellRoute?.loadComponent).toBeDefined();
@@ -54,7 +62,7 @@ describe('app routes', () => {
   });
 
   it('keeps critical redirects and lazy feature children stable', () => {
-    const shellRoute = routes.find((route) => route.path === '');
+    const shellRoute = routes.find((route) => route.path === '' && route.children !== undefined);
     const childRoutes = shellRoute?.children ?? [];
 
     expect(childRoutes.find((route) => route.path === '')).toMatchObject({
@@ -83,7 +91,7 @@ describe('app routes', () => {
   });
 
   it('separates operational routes from suspended-safe organization administration', () => {
-    const shellRoute = routes.find((route) => route.path === '');
+    const shellRoute = routes.find((route) => route.path === '' && route.children !== undefined);
     const childRoutes = shellRoute?.children ?? [];
     const operationalPaths = [
       'dashboard',
