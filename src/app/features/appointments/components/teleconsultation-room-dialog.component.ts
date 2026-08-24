@@ -76,6 +76,11 @@ export class TeleconsultationRoomDialogComponent implements OnInit, OnDestroy {
     return status === 'PENDING' || status === 'EXPIRED';
   });
 
+  readonly canJoinCall = computed(() => {
+    const status = this.room()?.status;
+    return status === 'ACTIVE' || status === 'PENDING';
+  });
+
   readonly canTerminate = computed(() => {
     const status = this.room()?.status;
     return status === 'PENDING' || status === 'ACTIVE';
@@ -193,6 +198,13 @@ export class TeleconsultationRoomDialogComponent implements OnInit, OnDestroy {
       this.copiedField.set(field);
       setTimeout(() => this.copiedField.set(null), 2000);
     });
+  }
+
+  joinVideoCall(): void {
+    const r = this.room();
+    if (!r) return;
+    const url = `/teleconsulta/${r.roomCode}?token=${r.patientToken}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   close(): void {

@@ -65,6 +65,21 @@ describe('HttpErrorPolicyService', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
+  it('does not handle a 401 from the teleconsultation access endpoint as session expiration', () => {
+    const router = createRouter('/teleconsulta/room123');
+    const { service, store } = configureService(router);
+    store.setSession('active-token', user);
+
+    const result = service.handle(
+      unauthorizedError(),
+      '/api/teleconsultation/access/room123?token=invalid',
+    );
+
+    expect(result).toBe('unauthorized');
+    expect(store.token()).toBe('active-token');
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
   it('does not clear the session or navigate for a 403', () => {
     const router = createRouter('/reports');
     const { service, store } = configureService(router);

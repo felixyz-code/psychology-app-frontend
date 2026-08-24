@@ -1,0 +1,235 @@
+<div class="teleconsult-view">
+  <!-- Top Navigation / Brand Header -->
+  <header class="teleconsult-view__header">
+    <div class="teleconsult-view__brand">
+      <mat-icon class="brand-icon">health_and_safety</mat-icon>
+      <div class="brand-info">
+        <span class="brand-title">{{ room()?.organizationName || 'PsiqueOS' }}</span>
+        <span class="brand-sub">Consulta Virtual Segura</span>
+      </div>
+    </div>
+
+    @if (room()) {
+      <div class="teleconsult-view__meta">
+        <span class="status-badge" [ngClass]="statusClass()">
+          <span class="status-badge__dot"></span>
+          {{ statusLabel() }}
+        </span>
+        <span class="secure-badge">
+          <mat-icon>lock</mat-icon>
+          Cifrado E2E
+        </span>
+      </div>
+    }
+  </header>
+
+  <!-- Main Container -->
+  <main class="teleconsult-view__main">
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="teleconsult-view__state-card">
+        <mat-spinner diameter="48"></mat-spinner>
+        <h2>Conectando a la sala de consulta...</h2>
+        <p>Verificando credenciales de acceso seguro y sala virtual.</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (!isLoading() && error()) {
+      <div class="teleconsult-view__state-card teleconsult-view__state-card--error" role="alert">
+        <mat-icon class="state-icon state-icon--error">error_outline</mat-icon>
+        <h2>Acceso No Disponible</h2>
+        <p>{{ error() }}</p>
+        <button mat-flat-button color="primary" (click)="loadRoom()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar conexión
+        </button>
+      </div>
+    }
+
+    <!-- Loaded Room States -->
+    @if (!isLoading() && room()) {
+      <!-- 1. PENDING State: Waiting Room -->
+      @if (isRoomPending()) {
+        <div class="teleconsult-view__state-card teleconsult-view__state-card--pending">
+          <div class="waiting-icon-pulse">
+            <mat-icon>hourglass_top</mat-icon>
+          </div>
+          <h2>Sala de Espera Virtual</h2>
+          <p class="lead-text">
+            Tu terapeuta <strong>{{ room()!.psychologistName }}</strong> aún no ha iniciado la videoconsulta.
+          </p>
+
+          <div class="session-summary-box">
+            <div class="summary-item">
+              <mat-icon>person</mat-icon>
+              <div>
+                <span class="summary-label">Paciente</span>
+                <span class="summary-val">{{ room()!.patientName }}</span>
+              </div>
+            </div>
+
+            <div class="summary-item">
+              <mat-icon>medical_services</mat-icon>
+              <div>
+                <span class="summary-label">Profesional Asignado</span>
+                <span class="summary-val">{{ room()!.psychologistName }}</span>
+              </div>
+            </div>
+
+            <div class="summary-item">
+              <mat-icon>event</mat-icon>
+              <div>
+                <span class="summary-label">Cita Programada</span>
+                <span class="summary-val">{{ scheduledDateDisplay() }}</span>
+              </div>
+            </div>
+
+            <div class="summary-item">
+              <mat-icon>timer</mat-icon>
+              <div>
+                <span class="summary-label">Duración</span>
+                <span class="summary-val">{{ room()!.durationMinutes }} minutos</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="waiting-actions">
+            <button mat-stroked-button color="primary" (click)="loadRoom()">
+              <mat-icon>refresh</mat-icon>
+              Comprobar si el terapeuta ya inició
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- 2. ACTIVE State: Video Call Room -->
+      @if (isRoomActive()) {
+        @if (!callEnded()) {
+          <div class="video-room">
+            <!-- Stage / Video Displays -->
+            <div class="video-stage">
+              <!-- Remote Main Video -->
+              <div class="video-stream video-stream--remote">
+                <div class="video-stream__avatar">
+                  <mat-icon>psychology</mat-icon>
+                </div>
+                <div class="video-stream__label">
+                  <mat-icon>account_circle</mat-icon>
+                  {{ room()!.psychologistName }} (Profesional)
+                </div>
+                <div class="live-indicator">
+                  <span class="live-indicator__dot"></span>
+                  Conexión Estable
+                </div>
+              </div>
+
+              <!-- Local Picture-In-Picture Video -->
+              <div class="video-stream video-stream--local" [class.video-stream--off]="!isCameraOn()">
+                @if (isCameraOn()) {
+                  <div class="local-preview">
+                    <mat-icon class="local-cam-icon">face</mat-icon>
+                  </div>
+                } @else {
+                  <div class="camera-off-state">
+                    <mat-icon>videocam_off</mat-icon>
+                    <span>Cámara apagada</span>
+                  </div>
+                }
+                <div class="video-stream__label">
+                  <mat-icon>person</mat-icon>
+                  {{ room()!.patientName }} (Tú)
+                </div>
+              </div>
+            </div>
+
+            <!-- Controls Toolbar -->
+            <div class="video-controls">
+              <button
+                mat-fab
+                [color]="isMicOn() ? 'basic' : 'warn'"
+                (click)="toggleMic()"
+                [matTooltip]="isMicOn() ? 'Silenciar micrófono' : 'Activar micrófono'"
+                aria-label="Alternar micrófono"
+              >
+                <mat-icon>{{ isMicOn() ? 'mic' : 'mic_off' }}</mat-icon>
+              </button>
+
+              <button
+                mat-fab
+                [color]="isCameraOn() ? 'basic' : 'warn'"
+                (click)="toggleCamera()"
+                [matTooltip]="isCameraOn() ? 'Apagar cámara' : 'Encender cámara'"
+                aria-label="Alternar cámara"
+              >
+                <mat-icon>{{ isCameraOn() ? 'videocam' : 'videocam_off' }}</mat-icon>
+              </button>
+
+              <button
+                mat-fab
+                [color]="isScreenSharing() ? 'accent' : 'basic'"
+                (click)="toggleScreenShare()"
+                [matTooltip]="isScreenSharing() ? 'Detener compartir' : 'Compartir pantalla'"
+                aria-label="Compartir pantalla"
+              >
+                <mat-icon>{{ isScreenSharing() ? 'stop_screen_share' : 'screen_share' }}</mat-icon>
+              </button>
+
+              <button
+                mat-fab
+                color="warn"
+                class="btn-end-call"
+                (click)="endCall()"
+                matTooltip="Salir de la llamada"
+                aria-label="Salir de la videollamada"
+              >
+                <mat-icon>call_end</mat-icon>
+              </button>
+            </div>
+          </div>
+        } @else {
+          <!-- Post-call summary for user who ended early -->
+          <div class="teleconsult-view__state-card">
+            <mat-icon class="state-icon state-icon--success">check_circle</mat-icon>
+            <h2>Has salido de la sesión</h2>
+            <p>Puedes volver a unirte si la sesión aún se encuentra activa con tu profesional.</p>
+            <div class="post-call-actions">
+              <button mat-flat-button color="primary" (click)="rejoinCall()">
+                <mat-icon>videocam</mat-icon>
+                Volver a conectarse
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- 3. EXPIRED State -->
+      @if (isRoomExpired()) {
+        <div class="teleconsult-view__state-card teleconsult-view__state-card--expired">
+          <mat-icon class="state-icon state-icon--warning">history_toggle_off</mat-icon>
+          <h2>Sesión Expirada</h2>
+          <p class="lead-text">
+            El tiempo límite para esta consulta virtual concluyó el {{ expiresAtDisplay() }}.
+          </p>
+          <p class="sub-text">
+            Si necesitas atención adicional o reprogramar tu sesión, ponte en contacto con tu centro de atención.
+          </p>
+        </div>
+      }
+
+      <!-- 4. TERMINATED State -->
+      @if (isRoomTerminated()) {
+        <div class="teleconsult-view__state-card teleconsult-view__state-card--terminated">
+          <mat-icon class="state-icon state-icon--success">task_alt</mat-icon>
+          <h2>Sesión Finalizada</h2>
+          <p class="lead-text">
+            El terapeuta <strong>{{ room()!.psychologistName }}</strong> ha dado por concluida la consulta clínica.
+          </p>
+          <p class="sub-text">
+            Gracias por utilizar el servicio de teleconsulta segura de {{ room()!.organizationName }}.
+          </p>
+        </div>
+      }
+    }
+  </main>
+</div>
