@@ -16,6 +16,12 @@ export const routes: Routes = [
     loadComponent: () => import('./core/auth/signup.page').then((m) => m.SignupPage),
   },
   {
+    path: 'forgot-password',
+    canActivate: [anonymousOnlyGuard],
+    loadComponent: () =>
+      import('./core/auth/forgot-password.page').then((m) => m.ForgotPasswordPage),
+  },
+  {
     path: 'organization-selection',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -43,6 +49,23 @@ export const routes: Routes = [
       import('./features/teleconsultation/pages/teleconsultation-room-view.page').then(
         (m) => m.TeleconsultationRoomViewPage,
       ),
+  },
+  {
+    path: 'sandbox',
+    loadComponent: () =>
+      import('./features/sandbox/pages/sandbox.page').then((m) => m.SandboxPageComponent),
+  },
+  {
+    path: 'demo',
+    loadComponent: () =>
+      import('./features/sandbox/pages/sandbox.page').then((m) => m.SandboxPageComponent),
+  },
+  {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [anonymousOnlyGuard],
+    loadComponent: () =>
+      import('./features/landing/landing-page.component').then((m) => m.LandingPageComponent),
   },
   {
     path: '',

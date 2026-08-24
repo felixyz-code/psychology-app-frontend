@@ -328,4 +328,17 @@ describe('AuthService', () => {
     expect(tenantContextStore.resetTenantState).toHaveBeenCalledWith('logout');
     expect(store.isAuthenticated()).toBe(false);
   });
+
+  it('posts email to /auth/forgot-password with public tenant context', () => {
+    const received = vi.fn();
+    service.forgotPassword('test@example.com').subscribe(received);
+
+    const req = httpTesting.expectOne(`${environment.apiUrl}/auth/forgot-password`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'test@example.com' });
+    expect(req.request.context.get(TENANT_HTTP_MODE)).toBe('PUBLIC');
+
+    req.flush({ success: true, message: 'Instrucciones enviadas' });
+    expect(received).toHaveBeenCalledWith({ success: true, message: 'Instrucciones enviadas' });
+  });
 });

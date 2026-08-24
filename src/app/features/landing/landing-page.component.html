@@ -1,0 +1,913 @@
+<div class="landing-layout" [class.dark-mode]="isDarkTheme()">
+  <!-- Top Ambient Glows -->
+  <div class="landing-ambient-glow landing-ambient-glow--primary" aria-hidden="true"></div>
+  <div class="landing-ambient-glow landing-ambient-glow--accent" aria-hidden="true"></div>
+
+  <!-- ========================================================================= -->
+  <!-- 1. PUBLIC STICKY HEADER -->
+  <!-- ========================================================================= -->
+  <header class="landing-header">
+    <div class="landing-container landing-header__inner">
+      <!-- Brand Logo -->
+      <a class="landing-header__brand" (click)="scrollToSection('hero')" role="button" tabindex="0">
+        <div class="landing-header__logo-box">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="26"
+            height="26"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="landing-header__logo-icon"
+            aria-hidden="true"
+          >
+            <line x1="12" y1="2" x2="12" y2="22" />
+            <path d="M4 6v5a8 8 0 0 0 16 0V6" />
+            <line x1="8" y1="22" x2="16" y2="22" />
+          </svg>
+        </div>
+        <div class="landing-header__brand-text">
+          <span class="landing-header__brand-name">PsiqueOS</span>
+          <span class="landing-header__brand-pill">Salud Mental</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="landing-header__nav" aria-label="Navegación principal">
+        <button type="button" class="landing-header__nav-link" (click)="scrollToSection('caracteristicas')">
+          {{ 'landing.nav.features' | translate }}
+        </button>
+        <button type="button" class="landing-header__nav-link" (click)="scrollToSection('planes')">
+          {{ 'landing.nav.pricing' | translate }}
+        </button>
+        <button type="button" class="landing-header__nav-link" (click)="scrollToSection('seguridad')">
+          {{ 'landing.nav.security' | translate }}
+        </button>
+        <button type="button" class="landing-header__nav-link" (click)="scrollToSection('faq')">
+          {{ 'landing.nav.faq' | translate }}
+        </button>
+      </nav>
+
+      <!-- Desktop Actions -->
+      <div class="landing-header__actions">
+        <!-- Language Switcher -->
+        <app-language-switcher variant="segmented" class="landing-lang-switcher" />
+
+        <!-- Theme Toggle -->
+        <button
+          type="button"
+          class="landing-theme-toggle-btn"
+          (click)="toggleTheme()"
+          [attr.aria-label]="isDarkTheme() ? ('common.lightTheme' | translate) : ('common.darkTheme' | translate)"
+          [title]="isDarkTheme() ? ('common.lightTheme' | translate) : ('common.darkTheme' | translate)"
+        >
+          <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+
+        <a
+          routerLink="/sandbox"
+          class="landing-btn landing-btn--ghost landing-header__sandbox-btn"
+          [title]="'landing.nav.sandbox' | translate"
+          [attr.aria-label]="'landing.nav.sandbox' | translate"
+        >
+          <mat-icon class="landing-btn__icon">science</mat-icon>
+          <span class="landing-header__sandbox-text">{{ 'landing.nav.sandbox' | translate }}</span>
+        </a>
+        <a routerLink="/login" class="landing-btn landing-btn--ghost landing-header__login-btn">
+          {{ 'landing.nav.login' | translate }}
+        </a>
+        <a routerLink="/signup" class="landing-btn landing-btn--primary landing-header__cta-btn">
+          <span>{{ 'landing.nav.startFree' | translate }}</span>
+          <mat-icon class="landing-btn__icon">arrow_forward</mat-icon>
+        </a>
+      </div>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button
+        type="button"
+        class="landing-header__mobile-toggle"
+        (click)="toggleMobileMenu()"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        [attr.aria-label]="'landing.nav.mobileToggle' | translate"
+      >
+        <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer Nav -->
+    @if (mobileMenuOpen()) {
+      <div class="landing-mobile-drawer" role="dialog" aria-modal="true" aria-label="Menú móvil">
+        <nav class="landing-mobile-drawer__links">
+          <button type="button" class="landing-mobile-drawer__link" (click)="scrollToSection('caracteristicas')">
+            <mat-icon>featured_play_list</mat-icon>
+            <span>{{ 'landing.nav.features' | translate }}</span>
+          </button>
+          <button type="button" class="landing-mobile-drawer__link" (click)="scrollToSection('planes')">
+            <mat-icon>sell</mat-icon>
+            <span>{{ 'landing.nav.pricing' | translate }}</span>
+          </button>
+          <button type="button" class="landing-mobile-drawer__link" (click)="scrollToSection('seguridad')">
+            <mat-icon>verified_user</mat-icon>
+            <span>{{ 'landing.nav.security' | translate }}</span>
+          </button>
+          <button type="button" class="landing-mobile-drawer__link" (click)="scrollToSection('faq')">
+            <mat-icon>help_outline</mat-icon>
+            <span>{{ 'landing.nav.faq' | translate }}</span>
+          </button>
+          <a routerLink="/sandbox" (click)="closeMobileMenu()" class="landing-mobile-drawer__link">
+            <mat-icon>science</mat-icon>
+            <span>{{ 'landing.nav.demo' | translate }}</span>
+          </a>
+        </nav>
+        <div class="landing-mobile-drawer__actions">
+          <div class="landing-mobile-drawer__lang-row" style="display: flex; justify-content: center; margin-bottom: 12px;">
+            <app-language-switcher variant="segmented" />
+          </div>
+          <a routerLink="/login" (click)="closeMobileMenu()" class="landing-btn landing-btn--ghost landing-btn--full">
+            {{ 'landing.nav.login' | translate }}
+          </a>
+          <a routerLink="/signup" (click)="closeMobileMenu()" class="landing-btn landing-btn--primary landing-btn--full">
+            {{ 'landing.hero.startTrial' | translate }}
+          </a>
+        </div>
+      </div>
+    }
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 2. HERO SECTION -->
+  <!-- ========================================================================= -->
+  <section id="hero" class="landing-hero">
+    <div class="landing-container">
+      <div class="landing-hero__badge-wrapper">
+        <div class="landing-hero__badge">
+          <mat-icon class="landing-hero__badge-icon">verified</mat-icon>
+          <span>{{ 'landing.hero.badge' | translate }}</span>
+        </div>
+      </div>
+
+      <h1 class="landing-hero__headline">
+        {{ 'landing.hero.titleHighlight' | translate }} <span class="landing-text-gradient">{{ 'landing.hero.titleRest' | translate }}</span>
+      </h1>
+
+      <p class="landing-hero__subheadline">
+        {{ 'landing.hero.subtitle' | translate }}
+      </p>
+
+      <div class="landing-hero__ctas">
+        <a routerLink="/signup" class="landing-btn landing-btn--primary landing-btn--large">
+          <span>{{ 'landing.hero.startTrial' | translate }}</span>
+          <mat-icon class="landing-btn__icon">arrow_forward</mat-icon>
+        </a>
+        <a routerLink="/sandbox" class="landing-btn landing-btn--secondary landing-btn--large">
+          <mat-icon class="landing-btn__icon">science</mat-icon>
+          <span>{{ 'landing.hero.trySandbox' | translate }}</span>
+        </a>
+      </div>
+
+      <p class="landing-hero__microcopy">
+        <mat-icon class="landing-hero__microcopy-icon">check_circle</mat-icon>
+        {{ 'landing.cta.noCreditCard' | translate }}
+      </p>
+
+      <!-- Trust Badges Row -->
+      <div class="landing-trust-bar">
+        @for (badge of trustBadges(); track badge.label) {
+          <div class="landing-trust-bar__item">
+            <div class="landing-trust-bar__icon-box">
+              <mat-icon>{{ badge.icon }}</mat-icon>
+            </div>
+            <div class="landing-trust-bar__info">
+              <span class="landing-trust-bar__label">{{ badge.label }}</span>
+              <span class="landing-trust-bar__desc">{{ badge.desc }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- INTERACTIVE CLINICAL WORKSPACE PREVIEW SIMULATOR -->
+      <!-- ===================================================================== -->
+      <div class="landing-preview-card">
+        <!-- Window Mockup Top Bar -->
+        <div class="landing-preview-card__header">
+          <div class="landing-preview-card__window-controls" aria-hidden="true">
+            <span class="window-dot window-dot--close"></span>
+            <span class="window-dot window-dot--min"></span>
+            <span class="window-dot window-dot--max"></span>
+          </div>
+
+          <!-- Interactive Workspace Tabs Switcher -->
+          <div class="landing-preview-card__tabs" role="tablist" [attr.aria-label]="'landing.preview.sectionTitle' | translate">
+            <button
+              type="button"
+              role="tab"
+              class="preview-tab"
+              [class.preview-tab--active]="selectedPreviewTab() === 'soap'"
+              [attr.aria-selected]="selectedPreviewTab() === 'soap'"
+              (click)="setPreviewTab('soap')"
+            >
+              <mat-icon>description</mat-icon>
+              <span>{{ 'landing.preview.tabs.soap' | translate }}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="preview-tab"
+              [class.preview-tab--active]="selectedPreviewTab() === 'teleconsultation'"
+              [attr.aria-selected]="selectedPreviewTab() === 'teleconsultation'"
+              (click)="setPreviewTab('teleconsultation')"
+            >
+              <mat-icon>videocam</mat-icon>
+              <span>{{ 'landing.preview.tabs.teleconsultation' | translate }}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="preview-tab"
+              [class.preview-tab--active]="selectedPreviewTab() === 'psychometrics'"
+              [attr.aria-selected]="selectedPreviewTab() === 'psychometrics'"
+              (click)="setPreviewTab('psychometrics')"
+            >
+              <mat-icon>psychology</mat-icon>
+              <span>{{ 'landing.preview.tabs.psychometrics' | translate }}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="preview-tab"
+              [class.preview-tab--active]="selectedPreviewTab() === 'paef'"
+              [attr.aria-selected]="selectedPreviewTab() === 'paef'"
+              (click)="setPreviewTab('paef')"
+            >
+              <mat-icon>corporate_fare</mat-icon>
+              <span>{{ 'landing.preview.tabs.paef' | translate }}</span>
+            </button>
+          </div>
+
+          <div class="landing-preview-card__meta-status">
+            <span class="status-indicator"></span>
+            <span>En vivo · v2.4</span>
+          </div>
+        </div>
+
+        <!-- Simulated Workspace Screen -->
+        <div class="landing-preview-card__body">
+          <!-- TAB 1: EXPEDIENTE SOAP -->
+          @if (selectedPreviewTab() === 'soap') {
+            <div class="preview-soap-view">
+              <div class="preview-patient-header">
+                <div class="preview-patient-avatar">
+                  <span>CM</span>
+                </div>
+                <div class="preview-patient-details">
+                  <div class="preview-patient-title-row">
+                    <h3>Camila Morales Soto</h3>
+                    <span class="preview-tag preview-tag--active">Expediente #EXP-2026-089</span>
+                    <span class="preview-tag preview-tag--norm">NOM-004-SSA3</span>
+                  </div>
+                  <p class="preview-patient-meta">28 años · Terapia Cognitivo-Conductual · Sesión 4 de 12 · Dra. Valenzuela</p>
+                </div>
+                <div class="preview-patient-actions">
+                  <span class="preview-btn-mock">
+                    <mat-icon>picture_as_pdf</mat-icon> Exportar PDF
+                  </span>
+                </div>
+              </div>
+
+              <div class="preview-soap-grid">
+                <div class="soap-block soap-block--s">
+                  <div class="soap-block__title">
+                    <span class="soap-letter">S</span>
+                    <strong>Subjetivo</strong>
+                  </div>
+                  <p class="soap-block__content">
+                    Paciente refiere disminución notable en episodios de angustia nocturna tras aplicar técnicas de respiración diafragmática. Manifiesta tensión laboral moderada.
+                  </p>
+                </div>
+
+                <div class="soap-block soap-block--o">
+                  <div class="soap-block__title">
+                    <span class="soap-letter">O</span>
+                    <strong>Objetivo</strong>
+                  </div>
+                  <p class="soap-block__content">
+                    Orientada en tiempo, espacio y persona. Afecto congruente, discurso fluido. Puntaje GAD-7 actualizado: 8/21 (Ansiedad leve, descenso de 6 pts vs línea base).
+                  </p>
+                </div>
+
+                <div class="soap-block soap-block--a">
+                  <div class="soap-block__title">
+                    <span class="soap-letter">A</span>
+                    <strong>Análisis / Evaluación</strong>
+                  </div>
+                  <p class="soap-block__content">
+                    Respuesta favorable al protocolo TCC para Trastorno de Ansiedad Generalizada (F41.1). Reestructuración cognitiva efectiva en pensamientos catastróficos.
+                  </p>
+                </div>
+
+                <div class="soap-block soap-block--p">
+                  <div class="soap-block__title">
+                    <span class="soap-letter">P</span>
+                    <strong>Plan de Intervención</strong>
+                  </div>
+                  <p class="soap-block__content">
+                    1. Registro de pensamientos disfuncionales en hoja de registro diario. 2. Próxima sesión virtual programada para el 31 de agosto. 3. Consentimiento digital vigente.
+                  </p>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- TAB 2: TELECONSULTA CIFRADA -->
+          @if (selectedPreviewTab() === 'teleconsultation') {
+            <div class="preview-teleconsultation-view">
+              <div class="tele-room-grid">
+                <div class="tele-video-mock">
+                  <div class="tele-video-overlay">
+                    <span class="tele-badge tele-badge--live">
+                      <span class="pulse-dot"></span> Teleconsulta Cifrada E2E
+                    </span>
+                    <span class="tele-badge tele-badge--timer">24:18 min</span>
+                  </div>
+                  <div class="tele-participant-avatar">
+                    <mat-icon class="tele-avatar-icon">account_circle</mat-icon>
+                    <span>Paciente Conectado (WebRTC Seguro)</span>
+                  </div>
+                  <div class="tele-video-controls">
+                    <span class="tele-btn-ctrl tele-btn-ctrl--active"><mat-icon>mic</mat-icon></span>
+                    <span class="tele-btn-ctrl tele-btn-ctrl--active"><mat-icon>videocam</mat-icon></span>
+                    <span class="tele-btn-ctrl"><mat-icon>screen_share</mat-icon></span>
+                    <span class="tele-btn-ctrl tele-btn-ctrl--hangup"><mat-icon>call_end</mat-icon></span>
+                  </div>
+                </div>
+
+                <div class="tele-notes-panel">
+                  <div class="tele-notes-header">
+                    <h4>Notas en Tiempo Real</h4>
+                    <span class="preview-tag preview-tag--norm">Autoguardado Activo</span>
+                  </div>
+                  <div class="tele-notes-content">
+                    <p class="tele-note-line"><strong>10:15 am:</strong> Paciente se conecta puntualmente desde su celular.</p>
+                    <p class="tele-note-line"><strong>10:22 am:</strong> Se revisa tarea conductual de exposición gradual.</p>
+                    <p class="tele-note-line"><strong>10:35 am:</strong> Se prescribe ejercicio de detención de pensamiento.</p>
+                  </div>
+                  <div class="tele-token-info">
+                    <mat-icon>lock</mat-icon>
+                    <span>Sala efímera: <code>room-8a9d-ef21</code> · Token expira al colgar</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- TAB 3: BATERÍA PSICOMÉTRICA -->
+          @if (selectedPreviewTab() === 'psychometrics') {
+            <div class="preview-psychometrics-view">
+              <div class="psycho-header">
+                <div>
+                  <h4>Escala de Depresión, Ansiedad y Estrés (DASS-21)</h4>
+                  <p class="psycho-subtitle">Evaluación aplicada de forma remota · Baremos Población Mexicana</p>
+                </div>
+                <span class="preview-tag preview-tag--active">Completada · Score 100%</span>
+              </div>
+
+              <div class="psycho-bars-grid">
+                <div class="psycho-scale-card">
+                  <div class="psycho-scale-header">
+                    <span>Escala de Depresión (D)</span>
+                    <strong>4 / 21 (Normal)</strong>
+                  </div>
+                  <div class="psycho-progress-bar">
+                    <div class="psycho-progress-fill psycho-progress-fill--low" style="width: 25%"></div>
+                  </div>
+                  <span class="psycho-scale-note">Percentil 22 · Sin sintomatología depresiva significativa</span>
+                </div>
+
+                <div class="psycho-scale-card">
+                  <div class="psycho-scale-header">
+                    <span>Escala de Ansiedad (A)</span>
+                    <strong>8 / 21 (Leve)</strong>
+                  </div>
+                  <div class="psycho-progress-bar">
+                    <div class="psycho-progress-fill psycho-progress-fill--mid" style="width: 48%"></div>
+                  </div>
+                  <span class="psycho-scale-note">Percentil 54 · Descenso notable vs evaluación inicial (16/21)</span>
+                </div>
+
+                <div class="psycho-scale-card">
+                  <div class="psycho-scale-header">
+                    <span>Escala de Estrés (S)</span>
+                    <strong>12 / 21 (Moderado)</strong>
+                  </div>
+                  <div class="psycho-progress-bar">
+                    <div class="psycho-progress-fill psycho-progress-fill--high" style="width: 65%"></div>
+                  </div>
+                  <span class="psycho-scale-note">Percentil 68 · Estrés asociado a carga laboral activa</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- TAB 4: CONVENIOS PAEF -->
+          @if (selectedPreviewTab() === 'paef') {
+            <div class="preview-paef-view">
+              <div class="paef-header-row">
+                <div>
+                  <h4>Convenio Corporativo: Grupo Industrial Innova</h4>
+                  <p class="paef-sub">Programa de Asistencia al Empleado (PAEF) · Póliza Anual #PAEF-2026-INNOVA</p>
+                </div>
+                <span class="preview-tag preview-tag--active">Convenio Activo</span>
+              </div>
+
+              <div class="paef-metrics-grid">
+                <div class="paef-stat-box">
+                  <span class="paef-stat-label">Bolsa de Sesiones Contratadas</span>
+                  <strong class="paef-stat-value">200 Sesiones</strong>
+                  <span class="paef-stat-sub">Vigencia al 31 de Diciembre 2026</span>
+                </div>
+                <div class="paef-stat-box">
+                  <span class="paef-stat-label">Sesiones Consumidas / Débitos</span>
+                  <strong class="paef-stat-value">64 Sesiones</strong>
+                  <span class="paef-stat-sub">32% de ejecución de póliza</span>
+                </div>
+                <div class="paef-stat-box">
+                  <span class="paef-stat-label">Colaboradores Beneficiados</span>
+                  <strong class="paef-stat-value">28 Pacientes</strong>
+                  <span class="paef-stat-sub">Validación por cédula / ID laboral</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 3. CLINICAL FEATURES GRID -->
+  <!-- ========================================================================= -->
+  <section id="caracteristicas" class="landing-features">
+    <div class="landing-container">
+      <div class="landing-section-header">
+        <span class="landing-section-pill">Innovación Clínica</span>
+        <h2 class="landing-section-title">
+          Diseñado por y para <span class="landing-text-gradient">Especialistas en Salud Mental</span>
+        </h2>
+        <p class="landing-section-subtitle">
+          Cada herramienta ha sido optimizada para maximizar la calidad de tu atención médica, reducir tiempos administrativos y proteger la confidencialidad de tus pacientes.
+        </p>
+
+        <!-- Category Filters -->
+        <div class="landing-features__filters">
+          <button
+            type="button"
+            class="filter-pill"
+            [class.filter-pill--active]="activeFeatureCategory() === 'all'"
+            (click)="setFeatureCategory('all')"
+          >
+            Todas las Funciones
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.filter-pill--active]="activeFeatureCategory() === 'clinical'"
+            (click)="setFeatureCategory('clinical')"
+          >
+            Gestión Clínica & SOAP
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.filter-pill--active]="activeFeatureCategory() === 'telehealth'"
+            (click)="setFeatureCategory('telehealth')"
+          >
+            Telemedicina
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.filter-pill--active]="activeFeatureCategory() === 'admin'"
+            (click)="setFeatureCategory('admin')"
+          >
+            Administración & PAEF
+          </button>
+        </div>
+      </div>
+
+      <!-- Features Cards Grid -->
+      <div class="landing-features__grid">
+        @for (feature of filteredFeatures(); track feature.id) {
+          <div class="landing-feature-card">
+            <div class="landing-feature-card__header">
+              <div class="landing-feature-card__icon-box">
+                <mat-icon>{{ feature.icon }}</mat-icon>
+              </div>
+              <span class="landing-feature-card__badge">{{ feature.badge }}</span>
+            </div>
+
+            <h3 class="landing-feature-card__title">{{ feature.title }}</h3>
+            <h4 class="landing-feature-card__subtitle">{{ feature.subtitle }}</h4>
+            <p class="landing-feature-card__desc">{{ feature.description }}</p>
+
+            <div class="landing-feature-card__divider"></div>
+
+            <ul class="landing-feature-card__list">
+              @for (point of feature.highlights; track point) {
+                <li class="landing-feature-card__list-item">
+                  <mat-icon class="check-icon">check</mat-icon>
+                  <span>{{ point }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 4. SECURITY & NORMATIVE COMPLIANCE SECTION -->
+  <!-- ========================================================================= -->
+  <section id="seguridad" class="landing-security">
+    <div class="landing-container">
+      <div class="landing-security__card">
+        <div class="landing-security__content">
+          <span class="landing-section-pill landing-section-pill--light">Máxima Seguridad Médica</span>
+          <h2 class="landing-security__title">
+            Protección de Grado Hospitalario y Cumplimiento Normativo
+          </h2>
+          <p class="landing-security__desc">
+            En salud mental, la confidencialidad no es opcional. PsiqueOS cumple con la legislación mexicana en materia de salud y privacidad digital.
+          </p>
+
+          <div class="landing-security__points-grid">
+            <div class="security-point">
+              <div class="security-point__icon-box">
+                <mat-icon>health_and_safety</mat-icon>
+              </div>
+              <div>
+                <h4>NOM-004-SSA3-2012</h4>
+                <p>Estructura obligatoria de notas médicas, consentimientos bajo información y archivo clínico inmutable.</p>
+              </div>
+            </div>
+
+            <div class="security-point">
+              <div class="security-point__icon-box">
+                <mat-icon>lock</mat-icon>
+              </div>
+              <div>
+                <h4>Cifrado AES-256 & TLS 1.3</h4>
+                <p>Todos los expedientes se cifran en reposo y en tránsito bajo estándares criptográficos militares.</p>
+              </div>
+            </div>
+
+            <div class="security-point">
+              <div class="security-point__icon-box">
+                <mat-icon>shield</mat-icon>
+              </div>
+              <div>
+                <h4>Aislamiento Multi-Tenant</h4>
+                <p>Bases de datos lógicamente segregadas por consultorio. Cero riesgo de cruce de datos entre clínicas.</p>
+              </div>
+            </div>
+
+            <div class="security-point">
+              <div class="security-point__icon-box">
+                <mat-icon>history_edu</mat-icon>
+              </div>
+              <div>
+                <h4>Audit Trail Inmutable</h4>
+                <p>Registro inalterable de aperturas, ediciones y descargas de expedientes para auditorías de COFEPRIS.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 5. PRICING & PLANS SECTION -->
+  <!-- ========================================================================= -->
+  <section id="planes" class="landing-pricing">
+    <div class="landing-container">
+      <div class="landing-section-header">
+        <span class="landing-section-pill">Planes Transparentes</span>
+        <h2 class="landing-section-title">
+          Invierte en la Eficiencia de tu <span class="landing-text-gradient">Práctica Clínica</span>
+        </h2>
+        <p class="landing-section-subtitle">
+          Elige el plan ideal según el tamaño de tu consultorio. Cambia de plan o cancela en cualquier momento sin penalizaciones.
+        </p>
+
+        <!-- Billing Cycle Toggle Switcher -->
+        <div class="landing-billing-toggle">
+          <button
+            type="button"
+            class="billing-toggle-option"
+            [class.billing-toggle-option--active]="billingCycle() === 'monthly'"
+            (click)="setBillingCycle('monthly')"
+          >
+            Facturación Mensual
+          </button>
+          <button
+            type="button"
+            class="billing-toggle-option"
+            [class.billing-toggle-option--active]="billingCycle() === 'annual'"
+            (click)="setBillingCycle('annual')"
+          >
+            <span>Facturación Anual</span>
+            <span class="discount-badge">Ahorra 20%</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Pricing Cards Grid -->
+      <div class="landing-pricing__grid">
+        @for (plan of plans; track plan.id) {
+          <div class="landing-pricing-card" [class.landing-pricing-card--popular]="plan.popular">
+            @if (plan.badge) {
+              <div class="landing-pricing-card__popular-badge">
+                <mat-icon>stars</mat-icon>
+                <span>{{ plan.badge }}</span>
+              </div>
+            }
+
+            <div class="landing-pricing-card__top">
+              <h3 class="landing-pricing-card__name">{{ plan.name }}</h3>
+              <p class="landing-pricing-card__tagline">{{ plan.tagline }}</p>
+
+              <div class="landing-pricing-card__price-box">
+                <span class="currency-symbol">$</span>
+                <span class="price-amount">
+                  {{ billingCycle() === 'annual' ? plan.annualMonthlyPrice : plan.monthlyPrice }}
+                </span>
+                <div class="price-period">
+                  <span>MXN</span>
+                  <span>/ mes</span>
+                </div>
+              </div>
+
+              @if (billingCycle() === 'annual') {
+                <p class="landing-pricing-card__annual-note">
+                  Cobrado anualmente ${{ plan.annualTotal }} MXN/año
+                </p>
+              } @else {
+                <p class="landing-pricing-card__annual-note">
+                  Facturación mensual recurrente sin plazo forzoso
+                </p>
+              }
+
+              <div class="landing-pricing-card__limits">
+                <div class="limit-item">
+                  <mat-icon>people</mat-icon>
+                  <span>{{ plan.patientLimit }}</span>
+                </div>
+                <div class="limit-item">
+                  <mat-icon>badge</mat-icon>
+                  <span>{{ plan.userLimit }}</span>
+                </div>
+              </div>
+
+              <a
+                [routerLink]="plan.ctaRoute"
+                class="landing-btn landing-btn--full"
+                [class.landing-btn--primary]="plan.popular"
+                [class.landing-btn--outline]="!plan.popular"
+              >
+                <span>{{ plan.ctaText }}</span>
+                <mat-icon class="landing-btn__icon">arrow_forward</mat-icon>
+              </a>
+            </div>
+
+            <div class="landing-pricing-card__divider"></div>
+
+            <div class="landing-pricing-card__features">
+              <span class="features-label">Lo que incluye:</span>
+              <ul class="features-list">
+                @for (item of plan.features; track item) {
+                  <li class="features-list-item">
+                    <mat-icon class="check-icon">check</mat-icon>
+                    <span>{{ item }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Feature Comparison Matrix Table -->
+      <div class="landing-comparison">
+        <h3 class="landing-comparison__title">Comparativa Detallada de Características</h3>
+        <div class="landing-comparison__table-wrapper">
+          <table class="landing-comparison__table" aria-label="Tabla de comparación de planes">
+            <thead>
+              <tr>
+                <th class="col-feature">Característica</th>
+                <th class="col-plan">Freelance</th>
+                <th class="col-plan col-plan--highlight">Consultorio</th>
+                <th class="col-plan">Clínica Enterprise</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of comparisonMatrix; track item.name) {
+                <tr>
+                  <td class="col-feature">
+                    <span class="feature-category-badge">{{ item.category }}</span>
+                    <span class="feature-name-text">{{ item.name }}</span>
+                  </td>
+                  <td class="col-plan">
+                    <mat-icon [class.icon-check]="item.includedInFreelance" [class.icon-cross]="!item.includedInFreelance">
+                      {{ item.includedInFreelance ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </td>
+                  <td class="col-plan col-plan--highlight">
+                    <mat-icon [class.icon-check]="item.includedInConsultorio" [class.icon-cross]="!item.includedInConsultorio">
+                      {{ item.includedInConsultorio ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </td>
+                  <td class="col-plan">
+                    <mat-icon [class.icon-check]="item.includedInClinica" [class.icon-cross]="!item.includedInClinica">
+                      {{ item.includedInClinica ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 6. FREQUENTLY ASKED QUESTIONS (FAQ) ACCORDION -->
+  <!-- ========================================================================= -->
+  <section id="faq" class="landing-faq">
+    <div class="landing-container">
+      <div class="landing-section-header">
+        <span class="landing-section-pill">Dudas Frecuentes</span>
+        <h2 class="landing-section-title">
+          Preguntas Frecuentes de <span class="landing-text-gradient">Terapeutas y Clínicas</span>
+        </h2>
+        <p class="landing-section-subtitle">
+          Todo lo que necesitas saber antes de modernizar tu práctica profesional con PsiqueOS.
+        </p>
+      </div>
+
+      <div class="landing-faq__accordion" role="region" aria-label="Sección de preguntas frecuentes">
+        @for (faq of faqs; track faq.question; let i = $index) {
+          <div class="faq-item" [class.faq-item--expanded]="isFaqExpanded(i)">
+            <button
+              type="button"
+              class="faq-item__trigger"
+              (click)="toggleFaq(i)"
+              [attr.aria-expanded]="isFaqExpanded(i)"
+              [attr.aria-controls]="'faq-content-' + i"
+              [id]="'faq-trigger-' + i"
+            >
+              <span class="faq-item__question">{{ faq.question }}</span>
+              <mat-icon class="faq-item__chevron">
+                {{ isFaqExpanded(i) ? 'expand_less' : 'expand_more' }}
+              </mat-icon>
+            </button>
+
+            @if (isFaqExpanded(i)) {
+              <div
+                class="faq-item__body"
+                [id]="'faq-content-' + i"
+                role="region"
+                [attr.aria-labelledby]="'faq-trigger-' + i"
+              >
+                <p class="faq-item__answer">{{ faq.answer }}</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 7. PRE-FOOTER CONVERSION BANNER -->
+  <!-- ========================================================================= -->
+  <section class="landing-cta-banner">
+    <div class="landing-container">
+      <div class="landing-cta-banner__card">
+        <div class="landing-cta-banner__glow" aria-hidden="true"></div>
+        <h2 class="landing-cta-banner__title">
+          Transforma y Profesionaliza tu Práctica Clínica Hoy Mismo
+        </h2>
+        <p class="landing-cta-banner__desc">
+          Únete a cientos de psicólogos, terapeutas y clínicas de salud mental que ya ahorran más de 8 horas semanales en papeleo y gestión.
+        </p>
+        <div class="landing-cta-banner__actions">
+          <a routerLink="/signup" class="landing-btn landing-btn--primary landing-btn--large">
+            <span>Comenzar Prueba Gratuita (14 Días)</span>
+            <mat-icon class="landing-btn__icon">arrow_forward</mat-icon>
+          </a>
+          <a routerLink="/login" class="landing-btn landing-btn--ghost-white landing-btn--large">
+            <span>Iniciar Sesión</span>
+          </a>
+        </div>
+        <p class="landing-cta-banner__subnote">
+          <mat-icon>shield</mat-icon> Sin compromiso · Sin tarjeta de crédito · Soporte continuo en español
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 8. INSTITUTIONAL FOOTER -->
+  <!-- ========================================================================= -->
+  <footer class="landing-footer">
+    <div class="landing-container">
+      <div class="landing-footer__grid">
+        <!-- Col 1: Brand & Mission -->
+        <div class="landing-footer__col landing-footer__col--brand">
+          <div class="landing-footer__brand">
+            <div class="landing-header__logo-box">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="landing-header__logo-icon"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="2" x2="12" y2="22" />
+                <path d="M4 6v5a8 8 0 0 0 16 0V6" />
+                <line x1="8" y1="22" x2="16" y2="22" />
+              </svg>
+            </div>
+            <span class="landing-footer__brand-name">PsiqueOS</span>
+          </div>
+          <p class="landing-footer__mission">
+            El sistema operativo clínico y psicométrico más completo para profesionales y clínicas de salud mental en México e Hispanoamérica.
+          </p>
+          <div class="landing-footer__security-pills">
+            <span class="footer-sec-pill">NOM-004-SSA3</span>
+            <span class="footer-sec-pill">TLS 1.3 / AES-256</span>
+            <span class="footer-sec-pill">Multi-Tenant</span>
+          </div>
+        </div>
+
+        <!-- Col 2: Producto -->
+        <div class="landing-footer__col">
+          <h4 class="landing-footer__heading">Producto</h4>
+          <ul class="landing-footer__links">
+            <li><a (click)="scrollToSection('caracteristicas')" role="button" tabindex="0">Expediente SOAP</a></li>
+            <li><a (click)="scrollToSection('caracteristicas')" role="button" tabindex="0">Baterías Psicométricas</a></li>
+            <li><a (click)="scrollToSection('caracteristicas')" role="button" tabindex="0">Teleconsulta Cifrada</a></li>
+            <li><a (click)="scrollToSection('caracteristicas')" role="button" tabindex="0">Convenios PAEF B2B</a></li>
+            <li><a (click)="scrollToSection('planes')" role="button" tabindex="0">Planes y Precios</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Legal & Normatividad -->
+        <div class="landing-footer__col">
+          <h4 class="landing-footer__heading">Normatividad & Legal</h4>
+          <ul class="landing-footer__links">
+            <li><a (click)="scrollToSection('seguridad')" role="button" tabindex="0">Cumplimiento NOM-004-SSA3</a></li>
+            <li><a (click)="scrollToSection('seguridad')" role="button" tabindex="0">Norma Oficial NOM-024-SSA3</a></li>
+            <li><a href="#terminos" (click)="$event.preventDefault()">Términos de Servicio</a></li>
+            <li><a href="#privacidad" (click)="$event.preventDefault()">Aviso de Privacidad (LFPDPPP)</a></li>
+            <li><a href="#seguridad-data" (click)="$event.preventDefault()">Seguridad y Encriptación</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Recursos -->
+        <div class="landing-footer__col">
+          <h4 class="landing-footer__heading">Recursos & Ayuda</h4>
+          <ul class="landing-footer__links">
+            <li><a (click)="scrollToSection('faq')" role="button" tabindex="0">Preguntas Frecuentes</a></li>
+            <li><a routerLink="/login">Acceso a Terapeutas</a></li>
+            <li><a routerLink="/signup">Registro de Nuevas Clínicas</a></li>
+            <li><a href="#contacto" (click)="$event.preventDefault()">Contacto y Soporte</a></li>
+            <li><a href="#estado" (click)="$event.preventDefault()">Estado del Sistema (99.9%)</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Footer Bottom Bar -->
+      <div class="landing-footer__bottom">
+        <p class="landing-footer__copyright">
+          © 2026 PsiqueOS Inc. Todos los derechos reservados. Diseñado para profesionales de la salud mental.
+        </p>
+        <p class="landing-footer__disclaimer">
+          Aviso: PsiqueOS es un software de gestión clínica y soporte administrativo para profesionales certificados. No sustituye el criterio médico ni el diagnóstico presencial del facultativo.
+        </p>
+      </div>
+    </div>
+  </footer>
+</div>

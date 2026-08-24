@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -8,7 +8,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -22,6 +22,8 @@ import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { FreelancerBootstrapRequest } from './auth.models';
 import { AuthService, BootstrapSessionConflictError } from './auth.service';
 import { AuthStore } from './auth.store';
+import { NgClass } from '@angular/common';
+import { AuthBrandPanelComponent } from './components/auth-brand-panel.component';
 
 const trimmedRequired: ValidatorFn = (control: AbstractControl): ValidationErrors | null =>
   typeof control.value === 'string' && control.value.trim().length > 0
@@ -52,6 +54,10 @@ export function utf8MaxBytes(maxBytes: number): ValidatorFn {
   };
 }
 
+import { LanguageSwitcherComponent } from '../i18n/components/language-switcher.component';
+import { TranslatePipe } from '../i18n/translate.pipe';
+import { I18nService } from '../i18n/i18n.service';
+
 @Component({
   selector: 'app-signup-page',
   standalone: true,
@@ -64,6 +70,10 @@ export function utf8MaxBytes(maxBytes: number): ValidatorFn {
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    NgClass,
+    AuthBrandPanelComponent,
+    LanguageSwitcherComponent,
+    TranslatePipe,
   ],
   templateUrl: './signup.page.html',
   styleUrl: './signup.page.scss',
@@ -74,6 +84,7 @@ export class SignupPage {
   private readonly authStore = inject(AuthStore);
   private readonly tenantContextStore = inject(TenantContextStore);
   private readonly router = inject(Router);
+  readonly i18n = inject(I18nService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly loginRoute = '/login';
@@ -96,6 +107,44 @@ export class SignupPage {
     },
     { validators: passwordsMatch },
   );
+
+  readonly passwordValue = toSignal(this.signupForm.controls.password.valueChanges, {
+    initialValue: '',
+  });
+
+  readonly hasMinLength = computed(() => (this.passwordValue()?.length ?? 0) >= 12);
+  readonly hasUppercase = computed(() => /[A-Z]/.test(this.passwordValue() ?? ''));
+  readonly hasLowercase = computed(() => /[a-z]/.test(this.passwordValue() ?? ''));
+  readonly hasNumberOrSymbol = computed(() => /[0-9\W_]/.test(this.passwordValue() ?? ''));
+
+  readonly passwordScore = computed(() => {
+    let score = 0;
+    if (this.hasMinLength()) score += 1;
+    if (this.hasUppercase()) score += 1;
+    if (this.hasLowercase()) score += 1;
+    if (this.hasNumberOrSymbol()) score += 1;
+    return score;
+  });
+
+  readonly passwordStrengthLabel = computed(() => {
+    const val = this.passwordValue() ?? '';
+    if (!val) return 'Sin ingresar';
+    const score = this.passwordScore();
+    if (score <= 1) return 'Débil';
+    if (score === 2) return 'Regular';
+    if (score === 3) return 'Buena';
+    return 'Excelente';
+  });
+
+  readonly passwordStrengthClass = computed(() => {
+    const val = this.passwordValue() ?? '';
+    if (!val) return 'strength--none';
+    const score = this.passwordScore();
+    if (score <= 1) return 'strength--weak';
+    if (score === 2) return 'strength--fair';
+    if (score === 3) return 'strength--good';
+    return 'strength--strong';
+  });
 
   submit(): void {
     if (this.submissionLocked()) {

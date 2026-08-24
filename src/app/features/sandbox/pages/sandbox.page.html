@@ -1,0 +1,863 @@
+<div class="sandbox-layout" [class.dark-mode]="isDarkTheme()">
+  <!-- ========================================================================= -->
+  <!-- 1. PERSISTENT TOP DEMO BANNER -->
+  <!-- ========================================================================= -->
+  <aside class="sandbox-banner" [attr.aria-label]="'sandbox.banner.demoMode' | translate">
+    <div class="sandbox-banner__inner">
+      <div class="sandbox-banner__badge-group">
+        <span class="sandbox-banner__pill">
+          <mat-icon class="sandbox-banner__pill-icon">science</mat-icon>
+          <span>{{ 'sandbox.banner.demoMode' | translate }}</span>
+        </span>
+        <span class="sandbox-banner__text">
+          {{ 'sandbox.banner.description' | translate }}
+        </span>
+      </div>
+
+      <div class="sandbox-banner__actions">
+        <button
+          type="button"
+          class="sandbox-banner__btn-ghost"
+          (click)="resetAllData()"
+          [title]="'sandbox.banner.resetBtn' | translate"
+        >
+          <mat-icon>restart_alt</mat-icon>
+          <span>{{ 'sandbox.banner.resetBtn' | translate }}</span>
+        </button>
+
+        <a routerLink="/signup" class="sandbox-banner__btn-cta">
+          <mat-icon>rocket_launch</mat-icon>
+          <span>{{ 'sandbox.banner.createAccount' | translate }}</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- 2. SANDBOX MAIN HEADER & WORKSPACE NAVIGATION -->
+  <!-- ========================================================================= -->
+  <header class="sandbox-header">
+    <div class="sandbox-header__inner">
+      <!-- Brand & Clinic Info -->
+      <div class="sandbox-header__brand-block">
+        <a routerLink="/" class="sandbox-header__brand-link" [title]="'sandbox.header.backToHome' | translate">
+          <div class="sandbox-header__logo-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="12" y1="2" x2="12" y2="22" />
+              <path d="M4 6v5a8 8 0 0 0 16 0V6" />
+              <line x1="8" y1="22" x2="16" y2="22" />
+            </svg>
+          </div>
+          <div class="sandbox-header__brand-titles">
+            <span class="sandbox-header__app-name">PsiqueOS</span>
+            <span class="sandbox-header__clinic-name">{{ clinicInfo().name }}</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Quick Patient Switcher Selector -->
+      <div class="sandbox-header__patient-switcher">
+        <label for="patient-select" class="sandbox-header__patient-label">
+          <mat-icon>person</mat-icon>
+          <span>{{ 'sandbox.patientSelector.label' | translate }}</span>
+        </label>
+        <select
+          id="patient-select"
+          class="sandbox-patient-dropdown"
+          [value]="selectedPatientId()"
+          (change)="onPatientSelectChange($event)"
+          [attr.aria-label]="'sandbox.patientSelector.switchCase' | translate"
+        >
+          @for (p of patients(); track p.id) {
+            <option [value]="p.id">
+              {{ p.fullName }} ({{ p.age }}{{ 'sandbox.patientSelector.ageYears' | translate }} · {{ p.diagnosisCode }})
+            </option>
+          }
+        </select>
+      </div>
+
+      <!-- Utility Actions -->
+      <div class="sandbox-header__utilities">
+        <app-language-switcher variant="segmented" />
+
+        <button
+          type="button"
+          class="sandbox-util-btn"
+          (click)="toggleTheme()"
+          [attr.aria-label]="isDarkTheme() ? ('common.lightTheme' | translate) : ('common.darkTheme' | translate)"
+          [title]="isDarkTheme() ? ('common.lightTheme' | translate) : ('common.darkTheme' | translate)"
+        >
+          <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+
+        <a routerLink="/login" class="sandbox-util-btn sandbox-util-btn--text">
+          <span>{{ 'landing.nav.login' | translate }}</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Workspace Navigation Tabs -->
+    <nav class="sandbox-nav" [attr.aria-label]="'sandbox.tabs.dashboard' | translate">
+      <div class="sandbox-nav__container">
+        <button
+          type="button"
+          class="sandbox-nav-tab"
+          [class.sandbox-nav-tab--active]="activeView() === 'dashboard'"
+          [attr.aria-selected]="activeView() === 'dashboard'"
+          (click)="setView('dashboard')"
+        >
+          <mat-icon>dashboard</mat-icon>
+          <span>{{ 'sandbox.tabs.dashboard' | translate }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="sandbox-nav-tab"
+          [class.sandbox-nav-tab--active]="activeView() === 'soap'"
+          [attr.aria-selected]="activeView() === 'soap'"
+          (click)="setView('soap')"
+        >
+          <mat-icon>description</mat-icon>
+          <span>{{ 'sandbox.tabs.soap' | translate }}</span>
+          <span class="sandbox-nav-tab__pill">NOM-004</span>
+        </button>
+
+        <button
+          type="button"
+          class="sandbox-nav-tab"
+          [class.sandbox-nav-tab--active]="activeView() === 'psychometrics'"
+          [attr.aria-selected]="activeView() === 'psychometrics'"
+          (click)="setView('psychometrics')"
+        >
+          <mat-icon>psychology</mat-icon>
+          <span>{{ 'sandbox.tabs.psychometrics' | translate }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="sandbox-nav-tab"
+          [class.sandbox-nav-tab--active]="activeView() === 'teleconsultation'"
+          [attr.aria-selected]="activeView() === 'teleconsultation'"
+          (click)="setView('teleconsultation')"
+        >
+          <mat-icon>videocam</mat-icon>
+          <span>{{ 'sandbox.tabs.teleconsultation' | translate }}</span>
+          <span class="sandbox-nav-tab__live-dot" aria-hidden="true"></span>
+        </button>
+
+        <button
+          type="button"
+          class="sandbox-nav-tab"
+          [class.sandbox-nav-tab--active]="activeView() === 'appointments'"
+          [attr.aria-selected]="activeView() === 'appointments'"
+          (click)="setView('appointments')"
+        >
+          <mat-icon>calendar_month</mat-icon>
+          <span>{{ 'sandbox.tabs.schedule' | translate }}</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 3. MAIN WORKSPACE CONTENT CONTAINER -->
+  <!-- ========================================================================= -->
+  <main class="sandbox-body">
+    <!-- Active Notification / Simulation Toast -->
+    @if (activeNotification(); as notif) {
+      <div class="sandbox-toast" [class.sandbox-toast--success]="notif.type === 'success'" role="status" aria-live="polite">
+        <mat-icon class="sandbox-toast__icon">
+          {{ notif.type === 'success' ? 'check_circle' : 'info' }}
+        </mat-icon>
+        <span class="sandbox-toast__message">{{ notif.message }}</span>
+        <button
+          type="button"
+          class="sandbox-toast__close"
+          (click)="dismissToast()"
+          aria-label="Cerrar notificación"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    }
+
+    <!-- ======================================================================= -->
+    <!-- VIEW 1: DASHBOARD CLÍNICO -->
+    <!-- ======================================================================= -->
+    @if (activeView() === 'dashboard') {
+      <section class="sandbox-view-section" aria-label="Dashboard Clínico">
+        <!-- Top Metrics Cards Grid -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-card__icon-box metric-card__icon-box--blue">
+              <mat-icon>people_outline</mat-icon>
+            </div>
+            <div class="metric-card__content">
+              <span class="metric-card__label">{{ 'sandbox.dashboard.activePatients' | translate }}</span>
+              <span class="metric-card__value">{{ metrics().activePatientsCount }}</span>
+              <span class="metric-card__subtext">100% NOM-004</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-card__icon-box metric-card__icon-box--green">
+              <mat-icon>event_available</mat-icon>
+            </div>
+            <div class="metric-card__content">
+              <span class="metric-card__label">{{ 'sandbox.dashboard.scheduledToday' | translate }}</span>
+              <span class="metric-card__value">{{ metrics().monthlySessionsCount }}</span>
+              <span class="metric-card__subtext">+14%</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-card__icon-box metric-card__icon-box--purple">
+              <mat-icon>psychology</mat-icon>
+            </div>
+            <div class="metric-card__content">
+              <span class="metric-card__label">{{ 'sandbox.dashboard.gad7Average' | translate }}</span>
+              <span class="metric-card__value">{{ metrics().completedAssessmentsCount }}</span>
+              <span class="metric-card__subtext">Auto Scoring</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-card__icon-box metric-card__icon-box--amber">
+              <mat-icon>trending_up</mat-icon>
+            </div>
+            <div class="metric-card__content">
+              <span class="metric-card__label">{{ 'sandbox.dashboard.notesCompleted' | translate }}</span>
+              <span class="metric-card__value">{{ metrics().adherenceRatePercentage }}%</span>
+              <span class="metric-card__subtext">{{ 'common.active' | translate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Session Alert Banner -->
+        <div class="session-alert-banner">
+          <div class="session-alert-banner__left">
+            <div class="session-alert-banner__pulse-box">
+              <mat-icon>videocam</mat-icon>
+            </div>
+            <div class="session-alert-banner__info">
+              <h4>Próxima Teleconsulta Programada</h4>
+              <p>
+                <strong>Camila Morales Soto</strong> (F41.1 Ansiedad Generalizada) · Hoy 16:00 - 16:50 hrs · Sala Cifrada
+              </p>
+            </div>
+          </div>
+          <button type="button" class="action-btn action-btn--primary" (click)="setView('teleconsultation')">
+            <mat-icon>login</mat-icon>
+            <span>Entrar a Sala Virtual</span>
+          </button>
+        </div>
+
+        <!-- Two Column Dashboard Layout -->
+        <div class="dashboard-split-grid">
+          <!-- Left: Today's Appointments -->
+          <div class="panel-box">
+            <div class="panel-box__header">
+              <div class="panel-box__title-group">
+                <mat-icon class="panel-box__icon">calendar_month</mat-icon>
+                <h3>Agenda de Citas del Día</h3>
+              </div>
+              <button type="button" class="btn-link" (click)="setView('appointments')">Ver todo</button>
+            </div>
+
+            <div class="appointments-list">
+              @for (apt of appointments(); track apt.id) {
+                <div class="appointment-item">
+                  <div class="appointment-item__time-col">
+                    <span class="appointment-item__time">{{ apt.time }}</span>
+                    <span class="appointment-item__duration">{{ apt.durationMinutes }}m</span>
+                  </div>
+                  <div class="appointment-item__info">
+                    <h5 class="appointment-item__patient-name">{{ apt.patientName }}</h5>
+                    <span class="appointment-item__therapist">{{ apt.therapistName }}</span>
+                  </div>
+                  <div class="appointment-item__actions">
+                    @if (apt.modality === 'TELECONSULTATION') {
+                      <span class="badge-chip badge-chip--telehealth">
+                        <mat-icon>videocam</mat-icon> Teleconsulta
+                      </span>
+                    } @else {
+                      <span class="badge-chip badge-chip--in-person">
+                        <mat-icon>apartment</mat-icon> Presencial
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Right: Clinical Case Files & Quick Navigation -->
+          <div class="panel-box">
+            <div class="panel-box__header">
+              <div class="panel-box__title-group">
+                <mat-icon class="panel-box__icon">folder_shared</mat-icon>
+                <h3>Pacientes en Tratamiento Activo</h3>
+              </div>
+              <button type="button" class="btn-link" (click)="setView('soap')">Ver expedientes</button>
+            </div>
+
+            <div class="patients-list">
+              @for (p of patients(); track p.id) {
+                <div
+                  class="patient-row"
+                  [class.patient-row--selected]="p.id === selectedPatientId()"
+                  (click)="selectPatient(p.id)"
+                  tabindex="0"
+                  role="button"
+                >
+                  <div class="patient-row__avatar">{{ p.initials }}</div>
+                  <div class="patient-row__info">
+                    <span class="patient-row__name">{{ p.fullName }}</span>
+                    <span class="patient-row__diagnosis">{{ p.diagnosisCode }} · {{ p.diagnosisName }}</span>
+                  </div>
+                  <div class="patient-row__meta">
+                    <span class="patient-row__sessions">{{ p.totalSessions }} sesiones</span>
+                    <button
+                      type="button"
+                      class="icon-action-btn"
+                      (click)="selectPatient(p.id); setView('soap'); $event.stopPropagation()"
+                      title="Abrir nota SOAP"
+                    >
+                      <mat-icon>edit_note</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ======================================================================= -->
+    <!-- VIEW 2: EXPEDIENTE CLÍNICO & NOTAS SOAP -->
+    <!-- ======================================================================= -->
+    @if (activeView() === 'soap') {
+      <section class="sandbox-view-section" aria-label="Expediente Clínico y Notas SOAP">
+        <!-- Patient Summary Card -->
+        <div class="patient-hero-card">
+          <div class="patient-hero-card__avatar">{{ selectedPatient().initials }}</div>
+          <div class="patient-hero-card__details">
+            <div class="patient-hero-card__title-row">
+              <h2>{{ selectedPatient().fullName }}</h2>
+              <span class="badge-chip badge-chip--diagnosis">{{ selectedPatient().diagnosisCode }}</span>
+              <span class="badge-chip badge-chip--active">Expediente NOM-004</span>
+            </div>
+            <p class="patient-hero-card__sub">
+              {{ selectedPatient().age }} años · {{ selectedPatient().gender }} · Tel: {{ selectedPatient().phone }} · Terapeuta: {{ selectedPatient().assignedTherapist }}
+            </p>
+          </div>
+          <div class="patient-hero-card__actions">
+            <button type="button" class="action-btn action-btn--secondary" (click)="exportClinicalPdf()">
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>Exportar PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="soap-workspace-grid">
+          <!-- Left: Interactive SOAP Editor -->
+          <div class="panel-box">
+            <div class="panel-box__header">
+              <div class="panel-box__title-group">
+                <mat-icon class="panel-box__icon">edit_note</mat-icon>
+                <h3>Nueva Nota de Evolución (Sesión #{{ selectedPatient().totalSessions + 1 }})</h3>
+              </div>
+              <span class="badge-chip badge-chip--draft">Borrador en edición</span>
+            </div>
+
+            <form class="soap-form" (ngSubmit)="saveSoapNote()">
+              <!-- Subjetivo (S) -->
+              <div class="soap-form-field">
+                <label class="soap-label">
+                  <span class="soap-letter soap-letter--s">S</span>
+                  <span class="soap-label-title">Subjetivo (Motivo de consulta, reporte sintomático del paciente)</span>
+                </label>
+                <textarea
+                  class="soap-textarea"
+                  rows="3"
+                  [(ngModel)]="soapDraft().subjective"
+                  name="subjective"
+                  placeholder="El paciente refiere..."
+                ></textarea>
+              </div>
+
+              <!-- Objetivo (O) -->
+              <div class="soap-form-field">
+                <label class="soap-label">
+                  <span class="soap-letter soap-letter--o">O</span>
+                  <span class="soap-label-title">Objetivo (Examen mental, signos observables, escalas aplicadas)</span>
+                </label>
+                <textarea
+                  class="soap-textarea"
+                  rows="3"
+                  [(ngModel)]="soapDraft().objective"
+                  name="objective"
+                  placeholder="Paciente orientado, lenguaje coherente..."
+                ></textarea>
+              </div>
+
+              <!-- Análisis (A) -->
+              <div class="soap-form-field">
+                <label class="soap-label">
+                  <span class="soap-letter soap-letter--a">A</span>
+                  <span class="soap-label-title">Análisis / Diagnóstico (Interpretación clínica CIE-10 / DSM-5)</span>
+                </label>
+                <textarea
+                  class="soap-textarea"
+                  rows="2"
+                  [(ngModel)]="soapDraft().assessment"
+                  name="assessment"
+                  placeholder="Juicio clínico y evolución..."
+                ></textarea>
+              </div>
+
+              <!-- Plan (P) -->
+              <div class="soap-form-field">
+                <label class="soap-label">
+                  <span class="soap-letter soap-letter--p">P</span>
+                  <span class="soap-label-title">Plan Terapéutico (Objetivos, tareas intersesión, fecha de seguimiento)</span>
+                </label>
+                <textarea
+                  class="soap-textarea"
+                  rows="3"
+                  [(ngModel)]="soapDraft().plan"
+                  name="plan"
+                  placeholder="1. Tareas de activación... 2. Próxima cita..."
+                ></textarea>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="soap-form__actions">
+                <button type="button" class="action-btn action-btn--secondary" (click)="saveSoapNote()">
+                  <mat-icon>save</mat-icon>
+                  <span>Guardar Borrador</span>
+                </button>
+                <button type="button" class="action-btn action-btn--primary" (click)="lockSoapNote()">
+                  <mat-icon>lock</mat-icon>
+                  <span>Firmar & Bloquear NOM-004</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Right: Historical Notes Timeline -->
+          <div class="panel-box">
+            <div class="panel-box__header">
+              <div class="panel-box__title-group">
+                <mat-icon class="panel-box__icon">history</mat-icon>
+                <h3>Historial de Notas de Evolución</h3>
+              </div>
+              <span class="badge-chip badge-chip--secure">Inmutable</span>
+            </div>
+
+            <div class="soap-history-timeline">
+              @for (note of soapNotes(); track note.id) {
+                <article class="timeline-note-card">
+                  <header class="timeline-note-card__header">
+                    <div class="timeline-note-card__meta">
+                      <span class="timeline-note-card__session">Sesión #{{ note.sessionNumber }}</span>
+                      <span class="timeline-note-card__date">{{ note.date }}</span>
+                    </div>
+                    <span class="badge-chip badge-chip--locked">
+                      <mat-icon>verified</mat-icon> Firmada NOM-004
+                    </span>
+                  </header>
+
+                  <div class="timeline-note-card__content">
+                    <div class="soap-snippet">
+                      <strong>S:</strong> {{ note.subjective }}
+                    </div>
+                    <div class="soap-snippet">
+                      <strong>O:</strong> {{ note.objective }}
+                    </div>
+                    <div class="soap-snippet">
+                      <strong>A:</strong> {{ note.assessment }}
+                    </div>
+                    <div class="soap-snippet">
+                      <strong>P:</strong> {{ note.plan }}
+                    </div>
+                  </div>
+
+                  <footer class="timeline-note-card__footer">
+                    <span class="therapist-signature">
+                      <mat-icon>draw</mat-icon> {{ note.therapistName }}
+                    </span>
+                    <button type="button" class="btn-text-danger" (click)="deleteNote(note.id)">
+                      <mat-icon>delete_outline</mat-icon>
+                      <span>Eliminar</span>
+                    </button>
+                  </footer>
+                </article>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ======================================================================= -->
+    <!-- VIEW 3: BATERÍA PSICOMÉTRICA INTEGRADA -->
+    <!-- ======================================================================= -->
+    @if (activeView() === 'psychometrics') {
+      <section class="sandbox-view-section" aria-label="Batería Psicométrica">
+        <div class="section-intro-bar">
+          <div>
+            <h2>Baterías Psicométricas Estandarizadas</h2>
+            <p>Aplica instrumentos baremados digitalmente con cálculo automático de percentiles y semaforización de riesgo.</p>
+          </div>
+          <button type="button" class="action-btn action-btn--primary" (click)="generateEphemeralPatientLink()">
+            <mat-icon>send</mat-icon>
+            <span>Generar Link para Paciente</span>
+          </button>
+        </div>
+
+        <div class="psychometrics-split-grid">
+          <!-- Left: Live Interactive GAD-7 Assessment Simulator -->
+          <div class="panel-box">
+            <div class="panel-box__header">
+              <div class="panel-box__title-group">
+                <mat-icon class="panel-box__icon">quiz</mat-icon>
+                <h3>Simulador de Aplicación en Vivo: Escala GAD-7</h3>
+              </div>
+              <span class="badge-chip badge-chip--interactive">Interactiva</span>
+            </div>
+
+            <p class="panel-subtext">
+              Responde a los 7 reactivos para calcular en tiempo real el puntaje de ansiedad y baremación clínica:
+            </p>
+
+            <div class="gad7-questions-list">
+              @for (ans of simulatedAnswers(); track $index; let qIndex = $index) {
+                <div class="gad7-question-item">
+                  <span class="gad7-question-text">
+                    {{ qIndex + 1 }}.
+                    @if (qIndex === 0) { Sentirse nervioso, ansioso o al límite }
+                    @if (qIndex === 1) { No poder parar o controlar las preocupaciones }
+                    @if (qIndex === 2) { Preocuparse demasiado por diferentes cosas }
+                    @if (qIndex === 3) { Dificultad para relajarse }
+                    @if (qIndex === 4) { Estar tan inquieto que es difícil permanecer sentado }
+                    @if (qIndex === 5) { Molestarse o irritarse con facilidad }
+                    @if (qIndex === 6) { Sentir miedo como si algo terrible fuera a suceder }
+                  </span>
+
+                  <div class="gad7-options-row">
+                    <button
+                      type="button"
+                      class="gad7-option-btn"
+                      [class.gad7-option-btn--selected]="ans === 0"
+                      (click)="updateSimulatedAnswer(qIndex, 0)"
+                    >
+                      Nunca (0)
+                    </button>
+                    <button
+                      type="button"
+                      class="gad7-option-btn"
+                      [class.gad7-option-btn--selected]="ans === 1"
+                      (click)="updateSimulatedAnswer(qIndex, 1)"
+                    >
+                      Varios días (1)
+                    </button>
+                    <button
+                      type="button"
+                      class="gad7-option-btn"
+                      [class.gad7-option-btn--selected]="ans === 2"
+                      (click)="updateSimulatedAnswer(qIndex, 2)"
+                    >
+                      + de la mitad (2)
+                    </button>
+                    <button
+                      type="button"
+                      class="gad7-option-btn"
+                      [class.gad7-option-btn--selected]="ans === 3"
+                      (click)="updateSimulatedAnswer(qIndex, 3)"
+                    >
+                      Casi diario (3)
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="simulator-submit-bar">
+              <div class="simulator-live-score">
+                <span>Puntaje Calculado: <strong>{{ simulatedGad7Total() }} / 21</strong></span>
+                <span class="severity-badge" [class.severity-badge--amber]="simulatedGad7Severity().color === 'amber'" [class.severity-badge--red]="simulatedGad7Severity().color === 'red'">
+                  {{ simulatedGad7Severity().label }}
+                </span>
+              </div>
+              <button type="button" class="action-btn action-btn--primary" (click)="submitAssessmentSimulation()">
+                <mat-icon>analytics</mat-icon>
+                <span>Generar Informe Baremado</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Psychometric Report Summary Card -->
+          <div class="panel-box">
+            <div class="panel-box__header">
+              <div class="panel-box__title-group">
+                <mat-icon class="panel-box__icon">assessment</mat-icon>
+                <h3>Informe Psicométrico Oficial</h3>
+              </div>
+              <span class="badge-chip badge-chip--secure">Baremos Oficiales</span>
+            </div>
+
+            @for (item of assessments(); track item.id) {
+              <div class="psychometric-report-card">
+                <div class="psychometric-report-card__header">
+                  <h4>{{ item.title }}</h4>
+                  <span class="badge-chip badge-chip--category">{{ item.category }}</span>
+                </div>
+
+                <div class="score-summary-box">
+                  <div class="score-number-col">
+                    <span class="big-score">{{ item.score }}</span>
+                    <span class="max-score">/ {{ item.maxScore }} pts</span>
+                  </div>
+                  <div class="score-interpretation-col">
+                    <span class="severity-title">{{ item.severityLabel }}</span>
+                    <span class="percentile-text">Percentil poblacional: {{ item.percentile }}%</span>
+                  </div>
+                </div>
+
+                <p class="report-summary-text">{{ item.summary }}</p>
+
+                <h5 class="recommendations-title">Recomendaciones Clínicas Sugeridas:</h5>
+                <ul class="recommendations-list">
+                  @for (rec of item.recommendations; track rec) {
+                    <li>
+                      <mat-icon class="rec-icon">check</mat-icon>
+                      <span>{{ rec }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ======================================================================= -->
+    <!-- VIEW 4: TELECONSULTA CIFRADA E2E -->
+    <!-- ======================================================================= -->
+    @if (activeView() === 'teleconsultation') {
+      <section class="sandbox-view-section" aria-label="Teleconsulta Cifrada E2E">
+        <div class="telehealth-workspace">
+          <!-- Main Video Area -->
+          <div class="telehealth-video-container">
+            <!-- Simulated Patient Webcam Stream -->
+            <div class="video-patient-stream">
+              <div class="video-patient-avatar-box">
+                <div class="patient-live-avatar">CM</div>
+                <div class="patient-live-label">
+                  <span class="live-dot"></span>
+                  <span>{{ teleconsultationState().patientName }} (Paciente)</span>
+                </div>
+              </div>
+
+              <!-- Top Overlay Meta Bar -->
+              <div class="video-top-overlay">
+                <div class="encryption-tag">
+                  <mat-icon>lock</mat-icon>
+                  <span>{{ teleconsultationState().encryptionStandard }}</span>
+                </div>
+                <div class="call-duration-tag">
+                  <mat-icon>schedule</mat-icon>
+                  <span>23:40</span>
+                </div>
+              </div>
+
+              <!-- Self Camera Pip -->
+              <div class="video-pip-doctor">
+                <div class="doctor-pip-inner">
+                  <mat-icon class="doc-icon">face</mat-icon>
+                  <span>Tú (Terapeuta)</span>
+                </div>
+              </div>
+
+              <!-- Bottom Call Controls Bar -->
+              <div class="video-controls-bar">
+                <button
+                  type="button"
+                  class="call-ctrl-btn"
+                  [class.call-ctrl-btn--muted]="!teleconsultationState().isMicOn"
+                  (click)="sandboxState.toggleTeleconsultationMic()"
+                  [attr.aria-label]="teleconsultationState().isMicOn ? 'Silenciar micrófono' : 'Activar micrófono'"
+                >
+                  <mat-icon>{{ teleconsultationState().isMicOn ? 'mic' : 'mic_off' }}</mat-icon>
+                </button>
+
+                <button
+                  type="button"
+                  class="call-ctrl-btn"
+                  [class.call-ctrl-btn--muted]="!teleconsultationState().isCameraOn"
+                  (click)="sandboxState.toggleTeleconsultationCamera()"
+                  [attr.aria-label]="teleconsultationState().isCameraOn ? 'Apagar cámara' : 'Encender cámara'"
+                >
+                  <mat-icon>{{ teleconsultationState().isCameraOn ? 'videocam' : 'videocam_off' }}</mat-icon>
+                </button>
+
+                <button
+                  type="button"
+                  class="call-ctrl-btn"
+                  [class.call-ctrl-btn--active]="teleconsultationState().isScreenSharing"
+                  (click)="sandboxState.toggleTeleconsultationScreenShare()"
+                  aria-label="Compartir pantalla"
+                >
+                  <mat-icon>screen_share</mat-icon>
+                </button>
+
+                <button
+                  type="button"
+                  class="call-ctrl-btn call-ctrl-btn--end"
+                  (click)="sandboxState.simulateSave('Teleconsulta finalizada y cerrada de forma segura.')"
+                  aria-label="Finalizar consulta"
+                >
+                  <mat-icon>call_end</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Split-screen Live Clinical Notes Panel -->
+          <div class="telehealth-notes-panel">
+            <div class="panel-box__header">
+              <div class="panel-box__title-group">
+                <mat-icon class="panel-box__icon">note_alt</mat-icon>
+                <h3>Notas Clínicas Simultáneas en Vivo</h3>
+              </div>
+            </div>
+
+            <p class="panel-subtext">
+              Toma apuntes confidenciales durante la videollamada sin cambiar de ventana:
+            </p>
+
+            <textarea
+              class="telehealth-notes-textarea"
+              [(ngModel)]="inCallNotesDraft"
+              rows="12"
+              placeholder="Registra observaciones de la videoconsulta..."
+            ></textarea>
+
+            <div class="telehealth-notes-actions">
+              <button type="button" class="action-btn action-btn--primary" (click)="saveInCallNotes()">
+                <mat-icon>sync</mat-icon>
+                <span>Guardar en Expediente</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ======================================================================= -->
+    <!-- VIEW 5: AGENDA MÉDICA -->
+    <!-- ======================================================================= -->
+    @if (activeView() === 'appointments') {
+      <section class="sandbox-view-section" aria-label="Agenda Médica">
+        <div class="section-intro-bar">
+          <div>
+            <h2>Agenda Médica Inteligente & Sincronización</h2>
+            <p>Control de citas por día, semana y mes con recordatorios automáticos por WhatsApp y Correo.</p>
+          </div>
+          <button type="button" class="action-btn action-btn--primary" (click)="scheduleDemoAppointment()">
+            <mat-icon>add</mat-icon>
+            <span>Nueva Cita Demo</span>
+          </button>
+        </div>
+
+        <div class="panel-box">
+          <div class="appointments-table-container">
+            <table class="sandbox-table">
+              <thead>
+                <tr>
+                  <th>Horario & Fecha</th>
+                  <th>Paciente</th>
+                  <th>Modalidad</th>
+                  <th>Estado</th>
+                  <th>Terapeuta</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (apt of appointments(); track apt.id) {
+                  <tr>
+                    <td>
+                      <div class="table-datetime">
+                        <strong>{{ apt.time }}</strong>
+                        <span>{{ apt.dateTime | slice: 0 : 10 }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <strong>{{ apt.patientName }}</strong>
+                    </td>
+                    <td>
+                      @if (apt.modality === 'TELECONSULTATION') {
+                        <span class="badge-chip badge-chip--telehealth">
+                          <mat-icon>videocam</mat-icon> Teleconsulta HD
+                        </span>
+                      } @else {
+                        <span class="badge-chip badge-chip--in-person">
+                          <mat-icon>apartment</mat-icon> Presencial
+                        </span>
+                      }
+                    </td>
+                    <td>
+                      <span class="badge-chip badge-chip--active">Confirmada</span>
+                    </td>
+                    <td>{{ apt.therapistName }}</td>
+                    <td>
+                      <div class="table-actions">
+                        @if (apt.modality === 'TELECONSULTATION') {
+                          <button
+                            type="button"
+                            class="action-btn action-btn--small action-btn--primary"
+                            (click)="setView('teleconsultation')"
+                          >
+                            <mat-icon>videocam</mat-icon>
+                            <span>Unirse</span>
+                          </button>
+                        }
+                        <button
+                          type="button"
+                          class="action-btn action-btn--small action-btn--secondary"
+                          (click)="selectPatient(apt.patientId); setView('soap')"
+                        >
+                          <mat-icon>description</mat-icon>
+                          <span>Expediente</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    }
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- 4. FLOATING INTERACTIVE GUIDED TOUR COMPONENT -->
+  <!-- ========================================================================= -->
+  <app-demo-tour-guide />
+</div>

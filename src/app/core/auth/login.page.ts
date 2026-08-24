@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -12,6 +13,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from './auth.service';
 import { LoginRequest } from './auth.models';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
+import { AuthBrandPanelComponent } from './components/auth-brand-panel.component';
+import { LanguageSwitcherComponent } from '../i18n/components/language-switcher.component';
+import { TranslatePipe } from '../i18n/translate.pipe';
+import { I18nService } from '../i18n/i18n.service';
 
 @Component({
   selector: 'app-login-page',
@@ -25,25 +30,51 @@ import { TenantContextStore } from '../tenant-context/tenant-context.store';
     MatIconModule,
     MatProgressSpinnerModule,
     RouterLink,
+    AuthBrandPanelComponent,
+    LanguageSwitcherComponent,
+    TranslatePipe,
   ],
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly tenantContextStore = inject(TenantContextStore);
   private readonly router = inject(Router);
+  private readonly titleService = inject(Title);
+  private readonly metaService = inject(Meta);
+  readonly i18n = inject(I18nService);
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
   readonly hidePassword = signal(true);
   readonly signupRoute = '/signup';
+  readonly forgotPasswordRoute = '/forgot-password';
 
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
+
+  ngOnInit(): void {
+    this.titleService.setTitle('Iniciar Sesión | PsiqueOS');
+    this.metaService.updateTag({
+      name: 'description',
+      content:
+        'Accede a tu consultorio clínico en PsiqueOS. Expediente electrónico, teleconsulta y gestión de pacientes con seguridad médica.',
+    });
+    this.metaService.updateTag({
+      property: 'og:title',
+      content: 'Iniciar Sesión | PsiqueOS',
+    });
+    this.metaService.updateTag({
+      property: 'og:description',
+      content:
+        'Accede a tu consultorio clínico en PsiqueOS. Expediente electrónico, teleconsulta y gestión de pacientes con seguridad médica.',
+    });
+    this.metaService.updateTag({ property: 'og:type', content: 'website' });
+  }
 
   submit(): void {
     if (this.isLoading()) {

@@ -1,0 +1,77 @@
+<div class="auth-brand-panel">
+  <!-- Ambient background glow elements -->
+  <div class="auth-brand-panel__glow auth-brand-panel__glow--primary" aria-hidden="true"></div>
+  <div class="auth-brand-panel__glow auth-brand-panel__glow--accent" aria-hidden="true"></div>
+
+  <div class="auth-brand-panel__content">
+    <!-- Brand Header & Badge -->
+    <header class="auth-brand-panel__header">
+      <div class="auth-brand-panel__identity">
+        <div class="auth-brand-panel__logo-container">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="28"
+            height="28"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="auth-brand-panel__logo-isotype"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <line x1="12" y1="2" x2="12" y2="22" />
+            <path d="M4 6v5a8 8 0 0 0 16 0V6" />
+            <line x1="8" y1="22" x2="16" y2="22" />
+          </svg>
+        </div>
+        <span class="auth-brand-panel__logo-text">PsiqueOS</span>
+      </div>
+
+      <div class="auth-brand-panel__pill">
+        <mat-icon class="auth-brand-panel__pill-icon">health_and_safety</mat-icon>
+        <span>{{ 'auth.brand.specializedSoftware' | translate }}</span>
+      </div>
+    </header>
+
+    <!-- Hero Value Statement -->
+    <div class="auth-brand-panel__hero">
+      <h1 class="auth-brand-panel__headline">
+        {{ 'auth.brand.tagline' | translate }}
+      </h1>
+      <p class="auth-brand-panel__subheadline">
+        {{ 'auth.brand.subheadline' | translate }}
+      </p>
+    </div>
+
+    <!-- 3 Value Proposition Highlight Cards -->
+    <div class="auth-brand-panel__features">
+      @for (feature of features(); track feature.title) {
+        <div class="auth-brand-panel__feature-card">
+          <div class="auth-brand-panel__feature-icon-box">
+            <mat-icon>{{ feature.icon }}</mat-icon>
+          </div>
+          <div class="auth-brand-panel__feature-info">
+            <h2 class="auth-brand-panel__feature-title">{{ feature.title }}</h2>
+            <p class="auth-brand-panel__feature-desc">{{ feature.description }}</p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Security & Trust Badges Footer -->
+    <footer class="auth-brand-panel__footer">
+      <p class="auth-brand-panel__footer-label">{{ 'auth.brand.footer' | translate }}</p>
+      <div class="auth-brand-panel__badges">
+        @for (badge of badges(); track badge.label) {
+          <div class="auth-brand-panel__badge-item">
+            <mat-icon class="auth-brand-panel__badge-icon">{{ badge.icon }}</mat-icon>
+            <span>{{ badge.label }}</span>
+          </div>
+        }
+      </div>
+    </footer>
+  </div>
+</div>

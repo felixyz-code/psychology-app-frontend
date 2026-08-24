@@ -176,15 +176,24 @@
           <div class="navbar-user-menu__theme-row">
             <div class="navbar-user-menu__theme-copy">
               <mat-icon>{{ isDarkTheme() ? 'dark_mode' : 'light_mode' }}</mat-icon>
-              <span>Modo oscuro</span>
+              <span>{{ isDarkTheme() ? ('common.darkTheme' | translate) : ('common.lightTheme' | translate) }}</span>
             </div>
 
             <mat-slide-toggle
               class="navbar-user-menu__theme-toggle"
               [checked]="isDarkTheme()"
               (change)="toggleTheme($event.checked, userMenuTrigger)"
-              aria-label="Cambiar tema"
+              [attr.aria-label]="'common.darkTheme' | translate"
             />
+          </div>
+
+          <div class="navbar-user-menu__theme-row">
+            <div class="navbar-user-menu__theme-copy">
+              <mat-icon>translate</mat-icon>
+              <span>{{ 'common.switchLanguage' | translate }}</span>
+            </div>
+
+            <app-language-switcher variant="segmented" />
           </div>
 
           <a class="navbar-user-menu__action" mat-menu-item routerLink="/profile">

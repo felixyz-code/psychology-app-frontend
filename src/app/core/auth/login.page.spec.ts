@@ -1,5 +1,6 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
+import { Title, Meta } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
@@ -77,20 +78,43 @@ describe('LoginPage', () => {
     expect(page.loginForm.touched).toBe(true);
   });
 
-  it('exposes signup navigation without raw location changes', () => {
+  it('exposes navigation routes for signup and forgot-password', () => {
     expect(page.signupRoute).toBe('/signup');
+    expect(page.forgotPasswordRoute).toBe('/forgot-password');
   });
 
-  it('renders the product eyebrow and one login task heading', () => {
+  it('renders the split screen layout with brand panel and login card', () => {
     const fixture = TestBed.createComponent(LoginPage);
     fixture.detectChanges();
 
     const nativeElement = fixture.nativeElement as HTMLElement;
-    expect(nativeElement.querySelector('.login-card__eyebrow')?.textContent?.trim()).toContain(
+    expect(nativeElement.querySelector('app-auth-brand-panel')).toBeTruthy();
+    expect(nativeElement.querySelector('.auth-card__eyebrow')?.textContent?.trim()).toContain(
       'PsiqueOS',
     );
-    const headings = nativeElement.querySelectorAll('h1');
-    expect(headings).toHaveLength(1);
-    expect(headings[0].textContent?.trim()).toBe('Inicia sesión');
+    const title = nativeElement.querySelector('.auth-card__title');
+    expect(title?.textContent?.trim()).toBe('Inicia sesión');
+    expect(nativeElement.querySelector('.auth-form__forgot-link')?.textContent?.trim()).toContain(
+      '¿Olvidaste tu contraseña?',
+    );
+  });
+
+  it('toggles password visibility', () => {
+    expect(page.hidePassword()).toBe(true);
+    page.togglePasswordVisibility();
+    expect(page.hidePassword()).toBe(false);
+    page.togglePasswordVisibility();
+    expect(page.hidePassword()).toBe(true);
+  });
+
+  it('sets SEO title and meta tags on initialization', () => {
+    const titleService = TestBed.inject(Title);
+    const metaService = TestBed.inject(Meta);
+    page.ngOnInit();
+
+    expect(titleService.getTitle()).toBe('Iniciar Sesión | PsiqueOS');
+    expect(metaService.getTag("name='description'")?.content).toContain('PsiqueOS');
+    expect(metaService.getTag("property='og:title'")?.content).toBe('Iniciar Sesión | PsiqueOS');
+    expect(metaService.getTag("property='og:type'")?.content).toBe('website');
   });
 });
