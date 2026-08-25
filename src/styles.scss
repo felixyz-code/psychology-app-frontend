@@ -3995,12 +3995,12 @@ button.btn--reset,
     }
   }
 
+  table,
   &__table {
+    table-layout: fixed;
     width: 100%;
     min-width: 680px;
-    table-layout: fixed;
     border-collapse: collapse;
-    text-align: left;
     font-size: 0.9375rem;
 
     th, td {
@@ -4014,6 +4014,18 @@ button.btn--reset,
       }
     }
 
+    th:first-child,
+    td:first-child {
+      width: 40%;
+      text-align: left;
+    }
+
+    th:not(:first-child),
+    td:not(:first-child) {
+      width: 20%;
+      text-align: center;
+    }
+
     thead th {
       background: var(--app-color-surface-soft, #f8fafc);
       font-weight: 700;
@@ -4022,6 +4034,14 @@ button.btn--reset,
       .dark-mode & {
         background: #1e293b;
         color: #f8fafc;
+      }
+    }
+
+    tbody tr:hover {
+      background: var(--app-color-surface-soft, #f8fafc);
+
+      .dark-mode & {
+        background: rgba(30, 41, 59, 0.5);
       }
     }
 
@@ -4034,6 +4054,7 @@ button.btn--reset,
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
+        text-align: left;
       }
 
       .feature-category-badge {

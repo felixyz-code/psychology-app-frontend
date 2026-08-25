@@ -6,7 +6,7 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { branchContextInterceptor } from './core/interceptors/branch-context.interceptor';
@@ -28,7 +28,13 @@ export const appConfig: ApplicationConfig = {
       inject(TenantStateInvalidationCoordinator);
       return inject(TenantContextStore).bootstrap();
     }),
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'top',
+        anchorScrolling: 'enabled',
+      }),
+    ),
     provideHttpClient(
       withInterceptors([
         authInterceptor,

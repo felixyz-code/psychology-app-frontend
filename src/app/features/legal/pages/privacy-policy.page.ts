@@ -33,6 +33,9 @@ export class PrivacyPolicyPage implements OnInit {
   readonly isDarkTheme = this.themeService.isDarkTheme;
 
   ngOnInit(): void {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
     this.titleService.setTitle(this.i18n.t('legal.privacy.metaTitle'));
     this.metaService.updateTag({
       name: 'description',
