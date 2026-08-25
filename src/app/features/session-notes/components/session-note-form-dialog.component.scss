@@ -1,11 +1,85 @@
 .session-note-dialog {
   display: flex;
   flex-direction: column;
-  max-height: min(85vh, calc(100dvh - 2rem));
-  height: min(85vh, calc(100dvh - 2rem));
+  max-height: min(90vh, calc(100dvh - 2rem));
+  height: min(90vh, calc(100dvh - 2rem));
   min-height: 0;
   gap: 0.4rem;
   overflow: hidden;
+}
+
+.session-note-dialog__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.autosave-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+
+  &--saving {
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+  }
+
+  &--saved {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+  }
+
+  .autosave-icon {
+    font-size: 0.95rem;
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+}
+
+.clinical-snippets-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.snippet-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  background: var(--app-color-surface-soft, #f1f5f9);
+  border: 1px solid var(--app-color-border, #cbd5e1);
+  color: var(--app-color-heading, #1e293b);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: #3b82f6;
+    color: #1d4ed8;
+    transform: translateY(-1px);
+  }
+
+  &__icon {
+    font-size: 0.95rem;
+    width: 0.95rem;
+    height: 0.95rem;
+    color: #2563eb;
+  }
 }
 
 .session-note-dialog__form {
@@ -65,10 +139,10 @@
 }
 
 .session-note-dialog__grid textarea.mat-mdc-input-element {
-  min-height: 2.9rem;
-  line-height: 1.4;
+  min-height: 5.5rem;
+  line-height: 1.45;
   overflow-y: auto;
-  resize: none;
+  resize: vertical;
 }
 
 @media (max-width: 720px) {

@@ -40,6 +40,19 @@ describe('app routes', () => {
     expect(demoRoute?.loadComponent).toBeDefined();
   });
 
+  it('exposes public legal pages (privacy, terms, compliance) without auth guard', () => {
+    const privacyRoute = routes.find((route) => route.path === 'privacy');
+    const termsRoute = routes.find((route) => route.path === 'terms');
+    const complianceRoute = routes.find((route) => route.path === 'compliance');
+
+    expect(privacyRoute?.canActivate).toBeUndefined();
+    expect(privacyRoute?.loadComponent).toBeDefined();
+    expect(termsRoute?.canActivate).toBeUndefined();
+    expect(termsRoute?.loadComponent).toBeDefined();
+    expect(complianceRoute?.canActivate).toBeUndefined();
+    expect(complianceRoute?.loadComponent).toBeDefined();
+  });
+
   it('exposes signup to anonymous users through the narrowly scoped anonymous-only policy', () => {
     const signupRoute = routes.find((route) => route.path === 'signup');
 

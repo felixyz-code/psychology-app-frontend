@@ -152,6 +152,43 @@ describe('SessionNoteFormDialogComponent', () => {
     expect(dialogRef.close).not.toHaveBeenCalled();
   });
 
+  it('inserts clinical snippet into empty content and appends to existing content', () => {
+    const { component } = createComponent({ mode: 'create', caseFileId: 'case-file-1' });
+    const soapSnippet = component.snippets[0];
+
+    component.insertSnippet(soapSnippet);
+    expect(component.sessionNoteForm.controls.content.value).toContain('S (Subjetivo):');
+
+    const mentalExamSnippet = component.snippets[1];
+    component.insertSnippet(mentalExamSnippet);
+    expect(component.sessionNoteForm.controls.content.value).toContain('S (Subjetivo):');
+    expect(component.sessionNoteForm.controls.content.value).toContain('EXAMEN DEL ESTADO MENTAL:');
+  });
+
+  it('saves draft to localStorage and restores it when available', () => {
+    const { component } = createComponent({ mode: 'create', caseFileId: 'case-file-test' });
+    component.sessionNoteForm.patchValue({
+      title: 'Borrador test',
+      content: 'Contenido guardado localmente',
+    });
+
+    // Save draft to localStorage
+    (component as any).saveDraftLocal();
+    expect(component.autosaveStatus()).toBe('saved');
+    expect(component.lastAutosavedAt()).toBeTruthy();
+
+    // Reset form value and restore draft
+    component.sessionNoteForm.patchValue({
+      title: '',
+      content: '',
+    });
+    (component as any).restoreDraftIfAvailable();
+    expect(component.sessionNoteForm.controls.content.value).toBe('Contenido guardado localmente');
+
+    // Clean up
+    (component as any).clearDraftLocal();
+  });
+
   function createComponent(data: {
     mode: 'create' | 'edit';
     caseFileId: string;

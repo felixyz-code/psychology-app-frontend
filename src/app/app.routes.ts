@@ -61,6 +61,21 @@ export const routes: Routes = [
       import('./features/sandbox/pages/sandbox.page').then((m) => m.SandboxPageComponent),
   },
   {
+    path: 'privacy',
+    loadComponent: () =>
+      import('./features/legal/pages/privacy-policy.page').then((m) => m.PrivacyPolicyPage),
+  },
+  {
+    path: 'terms',
+    loadComponent: () =>
+      import('./features/legal/pages/terms-of-service.page').then((m) => m.TermsOfServicePage),
+  },
+  {
+    path: 'compliance',
+    loadComponent: () =>
+      import('./features/legal/pages/compliance-normative.page').then((m) => m.ComplianceNormativePage),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [anonymousOnlyGuard],

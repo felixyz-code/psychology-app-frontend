@@ -9,7 +9,7 @@
   <header class="landing-header">
     <div class="landing-container landing-header__inner">
       <!-- Brand Logo -->
-      <a class="landing-header__brand" (click)="scrollToSection('hero')" role="button" tabindex="0">
+      <a routerLink="/" class="landing-header__brand" aria-label="PsiqueOS Inicio">
         <div class="landing-header__logo-box">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -718,8 +718,10 @@
               @for (item of comparisonMatrix; track item.name) {
                 <tr>
                   <td class="col-feature">
-                    <span class="feature-category-badge">{{ item.category }}</span>
-                    <span class="feature-name-text">{{ item.name }}</span>
+                    <div class="col-feature__content">
+                      <span class="feature-category-badge">{{ item.category }}</span>
+                      <span class="feature-name-text">{{ item.name }}</span>
+                    </div>
                   </td>
                   <td class="col-plan">
                     <mat-icon [class.icon-check]="item.includedInFreelance" [class.icon-cross]="!item.includedInFreelance">
@@ -830,7 +832,7 @@
       <div class="landing-footer__grid">
         <!-- Col 1: Brand & Mission -->
         <div class="landing-footer__col landing-footer__col--brand">
-          <div class="landing-footer__brand">
+          <a routerLink="/" class="landing-footer__brand" aria-label="PsiqueOS Inicio">
             <div class="landing-header__logo-box">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -851,7 +853,7 @@
               </svg>
             </div>
             <span class="landing-footer__brand-name">PsiqueOS</span>
-          </div>
+          </a>
           <p class="landing-footer__mission">
             {{ 'landing.footer.missionText' | translate }}
           </p>
@@ -878,11 +880,11 @@
         <div class="landing-footer__col">
           <h4 class="landing-footer__heading">{{ 'landing.footer.securityTitle' | translate }}</h4>
           <ul class="landing-footer__links">
-            <li><a (click)="scrollToSection('seguridad')" role="button" tabindex="0">{{ 'landing.footer.nomCompliance' | translate }}</a></li>
-            <li><a (click)="scrollToSection('seguridad')" role="button" tabindex="0">{{ 'landing.footer.nom024Compliance' | translate }}</a></li>
-            <li><a href="#terminos" (click)="$event.preventDefault()">{{ 'landing.footer.termsOfService' | translate }}</a></li>
-            <li><a href="#privacidad" (click)="$event.preventDefault()">{{ 'landing.footer.privacyPolicy' | translate }}</a></li>
-            <li><a href="#seguridad-data" (click)="$event.preventDefault()">{{ 'landing.footer.securityWhitepaper' | translate }}</a></li>
+            <li><a routerLink="/compliance">{{ 'landing.footer.nomCompliance' | translate }}</a></li>
+            <li><a routerLink="/compliance">{{ 'landing.footer.nom024Compliance' | translate }}</a></li>
+            <li><a routerLink="/terms">{{ 'landing.footer.termsOfService' | translate }}</a></li>
+            <li><a routerLink="/privacy">{{ 'landing.footer.privacyPolicy' | translate }}</a></li>
+            <li><a (click)="scrollToSection('seguridad')" role="button" tabindex="0">{{ 'landing.footer.securityWhitepaper' | translate }}</a></li>
           </ul>
         </div>
 
@@ -893,8 +895,8 @@
             <li><a (click)="scrollToSection('faq')" role="button" tabindex="0">{{ 'landing.faq.sectionBadge' | translate }}</a></li>
             <li><a routerLink="/login">{{ 'landing.footer.therapistAccess' | translate }}</a></li>
             <li><a routerLink="/signup">{{ 'landing.footer.clinicSignup' | translate }}</a></li>
-            <li><a href="#contacto" (click)="$event.preventDefault()">{{ 'landing.footer.contact' | translate }}</a></li>
-            <li><a href="#estado" (click)="$event.preventDefault()">{{ 'landing.footer.systemStatus' | translate }}</a></li>
+            <li><a (click)="scrollToSection('faq')" role="button" tabindex="0">{{ 'landing.footer.contact' | translate }}</a></li>
+            <li><a (click)="scrollToSection('seguridad')" role="button" tabindex="0">{{ 'landing.footer.systemStatus' | translate }}</a></li>
           </ul>
         </div>
       </div>

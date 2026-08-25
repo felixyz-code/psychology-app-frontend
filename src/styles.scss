@@ -3988,10 +3988,17 @@ button.btn--reset,
     border: 1px solid var(--app-color-border, #e2e8f0);
     border-radius: 16px;
     background: var(--app-color-card-bg, #ffffff);
+
+    .dark-mode & {
+      background: #0f172a;
+      border-color: #1e293b;
+    }
   }
 
   &__table {
     width: 100%;
+    min-width: 680px;
+    table-layout: fixed;
     border-collapse: collapse;
     text-align: left;
     font-size: 0.9375rem;
@@ -3999,48 +4006,86 @@ button.btn--reset,
     th, td {
       padding: 1rem 1.25rem;
       border-bottom: 1px solid var(--app-color-border, #e2e8f0);
+      vertical-align: middle;
+      box-sizing: border-box;
+
+      .dark-mode & {
+        border-color: #1e293b;
+      }
     }
 
     thead th {
       background: var(--app-color-surface-soft, #f8fafc);
       font-weight: 700;
       color: var(--app-color-heading, #0f172a);
+
+      .dark-mode & {
+        background: #1e293b;
+        color: #f8fafc;
+      }
     }
 
     .col-feature {
       width: 40%;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
+      text-align: left;
+      vertical-align: middle;
+
+      &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
 
       .feature-category-badge {
         font-size: 0.6875rem;
         font-weight: 700;
         text-transform: uppercase;
         color: var(--app-color-muted, #64748b);
+        letter-spacing: 0.5px;
+
+        .dark-mode & {
+          color: #94a3b8;
+        }
       }
 
       .feature-name-text {
         font-weight: 600;
         color: var(--app-color-heading, #0f172a);
+
+        .dark-mode & {
+          color: #f8fafc;
+        }
       }
     }
 
     .col-plan {
       text-align: center;
       width: 20%;
+      vertical-align: middle;
 
       mat-icon {
         font-size: 1.35rem;
         width: 1.35rem;
         height: 1.35rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .icon-check { color: #10b981; }
-      .icon-cross { color: #cbd5e1; }
+      .icon-cross {
+        color: #cbd5e1;
+        .dark-mode & {
+          color: #475569;
+        }
+      }
 
       &--highlight {
         background: rgba(37, 99, 235, 0.03);
+
+        .dark-mode & {
+          background: rgba(37, 99, 235, 0.12);
+        }
       }
     }
   }
@@ -4234,12 +4279,23 @@ button.btn--reset,
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+
+    &:hover {
+      opacity: 0.9;
+    }
   }
 
   &__brand-name {
     font-size: 1.35rem;
     font-weight: 800;
     color: var(--app-color-heading, #0f172a);
+
+    .dark-mode & {
+      color: #ffffff;
+    }
   }
 
   &__mission {
