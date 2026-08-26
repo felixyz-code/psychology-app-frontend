@@ -78,3 +78,36 @@ export interface FreezeTenantResponse {
   isFrozen: boolean;
   message: string;
 }
+
+export interface PlatformMetricsTenants {
+  total: number;
+  active: number;
+  suspended: number;
+  trialing: number;
+  lifetime: number;
+  activeSubscriptions: number;
+}
+
+export interface PlatformMetricsAggregates {
+  totalPatients: number;
+  totalAppointments: number;
+  totalUsers: number;
+}
+
+export interface PlatformMetricsMemory {
+  heapUsedMB: number;
+  heapTotalMB: number;
+  rssMB: number;
+}
+
+export interface PlatformMetricsResponse {
+  status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+  uptimeSeconds: number;
+  serverTimestamp: string;
+  environment: string;
+  databaseStatus: string;
+  tenants: PlatformMetricsTenants;
+  aggregates: PlatformMetricsAggregates;
+  memory: PlatformMetricsMemory;
+}
+

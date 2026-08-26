@@ -199,6 +199,11 @@ export class AuthStore {
     this.sessionChangeSubject.next(user);
   }
 
+  rehydrateFromStorage(): boolean {
+    this.loadSessionFromStorage(false);
+    return this.isAuthenticated();
+  }
+
   private clearInMemorySession(): void {
     const hadSession = this.accessTokenSignal() !== null || this.currentUserSignal() !== null;
 
@@ -252,7 +257,9 @@ export class AuthStore {
       typeof candidate.id === 'string' &&
       typeof candidate.name === 'string' &&
       typeof candidate.email === 'string' &&
-      (candidate.role === 'ADMIN' || candidate.role === 'PSYCHOLOGIST')
+      (candidate.role === 'SUPERADMIN' ||
+        candidate.role === 'ADMIN' ||
+        candidate.role === 'PSYCHOLOGIST')
     );
   }
 }

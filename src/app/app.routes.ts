@@ -283,7 +283,10 @@ export const routes: Routes = [
       {
         path: 'metrics',
         title: 'Métricas & Salud | Platform Governance',
-        redirectTo: 'tenants',
+        loadComponent: () =>
+          import('./features/superadmin/pages/platform-metrics.page').then(
+            (m) => m.PlatformMetricsPage,
+          ),
       },
     ],
   },

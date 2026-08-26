@@ -38,6 +38,32 @@ export class AuditLogsService {
     return this.http.get<AuditLogsPaginatedResponse>(this.basePath, { params });
   }
 
+  findGlobal(filters?: AuditLogsFilterParams): Observable<AuditLogsPaginatedResponse> {
+    let params = new HttpParams();
+
+    if (filters) {
+      if (filters.tenantId) params = params.set('tenantId', filters.tenantId);
+      if (filters.branchId) params = params.set('branchId', filters.branchId);
+      if (filters.userId) params = params.set('userId', filters.userId);
+      if (filters.resource) params = params.set('resource', filters.resource);
+      if (filters.resourceType) params = params.set('resourceType', filters.resourceType);
+      if (filters.resourceId) params = params.set('resourceId', filters.resourceId);
+      if (filters.action) params = params.set('action', filters.action);
+      if (filters.severity) params = params.set('severity', filters.severity);
+      if (filters.from) params = params.set('from', filters.from);
+      if (filters.to) params = params.set('to', filters.to);
+      if (filters.startDate) params = params.set('startDate', filters.startDate);
+      if (filters.endDate) params = params.set('endDate', filters.endDate);
+      if (filters.search) params = params.set('search', filters.search);
+      if (filters.limit !== undefined) params = params.set('limit', String(filters.limit));
+      if (filters.offset !== undefined) params = params.set('offset', String(filters.offset));
+    }
+
+    return this.http.get<AuditLogsPaginatedResponse>(`${environment.apiUrl}/admin/audit-logs`, {
+      params,
+    });
+  }
+
   findOne(id: string): Observable<AuditLogEntry> {
     return this.http.get<AuditLogEntry>(`${this.basePath}/${encodeURIComponent(id)}`);
   }
