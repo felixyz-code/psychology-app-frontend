@@ -2,6 +2,7 @@ import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { AuthStore } from '../auth/auth.store';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { SidebarComponent } from './sidebar.component';
 
@@ -10,10 +11,12 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
   let synchronizationPending: WritableSignal<boolean>;
   let activeTenantReady: WritableSignal<boolean>;
   let capabilities: WritableSignal<string[]>;
+  let isAdminSignal: WritableSignal<boolean>;
 
   beforeEach(async () => {
     synchronizationPending = signal(false);
     activeTenantReady = signal(true);
+    isAdminSignal = signal(false);
     capabilities = signal([
       'finance.read',
       'organization.read',
@@ -25,6 +28,12 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
       imports: [SidebarComponent],
       providers: [
         provideRouter([]),
+        {
+          provide: AuthStore,
+          useValue: {
+            isAdmin: isAdminSignal,
+          },
+        },
         {
           provide: TenantContextStore,
           useValue: {
@@ -87,5 +96,15 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
     capabilities.update((current) => [...current, 'notification_template.read']);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Plantillas');
+  });
+
+  it('renders SuperAdmin Backoffice link only when user has ADMIN role', async () => {
+    expect(fixture.nativeElement.textContent).not.toContain('SuperAdmin Backoffice');
+
+    isAdminSignal.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('SuperAdmin Backoffice');
   });
 });

@@ -216,6 +216,15 @@ describe('UserProfilePage', () => {
     spy.mockRestore();
   });
 
+  it('includes America/Hermosillo and canonical options in timezonesList', () => {
+    const hermosillo = component.timezonesList.find(
+      (tz) => tz.id === 'America/Hermosillo',
+    );
+    expect(hermosillo).toBeDefined();
+    expect(hermosillo?.label).toContain('(GMT-7)');
+    expect(hermosillo?.label).toContain('Sonora');
+  });
+
   it('submits localization preferences to store', () => {
     component.localizationForm.patchValue({
       timeZone: 'America/Santiago',

@@ -34,6 +34,8 @@ import {
   COMMON_TIMEZONES,
   REMINDER_OPTIONS,
   SUPPORTED_LOCALES,
+  TIMEZONE_OPTIONS,
+  TimezoneOption,
   UserDateFormat,
   UserTimeFormat,
 } from '../../../core/user-profile/user-profile.models';
@@ -77,7 +79,7 @@ export class UserProfilePage implements OnInit {
   readonly isLoadingSessions = signal(false);
   readonly isRevokingSessions = signal(false);
 
-  timezonesList = [...COMMON_TIMEZONES];
+  timezonesList: TimezoneOption[] = [...TIMEZONE_OPTIONS];
   readonly localesList = SUPPORTED_LOCALES;
   readonly reminderOptions = REMINDER_OPTIONS;
 
@@ -132,8 +134,11 @@ export class UserProfilePage implements OnInit {
     effect(() => {
       const prefs = this.store.preferences();
       if (prefs) {
-        if (prefs.timeZone && !this.timezonesList.includes(prefs.timeZone)) {
-          this.timezonesList = [prefs.timeZone, ...this.timezonesList];
+        if (prefs.timeZone && !this.timezonesList.some((tz) => tz.id === prefs.timeZone)) {
+          this.timezonesList = [
+            { id: prefs.timeZone, label: `${prefs.timeZone} (Personalizada)` },
+            ...this.timezonesList,
+          ];
         }
         this.localizationForm.patchValue({
           timeZone: prefs.timeZone || 'America/Mexico_City',
@@ -218,8 +223,11 @@ export class UserProfilePage implements OnInit {
     try {
       const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
       if (detected) {
-        if (!this.timezonesList.includes(detected)) {
-          this.timezonesList = [detected, ...this.timezonesList];
+        if (!this.timezonesList.some((tz) => tz.id === detected)) {
+          this.timezonesList = [
+            { id: detected, label: `${detected} (Detectada)` },
+            ...this.timezonesList,
+          ];
         }
         this.localizationForm.patchValue({ timeZone: detected });
         this.detectedTimeZone.set(detected);

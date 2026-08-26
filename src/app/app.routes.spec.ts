@@ -1,6 +1,7 @@
 import { authGuard } from './core/guards/auth.guard';
 import { anonymousOnlyGuard } from './core/guards/anonymous-only.guard';
 import { capabilityGuard } from './core/guards/capability.guard';
+import { superadminGuard } from './core/guards/superadmin.guard';
 import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
 import { routes } from './app.routes';
 
@@ -161,6 +162,9 @@ describe('app routes', () => {
     expect(childRoutes.find((route) => route.path === 'notification-templates')).toMatchObject({
       canActivate: [activeTenantGuard, capabilityGuard],
       data: { requiredCapability: 'notification_template.read' },
+    });
+    expect(childRoutes.find((route) => route.path === 'admin/tenants')).toMatchObject({
+      canActivate: [superadminGuard],
     });
   });
 });

@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { anonymousOnlyGuard } from './core/guards/anonymous-only.guard';
 import { capabilityGuard } from './core/guards/capability.guard';
+import { superadminGuard } from './core/guards/superadmin.guard';
 import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
 
 export const routes: Routes = [
@@ -238,6 +239,13 @@ export const routes: Routes = [
         data: { requiredCapability: 'audit.read' },
         loadChildren: () =>
           import('./features/audit-logs/audit-logs.routes').then((m) => m.auditLogsRoutes),
+      },
+      {
+        path: 'admin/tenants',
+        title: 'SuperAdmin Backoffice | PsiqueOS',
+        canActivate: [superadminGuard],
+        loadChildren: () =>
+          import('./features/superadmin/superadmin.routes').then((m) => m.superadminRoutes),
       },
       {
         path: 'profile',

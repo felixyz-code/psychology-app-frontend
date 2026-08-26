@@ -1,0 +1,264 @@
+<div class="backoffice-page">
+  <!-- Header -->
+  <header class="backoffice-header">
+    <div class="backoffice-header__title-area">
+      <h1 class="backoffice-header__title">
+        <mat-icon class="icon-superadmin">admin_panel_settings</mat-icon>
+        SuperAdmin Backoffice — Control de Suscripciones & Organizaciones
+      </h1>
+      <p class="backoffice-header__subtitle">
+        Gestión global de membresías vitalicias para asociaciones aliadas, extensiones de prueba, ajuste de cuotas y congelamiento preventivo.
+      </p>
+    </div>
+
+    <button mat-stroked-button (click)="loadTenants()" [disabled]="isLoading()">
+      <mat-icon [class.spin]="isLoading()">refresh</mat-icon>
+      <span>Actualizar</span>
+    </button>
+  </header>
+
+  <!-- KPI / Stats Row -->
+  <section class="stats-grid">
+    <mat-card class="stat-card stat-card--total">
+      <mat-card-content>
+        <div class="stat-card__icon"><mat-icon>domain</mat-icon></div>
+        <div class="stat-card__info">
+          <span class="stat-card__value">{{ stats().total }}</span>
+          <span class="stat-card__label">Total Organizaciones</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card stat-card--lifetime">
+      <mat-card-content>
+        <div class="stat-card__icon"><mat-icon>verified</mat-icon></div>
+        <div class="stat-card__info">
+          <span class="stat-card__value">{{ stats().lifetime }}</span>
+          <span class="stat-card__label">Vitalicias / Patrocinadores</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card stat-card--trial">
+      <mat-card-content>
+        <div class="stat-card__icon"><mat-icon>more_time</mat-icon></div>
+        <div class="stat-card__info">
+          <span class="stat-card__value">{{ stats().trialing }}</span>
+          <span class="stat-card__label">En Periodo de Prueba</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card stat-card--active">
+      <mat-card-content>
+        <div class="stat-card__icon"><mat-icon>check_circle</mat-icon></div>
+        <div class="stat-card__info">
+          <span class="stat-card__value">{{ stats().active }}</span>
+          <span class="stat-card__label">Activas Comerciales</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card stat-card--frozen">
+      <mat-card-content>
+        <div class="stat-card__icon"><mat-icon>ac_unit</mat-icon></div>
+        <div class="stat-card__info">
+          <span class="stat-card__value">{{ stats().frozen }}</span>
+          <span class="stat-card__label">Congeladas / Suspendidas</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Filter & Search Toolbar -->
+  <mat-card class="filter-card">
+    <div class="filter-bar">
+      <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          placeholder="Buscar por nombre, slug, razón social o notas..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+        @if (searchQuery()) {
+          <button matSuffix mat-icon-button type="button" (click)="searchQuery.set('')">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="status-field" subscriptSizing="dynamic">
+        <mat-label>Filtrar por Estatus</mat-label>
+        <mat-select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+          <mat-option value="ALL">Todos los Estados</mat-option>
+          <mat-option value="LIFETIME">Vitalicio / Patrocinador</mat-option>
+          <mat-option value="TRIAL">Periodo de Prueba</mat-option>
+          <mat-option value="ACTIVE">Activa Comercial</mat-option>
+          <mat-option value="FROZEN">Congelada / Suspendida</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <!-- Main Table Section -->
+  <mat-card class="table-card">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando organizaciones y suscripciones...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="error-state">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ errorMessage() }}</p>
+        <button mat-stroked-button (click)="loadTenants()">Reintentar</button>
+      </div>
+    } @else if (filteredTenants().length === 0) {
+      <div class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <h3>No se encontraron organizaciones</h3>
+        <p>Ajusta el filtro de búsqueda o el estatus seleccionado.</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table mat-table [dataSource]="filteredTenants()" class="tenants-table">
+          <!-- Organization Column -->
+          <ng-container matColumnDef="organization">
+            <th mat-header-cell *matHeaderCellDef>Organización</th>
+            <td mat-cell *matCellDef="let tenant">
+              <div class="org-cell">
+                <span class="org-name">{{ tenant.displayName }}</span>
+                <span class="org-slug">/{{ tenant.slug }}</span>
+                <span class="org-tz-badge" [matTooltip]="'Zona horaria configurada: ' + tenant.timezone">
+                  <mat-icon>schedule</mat-icon> {{ tenant.timezone }}
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Plan & Estatus</th>
+            <td mat-cell *matCellDef="let tenant">
+              <div class="status-cell">
+                <span class="badge" [ngClass]="getStatusClass(tenant.subscription?.status)">
+                  {{ getStatusLabel(tenant.subscription?.status) }}
+                </span>
+                <span class="plan-tag" *ngIf="tenant.subscription?.planName">
+                  {{ tenant.subscription?.planName }}
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Sponsorship / Exemption Column -->
+          <ng-container matColumnDef="sponsorship">
+            <th mat-header-cell *matHeaderCellDef>Convenio / Alianza</th>
+            <td mat-cell *matCellDef="let tenant">
+              <div class="sponsorship-cell">
+                @if (tenant.subscription?.isExempt) {
+                  <span
+                    class="exempt-badge"
+                    [matTooltip]="tenant.subscription?.sponsorNotes || 'Exento de cobro institucional'"
+                  >
+                    <mat-icon>workspace_premium</mat-icon> Exento de Pago
+                  </span>
+                  @if (tenant.subscription?.sponsorNotes) {
+                    <span class="notes-preview">{{ tenant.subscription?.sponsorNotes }}</span>
+                  }
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Quotas Column -->
+          <ng-container matColumnDef="quotas">
+            <th mat-header-cell *matHeaderCellDef>Capacidad / Uso</th>
+            <td mat-cell *matCellDef="let tenant">
+              <div class="quotas-cell">
+                <div class="quota-pill" matTooltip="Terapeutas activos / Límite">
+                  <mat-icon>badge</mat-icon>
+                  <span>{{ tenant.usage.therapistsCount }}/{{ formatLimit(tenant.usage.therapistsLimit) }}</span>
+                </div>
+                <div class="quota-pill" matTooltip="Pacientes registrados / Límite">
+                  <mat-icon>people</mat-icon>
+                  <span>{{ tenant.usage.patientsCount }}/{{ formatLimit(tenant.usage.patientsLimit) }}</span>
+                </div>
+                <div class="quota-pill" matTooltip="Sedes operativas / Límite">
+                  <mat-icon>apartment</mat-icon>
+                  <span>{{ tenant.usage.branchesCount }}/{{ formatLimit(tenant.usage.branchesLimit) }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Expiration Column -->
+          <ng-container matColumnDef="expiration">
+            <th mat-header-cell *matHeaderCellDef>Periodo / Vencimiento</th>
+            <td mat-cell *matCellDef="let tenant">
+              <div class="exp-cell">
+                @if (tenant.subscription?.status === 'LIFETIME_SPONSOR' || tenant.subscription?.isExempt) {
+                  <span class="text-lifetime">Vitalicio (Permanente)</span>
+                } @else if (tenant.subscription?.status === 'TRIALING' && tenant.subscription?.trialEndsAt) {
+                  <span class="text-trial">Prueba: {{ tenant.subscription?.trialEndsAt | date: 'dd/MM/yyyy' }}</span>
+                } @else if (tenant.subscription?.currentPeriodEndsAt) {
+                  <span>Vence: {{ tenant.subscription?.currentPeriodEndsAt | date: 'dd/MM/yyyy' }}</span>
+                } @else {
+                  <span class="text-muted">N/A</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-col">Acciones</th>
+            <td mat-cell *matCellDef="let tenant" class="actions-col">
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="actionsMenu"
+                aria-label="Acciones de organización"
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <mat-menu #actionsMenu="matMenu" xPosition="before">
+                <button mat-menu-item (click)="openExtendTrial(tenant)">
+                  <mat-icon color="primary">more_time</mat-icon>
+                  <span>Extender Periodo de Prueba</span>
+                </button>
+
+                <button mat-menu-item (click)="openGrantLifetime(tenant)">
+                  <mat-icon class="icon-gold">verified</mat-icon>
+                  <span>Otorgar Membresía Vitalicia (Aliado)</span>
+                </button>
+
+                <button mat-menu-item (click)="openAdjustQuotas(tenant)">
+                  <mat-icon>tune</mat-icon>
+                  <span>Ajustar Cuotas de Capacidad</span>
+                </button>
+
+                <mat-divider></mat-divider>
+
+                <button mat-menu-item (click)="openFreezeTenant(tenant)">
+                  <mat-icon [color]="(tenant.subscription?.status === 'FROZEN' || tenant.status === 'SUSPENDED') ? 'primary' : 'warn'">
+                    {{ (tenant.subscription?.status === 'FROZEN' || tenant.status === 'SUSPENDED') ? 'lock_open' : 'ac_unit' }}
+                  </mat-icon>
+                  <span>
+                    {{ (tenant.subscription?.status === 'FROZEN' || tenant.status === 'SUSPENDED') ? 'Descongelar Organización' : 'Congelar Acceso' }}
+                  </span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="tenant-row"></tr>
+        </table>
+      </div>
+    }
+  </mat-card>
+</div>

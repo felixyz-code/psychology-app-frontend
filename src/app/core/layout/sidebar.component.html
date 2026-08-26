@@ -244,6 +244,21 @@
           </span>
         </a>
       }
+
+      @if (authStore.isAdmin()) {
+        <a
+          routerLink="/admin/tenants"
+          routerLinkActive="sidebar__link--active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="sidebar__link"
+          (click)="navSelected.emit()"
+        >
+          <mat-icon>admin_panel_settings</mat-icon>
+          <span class="sidebar__content">
+            <span class="sidebar__title">SuperAdmin Backoffice</span>
+          </span>
+        </a>
+      }
     </nav>
   </div>
 </aside>
