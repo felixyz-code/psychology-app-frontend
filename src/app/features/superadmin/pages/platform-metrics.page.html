@@ -1,0 +1,181 @@
+<div class="metrics-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="title-area">
+      <div class="header-icon-box">
+        <mat-icon>monitoring</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">Métricas & Salud de Infraestructura</h1>
+        <p class="page-subtitle">
+          Telemetría en tiempo real, estado de nodos de base de datos y agregados globales de la Suite PsiqueOS.
+        </p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="loadMetrics()"
+        [disabled]="isLoading()"
+      >
+        <mat-icon [class.spin]="isLoading()">refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
+  </header>
+
+  <!-- Error State -->
+  <div class="error-banner" *ngIf="errorMessage()">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading() && !metrics()">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Consultando telemetría de plataforma...</p>
+  </div>
+
+  <!-- Metrics Content -->
+  <div class="metrics-grid" *ngIf="metrics()">
+    <!-- Status & Overview Hero Cards -->
+    <section class="overview-cards">
+      <div class="stat-card stat-card--status">
+        <div class="stat-card__icon status-healthy">
+          <mat-icon>verified</mat-icon>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-label">Estado de Plataforma</span>
+          <span class="stat-value status-text">{{ metrics()?.status }}</span>
+          <span class="stat-meta">Entorno: {{ metrics()?.environment }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon icon-uptime">
+          <mat-icon>timer</mat-icon>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-label">Tiempo Activo (Uptime)</span>
+          <span class="stat-value">{{ formatUptime(metrics()?.uptimeSeconds || 0) }}</span>
+          <span class="stat-meta">Server Clock: {{ metrics()?.serverTimestamp | date:'shortTime' }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon icon-db">
+          <mat-icon>storage</mat-icon>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-label">Base de Datos (PostgreSQL)</span>
+          <span class="stat-value text-online">{{ metrics()?.databaseStatus }}</span>
+          <span class="stat-meta">Pool de Conexiones Activo</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon icon-memory">
+          <mat-icon>memory</mat-icon>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-label">Memoria Heap Utilizada</span>
+          <span class="stat-value">{{ metrics()?.memory?.heapUsedMB }} MB</span>
+          <span class="stat-meta">RSS Total: {{ metrics()?.memory?.rssMB }} MB</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tenant Ecosystem Telemetry -->
+    <section class="section-container">
+      <h2 class="section-title">
+        <mat-icon>domain</mat-icon>
+        Distribución de Organizaciones & Suscripciones
+      </h2>
+
+      <div class="telemetry-grid">
+        <mat-card class="telemetry-card">
+          <mat-card-header>
+            <mat-card-title>Organizaciones Totales</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="big-metric">{{ metrics()?.tenants?.total }}</div>
+            <div class="metric-breakdown">
+              <div class="breakdown-item">
+                <span class="dot dot--green"></span>
+                <span>Activas: <strong>{{ metrics()?.tenants?.active }}</strong></span>
+              </div>
+              <div class="breakdown-item">
+                <span class="dot dot--red"></span>
+                <span>Congeladas: <strong>{{ metrics()?.tenants?.suspended }}</strong></span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="telemetry-card">
+          <mat-card-header>
+            <mat-card-title>Modalidades de Suscripción</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="sub-distribution">
+              <div class="dist-row">
+                <span class="dist-label">Periodos de Prueba (Trial):</span>
+                <span class="dist-val badge-trial">{{ metrics()?.tenants?.trialing }}</span>
+              </div>
+              <div class="dist-row">
+                <span class="dist-label">Suscripciones Comerciales Activas:</span>
+                <span class="dist-val badge-active">{{ metrics()?.tenants?.activeSubscriptions }}</span>
+              </div>
+              <div class="dist-row">
+                <span class="dist-label">Convenios de Patrocinio Vitalicio:</span>
+                <span class="dist-val badge-lifetime">{{ metrics()?.tenants?.lifetime }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </section>
+
+    <!-- Clinical Data & Usage Aggregates -->
+    <section class="section-container">
+      <h2 class="section-title">
+        <mat-icon>insights</mat-icon>
+        Agregados Globales de Uso Clínico
+      </h2>
+
+      <div class="aggregates-grid">
+        <div class="aggregate-tile">
+          <div class="aggregate-icon">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="aggregate-info">
+            <span class="aggregate-number">{{ metrics()?.aggregates?.totalPatients }}</span>
+            <span class="aggregate-desc">Pacientes Registrados Globalmente</span>
+          </div>
+        </div>
+
+        <div class="aggregate-tile">
+          <div class="aggregate-icon">
+            <mat-icon>calendar_month</mat-icon>
+          </div>
+          <div class="aggregate-info">
+            <span class="aggregate-number">{{ metrics()?.aggregates?.totalAppointments }}</span>
+            <span class="aggregate-desc">Citas Clínicas Agendadas</span>
+          </div>
+        </div>
+
+        <div class="aggregate-tile">
+          <div class="aggregate-icon">
+            <mat-icon>badge</mat-icon>
+          </div>
+          <div class="aggregate-info">
+            <span class="aggregate-number">{{ metrics()?.aggregates?.totalUsers }}</span>
+            <span class="aggregate-desc">Cuentas de Profesionales & Staff</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

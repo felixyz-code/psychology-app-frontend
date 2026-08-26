@@ -8,6 +8,7 @@ describe('superadminGuard', () => {
   let mockAuthStore: {
     isAuthenticated: ReturnType<typeof vi.fn>;
     isSuperAdmin: ReturnType<typeof vi.fn>;
+    rehydrateFromStorage: ReturnType<typeof vi.fn>;
   };
   let mockRouter: {
     createUrlTree: ReturnType<typeof vi.fn>;
@@ -17,6 +18,7 @@ describe('superadminGuard', () => {
     mockAuthStore = {
       isAuthenticated: vi.fn(),
       isSuperAdmin: vi.fn(),
+      rehydrateFromStorage: vi.fn(() => false),
     };
     mockRouter = {
       createUrlTree: vi.fn((commands: any[]) => ({ path: commands[0] }) as unknown as UrlTree),

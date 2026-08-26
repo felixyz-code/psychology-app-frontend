@@ -87,4 +87,12 @@ describe('SuperadminTenantsService', () => {
     expect(req.request.body).toEqual({ freeze: true, reason: 'Test' });
     req.flush({ success: true, isFrozen: true, message: 'Frozen' });
   });
+
+  it('queries platform metrics', () => {
+    service.getPlatformMetrics().subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/admin/metrics`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ status: 'HEALTHY' });
+  });
 });

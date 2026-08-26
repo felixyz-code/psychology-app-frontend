@@ -6,6 +6,10 @@ export const superadminGuard: CanActivateFn = () => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
+  if (!authStore.isAuthenticated()) {
+    authStore.rehydrateFromStorage();
+  }
+
   if (authStore.isAuthenticated() && authStore.isSuperAdmin()) {
     return true;
   }

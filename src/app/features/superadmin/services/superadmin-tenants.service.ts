@@ -9,6 +9,7 @@ import {
   FreezeTenantPayload,
   FreezeTenantResponse,
   GrantLifetimePayload,
+  PlatformMetricsResponse,
   UpdateQuotasPayload,
 } from '../models/superadmin.models';
 
@@ -68,6 +69,13 @@ export class SuperadminTenantsService {
     return this.http.post<FreezeTenantResponse>(
       `${this.baseUrl}/${encodeURIComponent(organizationId)}/freeze`,
       payload,
+      { context: this.identityContext },
+    );
+  }
+
+  getPlatformMetrics(): Observable<PlatformMetricsResponse> {
+    return this.http.get<PlatformMetricsResponse>(
+      `${environment.apiUrl}/admin/metrics`,
       { context: this.identityContext },
     );
   }
