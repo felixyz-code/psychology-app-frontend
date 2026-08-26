@@ -11,6 +11,7 @@ import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { branchContextInterceptor } from './core/interceptors/branch-context.interceptor';
 import { errorPolicyInterceptor } from './core/interceptors/error-policy.interceptor';
+import { tracingInterceptor } from './core/interceptors/tracing.interceptor';
 import { GlobalErrorHandler } from './core/errors/global-error-handler';
 import { TenantContextStore } from './core/tenant-context/tenant-context.store';
 import { TenantStateInvalidationCoordinator } from './core/tenant-context/tenant-state-invalidation.coordinator';
@@ -37,6 +38,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(
       withInterceptors([
+        tracingInterceptor,
         authInterceptor,
         branchContextInterceptor,
         tenantStateInterceptor,
