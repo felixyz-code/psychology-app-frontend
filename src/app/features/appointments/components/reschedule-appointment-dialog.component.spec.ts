@@ -75,7 +75,8 @@ describe('RescheduleAppointmentDialogComponent', () => {
       date: expect.any(String),
       durationMinutes: 60,
     });
-    expect(component.availableSlots().length).toBe(2);
+    expect(component.availableSlots().length).toBe(1);
+    expect(component.localTimeZone).toBeTruthy();
   });
 
   it('selects available slot and updates scheduledAt control', () => {

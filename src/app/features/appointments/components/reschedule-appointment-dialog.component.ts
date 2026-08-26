@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { finalize } from 'rxjs';
+import { debounceTime, finalize, Subscription } from 'rxjs';
 
 import { localDateTimeValueToIso, toDateTimeLocalValue } from '../utils/appointment-datetime';
 import { Appointment, AvailabilitySlot } from '../models/appointment.models';
@@ -35,7 +35,7 @@ export interface RescheduleAppointmentDialogData {
   templateUrl: './reschedule-appointment-dialog.component.html',
   styleUrl: './reschedule-appointment-dialog.component.scss',
 })
-export class RescheduleAppointmentDialogComponent {
+export class RescheduleAppointmentDialogComponent implements OnInit, OnDestroy {
   private readonly data = inject<RescheduleAppointmentDialogData>(MAT_DIALOG_DATA);
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly formBuilder = inject(FormBuilder);
@@ -45,8 +45,15 @@ export class RescheduleAppointmentDialogComponent {
   readonly patientName = this.data.patientName || 'Paciente';
   readonly isSubmitting = signal(false);
   readonly isLoadingSlots = signal(false);
+  readonly hasConflict = signal(false);
+  readonly conflictWarning = signal('');
   readonly errorMessage = signal('');
   readonly availableSlots = signal<AvailabilitySlot[]>([]);
+  readonly localTimeZone = typeof Intl !== 'undefined' && Intl.DateTimeFormat
+    ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local'
+    : 'Local';
+
+  private formSubscription?: Subscription;
 
   readonly rescheduleForm = this.formBuilder.nonNullable.group({
     scheduledAt: [toDateTimeLocalValue(this.appointment.scheduledAt), [Validators.required]],
@@ -54,13 +61,34 @@ export class RescheduleAppointmentDialogComponent {
     reason: ['', [Validators.required, Validators.maxLength(250)]],
   });
 
+  ngOnInit(): void {
+    this.checkAvailability();
+    this.formSubscription = this.rescheduleForm.valueChanges
+      .pipe(debounceTime(400))
+      .subscribe(() => {
+        this.checkAvailability();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.formSubscription?.unsubscribe();
+  }
+
   checkAvailability(): void {
     const scheduledAtValue = this.rescheduleForm.controls.scheduledAt.value;
     if (!scheduledAtValue) {
+      this.hasConflict.set(false);
+      this.conflictWarning.set('');
+      this.availableSlots.set([]);
       return;
     }
 
     const selectedDate = scheduledAtValue.split('T')[0];
+    const durationMinutes = this.rescheduleForm.controls.durationMinutes.value || 60;
+    const selectedIso = localDateTimeValueToIso(scheduledAtValue);
+    const selectedStart = new Date(selectedIso).getTime();
+    const selectedEnd = selectedStart + durationMinutes * 60_000;
+
     this.isLoadingSlots.set(true);
     this.errorMessage.set('');
 
@@ -68,15 +96,30 @@ export class RescheduleAppointmentDialogComponent {
       .getAvailability({
         therapistId: this.appointment.psychologistId,
         date: selectedDate,
-        durationMinutes: this.rescheduleForm.controls.durationMinutes.value,
+        durationMinutes,
       })
       .pipe(finalize(() => this.isLoadingSlots.set(false)))
       .subscribe({
         next: (response) => {
-          this.availableSlots.set(response.slots);
+          const slots = response.slots || [];
+          this.availableSlots.set(slots.filter((s) => s.available));
+
+          const hasOverlap = slots
+            .filter((s) => !s.available)
+            .some((s) => {
+              const slotStart = new Date(s.startTime).getTime();
+              const slotEnd = new Date(s.endTime).getTime();
+              return selectedStart < slotEnd && selectedEnd > slotStart;
+            });
+
+          this.hasConflict.set(hasOverlap);
+          this.conflictWarning.set(
+            hasOverlap ? 'Existe un conflicto con otra cita o bloqueo programado para este horario.' : '',
+          );
         },
         error: () => {
-          this.errorMessage.set('No fue posible consultar la disponibilidad.');
+          this.hasConflict.set(false);
+          this.conflictWarning.set('');
         },
       });
   }

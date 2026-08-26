@@ -59,6 +59,42 @@
   --data-table-toolbar-padding: 0.15rem 0 0;
   --data-table-toolbar-search-width: 20rem;
 }
+.patients-list-toolbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.patients-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+.filter-chip-btn {
+  font-size: 0.8rem !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  padding: 0 0.85rem !important;
+  border-radius: 9999px !important;
+  border-color: var(--app-color-border, #e2e8f0) !important;
+  color: var(--app-color-text-secondary, #64748b) !important;
+  background: var(--app-color-surface, #fff) !important;
+  transition: all 150ms ease !important;
+
+  &:hover {
+    border-color: var(--app-color-primary, #3b82f6) !important;
+    color: var(--app-color-primary, #3b82f6) !important;
+  }
+
+  &--active {
+    background: var(--app-color-primary, #3b82f6) !important;
+    border-color: var(--app-color-primary, #3b82f6) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+  }
+}
 .patients-loading-state {
   padding-top: 0.15rem;
 }

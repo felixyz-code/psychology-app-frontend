@@ -97,15 +97,56 @@
         <button mat-stroked-button type="button" (click)="loadPatients()">Reintentar</button>
       </div>
     } @else if (patients().length) {
-      <app-data-table-toolbar
-        class="patients-data-toolbar"
-        [searchTerm]="tableState().searchTerm"
-        searchPlaceholder="Buscar por nombre, telefono o correo"
-        [resultsLabel]="patientsCounterLabel()"
-        [hasActiveFilters]="patientsTableResult().hasActiveFilters"
-        (searchTermChange)="updateSearchTerm($event)"
-        (clearFilters)="clearPatientFilters()"
-      />
+      <div class="patients-list-toolbar-container">
+        <app-data-table-toolbar
+          class="patients-data-toolbar"
+          [searchTerm]="tableState().searchTerm"
+          searchPlaceholder="Buscar por nombre, telefono o correo"
+          [resultsLabel]="patientsCounterLabel()"
+          [hasActiveFilters]="patientsTableResult().hasActiveFilters"
+          (searchTermChange)="updateSearchTerm($event)"
+          (clearFilters)="clearPatientFilters()"
+        />
+
+        <div class="patients-filter-chips" role="group" aria-label="Filtros por estado clínico">
+          <button
+            mat-stroked-button
+            type="button"
+            class="filter-chip-btn"
+            [class.filter-chip-btn--active]="clinicalStatusFilter() === 'ALL'"
+            (click)="setClinicalStatusFilter('ALL')"
+          >
+            Todos
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            class="filter-chip-btn"
+            [class.filter-chip-btn--active]="clinicalStatusFilter() === 'ACTIVE'"
+            (click)="setClinicalStatusFilter('ACTIVE')"
+          >
+            Activos
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            class="filter-chip-btn"
+            [class.filter-chip-btn--active]="clinicalStatusFilter() === 'PAUSED'"
+            (click)="setClinicalStatusFilter('PAUSED')"
+          >
+            En pausa
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            class="filter-chip-btn"
+            [class.filter-chip-btn--active]="clinicalStatusFilter() === 'DISCHARGED'"
+            (click)="setClinicalStatusFilter('DISCHARGED')"
+          >
+            Alta médica
+          </button>
+        </div>
+      </div>
 
       @if (patientsTableResult().totalFilteredItems) {
         <div class="patients-table-wrapper app-table-wrapper">
@@ -179,6 +220,16 @@
                     [attr.aria-label]="'Ver ' + getFullName(patient)"
                   >
                     <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Exportar Ficha Clínica PDF"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); exportPatientSummary(patient, $event)"
+                    [attr.aria-label]="'Exportar Ficha Clínica de ' + getFullName(patient)"
+                  >
+                    <mat-icon>picture_as_pdf</mat-icon>
                   </button>
                   <button
                     mat-icon-button

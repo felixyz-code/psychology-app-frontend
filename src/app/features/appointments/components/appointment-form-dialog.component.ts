@@ -1,12 +1,14 @@
-import { Component, inject, signal } from '@angular/core';
+import { SlicePipe } from '@angular/common';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { finalize } from 'rxjs';
+import { debounceTime, finalize, Subscription } from 'rxjs';
 
 import { AuthStore } from '../../../core/auth/auth.store';
 import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
@@ -16,6 +18,7 @@ import { localDateTimeValueToIso, toDateTimeLocalValue } from '../utils/appointm
 import {
   Appointment,
   AppointmentStatus,
+  AvailabilitySlot,
   CreateAppointmentRequest,
   UpdateAppointmentRequest,
 } from '../models/appointment.models';
@@ -33,10 +36,12 @@ interface AppointmentFormDialogData {
   selector: 'app-appointment-form-dialog',
   standalone: true,
   imports: [
+    SlicePipe,
     ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,
@@ -44,7 +49,7 @@ interface AppointmentFormDialogData {
   templateUrl: './appointment-form-dialog.component.html',
   styleUrl: './appointment-form-dialog.component.scss',
 })
-export class AppointmentFormDialogComponent {
+export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
   private readonly data = inject<AppointmentFormDialogData>(MAT_DIALOG_DATA);
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly patientsService = inject(PatientsService);
@@ -55,10 +60,19 @@ export class AppointmentFormDialogComponent {
 
   readonly isSaving = signal(false);
   readonly isLoadingPatients = signal(false);
+  readonly isCheckingAvailability = signal(false);
+  readonly hasConflict = signal(false);
+  readonly conflictWarning = signal('');
+  readonly availableSlots = signal<AvailabilitySlot[]>([]);
   readonly errorMessage = signal('');
   readonly mode = this.data.mode;
   readonly statuses: AppointmentStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
   readonly availablePatients = signal<Patient[]>(this.data.patients ?? []);
+  readonly localTimeZone = typeof Intl !== 'undefined' && Intl.DateTimeFormat
+    ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local'
+    : 'Local';
+
+  private valueChangeSubscription?: Subscription;
 
   readonly appointmentForm = this.formBuilder.nonNullable.group({
     patientId: [this.data.patientId ?? '', [Validators.required]],
@@ -82,6 +96,81 @@ export class AppointmentFormDialogComponent {
     if (!this.availablePatients().length) {
       this.loadPatients();
     }
+  }
+
+  ngOnInit(): void {
+    this.checkAvailability();
+    this.valueChangeSubscription = this.appointmentForm.valueChanges
+      .pipe(debounceTime(400))
+      .subscribe(() => {
+        this.checkAvailability();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.valueChangeSubscription?.unsubscribe();
+  }
+
+  checkAvailability(): void {
+    const scheduledAtValue = this.appointmentForm.controls.scheduledAt.value;
+    const psychologistId = this.authStore.user()?.id;
+
+    if (!scheduledAtValue || !psychologistId) {
+      this.hasConflict.set(false);
+      this.conflictWarning.set('');
+      this.availableSlots.set([]);
+      return;
+    }
+
+    const selectedDate = scheduledAtValue.split('T')[0];
+    const durationMinutes = this.appointmentForm.controls.durationMinutes.value || 60;
+    const selectedIso = localDateTimeValueToIso(scheduledAtValue);
+    const selectedStart = new Date(selectedIso).getTime();
+    const selectedEnd = selectedStart + durationMinutes * 60_000;
+
+    this.isCheckingAvailability.set(true);
+    this.appointmentsService
+      .getAvailability({
+        therapistId: psychologistId,
+        date: selectedDate,
+        durationMinutes,
+      })
+      .pipe(finalize(() => this.isCheckingAvailability.set(false)))
+      .subscribe({
+        next: (response) => {
+          const slots = response.slots || [];
+          this.availableSlots.set(slots.filter((s) => s.available));
+
+          const hasOverlap = slots
+            .filter((s) => !s.available)
+            .some((s) => {
+              // If in edit mode and the conflict is the current appointment, skip it
+              const slotStart = new Date(s.startTime).getTime();
+              const slotEnd = new Date(s.endTime).getTime();
+              return selectedStart < slotEnd && selectedEnd > slotStart;
+            });
+
+          this.hasConflict.set(hasOverlap);
+          this.conflictWarning.set(
+            hasOverlap ? 'Existe un conflicto de horario con otra cita o bloqueo programado.' : '',
+          );
+        },
+        error: () => {
+          this.hasConflict.set(false);
+          this.conflictWarning.set('');
+        },
+      });
+  }
+
+  selectSlot(slot: AvailabilitySlot): void {
+    if (!slot.available) {
+      return;
+    }
+    this.appointmentForm.patchValue({
+      scheduledAt: toDateTimeLocalValue(slot.startTime),
+    });
+    this.hasConflict.set(false);
+    this.conflictWarning.set('');
   }
 
   submit(): void {

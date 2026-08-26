@@ -85,14 +85,46 @@
 
 .session-note-detail-dialog__footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.75rem;
   flex: 0 0 auto;
   flex-shrink: 0;
-  padding: 0.75rem 0.5rem 0.25rem;
-  border-top: 1px solid var(--app-color-card-border);
+  padding: 0.85rem 0.5rem 0.25rem;
+  border-top: 1px solid var(--app-color-card-border, #e2e8f0);
   background: var(--app-color-dialog-bg);
+}
+
+.session-note-detail-dialog__footer-left,
+.session-note-detail-dialog__footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.session-note-detail-dialog__close-btn {
+  border: 1px solid var(--app-color-border, #cbd5e1) !important;
+  background-color: var(--app-color-card-soft-bg, #f8fafc) !important;
+  color: var(--app-color-text, #334155) !important;
+  font-weight: 500;
+  border-radius: 10px;
+  transition: background-color 150ms ease, border-color 150ms ease;
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--app-color-card-soft-bg) 80%, #94a3b8) !important;
+    border-color: #94a3b8 !important;
+  }
+}
+
+.session-note-detail-dialog__export-btn,
+.session-note-detail-dialog__edit-btn {
+  border-radius: 10px !important;
+}
+
+.session-note-detail-dialog__schedule-btn {
+  border-radius: 10px !important;
 }
 
 @media (max-width: 720px) {
@@ -109,5 +141,16 @@
     flex-direction: column;
     align-items: stretch;
     padding: 0.75rem 0 0;
+  }
+
+  .session-note-detail-dialog__footer-left,
+  .session-note-detail-dialog__footer-right {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+
+    > button {
+      width: 100%;
+    }
   }
 }
