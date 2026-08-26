@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -105,8 +106,8 @@ import {
       <!-- Filters Card -->
       <mat-card class="filter-card">
         <div class="filters-grid">
-          <!-- Branch Selector -->
-          <mat-form-field appearance="outline" class="filter-item">
+          <!-- Branch Selector (Omitted in Global SuperAdmin Mode) -->
+          <mat-form-field appearance="outline" class="filter-item" *ngIf="!isGlobalMode()">
             <mat-label>Sede / Sucursal</mat-label>
             <mat-select [(ngModel)]="selectedBranchId" (selectionChange)="onFilterChange()">
               <mat-option [value]="''">Todas las Sedes</mat-option>
@@ -684,17 +685,22 @@ export class AuditTrailViewerPage implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.loadBranches();
+    if (!this.isGlobalMode()) {
+      this.loadBranches();
+    }
     this.loadLogs();
   }
 
   loadBranches(): void {
     if (this.isGlobalMode()) {
+      this.branchesSignal.set([]);
       return;
     }
     this.branchesService.findAll().subscribe({
       next: (branches) => this.branchesSignal.set(branches),
-      error: () => {},
+      error: () => {
+        this.branchesSignal.set([]);
+      },
     });
   }
 
@@ -718,16 +724,16 @@ export class AuditTrailViewerPage implements OnInit {
       ? this.auditService.findGlobal(this.getFilterParams())
       : this.auditService.findAll(this.getFilterParams());
 
-    query$.subscribe({
-      next: (res) => {
-        this.logsSignal.set(res.items);
-        this.totalSignal.set(res.total);
-        this.loadingSignal.set(false);
+    query$.pipe(finalize(() => this.loadingSignal.set(false))).subscribe({
+      next: (res: any) => {
+        const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = res?.total ?? (Array.isArray(res) ? res.length : items.length);
+        this.logsSignal.set(items);
+        this.totalSignal.set(total);
       },
       error: () => {
         this.logsSignal.set([]);
         this.totalSignal.set(0);
-        this.loadingSignal.set(false);
       },
     });
   }

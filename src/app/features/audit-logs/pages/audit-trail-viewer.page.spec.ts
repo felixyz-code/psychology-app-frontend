@@ -14,6 +14,7 @@ describe('AuditTrailViewerPage', () => {
   let fixture: ComponentFixture<AuditTrailViewerPage>;
   let auditLogsServiceMock: {
     findAll: ReturnType<typeof vi.fn>;
+    findGlobal: ReturnType<typeof vi.fn>;
     findOne: ReturnType<typeof vi.fn>;
     exportViaApi: ReturnType<typeof vi.fn>;
     downloadBlob: ReturnType<typeof vi.fn>;
@@ -67,6 +68,7 @@ describe('AuditTrailViewerPage', () => {
   beforeEach(async () => {
     auditLogsServiceMock = {
       findAll: vi.fn().mockReturnValue(of(mockLogsResponse)),
+      findGlobal: vi.fn().mockReturnValue(of(mockLogsResponse)),
       findOne: vi.fn().mockReturnValue(of(mockLogsResponse.items[0])),
       exportViaApi: vi.fn().mockReturnValue(of(new Blob(['test'], { type: 'text/csv' }))),
       downloadBlob: vi.fn(),
@@ -179,5 +181,19 @@ describe('AuditTrailViewerPage', () => {
     expect(component.getSeverityClass('MEDIUM')).toBe('medium');
     expect(component.getSeverityClass('LOW')).toBe('low');
     expect(component.getSeverityClass('INFO')).toBe('info');
+  });
+
+  it('should call findGlobal and resolve loading state when in global mode', () => {
+    // Override isGlobalMode to true
+    Object.defineProperty(component, 'isGlobalMode', {
+      value: () => true,
+    });
+
+    component.loadLogs();
+
+    expect(auditLogsServiceMock.findGlobal).toHaveBeenCalled();
+    expect(component.loadingSignal()).toBe(false);
+    expect(component.logsSignal()).toEqual(mockLogsResponse.items);
+    expect(component.totalSignal()).toBe(1);
   });
 });
