@@ -7,17 +7,29 @@ import { Patient } from '../models/patient.models';
 import { PatientsService } from '../services/patients.service';
 import { PatientsListPage } from './patients-list.page';
 
+import { CaseFilesService } from '../../case-files/services/case-files.service';
+import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/components/clinical-document-preview-dialog.component';
+
 describe('PatientsListPage', () => {
   let getPatients: ReturnType<typeof vi.fn<() => Observable<Patient[]>>>;
   let dialog: { open: ReturnType<typeof vi.fn> };
+  let caseFilesService: {
+    getCaseFileByPatientId: ReturnType<typeof vi.fn>;
+    getClinicalPdfData: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     getPatients = vi.fn<() => Observable<Patient[]>>();
     dialog = { open: vi.fn() };
+    caseFilesService = {
+      getCaseFileByPatientId: vi.fn(() => of({ id: 'case-1', patientId: 'patient-1' })),
+      getClinicalPdfData: vi.fn(() => of({ caseFile: { id: 'case-1' } })),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         { provide: PatientsService, useValue: { getPatients } },
+        { provide: CaseFilesService, useValue: caseFilesService },
         { provide: MatDialog, useValue: dialog },
       ],
     });
@@ -64,6 +76,37 @@ describe('PatientsListPage', () => {
       expect.objectContaining({ data: { patient } }),
     );
     expect(getPatients).toHaveBeenCalledTimes(2);
+  });
+
+  it('updates clinical status and therapist filters and exports summary PDF', () => {
+    const patient = createPatient();
+    getPatients.mockReturnValue(of([patient]));
+    const page = createPage();
+
+    page.setClinicalStatusFilter('ACTIVE');
+    expect(page.clinicalStatusFilter()).toBe('ACTIVE');
+
+    page.setTherapistFilter('psychologist-1');
+    expect(page.therapistFilter()).toBe('psychologist-1');
+    expect(page.patientsTableResult().totalFilteredItems).toBe(1);
+
+    page.setTherapistFilter('other-psychologist');
+    expect(page.patientsTableResult().totalFilteredItems).toBe(0);
+
+    page.clearPatientFilters();
+    expect(page.clinicalStatusFilter()).toBe('ALL');
+    expect(page.therapistFilter()).toBe('ALL');
+    expect(page.patientsTableResult().totalFilteredItems).toBe(1);
+
+    page.exportPatientSummary(patient);
+    expect(caseFilesService.getCaseFileByPatientId).toHaveBeenCalledWith('patient-1');
+    expect(caseFilesService.getClinicalPdfData).toHaveBeenCalledWith('case-1');
+    expect(dialog.open).toHaveBeenCalledWith(
+      ClinicalDocumentPreviewDialogComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ initialDocumentType: 'CASE_FILE_SUMMARY' }),
+      }),
+    );
   });
 
   function createPage(): PatientsListPage {

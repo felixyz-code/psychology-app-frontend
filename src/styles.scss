@@ -2332,6 +2332,16 @@ button.btn--reset,
   @media (max-width: 1280px) {
     padding: 0 1rem;
   }
+
+  @media (min-width: 1440px) {
+    max-width: 1360px;
+    padding: 0 2rem;
+  }
+
+  @media (min-width: 1920px) {
+    max-width: 1600px;
+    padding: 0 3rem;
+  }
 }
 
 .landing-ambient-glow {
@@ -2757,7 +2767,7 @@ button.btn--reset,
 .landing-hero {
   position: relative;
   z-index: 1;
-  padding: 4rem 0 3rem 0;
+  padding: 2.5rem 0 2.25rem 0;
   text-align: center;
 
   &__badge-wrapper {
@@ -2795,7 +2805,16 @@ button.btn--reset,
     margin: 0 auto 1.5rem auto;
 
     @media (min-width: 768px) {
+      font-size: 2.75rem;
+    }
+
+    @media (min-width: 1024px) {
       font-size: 3.25rem;
+    }
+
+    @media (min-width: 1440px) {
+      font-size: 3.5rem;
+      max-width: 1100px;
     }
   }
 
@@ -2831,7 +2850,7 @@ button.btn--reset,
     gap: 0.4rem;
     font-size: 0.875rem;
     color: var(--app-color-muted, #64748b);
-    margin-bottom: 3.5rem;
+    margin-bottom: 2rem;
 
     &-icon {
       font-size: 1rem;
@@ -2846,7 +2865,7 @@ button.btn--reset,
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: 1rem;
-  margin-bottom: 3.5rem;
+  margin-bottom: 2rem;
 
   @media (min-width: 600px) {
     grid-template-columns: repeat(2, 1fr);
@@ -3459,13 +3478,13 @@ button.btn--reset,
 }
 
 .landing-features {
-  padding: 5rem 0;
+  padding: 2.75rem 0 2.25rem 0;
 }
 
 .landing-section-header {
   text-align: center;
   max-width: 800px;
-  margin: 0 auto 3rem auto;
+  margin: 0 auto 1.75rem auto;
 }
 
 .landing-section-title {
@@ -3539,14 +3558,14 @@ button.btn--reset,
   border: 1px solid var(--app-color-border, #e2e8f0);
   border-radius: 16px;
   padding: 1.75rem;
-  box-shadow: var(--app-shadow-card, 0 1px 3px rgba(0, 0, 0, 0.05));
   display: flex;
   flex-direction: column;
+  box-shadow: var(--app-shadow-card, 0 1px 3px rgba(0, 0, 0, 0.05));
   transition: all 0.2s ease;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: var(--app-shadow-card-hover, 0 10px 25px rgba(0, 0, 0, 0.08));
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     border-color: var(--app-color-primary-border, rgba(37, 99, 235, 0.3));
   }
 
@@ -3566,16 +3585,23 @@ button.btn--reset,
     border-radius: 12px;
     background: var(--app-color-primary-soft, rgba(37, 99, 235, 0.08));
     color: var(--app-color-primary, #2563eb);
+
+    mat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
   }
 
   &__badge {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #0d9488;
-    background: rgba(13, 148, 136, 0.08);
-    border: 1px solid rgba(13, 148, 136, 0.2);
-    padding: 0.2rem 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0.65rem;
     border-radius: 9999px;
+    background: var(--app-color-surface-soft, #f1f5f9);
+    color: var(--app-color-muted, #64748b);
   }
 
   &__title {
@@ -3586,7 +3612,7 @@ button.btn--reset,
   }
 
   &__subtitle {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: var(--app-color-primary, #2563eb);
     margin: 0 0 0.75rem 0;
@@ -3597,13 +3623,13 @@ button.btn--reset,
     line-height: 1.5;
     color: var(--app-color-text-secondary, #64748b);
     margin: 0 0 1.25rem 0;
+    flex-grow: 1;
   }
 
   &__divider {
     height: 1px;
     background: var(--app-color-border, #e2e8f0);
-    margin-top: auto;
-    margin-bottom: 1rem;
+    margin: 0 0 1.25rem 0;
   }
 
   &__list {
@@ -3619,13 +3645,13 @@ button.btn--reset,
     display: flex;
     align-items: flex-start;
     gap: 0.5rem;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     color: var(--app-color-text, #334155);
 
     .check-icon {
-      font-size: 1rem;
-      width: 1rem;
-      height: 1rem;
+      font-size: 1.1rem;
+      width: 1.1rem;
+      height: 1.1rem;
       color: #10b981;
       flex-shrink: 0;
       margin-top: 0.15rem;
@@ -3634,7 +3660,7 @@ button.btn--reset,
 }
 
 .landing-security {
-  padding: 3rem 0 5rem 0;
+  padding: 2.75rem 0 2.25rem 0;
 
   &__card {
     background: linear-gradient(135deg, #0f1e36 0%, #1e293b 100%);
@@ -3671,7 +3697,7 @@ button.btn--reset,
     font-size: 1.1rem;
     line-height: 1.6;
     color: #94a3b8;
-    margin: 0 auto 3rem auto;
+    margin: 0 auto 2rem auto;
     max-width: 720px;
   }
 
@@ -3724,7 +3750,7 @@ button.btn--reset,
 }
 
 .landing-pricing {
-  padding: 5rem 0;
+  padding: 2.75rem 0 2.25rem 0;
 }
 
 .landing-billing-toggle {
@@ -3773,7 +3799,7 @@ button.btn--reset,
   grid-template-columns: 1fr;
   gap: 1.5rem;
   align-items: stretch;
-  margin-bottom: 4rem;
+  margin-bottom: 2rem;
 
   @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
@@ -3962,66 +3988,132 @@ button.btn--reset,
     border: 1px solid var(--app-color-border, #e2e8f0);
     border-radius: 16px;
     background: var(--app-color-card-bg, #ffffff);
+
+    .dark-mode & {
+      background: #0f172a;
+      border-color: #1e293b;
+    }
   }
 
+  table,
   &__table {
+    table-layout: fixed;
     width: 100%;
+    min-width: 680px;
     border-collapse: collapse;
-    text-align: left;
     font-size: 0.9375rem;
 
     th, td {
       padding: 1rem 1.25rem;
       border-bottom: 1px solid var(--app-color-border, #e2e8f0);
+      vertical-align: middle;
+      box-sizing: border-box;
+
+      .dark-mode & {
+        border-color: #1e293b;
+      }
+    }
+
+    th:first-child,
+    td:first-child {
+      width: 40%;
+      text-align: left;
+    }
+
+    th:not(:first-child),
+    td:not(:first-child) {
+      width: 20%;
+      text-align: center;
     }
 
     thead th {
       background: var(--app-color-surface-soft, #f8fafc);
       font-weight: 700;
       color: var(--app-color-heading, #0f172a);
+
+      .dark-mode & {
+        background: #1e293b;
+        color: #f8fafc;
+      }
+    }
+
+    tbody tr:hover {
+      background: var(--app-color-surface-soft, #f8fafc);
+
+      .dark-mode & {
+        background: rgba(30, 41, 59, 0.5);
+      }
     }
 
     .col-feature {
       width: 40%;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
+      text-align: left;
+      vertical-align: middle;
+
+      &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        text-align: left;
+      }
 
       .feature-category-badge {
         font-size: 0.6875rem;
         font-weight: 700;
         text-transform: uppercase;
         color: var(--app-color-muted, #64748b);
+        letter-spacing: 0.5px;
+
+        .dark-mode & {
+          color: #94a3b8;
+        }
       }
 
       .feature-name-text {
         font-weight: 600;
         color: var(--app-color-heading, #0f172a);
+
+        .dark-mode & {
+          color: #f8fafc;
+        }
       }
     }
 
     .col-plan {
       text-align: center;
       width: 20%;
+      vertical-align: middle;
 
       mat-icon {
         font-size: 1.35rem;
         width: 1.35rem;
         height: 1.35rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .icon-check { color: #10b981; }
-      .icon-cross { color: #cbd5e1; }
+      .icon-cross {
+        color: #cbd5e1;
+        .dark-mode & {
+          color: #475569;
+        }
+      }
 
       &--highlight {
         background: rgba(37, 99, 235, 0.03);
+
+        .dark-mode & {
+          background: rgba(37, 99, 235, 0.12);
+        }
       }
     }
   }
 }
 
 .landing-faq {
-  padding: 5rem 0;
+  padding: 2.75rem 0 2.25rem 0;
 
   &__accordion {
     max-width: 800px;
@@ -4088,7 +4180,7 @@ button.btn--reset,
 }
 
 .landing-cta-banner {
-  padding: 4rem 0 5rem 0;
+  padding: 2.75rem 0 2.25rem 0;
 
   &__card {
     position: relative;
@@ -4175,7 +4267,7 @@ button.btn--reset,
 .landing-footer {
   background: var(--app-color-surface-soft, #f8fafc);
   border-top: 1px solid var(--app-color-border, #e2e8f0);
-  padding: 4.5rem 0 2rem 0;
+  padding: 2.75rem 0 2.25rem 0;
   font-size: 0.9375rem;
 
   .dark-mode & {
@@ -4187,7 +4279,7 @@ button.btn--reset,
     display: grid;
     grid-template-columns: 1fr;
     gap: 2.5rem;
-    margin-bottom: 3.5rem;
+    margin-bottom: 2rem;
 
     @media (min-width: 600px) {
       grid-template-columns: repeat(2, 1fr);
@@ -4208,12 +4300,23 @@ button.btn--reset,
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+
+    &:hover {
+      opacity: 0.9;
+    }
   }
 
   &__brand-name {
     font-size: 1.35rem;
     font-weight: 800;
     color: var(--app-color-heading, #0f172a);
+
+    .dark-mode & {
+      color: #ffffff;
+    }
   }
 
   &__mission {

@@ -482,6 +482,10 @@ export class PatientDetailDialogComponent {
     });
   }
 
+  openSummaryPdfDialog(): void {
+    this.openClinicalPdfDialog(undefined, 'CASE_FILE_SUMMARY');
+  }
+
   openEditPatientDialog(): void {
     const scrollTop = this.workspaceContent()?.nativeElement.scrollTop ?? 0;
     const dialogRef = this.dialog.open(PatientFormDialogComponent, {
@@ -551,6 +555,11 @@ export class PatientDetailDialogComponent {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
+      if (result?.action === 'schedule_next') {
+        this.openCreateAppointmentDialog();
+        return;
+      }
+
       if (result?.action === 'edit') {
         this.openEditSessionNoteDialog(result.sessionNote);
         return;

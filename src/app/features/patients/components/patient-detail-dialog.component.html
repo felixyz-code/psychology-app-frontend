@@ -132,6 +132,12 @@
             (triggered)="openClinicalPdfDialog()"
           />
           <app-action-card
+            icon="description"
+            label="Ficha clínica PDF"
+            [disabled]="!caseFile()"
+            (triggered)="openSummaryPdfDialog()"
+          />
+          <app-action-card
             icon="verified_user"
             label="Consentimiento"
             [disabled]="!caseFile()"
@@ -140,6 +146,60 @@
         </div>
       </app-section-card>
     </div>
+
+    <app-section-card
+      title="Contacto de Emergencia y Consentimiento"
+      subtitle="Información de contacto inmediato y vigencia del marco legal NOM-004."
+    >
+      <div class="patient-detail-dialog__summary-grid">
+        <article class="patient-detail-dialog__summary-panel">
+          <span class="patient-detail-dialog__label">Teléfono del paciente</span>
+          <p>{{ patient().phoneNumber || 'No registrado' }}</p>
+        </article>
+
+        <article class="patient-detail-dialog__summary-panel">
+          <span class="patient-detail-dialog__label">Correo electrónico</span>
+          <p>{{ patient().email || 'No registrado' }}</p>
+        </article>
+
+        <article class="patient-detail-dialog__summary-panel">
+          <span class="patient-detail-dialog__label">Consentimiento NOM-004</span>
+          <div class="patient-detail-dialog__card-action-container">
+            <app-status-badge
+              [label]="caseFile() ? 'Vigente / Disponible' : 'Pendiente'"
+              [variant]="caseFile() ? 'success' : 'warning'"
+            />
+            @if (caseFile()) {
+              <button
+                mat-stroked-button
+                type="button"
+                class="patient-detail-dialog__card-btn btn-consent"
+                (click)="openConsentPdfDialog()"
+              >
+                <mat-icon class="patient-detail-dialog__card-btn-icon">verified_user</mat-icon>
+                <span>Ver Consentimiento</span>
+              </button>
+            }
+          </div>
+        </article>
+
+        <article class="patient-detail-dialog__summary-panel">
+          <span class="patient-detail-dialog__label">Ficha Clínica Resumida</span>
+          <div class="patient-detail-dialog__card-action-container">
+            <button
+              mat-stroked-button
+              type="button"
+              class="patient-detail-dialog__card-btn btn-summary"
+              [disabled]="!caseFile()"
+              (click)="openSummaryPdfDialog()"
+            >
+              <mat-icon class="patient-detail-dialog__card-btn-icon">picture_as_pdf</mat-icon>
+              <span>Resumen Clínico PDF</span>
+            </button>
+          </div>
+        </article>
+      </div>
+    </app-section-card>
 
     <app-section-card
       title="Linea de tiempo clinica"

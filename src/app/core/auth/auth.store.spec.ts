@@ -57,17 +57,31 @@ describe('AuthStore', () => {
     expect(localStorage.getItem(LEGACY_AUTH_USER_KEY)).toBeNull();
   });
 
-  it('persists a session and exposes its authentication state', () => {
+  it('persists a session with refreshToken and exposes its authentication state', () => {
     const store = new AuthStore();
 
-    store.setSession('new-token', user);
+    store.setSession('new-token', user, 'session-id.secret');
 
     expect(store.isAuthenticated()).toBe(true);
+    expect(store.refreshToken()).toBe('session-id.secret');
     expect(localStorage.getItem(AUTH_SESSION_KEY)).toBe(
-      JSON.stringify({ accessToken: 'new-token', user }),
+      JSON.stringify({ accessToken: 'new-token', user, refreshToken: 'session-id.secret' }),
     );
     expect(localStorage.getItem(LEGACY_ACCESS_TOKEN_KEY)).toBeNull();
     expect(localStorage.getItem(LEGACY_AUTH_USER_KEY)).toBeNull();
+  });
+
+  it('updates tokens and persists them', () => {
+    const store = new AuthStore();
+    store.setSession('token-1', user, 'session-id.secret-1');
+
+    store.updateTokens('token-2', 'session-id.secret-2');
+
+    expect(store.token()).toBe('token-2');
+    expect(store.refreshToken()).toBe('session-id.secret-2');
+    expect(localStorage.getItem(AUTH_SESSION_KEY)).toBe(
+      JSON.stringify({ accessToken: 'token-2', user, refreshToken: 'session-id.secret-2' }),
+    );
   });
 
   it('synchronizes a valid session from a canonical cross-tab storage event', () => {

@@ -12,8 +12,12 @@ import {
   FreelancerBootstrapResponse,
   LoginRequest,
   LoginResponse,
+  RevokeOtherSessionsResponse,
+  RevokeSessionResponse,
+  UserSessionItem,
 } from './auth.models';
 import { AuthStore } from './auth.store';
+import { tap } from 'rxjs/operators';
 
 export class BootstrapSessionConflictError extends Error {
   readonly code = 'BOOTSTRAP_SESSION_CONFLICT';
@@ -38,7 +42,11 @@ export class AuthService {
       .post<LoginResponse>(this.apiUrl + '/auth/login', credentials, { context })
       .pipe(
         switchMap((response) => {
-          this.authStore.setSession(response.accessToken, response.user);
+          this.authStore.setSession(
+            response.accessToken,
+            response.user,
+            response.refreshToken,
+          );
           return from(this.tenantContextStore.startForIdentity(response.user.id)).pipe(
             map(() => response),
           );
@@ -84,7 +92,11 @@ export class AuthService {
           return throwError(() => new BootstrapSessionConflictError(true));
         }
 
-        this.authStore.setSession(response.accessToken, response.user);
+        this.authStore.setSession(
+          response.accessToken,
+          response.user,
+          response.refreshToken,
+        );
         const installedSessionVersion = this.authStore.sessionVersion();
 
         return from(this.tenantContextStore.startForIdentity(response.user.id)).pipe(
@@ -96,6 +108,43 @@ export class AuthService {
           ),
         );
       }),
+    );
+  }
+
+  refreshToken(): Observable<LoginResponse> {
+    const currentRefreshToken = this.authStore.refreshToken();
+    if (!currentRefreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    const context = new HttpContext().set(TENANT_HTTP_MODE, 'PUBLIC');
+    return this.http
+      .post<LoginResponse>(
+        this.apiUrl + '/auth/refresh',
+        { refreshToken: currentRefreshToken },
+        { context },
+      )
+      .pipe(
+        tap((response) => {
+          this.authStore.updateTokens(response.accessToken, response.refreshToken);
+        }),
+      );
+  }
+
+  listSessions(): Observable<UserSessionItem[]> {
+    return this.http.get<UserSessionItem[]>(this.apiUrl + '/auth/sessions');
+  }
+
+  revokeSession(sessionId: string): Observable<RevokeSessionResponse> {
+    return this.http.delete<RevokeSessionResponse>(
+      this.apiUrl + '/auth/sessions/' + sessionId,
+    );
+  }
+
+  revokeOtherSessions(): Observable<RevokeOtherSessionsResponse> {
+    return this.http.post<RevokeOtherSessionsResponse>(
+      this.apiUrl + '/auth/sessions/revoke-others',
+      {},
     );
   }
 
@@ -111,6 +160,10 @@ export class AuthService {
   }
 
   logout(): void {
+    this.http.post(this.apiUrl + '/auth/logout', {}).subscribe({
+      next: () => {},
+      error: () => {},
+    });
     this.tenantContextStore.resetTenantState('logout');
     this.authStore.clearSession();
   }

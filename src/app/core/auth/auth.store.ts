@@ -9,17 +9,20 @@ const LEGACY_AUTH_USER_KEY = 'psychology_app_auth_user';
 
 interface PersistedAuthSession {
   readonly accessToken: string;
+  readonly refreshToken?: string;
   readonly user: AuthUser;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
   private readonly accessTokenSignal = signal<string | null>(null);
+  private readonly refreshTokenSignal = signal<string | null>(null);
   private readonly currentUserSignal = signal<AuthUser | null>(null);
   private readonly sessionVersionSignal = signal(0);
   private readonly sessionChangeSubject = new Subject<AuthUser | null>();
 
   readonly token = computed(() => this.accessTokenSignal());
+  readonly refreshToken = computed(() => this.refreshTokenSignal());
   readonly user = computed(() => this.currentUserSignal());
   readonly isAuthenticated = computed(() => !!this.accessTokenSignal());
   readonly sessionVersion = computed(() => this.sessionVersionSignal());
@@ -40,25 +43,52 @@ export class AuthStore {
     }
   }
 
-  setSession(accessToken: string, user: AuthUser): void {
+  setSession(accessToken: string, user: AuthUser, refreshToken?: string): void {
     this.accessTokenSignal.set(accessToken);
+    this.refreshTokenSignal.set(refreshToken ?? null);
     this.currentUserSignal.set(user);
     this.sessionVersionSignal.update((version) => version + 1);
 
-    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({ accessToken, user }));
+    localStorage.setItem(
+      AUTH_SESSION_KEY,
+      JSON.stringify({ accessToken, user, ...(refreshToken ? { refreshToken } : {}) }),
+    );
     this.removeLegacyPersistedSession();
     this.sessionChangeSubject.next(user);
+  }
+
+  updateTokens(accessToken: string, refreshToken?: string): void {
+    const user = this.currentUserSignal();
+    if (!user) return;
+    this.accessTokenSignal.set(accessToken);
+    if (refreshToken) {
+      this.refreshTokenSignal.set(refreshToken);
+    }
+    const currentRefresh = refreshToken ?? this.refreshTokenSignal();
+    localStorage.setItem(
+      AUTH_SESSION_KEY,
+      JSON.stringify({
+        accessToken,
+        user,
+        ...(currentRefresh ? { refreshToken: currentRefresh } : {}),
+      }),
+    );
   }
 
   updateUser(updated: Partial<AuthUser>): void {
     const current = this.currentUserSignal();
     const token = this.accessTokenSignal();
+    const refresh = this.refreshTokenSignal();
     if (current && token) {
       const merged: AuthUser = { ...current, ...updated };
       this.currentUserSignal.set(merged);
       localStorage.setItem(
         AUTH_SESSION_KEY,
-        JSON.stringify({ accessToken: token, user: merged }),
+        JSON.stringify({
+          accessToken: token,
+          user: merged,
+          ...(refresh ? { refreshToken: refresh } : {}),
+        }),
       );
       this.sessionChangeSubject.next(merged);
     }
@@ -68,6 +98,7 @@ export class AuthStore {
     const hadSession = this.accessTokenSignal() !== null || this.currentUserSignal() !== null;
 
     this.accessTokenSignal.set(null);
+    this.refreshTokenSignal.set(null);
     this.currentUserSignal.set(null);
 
     if (hadSession) {
@@ -94,6 +125,7 @@ export class AuthStore {
             persistedSession.accessToken,
             persistedSession.user,
             !isInitialLoad,
+            persistedSession.refreshToken,
           );
           return;
         }
@@ -146,11 +178,13 @@ export class AuthStore {
     accessToken: string,
     user: AuthUser,
     incrementVersion: boolean,
+    refreshToken?: string,
   ): void {
     const sessionChanged =
       this.accessTokenSignal() !== accessToken || this.currentUserSignal()?.id !== user.id;
 
     this.accessTokenSignal.set(accessToken);
+    this.refreshTokenSignal.set(refreshToken ?? null);
     this.currentUserSignal.set(user);
 
     if (incrementVersion && sessionChanged) {
@@ -164,6 +198,7 @@ export class AuthStore {
     const hadSession = this.accessTokenSignal() !== null || this.currentUserSignal() !== null;
 
     this.accessTokenSignal.set(null);
+    this.refreshTokenSignal.set(null);
     this.currentUserSignal.set(null);
 
     if (hadSession) {

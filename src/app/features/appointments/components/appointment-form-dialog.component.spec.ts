@@ -14,10 +14,17 @@ describe('AppointmentFormDialogComponent', () => {
   let appointmentsService: {
     createAppointment: ReturnType<typeof vi.fn>;
     updateAppointment: ReturnType<typeof vi.fn>;
+    getAvailability: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    appointmentsService = { createAppointment: vi.fn(), updateAppointment: vi.fn() };
+    appointmentsService = {
+      createAppointment: vi.fn(),
+      updateAppointment: vi.fn(),
+      getAvailability: vi.fn(() =>
+        of({ therapistId: 'psychologist-1', date: '2026-07-15', slotDurationMinutes: 60, slots: [] }),
+      ),
+    };
   });
 
   afterEach(() => TestBed.resetTestingModule());
@@ -164,6 +171,49 @@ describe('AppointmentFormDialogComponent', () => {
     expect(appointmentsService.createAppointment).toHaveBeenCalledWith(
       expect.objectContaining({ durationMinutes: 75 }),
     );
+  });
+
+  it('exposes local timezone and detects schedule conflicts in real time', () => {
+    appointmentsService.getAvailability.mockReturnValue(
+      of({
+        therapistId: 'psychologist-1',
+        date: '2026-07-15',
+        slotDurationMinutes: 60,
+        slots: [
+          {
+            startTime: new Date('2026-07-15T09:00').toISOString(),
+            endTime: new Date('2026-07-15T10:00').toISOString(),
+            available: false,
+            conflictType: 'APPOINTMENT',
+          },
+          {
+            startTime: new Date('2026-07-15T11:00').toISOString(),
+            endTime: new Date('2026-07-15T12:00').toISOString(),
+            available: true,
+          },
+        ],
+      }),
+    );
+
+    const { component } = createComponent({
+      mode: 'create',
+      patients: [createPatient()],
+    });
+
+    expect(component.localTimeZone).toBeTruthy();
+
+    component.appointmentForm.patchValue({
+      scheduledAt: '2026-07-15T09:30',
+      durationMinutes: 60,
+    });
+    component.checkAvailability();
+
+    expect(component.hasConflict()).toBe(true);
+    expect(component.conflictWarning()).toContain('conflicto');
+    expect(component.availableSlots().length).toBe(1);
+
+    component.selectSlot(component.availableSlots()[0]);
+    expect(component.hasConflict()).toBe(false);
   });
 
   function createComponent(

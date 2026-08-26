@@ -394,6 +394,8 @@ export class ClinicalPdfEngineService {
       ? `<img src="${payload.tenant.logoDataUri}" alt="Logo" class="header-logo clinic-logo" style="max-width: 100px; max-height: 70px; object-fit: contain;">`
       : `<div class="clinic-logo-placeholder">${this.escape(payload.tenant.displayName.substring(0, 2).toUpperCase())}</div>`;
 
+    const folioNumber = `EXP-${payload.caseFile.id.substring(0, 8).toUpperCase()}-${this.formatDateCompact(payload.generatedAt)}`;
+
     return `
     <header class="doc-header">
       <div class="clinic-info">
@@ -408,7 +410,10 @@ export class ClinicalPdfEngineService {
           ${payload.tenant.address ? `<div class="clinic-address">${this.escape(payload.tenant.address)}</div>` : ''}
         </div>
       </div>
-      <div class="doc-badge">${this.escape(subtitle)}</div>
+      <div class="doc-badge-group">
+        <div class="doc-badge">${this.escape(subtitle)}</div>
+        <div class="doc-folio">FOLIO: <strong>${folioNumber}</strong></div>
+      </div>
     </header>
     `;
   }
@@ -417,6 +422,8 @@ export class ClinicalPdfEngineService {
     const signatureImg = payload.therapist.signatureDataUri
       ? `<img src="${payload.therapist.signatureDataUri}" alt="Firma digitalizada" class="signature-image sig-img" style="max-width: 180px; max-height: 60px; object-fit: contain;">`
       : `<div style="height: 45px;"></div>`;
+
+    const folioNumber = `EXP-${payload.caseFile.id.substring(0, 8).toUpperCase()}-${this.formatDateCompact(payload.generatedAt)}`;
 
     return `
     <footer class="signature-section">
@@ -432,7 +439,8 @@ export class ClinicalPdfEngineService {
         </div>
       </div>
       <div class="doc-footer">
-        <span>${this.escape(disclaimer)}</span>
+        <p class="doc-disclaimer">${this.escape(disclaimer)}</p>
+        <p class="doc-pagination">Folio: ${folioNumber} · Página 1 de 1 · Expediente Clínico Electrónico Certificado PsiqueOS (NOM-004/NOM-024)</p>
       </div>
     </footer>
     `;
@@ -536,12 +544,33 @@ export class ClinicalPdfEngineService {
         color: #4b5563;
         margin-top: 2px;
       }
+      .doc-badge-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+      }
       .doc-badge {
         font-size: 9pt;
         font-weight: 600;
         color: ${primaryColor};
         text-align: right;
         max-width: 250px;
+      }
+      .doc-folio {
+        font-size: 8pt;
+        font-weight: 600;
+        color: #64748b;
+        background-color: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 2px 6px;
+        text-align: right;
+        display: inline-block;
+
+        strong {
+          color: #0f172a;
+        }
       }
       .patient-card {
         background-color: #f8fafc;
@@ -621,6 +650,18 @@ export class ClinicalPdfEngineService {
         border-top: 1px solid #f1f5f9;
         padding-top: 6px;
         text-align: center;
+
+        .doc-disclaimer {
+          margin: 0 0 3px 0;
+          color: #64748b;
+          font-weight: 500;
+        }
+
+        .doc-pagination {
+          margin: 0;
+          font-size: 7pt;
+          color: #94a3b8;
+        }
       }
     `;
   }
@@ -647,6 +688,20 @@ export class ClinicalPdfEngineService {
       }).format(date);
     } catch {
       return dateStr;
+    }
+  }
+
+  private formatDateCompact(dateStr: string | null | undefined): string {
+    if (!dateStr) return '00000000';
+    try {
+      const date = new Date(dateStr);
+      if (Number.isNaN(date.getTime())) return '00000000';
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}${month}${day}`;
+    } catch {
+      return '00000000';
     }
   }
 

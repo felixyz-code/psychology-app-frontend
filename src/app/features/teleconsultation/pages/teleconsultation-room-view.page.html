@@ -1,24 +1,42 @@
 <div class="teleconsult-view">
   <!-- Top Navigation / Brand Header -->
   <header class="teleconsult-view__header">
-    <div class="teleconsult-view__brand">
+    <a class="teleconsult-view__brand" routerLink="/appointments" matTooltip="Ir a la Agenda de Citas">
       <mat-icon class="brand-icon">health_and_safety</mat-icon>
       <div class="brand-info">
         <span class="brand-title">{{ room()?.organizationName || 'PsiqueOS' }}</span>
         <span class="brand-sub">Consulta Virtual Segura</span>
       </div>
-    </div>
+    </a>
 
     @if (room()) {
       <div class="teleconsult-view__meta">
+        <!-- Live WebRTC Network Telemetry Pill -->
+        @if (isCallActive() && !callEnded()) {
+          <div
+            class="telemetry-pill"
+            [ngClass]="webrtc.networkQualityClass()"
+            [matTooltip]="'Latencia: ' + webrtc.latencyMs() + 'ms | Jitter: ' + webrtc.jitterMs() + 'ms | Pérdida: ' + webrtc.packetLossPercent() + '%'"
+          >
+            <span class="telemetry-pill__dot"></span>
+            <span class="telemetry-pill__label">Red: {{ webrtc.networkQualityLabel() }} ({{ webrtc.latencyMs() }}ms)</span>
+          </div>
+        }
+
         <span class="status-badge" [ngClass]="statusClass()">
           <span class="status-badge__dot"></span>
           {{ statusLabel() }}
         </span>
-        <span class="secure-badge">
+
+        <span class="secure-badge" [class.secure-badge--active]="webrtc.isE2eEncrypted()">
           <mat-icon>lock</mat-icon>
-          Cifrado E2E
+          Cifrado E2E Activo
         </span>
+
+        <a mat-button class="btn-nav-exit" routerLink="/appointments" matTooltip="Salir al panel principal">
+          <mat-icon>dashboard</mat-icon>
+          Agenda
+        </a>
       </div>
     }
   </header>
@@ -40,10 +58,16 @@
         <mat-icon class="state-icon state-icon--error">error_outline</mat-icon>
         <h2>Acceso No Disponible</h2>
         <p>{{ error() }}</p>
-        <button mat-flat-button color="primary" (click)="loadRoom()">
-          <mat-icon>refresh</mat-icon>
-          Reintentar conexión
-        </button>
+        <div class="post-call-actions">
+          <button mat-flat-button color="primary" (click)="loadRoom()">
+            <mat-icon>refresh</mat-icon>
+            Reintentar conexión
+          </button>
+          <a mat-stroked-button routerLink="/appointments">
+            <mat-icon>arrow_back</mat-icon>
+            Volver a la Agenda
+          </a>
+        </div>
       </div>
     }
 
@@ -95,10 +119,14 @@
           </div>
 
           <div class="waiting-actions">
-            <button mat-stroked-button color="primary" (click)="loadRoom()">
+            <button mat-flat-button color="primary" (click)="loadRoom()">
               <mat-icon>refresh</mat-icon>
               Comprobar si el terapeuta ya inició
             </button>
+            <a mat-stroked-button routerLink="/appointments">
+              <mat-icon>arrow_back</mat-icon>
+              Volver a la Agenda
+            </a>
           </div>
         </div>
       }
@@ -106,45 +134,81 @@
       <!-- 2. ACTIVE State: Video Call Room -->
       @if (isRoomActive()) {
         @if (!callEnded()) {
-          <div class="video-room">
-            <!-- Stage / Video Displays -->
-            <div class="video-stage">
-              <!-- Remote Main Video -->
-              <div class="video-stream video-stream--remote">
-                <div class="video-stream__avatar">
-                  <mat-icon>psychology</mat-icon>
+          <div class="video-room" [class.video-room--with-sidebar]="isNotesOpen()">
+            <!-- WebRTC Reconnecting Alert Banner -->
+            @if (webrtc.isReconnecting()) {
+              <div class="connection-banner connection-banner--reconnecting">
+                <mat-spinner diameter="18"></mat-spinner>
+                <span>
+                  Reconectando transmisión WebRTC (Intento {{ webrtc.reconnectAttempt() }}/{{ webrtc.maxReconnectAttempts }})...
+                </span>
+              </div>
+            }
+
+            <!-- WebRTC Connection Failed Alert Banner -->
+            @if (webrtc.isFailed()) {
+              <div class="connection-banner connection-banner--failed">
+                <mat-icon>wifi_off</mat-icon>
+                <span>{{ webrtc.failureReason() || 'Interrupción de conexión WebRTC' }}</span>
+                <button mat-flat-button color="primary" (click)="webrtc.retryManualConnection()">
+                  Reintentar ahora
+                </button>
+              </div>
+            }
+
+            <div class="video-layout">
+              <!-- Stage / Video Displays -->
+              <div class="video-stage">
+                <!-- Remote Main Video -->
+                <div class="video-stream video-stream--remote">
+                  <div class="video-stream__avatar">
+                    <mat-icon>psychology</mat-icon>
+                  </div>
+                  <div class="video-stream__label">
+                    <mat-icon>account_circle</mat-icon>
+                    {{ room()!.psychologistName }} (Profesional)
+                  </div>
+                  <div class="live-indicator">
+                    <span class="live-indicator__dot"></span>
+                    {{ webrtc.isConnected() ? 'Conexión Estable WebRTC' : 'Conectando...' }}
+                  </div>
                 </div>
-                <div class="video-stream__label">
-                  <mat-icon>account_circle</mat-icon>
-                  {{ room()!.psychologistName }} (Profesional)
-                </div>
-                <div class="live-indicator">
-                  <span class="live-indicator__dot"></span>
-                  Conexión Estable
+
+                <!-- Local Picture-In-Picture Video -->
+                <div class="video-stream video-stream--local" [class.video-stream--off]="!isCameraOn()">
+                  @if (isCameraOn()) {
+                    <div class="local-preview">
+                      <mat-icon class="local-cam-icon">face</mat-icon>
+                    </div>
+                  } @else {
+                    <div class="camera-off-state">
+                      <mat-icon>videocam_off</mat-icon>
+                      <span>Cámara apagada</span>
+                    </div>
+                  }
+                  <div class="video-stream__label">
+                    <mat-icon>person</mat-icon>
+                    {{ room()!.patientName }} (Tú)
+                  </div>
                 </div>
               </div>
 
-              <!-- Local Picture-In-Picture Video -->
-              <div class="video-stream video-stream--local" [class.video-stream--off]="!isCameraOn()">
-                @if (isCameraOn()) {
-                  <div class="local-preview">
-                    <mat-icon class="local-cam-icon">face</mat-icon>
-                  </div>
-                } @else {
-                  <div class="camera-off-state">
-                    <mat-icon>videocam_off</mat-icon>
-                    <span>Cámara apagada</span>
-                  </div>
-                }
-                <div class="video-stream__label">
-                  <mat-icon>person</mat-icon>
-                  {{ room()!.patientName }} (Tú)
+              <!-- In-Call Notes Sidebar Panel -->
+              @if (isNotesOpen()) {
+                <div class="video-sidebar-container">
+                  <app-teleconsultation-notes-sidebar
+                    [roomCode]="room()!.roomCode"
+                    [patientName]="room()!.patientName"
+                    [appointmentId]="room()!.appointmentId"
+                    (closeSidebar)="closeNotes()"
+                  ></app-teleconsultation-notes-sidebar>
                 </div>
-              </div>
+              }
             </div>
 
             <!-- Controls Toolbar -->
             <div class="video-controls">
+              <!-- Mic Button -->
               <button
                 mat-fab
                 [color]="isMicOn() ? 'basic' : 'warn'"
@@ -155,6 +219,7 @@
                 <mat-icon>{{ isMicOn() ? 'mic' : 'mic_off' }}</mat-icon>
               </button>
 
+              <!-- Camera Button -->
               <button
                 mat-fab
                 [color]="isCameraOn() ? 'basic' : 'warn'"
@@ -165,6 +230,7 @@
                 <mat-icon>{{ isCameraOn() ? 'videocam' : 'videocam_off' }}</mat-icon>
               </button>
 
+              <!-- Screen Share Button -->
               <button
                 mat-fab
                 [color]="isScreenSharing() ? 'accent' : 'basic'"
@@ -175,12 +241,68 @@
                 <mat-icon>{{ isScreenSharing() ? 'stop_screen_share' : 'screen_share' }}</mat-icon>
               </button>
 
+              <!-- Peripheral Device Selector Menu Button -->
+              <button
+                mat-fab
+                color="basic"
+                [matMenuTriggerFor]="deviceMenu"
+                matTooltip="Configuración de periféricos"
+                aria-label="Seleccionar micrófono y cámara"
+              >
+                <mat-icon>settings_input_component</mat-icon>
+              </button>
+
+              <!-- Device Selection Menu -->
+              <mat-menu #deviceMenu="matMenu" class="device-menu">
+                <div class="device-menu__section-header">
+                  <mat-icon>mic</mat-icon>
+                  <span>Micrófono</span>
+                </div>
+                @for (mic of webrtc.audioDevices(); track mic.deviceId) {
+                  <button
+                    mat-menu-item
+                    (click)="selectAudioDevice(mic.deviceId)"
+                    [class.device-menu__item--active]="webrtc.selectedAudioDeviceId() === mic.deviceId"
+                  >
+                    <mat-icon>{{ webrtc.selectedAudioDeviceId() === mic.deviceId ? 'check' : 'radio_button_unchecked' }}</mat-icon>
+                    <span>{{ mic.label }}</span>
+                  </button>
+                }
+
+                <div class="device-menu__section-header">
+                  <mat-icon>videocam</mat-icon>
+                  <span>Cámara de Video</span>
+                </div>
+                @for (cam of webrtc.videoDevices(); track cam.deviceId) {
+                  <button
+                    mat-menu-item
+                    (click)="selectVideoDevice(cam.deviceId)"
+                    [class.device-menu__item--active]="webrtc.selectedVideoDeviceId() === cam.deviceId"
+                  >
+                    <mat-icon>{{ webrtc.selectedVideoDeviceId() === cam.deviceId ? 'check' : 'radio_button_unchecked' }}</mat-icon>
+                    <span>{{ cam.label }}</span>
+                  </button>
+                }
+              </mat-menu>
+
+              <!-- Notes Toggle Button -->
+              <button
+                mat-fab
+                [color]="isNotesOpen() ? 'primary' : 'basic'"
+                (click)="toggleNotes()"
+                [matTooltip]="isNotesOpen() ? 'Ocultar notas clínicas' : 'Abrir notas clínicas'"
+                aria-label="Alternar notas clínicas"
+              >
+                <mat-icon>edit_note</mat-icon>
+              </button>
+
+              <!-- End Call Button -->
               <button
                 mat-fab
                 color="warn"
                 class="btn-end-call"
                 (click)="endCall()"
-                matTooltip="Salir de la llamada"
+                matTooltip="Finalizar consulta"
                 aria-label="Salir de la videollamada"
               >
                 <mat-icon>call_end</mat-icon>
@@ -188,16 +310,28 @@
             </div>
           </div>
         } @else {
-          <!-- Post-call summary for user who ended early -->
+          <!-- Post-call summary -->
           <div class="teleconsult-view__state-card">
             <mat-icon class="state-icon state-icon--success">check_circle</mat-icon>
-            <h2>Has salido de la sesión</h2>
-            <p>Puedes volver a unirte si la sesión aún se encuentra activa con tu profesional.</p>
+            <h2>Has concluido la sesión virtual</h2>
+            <p>La videoconsulta se ha finalizado correctamente.</p>
+
+            @if (appointmentMarkedCompleted()) {
+              <div class="completed-badge-pill">
+                <mat-icon>verified</mat-icon>
+                <span>Cita registrada como COMPLETADA</span>
+              </div>
+            }
+
             <div class="post-call-actions">
               <button mat-flat-button color="primary" (click)="rejoinCall()">
                 <mat-icon>videocam</mat-icon>
                 Volver a conectarse
               </button>
+              <a mat-stroked-button routerLink="/appointments">
+                <mat-icon>calendar_month</mat-icon>
+                Volver a la Agenda
+              </a>
             </div>
           </div>
         }
@@ -214,6 +348,12 @@
           <p class="sub-text">
             Si necesitas atención adicional o reprogramar tu sesión, ponte en contacto con tu centro de atención.
           </p>
+          <div class="post-call-actions">
+            <a mat-flat-button color="primary" routerLink="/appointments">
+              <mat-icon>calendar_month</mat-icon>
+              Volver a la Agenda
+            </a>
+          </div>
         </div>
       }
 
@@ -228,6 +368,12 @@
           <p class="sub-text">
             Gracias por utilizar el servicio de teleconsulta segura de {{ room()!.organizationName }}.
           </p>
+          <div class="post-call-actions">
+            <a mat-flat-button color="primary" routerLink="/appointments">
+              <mat-icon>calendar_month</mat-icon>
+              Volver a la Agenda
+            </a>
+          </div>
         </div>
       }
     }

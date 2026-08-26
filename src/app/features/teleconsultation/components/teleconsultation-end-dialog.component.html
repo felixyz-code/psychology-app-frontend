@@ -1,0 +1,45 @@
+<div class="end-dialog">
+  <div class="end-dialog__header">
+    <div class="end-dialog__icon-wrap">
+      <mat-icon>call_end</mat-icon>
+    </div>
+    <div>
+      <h2 class="end-dialog__title">Finalizar Videoconsulta</h2>
+      <p class="end-dialog__subtitle">Cierre clínico seguro de sesión virtual</p>
+    </div>
+  </div>
+
+  <div class="end-dialog__content">
+    <p class="lead-text">
+      ¿Estás seguro de que deseas dar por concluida la videoconsulta con <strong>{{ data.patientName }}</strong>?
+    </p>
+
+    @if (data.appointmentId) {
+      <div class="completion-option">
+        <mat-checkbox
+          [checked]="markCompleted()"
+          (change)="markCompleted.set($event.checked)"
+          color="primary"
+        >
+          <span class="checkbox-label">
+            Marcar cita como <strong>COMPLETADA</strong> (Asistencia clínica confirmada)
+          </span>
+        </mat-checkbox>
+        <p class="option-hint">
+          El estado de la cita se actualizará en la agenda y el expediente del paciente.
+        </p>
+      </div>
+    }
+  </div>
+
+  <div class="end-dialog__actions">
+    <button mat-stroked-button (click)="cancel()">
+      Continuar en llamada
+    </button>
+
+    <button mat-flat-button color="warn" (click)="confirm()">
+      <mat-icon>check_circle</mat-icon>
+      Finalizar sesión
+    </button>
+  </div>
+</div>
