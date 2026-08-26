@@ -14,6 +14,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   accessToken: string;
+  refreshToken?: string;
   user: AuthUser;
 }
 
@@ -46,6 +47,7 @@ export interface FreelancerBootstrapMembership {
 
 export interface FreelancerBootstrapResponse {
   accessToken: string;
+  refreshToken?: string;
   user: AuthUser;
   organization: FreelancerBootstrapOrganization;
   membership: FreelancerBootstrapMembership;
@@ -57,6 +59,31 @@ export interface ForgotPasswordRequest {
 
 export interface ForgotPasswordResponse {
   success: boolean;
+  message: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface UserSessionItem {
+  id: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceInfo: string | null;
+  lastActiveAt: string;
+  createdAt: string;
+  isCurrent: boolean;
+}
+
+export interface RevokeSessionResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface RevokeOtherSessionsResponse {
+  success: boolean;
+  revokedCount: number;
   message: string;
 }
 
