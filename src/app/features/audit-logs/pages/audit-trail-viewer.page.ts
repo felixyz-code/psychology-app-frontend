@@ -17,6 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 
+import { SkeletonTableComponent } from '../../../shared/components/skeleton';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { AuditLogsService } from '../services/audit-logs.service';
 import { BranchesService } from '../../../core/services/branches.service';
@@ -53,6 +54,7 @@ import {
     MatMenuModule,
     AuditResourceLabelPipe,
     AuditActionLabelPipe,
+    SkeletonTableComponent,
   ],
   template: `
     <div class="audit-trail-container">
@@ -185,12 +187,21 @@ import {
 
       <!-- Table Container -->
       <mat-card class="table-card">
-        <div *ngIf="loadingSignal()" class="loading-overlay">
+        <app-skeleton-table
+          *ngIf="loadingSignal() && logsSignal().length === 0"
+          [rows]="6"
+          [columns]="6"
+          [hasToolbar]="false"
+          [hasPagination]="false"
+          [hasActionsColumn]="true"
+        />
+
+        <div *ngIf="loadingSignal() && logsSignal().length > 0" class="loading-overlay">
           <mat-spinner diameter="40"></mat-spinner>
           <span>Cargando eventos de auditoría...</span>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive" *ngIf="!loadingSignal() || logsSignal().length > 0">
           <table mat-table [dataSource]="logsSignal()" class="audit-table">
             <!-- Timestamp Column -->
             <ng-container matColumnDef="timestamp">

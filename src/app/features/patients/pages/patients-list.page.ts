@@ -32,6 +32,9 @@ import { PatientsService } from '../services/patients.service';
 import { CaseFilesService } from '../../case-files/services/case-files.service';
 import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/components/clinical-document-preview-dialog.component';
 
+import { SkeletonTableComponent } from '../../../shared/components/skeleton';
+import { ToastService } from '../../../core/services/toast.service';
+
 export type PatientClinicalFilterStatus = 'ALL' | 'ACTIVE' | 'PAUSED' | 'DISCHARGED';
 
 @Component({
@@ -50,6 +53,7 @@ export type PatientClinicalFilterStatus = 'ALL' | 'ACTIVE' | 'PAUSED' | 'DISCHAR
     MetricCardComponent,
     PageHeaderComponent,
     SectionCardComponent,
+    SkeletonTableComponent,
   ],
   templateUrl: './patients-list.page.html',
   styleUrl: './patients-list.page.scss',
@@ -64,6 +68,7 @@ export class PatientsListPage {
   private readonly dialog = inject(MatDialog);
   private readonly patientsService = inject(PatientsService);
   private readonly caseFilesService = inject(CaseFilesService);
+  private readonly toastService = inject(ToastService);
 
   readonly displayedColumns = ['name', 'phoneNumber', 'email', 'birthDate', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
@@ -368,6 +373,7 @@ export class PatientsListPage {
 
     dialogRef.afterClosed().subscribe((created) => {
       if (created) {
+        this.toastService.success('Paciente registrado exitosamente.');
         this.loadPatients();
       }
     });
@@ -387,6 +393,7 @@ export class PatientsListPage {
 
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
+        this.toastService.success('Paciente actualizado exitosamente.');
         this.loadPatients();
       }
     });
@@ -423,6 +430,7 @@ export class PatientsListPage {
 
     dialogRef.afterClosed().subscribe((deleted) => {
       if (deleted) {
+        this.toastService.success('Paciente eliminado exitosamente.');
         this.loadPatients();
       }
     });

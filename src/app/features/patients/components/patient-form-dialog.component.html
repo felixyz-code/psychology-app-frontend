@@ -85,7 +85,7 @@
     <div class="patient-dialog__actions app-dialog__actions">
       <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>
       <div class="app-dialog__actions-group app-form-actions__group">
-        <button mat-flat-button type="submit" [disabled]="isSaving()">
+        <button mat-flat-button type="submit" [appButtonSpinner]="isSaving()" [disabled]="isSaving()">
           {{ getSubmitLabel() }}
         </button>
       </div>

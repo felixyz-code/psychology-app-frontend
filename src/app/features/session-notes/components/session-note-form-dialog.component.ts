@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { ButtonSpinnerDirective } from '../../../shared/directives/button-spinner.directive';
+import { SavingIndicatorComponent } from '../../../shared/components/saving-indicator/saving-indicator.component';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { logError } from '../../../core/logging/app-logger';
 import {
@@ -102,6 +104,8 @@ interface SessionNoteFormDialogData {
     MatInputModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
+    SavingIndicatorComponent,
   ],
   templateUrl: './session-note-form-dialog.component.html',
   styleUrl: './session-note-form-dialog.component.scss',

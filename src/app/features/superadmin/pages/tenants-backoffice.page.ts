@@ -12,9 +12,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SkeletonTableComponent } from '../../../shared/components/skeleton';
+import { ToastService } from '../../../core/services/toast.service';
 import { AdjustQuotasDialogComponent } from '../components/adjust-quotas-dialog.component';
 import { ExtendTrialDialogComponent } from '../components/extend-trial-dialog.component';
 import { FreezeTenantDialogComponent } from '../components/freeze-tenant-dialog.component';
@@ -39,9 +40,9 @@ import { SuperadminTenantsService } from '../services/superadmin-tenants.service
     MatMenuModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatSnackBarModule,
     MatTableModule,
     MatTooltipModule,
+    SkeletonTableComponent,
   ],
   templateUrl: './tenants-backoffice.page.html',
   styleUrl: './tenants-backoffice.page.scss',
@@ -49,7 +50,7 @@ import { SuperadminTenantsService } from '../services/superadmin-tenants.service
 export class TenantsBackofficePage implements OnInit {
   private readonly superadminService = inject(SuperadminTenantsService);
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly toastService = inject(ToastService);
 
   readonly tenants = signal<AdminTenantItem[]>([]);
   readonly isLoading = signal(false);
@@ -136,9 +137,7 @@ export class TenantsBackofficePage implements OnInit {
 
     ref.afterClosed().subscribe((res) => {
       if (res) {
-        this.snackBar.open('Periodo de prueba extendido exitosamente.', 'Cerrar', {
-          duration: 4000,
-        });
+        this.toastService.success('Periodo de prueba extendido exitosamente.');
         this.loadTenants();
       }
     });
@@ -152,9 +151,7 @@ export class TenantsBackofficePage implements OnInit {
 
     ref.afterClosed().subscribe((res) => {
       if (res) {
-        this.snackBar.open('Membresía vitalicia otorgada correctamente.', 'Cerrar', {
-          duration: 4000,
-        });
+        this.toastService.success('Membresía vitalicia otorgada correctamente.');
         this.loadTenants();
       }
     });
@@ -168,9 +165,7 @@ export class TenantsBackofficePage implements OnInit {
 
     ref.afterClosed().subscribe((res) => {
       if (res) {
-        this.snackBar.open('Cuotas personalizadas actualizadas.', 'Cerrar', {
-          duration: 4000,
-        });
+        this.toastService.success('Cuotas personalizadas actualizadas.');
         this.loadTenants();
       }
     });
@@ -190,7 +185,7 @@ export class TenantsBackofficePage implements OnInit {
         const msg = isFrozen
           ? 'Organización reactivada exitosamente.'
           : 'Organización congelada preventivamente.';
-        this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
+        this.toastService.success(msg);
         this.loadTenants();
       }
     });

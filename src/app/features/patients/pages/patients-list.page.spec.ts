@@ -2,6 +2,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TestBed } from '@angular/core/testing';
 import { Observable, of, throwError } from 'rxjs';
 
+import { ToastService } from '../../../core/services/toast.service';
 import { PatientDetailDialogComponent } from '../components/patient-detail-dialog.component';
 import { Patient } from '../models/patient.models';
 import { PatientsService } from '../services/patients.service';
@@ -13,6 +14,7 @@ import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/compone
 describe('PatientsListPage', () => {
   let getPatients: ReturnType<typeof vi.fn<() => Observable<Patient[]>>>;
   let dialog: { open: ReturnType<typeof vi.fn> };
+  let toastService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; warning: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
   let caseFilesService: {
     getCaseFileByPatientId: ReturnType<typeof vi.fn>;
     getClinicalPdfData: ReturnType<typeof vi.fn>;
@@ -21,6 +23,12 @@ describe('PatientsListPage', () => {
   beforeEach(() => {
     getPatients = vi.fn<() => Observable<Patient[]>>();
     dialog = { open: vi.fn() };
+    toastService = {
+      success: vi.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
+      info: vi.fn(),
+    };
     caseFilesService = {
       getCaseFileByPatientId: vi.fn(() => of({ id: 'case-1', patientId: 'patient-1' })),
       getClinicalPdfData: vi.fn(() => of({ caseFile: { id: 'case-1' } })),
@@ -31,6 +39,7 @@ describe('PatientsListPage', () => {
         { provide: PatientsService, useValue: { getPatients } },
         { provide: CaseFilesService, useValue: caseFilesService },
         { provide: MatDialog, useValue: dialog },
+        { provide: ToastService, useValue: toastService },
       ],
     });
   });

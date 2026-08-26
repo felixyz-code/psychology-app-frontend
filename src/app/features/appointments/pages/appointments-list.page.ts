@@ -37,6 +37,8 @@ import {
   paginateItems,
   sortItems,
 } from '../../../shared/utils/data-table';
+import { SkeletonTableComponent } from '../../../shared/components/skeleton';
+import { ToastService } from '../../../core/services/toast.service';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { AppointmentDeleteDialogComponent } from '../components/appointment-delete-dialog.component';
@@ -89,6 +91,7 @@ interface AppointmentsTableState extends DataTableState {
     PageHeaderComponent,
     SectionCardComponent,
     StatusBadgeComponent,
+    SkeletonTableComponent,
     AppointmentsCalendarComponent,
     AppointmentsDailyAgendaComponent,
   ],
@@ -105,6 +108,7 @@ export class AppointmentsListPage {
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly patientsService = inject(PatientsService);
   private readonly dialog = inject(MatDialog);
+  private readonly toastService = inject(ToastService);
   private readonly defaultDateRange = this.createCurrentMonthDateRange();
 
   readonly displayedColumns = ['patient', 'scheduledAt', 'durationMinutes', 'status', 'actions'];
@@ -373,6 +377,7 @@ export class AppointmentsListPage {
 
     dialogRef.afterClosed().subscribe((created) => {
       if (created) {
+        this.toastService.success('Cita programada exitosamente.');
         this.loadAppointments();
       }
     });
@@ -394,6 +399,7 @@ export class AppointmentsListPage {
 
     dialogRef.afterClosed().subscribe((rescheduled) => {
       if (rescheduled) {
+        this.toastService.success('La cita fue reprogramada correctamente.');
         this.successMessage.set('La cita fue reprogramada correctamente.');
         this.loadAppointments();
       }
@@ -429,11 +435,14 @@ export class AppointmentsListPage {
       .pipe(finalize(() => this.cancellingAppointmentId.set(null)))
       .subscribe({
         next: () => {
+          this.toastService.success('La cita fue cancelada correctamente.');
           this.successMessage.set('La cita fue cancelada correctamente.');
           this.loadAppointments();
         },
         error: (error: HttpErrorResponse) => {
-          this.errorMessage.set(this.getAppointmentActionErrorMessage(error, 'cancelar'));
+          const msg = this.getAppointmentActionErrorMessage(error, 'cancelar');
+          this.toastService.error(msg);
+          this.errorMessage.set(msg);
         },
       });
   }
@@ -452,6 +461,7 @@ export class AppointmentsListPage {
 
     dialogRef.afterClosed().subscribe((deleted) => {
       if (deleted) {
+        this.toastService.success('La cita fue eliminada exitosamente.');
         this.loadAppointments();
       }
     });

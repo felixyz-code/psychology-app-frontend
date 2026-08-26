@@ -1,0 +1,34 @@
+<header
+  class="app-skeleton-header {{ customClass() }}"
+  role="status"
+  aria-busy="true"
+  aria-label="Cargando encabezado..."
+>
+  @if (hasBreadcrumb()) {
+    <div class="app-skeleton-header__breadcrumb">
+      <div class="app-skeleton-line app-skeleton-line--breadcrumb"></div>
+    </div>
+  }
+
+  <div class="app-skeleton-header__main">
+    <div class="app-skeleton-header__titles">
+      <div class="app-skeleton-header__title-row">
+        <div class="app-skeleton-line app-skeleton-line--title"></div>
+        @if (hasBadge()) {
+          <div class="app-skeleton-badge"></div>
+        }
+      </div>
+      @if (hasSubtitle()) {
+        <div class="app-skeleton-line app-skeleton-line--subtitle"></div>
+      }
+    </div>
+
+    @if (hasActions()) {
+      <div class="app-skeleton-header__actions">
+        @for (action of getActionsArray(); track action) {
+          <div class="app-skeleton-button app-skeleton-button--header"></div>
+        }
+      </div>
+    }
+  </div>
+</header>
