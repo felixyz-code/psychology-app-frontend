@@ -33,9 +33,11 @@
   </div>
 
   <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading() && !metrics()">
-    <mat-spinner diameter="48"></mat-spinner>
-    <p>Consultando telemetría de plataforma...</p>
+  <div class="overview-cards" *ngIf="isLoading() && !metrics()" aria-busy="true">
+    <app-skeleton-card variant="metric" [lines]="2" />
+    <app-skeleton-card variant="metric" [lines]="2" />
+    <app-skeleton-card variant="metric" [lines]="2" />
+    <app-skeleton-card variant="metric" [lines]="2" />
   </div>
 
   <!-- Metrics Content -->

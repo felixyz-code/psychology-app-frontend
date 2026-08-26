@@ -82,52 +82,13 @@
     </span>
 
     @if (isLoading()) {
-      <div class="appointments-loading-state" aria-label="Cargando citas" aria-busy="true">
-        <div class="appointments-loading-state__header">
-          <span
-            class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--search"
-            aria-hidden="true"
-          ></span>
-          <span
-            class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--meta"
-            aria-hidden="true"
-          ></span>
-        </div>
-
-        <div class="appointments-loading-state__filters" aria-hidden="true">
-          <span
-            class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--filter"
-          ></span>
-          <span
-            class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--filter"
-          ></span>
-          <span
-            class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--filter appointments-skeleton-line--filter-wide"
-          ></span>
-        </div>
-
-        <div class="appointments-loading-state__table" aria-hidden="true">
-          @for (row of tableSkeletonRows; track $index) {
-            <div class="appointments-loading-row">
-              <span
-                class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--name"
-              ></span>
-              <span
-                class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--date"
-              ></span>
-              <span
-                class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--duration"
-              ></span>
-              <span
-                class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--status"
-              ></span>
-              <span
-                class="app-skeleton-line appointments-skeleton-line appointments-skeleton-line--actions"
-              ></span>
-            </div>
-          }
-        </div>
-      </div>
+      <app-skeleton-table
+        [rows]="6"
+        [columns]="4"
+        [hasToolbar]="true"
+        [hasPagination]="true"
+        [hasActionsColumn]="true"
+      />
     } @else if (errorMessage()) {
       <div
         class="appointments-state appointments-state--error app-table-feedback-state app-table-feedback-state--error"

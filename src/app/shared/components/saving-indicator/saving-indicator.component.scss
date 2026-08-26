@@ -1,0 +1,57 @@
+:host {
+  display: inline-block;
+}
+
+.app-saving-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--app-radius-full, 999px);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  background: var(--app-color-card-soft-bg, #f1f5f9);
+  color: var(--app-color-text-secondary, #475569);
+  border: 1px solid var(--app-color-border, #cbd5e1);
+
+  &__icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+
+    &--spinning {
+      animation: app-saving-spin 1s linear infinite;
+    }
+  }
+
+  &--saving {
+    background: color-mix(in srgb, var(--app-color-primary, #0284c7) 8%, var(--app-color-card-soft-bg, #f8fafc));
+    color: var(--app-color-primary, #0284c7);
+    border-color: color-mix(in srgb, var(--app-color-primary, #0284c7) 25%, transparent);
+  }
+
+  &--saved {
+    background: color-mix(in srgb, #10b981 10%, var(--app-color-card-soft-bg, #f8fafc));
+    color: #059669;
+    border-color: color-mix(in srgb, #10b981 25%, transparent);
+  }
+
+  &--error {
+    background: color-mix(in srgb, #ef4444 10%, var(--app-color-card-soft-bg, #f8fafc));
+    color: #dc2626;
+    border-color: color-mix(in srgb, #ef4444 25%, transparent);
+  }
+}
+
+@keyframes app-saving-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-saving-indicator__icon--spinning {
+    animation: none;
+  }
+}

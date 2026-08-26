@@ -1,0 +1,69 @@
+<div
+  class="app-skeleton-table-wrapper {{ customClass() }}"
+  role="status"
+  aria-busy="true"
+  aria-label="Cargando tabla de datos..."
+>
+  @if (hasToolbar()) {
+    <div class="app-skeleton-table__toolbar">
+      <div class="app-skeleton-line app-skeleton-line--search"></div>
+      <div class="app-skeleton-table__toolbar-actions">
+        <div class="app-skeleton-line app-skeleton-line--filter"></div>
+        <div class="app-skeleton-button app-skeleton-button--sm"></div>
+      </div>
+    </div>
+  }
+
+  <div class="app-skeleton-table">
+    <div class="app-skeleton-table__header-row">
+      @for (col of getColumnsArray(); track col) {
+        <div
+          class="app-skeleton-table__header-cell"
+          [style.width]="getColumnWidth(col)"
+        >
+          <div class="app-skeleton-line app-skeleton-line--th"></div>
+        </div>
+      }
+      @if (hasActionsColumn()) {
+        <div class="app-skeleton-table__header-cell app-skeleton-table__header-cell--actions">
+          <div class="app-skeleton-line app-skeleton-line--th-action"></div>
+        </div>
+      }
+    </div>
+
+    <div class="app-skeleton-table__body">
+      @for (row of getRowsArray(); track row) {
+        <div class="app-skeleton-table__row">
+          @for (col of getColumnsArray(); track col) {
+            <div
+              class="app-skeleton-table__cell"
+              [style.width]="getColumnWidth(col)"
+            >
+              <div
+                class="app-skeleton-line app-skeleton-line--td"
+                [style.width]="getCellWidth(row, col)"
+              ></div>
+            </div>
+          }
+          @if (hasActionsColumn()) {
+            <div class="app-skeleton-table__cell app-skeleton-table__cell--actions">
+              <div class="app-skeleton-icon-button"></div>
+              <div class="app-skeleton-icon-button"></div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (hasPagination()) {
+    <div class="app-skeleton-table__pagination">
+      <div class="app-skeleton-line app-skeleton-line--page-size"></div>
+      <div class="app-skeleton-line app-skeleton-line--page-range"></div>
+      <div class="app-skeleton-table__pagination-controls">
+        <div class="app-skeleton-icon-button"></div>
+        <div class="app-skeleton-icon-button"></div>
+      </div>
+    </div>
+  }
+</div>

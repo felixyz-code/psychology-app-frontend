@@ -10,6 +10,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PlatformMetricsResponse } from '../models/superadmin.models';
 import { SuperadminTenantsService } from '../services/superadmin-tenants.service';
 
+import { SkeletonCardComponent } from '../../../shared/components/skeleton';
+
 @Component({
   selector: 'app-platform-metrics-page',
   standalone: true,
@@ -22,6 +24,7 @@ import { SuperadminTenantsService } from '../services/superadmin-tenants.service
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    SkeletonCardComponent,
   ],
   templateUrl: './platform-metrics.page.html',
   styleUrl: './platform-metrics.page.scss',

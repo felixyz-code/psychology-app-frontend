@@ -529,6 +529,87 @@ button:disabled,
   }
 }
 
+/* ==========================================================================
+   Micro-Interactions: Button Spinners & Standardized Toast Notifications
+   ========================================================================== */
+.app-button-spinner--active {
+  position: relative !important;
+  cursor: wait !important;
+  pointer-events: none !important;
+
+  .app-button-spinner__spinner {
+    display: inline-block;
+    width: 0.95rem;
+    height: 0.95rem;
+    margin-right: 0.5rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    vertical-align: middle;
+    animation: app-button-spin 0.65s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .app-button-spinner__text {
+    margin-left: 0.25rem;
+  }
+}
+
+@keyframes app-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-button-spinner--active .app-button-spinner__spinner {
+    animation: none;
+    border-style: dotted;
+  }
+}
+
+.mat-mdc-snack-bar-container.app-toast {
+  --mdc-snackbar-container-color: var(--app-color-card-bg, #ffffff);
+  --mat-snack-bar-button-color: var(--app-color-primary, #0284c7);
+
+  .mdc-snackbar__surface {
+    border-radius: var(--app-radius-lg, 12px) !important;
+    border: 1px solid var(--app-color-border, #e2e8f0);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    background: var(--app-color-card-bg, #ffffff) !important;
+    color: var(--app-color-heading, #1e293b) !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .mat-mdc-snack-bar-label {
+    color: var(--app-color-heading, #1e293b) !important;
+    font-size: 0.9125rem !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+  }
+
+  .mat-mdc-snack-bar-actions .mat-mdc-button {
+    font-weight: 600 !important;
+    font-size: 0.8125rem !important;
+  }
+
+  &.app-toast--success .mdc-snackbar__surface {
+    border-left: 4px solid #10b981 !important;
+  }
+
+  &.app-toast--error .mdc-snackbar__surface {
+    border-left: 4px solid #ef4444 !important;
+  }
+
+  &.app-toast--warning .mdc-snackbar__surface {
+    border-left: 4px solid #f59e0b !important;
+  }
+
+  &.app-toast--info .mdc-snackbar__surface {
+    border-left: 4px solid var(--app-color-primary, #0284c7) !important;
+  }
+}
+
 .app-status-badge {
   display: inline-flex;
   align-items: center;

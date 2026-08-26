@@ -104,10 +104,13 @@
   <!-- Main Table Section -->
   <mat-card class="table-card">
     @if (isLoading()) {
-      <div class="loading-state">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Cargando organizaciones y suscripciones...</p>
-      </div>
+      <app-skeleton-table
+        [rows]="6"
+        [columns]="6"
+        [hasToolbar]="false"
+        [hasPagination]="false"
+        [hasActionsColumn]="true"
+      />
     } @else if (errorMessage()) {
       <div class="error-state">
         <mat-icon>error_outline</mat-icon>
