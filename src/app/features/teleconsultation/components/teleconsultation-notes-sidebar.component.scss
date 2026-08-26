@@ -1,0 +1,211 @@
+.notes-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.96);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  box-sizing: border-box;
+
+  &__header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #334155;
+    background: #1e293b;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+
+    button {
+      color: #94a3b8;
+      &:hover { color: #f8fafc; }
+    }
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .heading-icon {
+      color: #38bdf8;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .patient-subtitle {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      display: block;
+    }
+  }
+
+  &__sync-bar {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+
+    .sync-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+
+      &--saving {
+        color: #38bdf8;
+        font-weight: 500;
+      }
+
+      &--saved {
+        color: #34d399;
+        font-weight: 500;
+      }
+
+      &--idle {
+        color: #94a3b8;
+      }
+
+      .sync-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+
+  &__templates {
+    padding: 10px 16px;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+
+    .templates-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .templates-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+
+      .template-chip {
+        border: 1px solid #475569;
+        background: rgba(30, 41, 59, 0.8);
+        color: #38bdf8;
+        font-size: 0.74rem;
+        font-weight: 500;
+        padding: 3px 8px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover {
+          background: rgba(56, 189, 248, 0.18);
+          border-color: #38bdf8;
+          color: #ffffff;
+        }
+      }
+    }
+  }
+
+  &__form {
+    flex: 1;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    box-sizing: border-box;
+
+    .notes-sidebar__field {
+      width: 100%;
+
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #1e293b !important;
+      }
+
+      ::ng-deep .mat-mdc-form-field-focus-overlay {
+        background: transparent !important;
+      }
+
+      ::ng-deep input.mat-mdc-input-element,
+      ::ng-deep textarea.mat-mdc-input-element {
+        color: #f8fafc !important;
+        caret-color: #38bdf8;
+      }
+
+      ::ng-deep .mdc-notched-outline__leading,
+      ::ng-deep .mdc-notched-outline__notch,
+      ::ng-deep .mdc-notched-outline__trailing {
+        border-color: #334155 !important;
+      }
+
+      ::ng-deep &.mat-focused {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: #38bdf8 !important;
+        }
+      }
+
+      ::ng-deep .mat-mdc-floating-label {
+        color: #94a3b8 !important;
+      }
+
+      &--content {
+        flex: 1;
+
+        ::ng-deep .mat-mdc-form-field-flex {
+          height: 100%;
+        }
+
+        textarea {
+          resize: none;
+          font-family: inherit;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+
+  &__footer {
+    padding: 10px 16px;
+    border-top: 1px solid #334155;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    button {
+      color: #e2e8f0;
+      border-color: #475569;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    button[color="warn"] {
+      color: #f87171;
+      &:hover {
+        background: rgba(239, 68, 68, 0.15);
+      }
+    }
+  }
+}

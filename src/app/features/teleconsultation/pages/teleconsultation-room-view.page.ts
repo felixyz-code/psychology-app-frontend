@@ -9,13 +9,21 @@ import {
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 
 import { AppointmentsService } from '../../appointments/services/appointments.service';
 import { PublicTeleconsultationRoom } from '../../appointments/models/appointment.models';
+import { TeleconsultationWebRtcService } from '../services/teleconsultation-webrtc.service';
+import { TeleconsultationNotesSidebarComponent } from '../components/teleconsultation-notes-sidebar.component';
+import {
+  TeleconsultationEndDialogComponent,
+  TeleconsultationEndDialogResult,
+} from '../components/teleconsultation-end-dialog.component';
 
 @Component({
   selector: 'app-teleconsultation-room-view',
@@ -25,8 +33,10 @@ import { PublicTeleconsultationRoom } from '../../appointments/models/appointmen
     RouterModule,
     MatButtonModule,
     MatIconModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    TeleconsultationNotesSidebarComponent,
   ],
   templateUrl: './teleconsultation-room-view.page.html',
   styleUrl: './teleconsultation-room-view.page.scss',
@@ -34,6 +44,9 @@ import { PublicTeleconsultationRoom } from '../../appointments/models/appointmen
 export class TeleconsultationRoomViewPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly appointmentsService = inject(AppointmentsService);
+  private readonly dialog = inject(MatDialog);
+  readonly webrtc = inject(TeleconsultationWebRtcService);
+
   private readonly subscriptions = new Subscription();
 
   readonly roomCode = signal<string>('');
@@ -48,6 +61,10 @@ export class TeleconsultationRoomViewPage implements OnInit, OnDestroy {
   readonly isScreenSharing = signal<boolean>(false);
   readonly isCallActive = signal<boolean>(false);
   readonly callEnded = signal<boolean>(false);
+  readonly appointmentMarkedCompleted = signal<boolean>(false);
+
+  // In-Call Notes Sidebar State
+  readonly isNotesOpen = signal<boolean>(false);
 
   readonly statusLabel = computed(() => {
     const status = this.room()?.status;
@@ -122,6 +139,7 @@ export class TeleconsultationRoomViewPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.webrtc.disconnect();
   }
 
   loadRoom(): void {
@@ -136,6 +154,7 @@ export class TeleconsultationRoomViewPage implements OnInit, OnDestroy {
           this.isLoading.set(false);
           if (data.status === 'ACTIVE') {
             this.isCallActive.set(true);
+            this.webrtc.initializeConnection();
           }
         },
         error: (err) => {
@@ -167,13 +186,71 @@ export class TeleconsultationRoomViewPage implements OnInit, OnDestroy {
     this.isScreenSharing.update((v) => !v);
   }
 
+  toggleNotes(): void {
+    this.isNotesOpen.update((v) => !v);
+  }
+
+  closeNotes(): void {
+    this.isNotesOpen.set(false);
+  }
+
+  selectAudioDevice(deviceId: string): void {
+    this.webrtc.selectAudioDevice(deviceId);
+  }
+
+  selectVideoDevice(deviceId: string): void {
+    this.webrtc.selectVideoDevice(deviceId);
+  }
+
   endCall(): void {
+    const dialogRef = this.dialog.open<
+      TeleconsultationEndDialogComponent,
+      any,
+      TeleconsultationEndDialogResult
+    >(TeleconsultationEndDialogComponent, {
+      width: '460px',
+      data: {
+        patientName: this.room()?.patientName || 'Paciente',
+        appointmentId: this.room()?.appointmentId,
+        durationMinutes: this.room()?.durationMinutes,
+      },
+    });
+
+    const sub = dialogRef.afterClosed().subscribe((res) => {
+      if (res?.confirmed) {
+        this.finalizeSession(res.markCompleted);
+      }
+    });
+
+    this.subscriptions.add(sub);
+  }
+
+  private finalizeSession(markCompleted: boolean): void {
+    const r = this.room();
+    const apptId = r?.appointmentId;
+
+    if (markCompleted && apptId) {
+      const apptSub = this.appointmentsService
+        .updateAppointment(apptId, { status: 'COMPLETED' })
+        .subscribe({
+          next: () => {
+            this.appointmentMarkedCompleted.set(true);
+          },
+          error: () => {
+            // Non-blocking error handled gracefully
+          },
+        });
+      this.subscriptions.add(apptSub);
+    }
+
     this.isCallActive.set(false);
     this.callEnded.set(true);
+    this.webrtc.disconnect();
   }
 
   rejoinCall(): void {
     this.callEnded.set(false);
+    this.appointmentMarkedCompleted.set(false);
     this.loadRoom();
   }
 }
