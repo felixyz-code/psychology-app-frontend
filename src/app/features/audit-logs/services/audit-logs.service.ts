@@ -1,8 +1,9 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { TENANT_HTTP_MODE } from '../../../core/tenant-context/tenant-http-context';
 import {
   AuditLogEntry,
   AuditLogsFilterParams,
@@ -13,6 +14,11 @@ import {
 export class AuditLogsService {
   private readonly http = inject(HttpClient);
   private readonly basePath = `${environment.apiUrl}/audit-logs`;
+
+  private readonly identityContext = new HttpContext().set(
+    TENANT_HTTP_MODE,
+    'IDENTITY_ONLY',
+  );
 
   findAll(filters?: AuditLogsFilterParams): Observable<AuditLogsPaginatedResponse> {
     let params = new HttpParams();
@@ -61,6 +67,7 @@ export class AuditLogsService {
 
     return this.http.get<AuditLogsPaginatedResponse>(`${environment.apiUrl}/admin/audit-logs`, {
       params,
+      context: this.identityContext,
     });
   }
 

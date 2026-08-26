@@ -140,4 +140,42 @@ describe('AuditLogsService', () => {
     expect(() => service.exportToCsv([])).not.toThrow();
     expect(() => service.exportToJson([])).not.toThrow();
   });
+
+  it('should fetch global audit logs from /admin/audit-logs', () => {
+    const mockResponse: AuditLogsPaginatedResponse = {
+      items: [
+        {
+          id: 'log-global-1',
+          timestamp: '2026-08-25T12:00:00.000Z',
+          action: 'SUPERADMIN_TENANT_EXTEND_TRIAL',
+          resourceType: 'Organization',
+          severity: 'HIGH',
+        },
+      ],
+      total: 1,
+      limit: 50,
+      offset: 0,
+    };
+
+    service
+      .findGlobal({
+        search: 'TENANT',
+        limit: 50,
+        offset: 0,
+      })
+      .subscribe((res) => {
+        expect(res).toEqual(mockResponse);
+      });
+
+    const req = httpTestingController.expectOne((request) => {
+      return (
+        request.url === `${environment.apiUrl}/admin/audit-logs` &&
+        request.params.get('search') === 'TENANT' &&
+        request.params.get('limit') === '50'
+      );
+    });
+
+    expect(req.request.method).toBe('GET');
+    req.flush(mockResponse);
+  });
 });
