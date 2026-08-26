@@ -325,3 +325,198 @@
   border: 1px solid color-mix(in srgb, var(--app-color-danger-text) 30%, transparent);
   color: var(--app-color-danger-text);
 }
+
+/* Security & Sessions Tab */
+.profile-page__card-header--with-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.profile-page__loading-sessions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  color: var(--app-color-text-muted);
+  font-size: 0.95rem;
+}
+
+.sessions-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.session-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--app-color-card-border);
+  background: var(--app-color-surface-muted, rgba(255, 255, 255, 0.03));
+  transition: all 0.2s ease;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  &--current {
+    border-color: rgba(16, 185, 129, 0.4);
+    background: rgba(16, 185, 129, 0.04);
+  }
+}
+
+.session-card__icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: var(--app-color-card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .session-card--current & {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+}
+
+.session-card__device-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.session-card__info {
+  display: grid;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.session-card__header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.session-card__device-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--app-color-text-main);
+}
+
+.session-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &--current {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  &--active {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--app-color-primary);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+  }
+}
+
+.session-card__details-grid {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 0.84rem;
+}
+
+.session-card__detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.session-card__detail-label {
+  color: var(--app-color-text-muted);
+}
+
+.session-card__detail-value {
+  color: var(--app-color-text-main);
+  font-weight: 500;
+
+  &.font-mono {
+    font-family: monospace;
+  }
+}
+
+.session-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.session-card__btn-revoke {
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.session-card__current-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #10b981;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.sessions-list__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  color: var(--app-color-text-muted);
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+

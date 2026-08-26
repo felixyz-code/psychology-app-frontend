@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { I18nService } from '../../i18n/i18n.service';
@@ -6,7 +7,7 @@ import { I18nService } from '../../i18n/i18n.service';
 @Component({
   selector: 'app-auth-brand-panel',
   standalone: true,
-  imports: [MatIconModule, TranslatePipe],
+  imports: [MatIconModule, TranslatePipe, RouterLink],
   templateUrl: './auth-brand-panel.component.html',
   styleUrl: './auth-brand-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -149,11 +149,40 @@
   justify-items: start;
   padding: 0.45rem 0.5rem;
   border: 1px solid var(--app-color-border);
+  border-left: 3px solid var(--app-color-primary, #3b82f6);
   border-radius: 10px;
   background: var(--app-color-surface, #fff);
   box-sizing: border-box;
   cursor: pointer;
   overflow: hidden;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  &--scheduled {
+    border-left-color: #3b82f6;
+  }
+
+  &--completed {
+    border-left-color: #10b981;
+    background: rgba(16, 185, 129, 0.04);
+  }
+
+  &--cancelled {
+    border-left-color: #ef4444;
+    opacity: 0.72;
+    .appointments-calendar__appointment-patient {
+      text-decoration: line-through;
+    }
+  }
+
+  &--noshow {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.04);
+  }
 }
 
 .appointments-calendar__appointment-main {

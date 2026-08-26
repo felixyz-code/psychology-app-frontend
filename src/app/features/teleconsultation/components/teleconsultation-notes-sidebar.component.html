@@ -1,0 +1,104 @@
+<aside class="notes-sidebar">
+  <!-- Sidebar Header -->
+  <div class="notes-sidebar__header">
+    <div class="notes-sidebar__title-row">
+      <div class="notes-sidebar__heading">
+        <mat-icon class="heading-icon">edit_note</mat-icon>
+        <div>
+          <h3 class="title">Notas Clínicas en Vivo</h3>
+          <span class="patient-subtitle">{{ patientName() }}</span>
+        </div>
+      </div>
+      <button
+        mat-icon-button
+        (click)="onClose()"
+        matTooltip="Cerrar panel de notas"
+        aria-label="Cerrar panel"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Sync status indicator bar -->
+    <div class="notes-sidebar__sync-bar">
+      @if (saveStatus() === 'saving') {
+        <span class="sync-status sync-status--saving">
+          <mat-spinner diameter="14"></mat-spinner>
+          Autoguardando borrador...
+        </span>
+      } @else if (saveStatus() === 'saved') {
+        <span class="sync-status sync-status--saved">
+          <mat-icon class="sync-icon">cloud_done</mat-icon>
+          Guardado a las {{ lastSavedTime() }}
+        </span>
+      } @else {
+        <span class="sync-status sync-status--idle">
+          <mat-icon class="sync-icon">schedule</mat-icon>
+          {{ lastSavedTime() ? 'Último guardado: ' + lastSavedTime() : 'Borrador local seguro' }}
+        </span>
+      }
+    </div>
+  </div>
+
+  <!-- Quick SOAP Templates -->
+  <div class="notes-sidebar__templates">
+    <span class="templates-label">Estructura rápida SOAP:</span>
+    <div class="templates-chips">
+      @for (tmpl of soapTemplates; track tmpl.label) {
+        <button
+          type="button"
+          class="template-chip"
+          (click)="insertSnippet(tmpl.snippet)"
+        >
+          + {{ tmpl.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Notes Editor Form -->
+  <form [formGroup]="notesForm" class="notes-sidebar__form">
+    <mat-form-field appearance="outline" class="notes-sidebar__field">
+      <mat-label>Título o Enfoque de la Sesión (Opcional)</mat-label>
+      <input
+        matInput
+        formControlName="title"
+        placeholder="Ej. Sesión 4: Manejo de Ansiedad"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="notes-sidebar__field notes-sidebar__field--content">
+      <mat-label>Observaciones, Hipótesis y Acuerdos</mat-label>
+      <textarea
+        matInput
+        formControlName="content"
+        rows="14"
+        placeholder="Registra tus anotaciones clínicas durante la consulta virtual..."
+      ></textarea>
+    </mat-form-field>
+  </form>
+
+  <!-- Sidebar Footer Actions -->
+  <div class="notes-sidebar__footer">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="copyNotes()"
+      [matTooltip]="isCopied() ? '¡Copiado al portapapeles!' : 'Copiar todo el texto'"
+    >
+      <mat-icon>{{ isCopied() ? 'check' : 'content_copy' }}</mat-icon>
+      {{ isCopied() ? 'Copiado' : 'Copiar' }}
+    </button>
+
+    <button
+      mat-button
+      color="warn"
+      type="button"
+      (click)="clearNotes()"
+      matTooltip="Limpiar notas actuales"
+    >
+      <mat-icon>delete_outline</mat-icon>
+      Limpiar
+    </button>
+  </div>
+</aside>

@@ -1,13 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 
 import { TeleconsultationRoomViewPage } from './teleconsultation-room-view.page';
 import { AppointmentsService } from '../../appointments/services/appointments.service';
 import { PublicTeleconsultationRoom } from '../../appointments/models/appointment.models';
+import { TeleconsultationWebRtcService } from '../services/teleconsultation-webrtc.service';
 
 const MOCK_PUBLIC_ROOM: PublicTeleconsultationRoom = {
   id: 'room-uuid-1',
+  appointmentId: 'appt-uuid-1',
   roomCode: 'abc123def456ghi7',
   provider: 'internal',
   status: 'PENDING',
@@ -22,11 +25,21 @@ const MOCK_PUBLIC_ROOM: PublicTeleconsultationRoom = {
 describe('TeleconsultationRoomViewPage', () => {
   let appointmentsService: {
     getPublicTeleconsultationRoom: ReturnType<typeof vi.fn>;
+    updateAppointment: ReturnType<typeof vi.fn>;
+  };
+  let mockDialog: {
+    open: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     appointmentsService = {
       getPublicTeleconsultationRoom: vi.fn().mockReturnValue(of(MOCK_PUBLIC_ROOM)),
+      updateAppointment: vi.fn().mockReturnValue(of({ id: 'appt-uuid-1', status: 'COMPLETED' })),
+    };
+    mockDialog = {
+      open: vi.fn().mockReturnValue({
+        afterClosed: () => of({ confirmed: true, markCompleted: true }),
+      }),
     };
   });
 
@@ -49,6 +62,8 @@ describe('TeleconsultationRoomViewPage', () => {
           },
         },
         { provide: AppointmentsService, useValue: appointmentsService },
+        { provide: MatDialog, useValue: mockDialog },
+        TeleconsultationWebRtcService,
       ],
     });
 
@@ -128,7 +143,7 @@ describe('TeleconsultationRoomViewPage', () => {
     expect(component.isRoomTerminated()).toBe(true);
   });
 
-  it('toggles mic, camera, and screen share controls', () => {
+  it('toggles mic, camera, screen share and notes sidebar controls', () => {
     const { component } = createComponent();
 
     expect(component.isMicOn()).toBe(true);
@@ -142,19 +157,43 @@ describe('TeleconsultationRoomViewPage', () => {
     expect(component.isScreenSharing()).toBe(false);
     component.toggleScreenShare();
     expect(component.isScreenSharing()).toBe(true);
+
+    expect(component.isNotesOpen()).toBe(false);
+    component.toggleNotes();
+    expect(component.isNotesOpen()).toBe(true);
+    component.closeNotes();
+    expect(component.isNotesOpen()).toBe(false);
   });
 
-  it('ends and rejoins call', () => {
+  it('selects audio and video devices through WebRtc service', () => {
     const { component } = createComponent();
-    component.room.set({ ...MOCK_PUBLIC_ROOM, status: 'ACTIVE' });
+    const audioSpy = vi.spyOn(component.webrtc, 'selectAudioDevice');
+    const videoSpy = vi.spyOn(component.webrtc, 'selectVideoDevice');
+
+    component.selectAudioDevice('mic-device-1');
+    expect(audioSpy).toHaveBeenCalledWith('mic-device-1');
+
+    component.selectVideoDevice('cam-device-1');
+    expect(videoSpy).toHaveBeenCalledWith('cam-device-1');
+  });
+
+  it('ends call via dialog, marks appointment COMPLETED and rejoins', () => {
+    const { component } = createComponent();
+    component.room.set({ ...MOCK_PUBLIC_ROOM, status: 'ACTIVE', appointmentId: 'appt-uuid-1' });
     component.isCallActive.set(true);
 
     component.endCall();
+    expect(mockDialog.open).toHaveBeenCalled();
+    expect(appointmentsService.updateAppointment).toHaveBeenCalledWith('appt-uuid-1', {
+      status: 'COMPLETED',
+    });
+    expect(component.appointmentMarkedCompleted()).toBe(true);
     expect(component.isCallActive()).toBe(false);
     expect(component.callEnded()).toBe(true);
 
     component.rejoinCall();
     expect(component.callEnded()).toBe(false);
+    expect(component.appointmentMarkedCompleted()).toBe(false);
     expect(appointmentsService.getPublicTeleconsultationRoom).toHaveBeenCalled();
   });
 });

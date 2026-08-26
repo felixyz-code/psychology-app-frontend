@@ -5,7 +5,13 @@
     </div>
     <div class="header-content">
       <h2>Reprogramar Cita</h2>
-      <p class="subtitle">Paciente: <strong>{{ patientName }}</strong></p>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <p class="subtitle">Paciente: <strong>{{ patientName }}</strong></p>
+        <span class="tz-pill">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">schedule</mat-icon>
+          <span>Zona horaria: {{ localTimeZone }}</span>
+        </span>
+      </div>
     </div>
   </div>
 
@@ -13,6 +19,14 @@
     <div *ngIf="errorMessage()" class="alert-banner alert-danger">
       <mat-icon>error_outline</mat-icon>
       <span>{{ errorMessage() }}</span>
+    </div>
+
+    <div *ngIf="hasConflict()" class="alert-banner alert-warning" style="background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.4); color: #b45309;">
+      <mat-icon>warning</mat-icon>
+      <div>
+        <strong>Conflicto detectado</strong>
+        <p style="margin: 0; font-size: 0.85rem;">{{ conflictWarning() }}</p>
+      </div>
     </div>
 
     <form [formGroup]="rescheduleForm" class="reschedule-dialog__form">

@@ -137,245 +137,194 @@ export class LandingPageComponent implements OnInit {
   ]);
 
   // Clinical Features Grid
-  readonly clinicalFeatures: ClinicalFeature[] = [
+  readonly clinicalFeaturesComputed = computed<ClinicalFeature[]>(() => [
     {
       id: 'expediente',
-      title: 'Expediente Clínico Electrónico',
-      subtitle: 'Cumplimiento estricto NOM-004-SSA3-2012',
-      description:
-        'Estructura integral para notas de evolución SOAP, historia clínica unificada, antecedentes patológicos y consentimientos informados con firma digital autógrafa.',
+      title: this.i18n.t('landing.features.items.expediente.title'),
+      subtitle: this.i18n.t('landing.features.items.expediente.subtitle'),
+      description: this.i18n.t('landing.features.items.expediente.desc'),
       icon: 'description',
-      badge: 'NOM-004 Certificado',
+      badge: this.i18n.isSpanish() ? 'NOM-004 Certificado' : 'NOM-004 Certified',
       highlights: [
-        'Notas SOAP estructuradas con autoguardado',
-        'Consentimientos informados con trazabilidad y firma digital',
-        'Exportación inmediata de reportes clínicos a PDF institucional',
-        'Bloqueo inmutable de notas para cumplimiento legal',
+        this.i18n.t('landing.features.items.expediente.h1'),
+        this.i18n.t('landing.features.items.expediente.h2'),
+        this.i18n.t('landing.features.items.expediente.h3'),
       ],
       category: 'clinical',
     },
     {
       id: 'psicometria',
-      title: 'Batería Psicométrica Integrada',
-      subtitle: 'Evaluaciones digitales baremadas y alertas clínicas',
-      description:
-        'Aplica instrumentos estandarizados (ansiedad, depresión, estrés laboral) de forma remota o presencial con calificación baremada automática e identificación de riesgos.',
+      title: this.i18n.t('landing.features.items.psicometria.title'),
+      subtitle: this.i18n.t('landing.features.items.psicometria.subtitle'),
+      description: this.i18n.t('landing.features.items.psicometria.desc'),
       icon: 'psychology',
-      badge: 'Baremos Automatizados',
+      badge: this.i18n.isSpanish() ? 'Baremos Automatizados' : 'Automated Norms',
       highlights: [
-        'Envío de links efímeros para respuesta autónoma del paciente',
-        'Cálculo automático de percentiles y puntuaciones típicas',
-        'Detección instantánea de alertas clínicas y riesgo suicida',
-        'Seguimiento longitudinal y gráficas de evolución temporal',
+        this.i18n.t('landing.features.items.psicometria.h1'),
+        this.i18n.t('landing.features.items.psicometria.h2'),
+        this.i18n.t('landing.features.items.psicometria.h3'),
       ],
       category: 'clinical',
     },
     {
       id: 'teleconsulta',
-      title: 'Teleconsulta Cifrada E2E',
-      subtitle: 'Salas virtuales efímeras sin descargas ni complicaciones',
-      description:
-        'Conexión segura de videoconsulta de alta definición con tokens criptográficos efímeros. El paciente ingresa con un clic desde cualquier navegador sin crear cuentas.',
+      title: this.i18n.t('landing.features.items.teleconsulta.title'),
+      subtitle: this.i18n.t('landing.features.items.teleconsulta.subtitle'),
+      description: this.i18n.t('landing.features.items.teleconsulta.desc'),
       icon: 'videocam',
       badge: 'Zero-Download HD',
       highlights: [
-        'Tokens criptográficos de un solo uso con expiración programada',
-        'Panel dividido de notas clínicas y chat confidencial en vivo',
-        '100% compatible con computadoras, tablets y smartphones',
-        'Cumplimiento de estándares de privacidad médica internacional',
+        this.i18n.t('landing.features.items.teleconsulta.h1'),
+        this.i18n.t('landing.features.items.teleconsulta.h2'),
+        this.i18n.t('landing.features.items.teleconsulta.h3'),
       ],
       category: 'telehealth',
     },
     {
       id: 'corporate-paef',
-      title: 'Convenios Corporativos B2B (PAEF)',
-      subtitle: 'Gestión de Programas de Asistencia al Empleado',
-      description:
-        'Administra pólizas y convenios con empresas, débitos automáticos de beneficios por colaborador y bolsas de sesiones con métricas ejecutivas de impacto.',
+      title: this.i18n.t('landing.features.items.paef.title'),
+      subtitle: this.i18n.t('landing.features.items.paef.subtitle'),
+      description: this.i18n.t('landing.features.items.paef.desc'),
       icon: 'corporate_fare',
       badge: 'B2B Enterprise',
       highlights: [
-        'Control de elegibilidad de empleados por número de nómina',
-        'Débito automático de bolsas de cobertura prepagadas',
-        'Reportes ejecutivos anonimizados para áreas de Recursos Humanos',
-        'Gestión de tarifas preferenciales y facturación por convenio',
+        this.i18n.t('landing.features.items.paef.h1'),
+        this.i18n.t('landing.features.items.paef.h2'),
+        this.i18n.t('landing.features.items.paef.h3'),
       ],
       category: 'admin',
     },
     {
       id: 'agenda-citas',
-      title: 'Agenda Médica Inteligente',
-      subtitle: 'Programación fluida y recordatorios multicanal',
-      description:
-        'Calendario optimizado con sincronización de sucursales, bloqueo de horarios no laborables, control de ausentismo y recordatorios automáticos por WhatsApp y correo.',
+      title: this.i18n.t('landing.features.items.agenda.title'),
+      subtitle: this.i18n.t('landing.features.items.agenda.subtitle'),
+      description: this.i18n.t('landing.features.items.agenda.desc'),
       icon: 'calendar_month',
-      badge: 'Cero Ausentismo',
+      badge: this.i18n.isSpanish() ? 'Cero Ausentismo' : 'Zero No-Shows',
       highlights: [
-        'Vista de agenda por día, semana, mes y terapeuta asignado',
-        'Notificaciones y recordatorios automáticos multicanal',
-        'Bloqueo preventivo de sobrecupos y festivos',
-        'Historial de asistencias, cancelaciones y reagendamientos',
+        this.i18n.t('landing.features.items.agenda.h1'),
+        this.i18n.t('landing.features.items.agenda.h2'),
+        this.i18n.t('landing.features.items.agenda.h3'),
       ],
       category: 'admin',
     },
     {
-      id: 'finanzas-metricas',
-      title: 'Control Financiero & Métricas',
-      subtitle: 'Claridad total en ingresos, cobros y retención',
-      description:
-        'Panel financiero con registro de transacciones, estados de cuenta por paciente, control de honorarios por terapeuta y métricas de crecimiento clínico.',
-      icon: 'account_balance_wallet',
-      badge: 'Finanzas Claras',
+      id: 'seguridad-audit',
+      title: this.i18n.t('landing.features.items.seguridad.title'),
+      subtitle: this.i18n.t('landing.features.items.seguridad.subtitle'),
+      description: this.i18n.t('landing.features.items.seguridad.desc'),
+      icon: 'shield',
+      badge: this.i18n.isSpanish() ? 'Máxima Seguridad' : 'Top Security',
       highlights: [
-        'Registro de pagos en efectivo, transferencias y pasarelas',
-        'Reportes de facturación y recibos descargables',
-        'Métricas de retención de pacientes y tasa de adherencia',
-        'Auditoría y trazabilidad completa de movimientos económicos',
+        this.i18n.t('landing.features.items.seguridad.h1'),
+        this.i18n.t('landing.features.items.seguridad.h2'),
+        this.i18n.t('landing.features.items.seguridad.h3'),
       ],
       category: 'admin',
     },
-  ];
+  ]);
+
+  get clinicalFeatures(): ClinicalFeature[] {
+    return this.clinicalFeaturesComputed();
+  }
 
   // Pricing Plans
-  readonly plans: PricingPlan[] = [
+  readonly plansComputed = computed<PricingPlan[]>(() => [
     {
       id: 'freelance',
-      name: 'Freelance',
-      tagline: 'Para terapeutas y psicólogos individuales con práctica privada independiente.',
+      name: this.i18n.t('landing.pricing.freelance.name'),
+      tagline: this.i18n.t('landing.pricing.freelance.desc'),
       monthlyPrice: 499,
       annualMonthlyPrice: 399,
       annualTotal: 4788,
-      patientLimit: 'Hasta 30 pacientes activos',
-      userLimit: '1 Terapeuta profesional',
-      ctaText: 'Comenzar Gratis',
+      patientLimit: this.i18n.t('landing.pricing.freelance.patientLimit'),
+      userLimit: this.i18n.t('landing.pricing.freelance.userLimit'),
+      ctaText: this.i18n.t('landing.pricing.freelance.actionCta'),
       ctaRoute: '/signup',
-      features: [
-        'Expediente clínico NOM-004 completo',
-        'Notas SOAP estructuradas ilimitadas',
-        'Teleconsulta cifrada estándar',
-        '5 evaluaciones psicométricas al mes',
-        'Agenda de citas y recordatorios por email',
-        'Consentimientos informados digitales',
-        'Exportación de expedientes a PDF',
-        'Soporte estándar vía correo',
-      ],
+      features: (this.i18n.getRaw('landing.pricing.freelance.features') as string[]) || [],
     },
     {
       id: 'consultorio',
-      name: 'Consultorio',
-      badge: 'Más Popular',
+      name: this.i18n.t('landing.pricing.consultorio.name'),
+      badge: this.i18n.t('landing.pricing.mostPopularBadge'),
       popular: true,
-      tagline: 'Para consultorios privados, duplas terapéuticas y clínicas en expansión.',
+      tagline: this.i18n.t('landing.pricing.consultorio.desc'),
       monthlyPrice: 1199,
       annualMonthlyPrice: 959,
       annualTotal: 11508,
-      patientLimit: 'Hasta 150 pacientes activos',
-      userLimit: 'Hasta 3 terapeutas / miembros',
-      ctaText: 'Prueba Gratis 14 Días',
+      patientLimit: this.i18n.t('landing.pricing.consultorio.patientLimit'),
+      userLimit: this.i18n.t('landing.pricing.consultorio.userLimit'),
+      ctaText: this.i18n.t('landing.pricing.consultorio.actionCta'),
       ctaRoute: '/signup',
-      features: [
-        'Todo lo del plan Freelance, y además:',
-        'Baterías psicométricas ilimitadas',
-        'Teleconsulta HD con salas virtuales ilimitadas',
-        'Recordatorios automáticos por WhatsApp y Email',
-        'Firma digital autógrafa de pacientes en tableta/móvil',
-        'Adjuntos de archivos clínicos (estudios, PDFs, imágenes)',
-        'Hasta 2 sucursales o consultorios físicos',
-        'Módulo financiero y control de cobros',
-        'Soporte prioritario por chat y correo',
-      ],
+      features: (this.i18n.getRaw('landing.pricing.consultorio.features') as string[]) || [],
     },
     {
       id: 'clinica',
-      name: 'Clínica Enterprise',
-      badge: 'Multi-Sedes & PAEF',
-      tagline: 'Para clínicas de salud mental, centros especializados y convenios corporativos.',
+      name: this.i18n.t('landing.pricing.clinica.name'),
+      badge: this.i18n.t('landing.pricing.multiBranchBadge'),
+      tagline: this.i18n.t('landing.pricing.clinica.desc'),
       monthlyPrice: 2499,
       annualMonthlyPrice: 1999,
       annualTotal: 23988,
-      patientLimit: 'Pacientes activos ilimitados',
-      userLimit: 'Terapeutas y recepcionistas ilimitados',
-      ctaText: 'Comenzar con Clínica',
+      patientLimit: this.i18n.t('landing.pricing.clinica.patientLimit'),
+      userLimit: this.i18n.t('landing.pricing.clinica.userLimit'),
+      ctaText: this.i18n.t('landing.pricing.clinica.actionCta'),
       ctaRoute: '/signup',
-      features: [
-        'Todo lo del plan Consultorio, y además:',
-        'Gestión de Multi-Sedes y sucursales ilimitadas',
-        'Módulo de Convenios Corporativos PAEF (B2B)',
-        'Débito automático de bolsas de sesiones empresariales',
-        'Roles y permisos granulares (Admin, Terapeuta, Recepción)',
-        'Pistas de auditoría clínica avanzadas (Audit Trail)',
-        'Personalización de marca, logotipo y temas institucionales',
-        'Plantillas de notificación personalizables',
-        'Onboarding asistido y soporte 24/7 preferente',
-      ],
+      features: (this.i18n.getRaw('landing.pricing.clinica.features') as string[]) || [],
     },
-  ];
+  ]);
+
+  get plans(): PricingPlan[] {
+    return this.plansComputed();
+  }
 
   // Feature Comparison Matrix
-  readonly comparisonMatrix: PlanFeatureItem[] = [
-    { category: 'Gestión Clínica', name: 'Expediente NOM-004-SSA3', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Gestión Clínica', name: 'Notas de Evolución SOAP Ilimitadas', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Gestión Clínica', name: 'Consentimientos con Firma Digital', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Gestión Clínica', name: 'Adjuntos Clínicos y Documentos', includedInFreelance: false, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Psicometría', name: 'Batería de Instrumentos Estandarizados', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Psicometría', name: 'Baremación Automática de Resultados', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Psicometría', name: 'Aplicaciones Psicométricas Ilimitadas', includedInFreelance: false, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Telemedicina', name: 'Teleconsulta Cifrada E2E', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Telemedicina', name: 'Salas HD sin Descargas para Pacientes', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Comunicación', name: 'Recordatorios de Citas por WhatsApp', includedInFreelance: false, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Organización', name: 'Multi-Sedes / Sucursales', includedInFreelance: false, includedInConsultorio: true, includedInClinica: true },
-    { category: 'Corporativo', name: 'Módulo de Convenios PAEF B2B', includedInFreelance: false, includedInConsultorio: false, includedInClinica: true },
-    { category: 'Seguridad', name: 'Pistas de Auditoría Inmutables (Audit Logs)', includedInFreelance: false, includedInConsultorio: false, includedInClinica: true },
-    { category: 'Seguridad', name: 'Cifrado AES-256 y Respaldos Diarios', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
-  ];
+  readonly comparisonMatrixComputed = computed<PlanFeatureItem[]>(() => {
+    const isEs = this.i18n.isSpanish();
+    return [
+      { category: isEs ? 'Gestión Clínica' : 'Clinical Management', name: isEs ? 'Expediente NOM-004-SSA3' : 'NOM-004 Electronic Records', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Gestión Clínica' : 'Clinical Management', name: isEs ? 'Notas de Evolución SOAP Ilimitadas' : 'Unlimited SOAP Evolution Notes', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Gestión Clínica' : 'Clinical Management', name: isEs ? 'Consentimientos con Firma Digital' : 'Digital Informed Consents', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Gestión Clínica' : 'Clinical Management', name: isEs ? 'Adjuntos Clínicos y Documentos' : 'Clinical Document Attachments', includedInFreelance: false, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Psicometría' : 'Psychometrics', name: isEs ? 'Batería de Instrumentos Estandarizados' : 'Standardized Assessment Battery', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Psicometría' : 'Psychometrics', name: isEs ? 'Baremación Automática de Resultados' : 'Automated Normative Scoring', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Psicometría' : 'Psychometrics', name: isEs ? 'Aplicaciones Psicométricas Ilimitadas' : 'Unlimited Psychometric Tests', includedInFreelance: false, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Telemedicina' : 'Telehealth', name: isEs ? 'Teleconsulta Cifrada E2E' : 'E2E Encrypted Telehealth', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Telemedicina' : 'Telehealth', name: isEs ? 'Salas HD sin Descargas para Pacientes' : 'Zero-Download HD Patient Rooms', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Comunicación' : 'Communication', name: isEs ? 'Recordatorios de Citas por WhatsApp' : 'Automated WhatsApp Reminders', includedInFreelance: false, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Organización' : 'Organization', name: isEs ? 'Multi-Sedes / Sucursales' : 'Multi-Branch & Locations', includedInFreelance: false, includedInConsultorio: true, includedInClinica: true },
+      { category: isEs ? 'Corporativo' : 'Corporate', name: isEs ? 'Módulo de Convenios PAEF B2B' : 'Corporate EAP Agreements Module', includedInFreelance: false, includedInConsultorio: false, includedInClinica: true },
+      { category: isEs ? 'Seguridad' : 'Security', name: isEs ? 'Pistas de Auditoría Inmutables (Audit Logs)' : 'Tamper-Proof Audit Trails', includedInFreelance: false, includedInConsultorio: false, includedInClinica: true },
+      { category: isEs ? 'Seguridad' : 'Security', name: isEs ? 'Cifrado AES-256 y Respaldos Diarios' : 'AES-256 Encryption & Daily Backups', includedInFreelance: true, includedInConsultorio: true, includedInClinica: true },
+    ];
+  });
+
+  get comparisonMatrix(): PlanFeatureItem[] {
+    return this.comparisonMatrixComputed();
+  }
 
   // FAQ Accordion Data
-  readonly faqs: FaqItem[] = [
-    {
-      question: '¿PsiqueOS cumple con las normas oficiales mexicanas de salud mental?',
-      answer:
-        'Sí. PsiqueOS está diseñado en estricto apego a la NOM-004-SSA3-2012 (Del expediente clínico) y la NOM-024-SSA3-2012 (Sistemas de información de registro electrónico para la salud). Garantiza la confidencialidad, estructura estandarizada de notas de evolución (SOAP), inmutabilidad tras cierre y trazabilidad de consentimientos informados.',
-      category: 'normatividad',
-    },
-    {
-      question: '¿Mis pacientes necesitan descargar o instalar alguna aplicación para la teleconsulta?',
-      answer:
-        'No. La teleconsulta de PsiqueOS funciona 100% en el navegador web con tecnología WebRTC cifrada de última generación. El paciente recibe un enlace seguro por WhatsApp o correo y se conecta al instante desde su smartphone, tablet o computadora sin crear cuentas ni descargar programas.',
-      category: 'teleconsulta',
-    },
-    {
-      question: '¿Cómo funciona el periodo de prueba gratuito de 14 días?',
-      answer:
-        'Al crear tu cuenta en PsiqueOS obtienes acceso inmediato y completo a todas las características del plan Consultorio durante 14 días. No solicitamos tarjeta de crédito ni datos de pago para iniciar. Al finalizar tu prueba, puedes seleccionar el plan que mejor se adapte a tus necesidades.',
-      category: 'planes',
-    },
-    {
-      question: '¿Cómo se garantiza la seguridad y privacidad de los expedientes de mis pacientes?',
-      answer:
-        'Todos los datos viajan cifrados mediante TLS 1.3 y se almacenan en reposo con cifrado de grado militar AES-256. Cada consultorio o clínica cuenta con un esquema de base de datos Multi-Tenant aislado, lo que imposibilita cualquier cruce indebido de información entre profesionales.',
-      category: 'seguridad',
-    },
-    {
-      question: '¿Puedo migrar los pacientes y expedientes que ya tengo en Excel o papel?',
-      answer:
-        'Sí. PsiqueOS cuenta con herramientas intuitivas de importación masiva en formato CSV/Excel. Además, nuestro equipo de soporte técnico te acompaña sin costo en el proceso de migración para que tu transición sea rápida y sin interrupciones en tu consulta diaria.',
-      category: 'migracion',
-    },
-    {
-      question: '¿Qué incluye el módulo de Convenios Corporativos PAEF del plan Clínica?',
-      answer:
-        'El módulo PAEF permite a las clínicas registrar empresas colaboradoras, administrar pólizas de bienestar psicológico, controlar bolsas de sesiones prepagadas y debitar automáticamente las atenciones por colaborador, generando reportes ejecutivos consolidados para los departamentos de Recursos Humanos.',
-      category: 'enterprise',
-    },
-  ];
+  readonly faqsComputed = computed<FaqItem[]>(() => {
+    const rawFaqs = (this.i18n.getRaw('landing.faq.items') as Array<{ q: string; a: string }>) || [];
+    return rawFaqs.map((item) => ({
+      question: item.q,
+      answer: item.a,
+      category: 'general',
+    }));
+  });
+
+  get faqs(): FaqItem[] {
+    return this.faqsComputed();
+  }
 
   // Filtered Clinical Features signal
   readonly filteredFeatures = computed(() => {
     const category = this.activeFeatureCategory();
+    const features = this.clinicalFeaturesComputed();
     if (category === 'all') {
-      return this.clinicalFeatures;
+      return features;
     }
-    return this.clinicalFeatures.filter((f) => f.category === category);
+    return features.filter((f) => f.category === category);
   });
 
   // Action Methods

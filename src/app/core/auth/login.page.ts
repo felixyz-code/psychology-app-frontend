@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from './auth.service';
+import { AuthStore } from './auth.store';
 import { LoginRequest } from './auth.models';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { AuthBrandPanelComponent } from './components/auth-brand-panel.component';
@@ -40,6 +41,7 @@ import { I18nService } from '../i18n/i18n.service';
 export class LoginPage implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly authStore = inject(AuthStore);
   private readonly tenantContextStore = inject(TenantContextStore);
   private readonly router = inject(Router);
   private readonly titleService = inject(Title);
@@ -96,6 +98,10 @@ export class LoginPage implements OnInit {
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: () => {
+          if (this.authStore.isSuperAdmin()) {
+            void this.router.navigate(['/admin/tenants']);
+            return;
+          }
           void this.router.navigate([
             this.tenantContextStore.isActiveTenantReady() ||
             this.tenantContextStore.isAdminSuspendedContext()

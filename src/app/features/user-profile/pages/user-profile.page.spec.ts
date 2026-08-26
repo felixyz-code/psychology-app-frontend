@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AuthService } from '../../../core/auth/auth.service';
 import { UserProfileStore } from '../../../core/user-profile/user-profile.store';
 import {
   UserPreferences,
@@ -11,6 +13,11 @@ import { UserProfilePage } from './user-profile.page';
 describe('UserProfilePage', () => {
   let component: UserProfilePage;
   let fixture: ComponentFixture<UserProfilePage>;
+  let mockAuthService: {
+    listSessions: ReturnType<typeof vi.fn>;
+    revokeSession: ReturnType<typeof vi.fn>;
+    revokeOtherSessions: ReturnType<typeof vi.fn>;
+  };
   let mockStore: {
     profile: ReturnType<typeof signal<UserProfile | null>>;
     preferences: ReturnType<typeof signal<UserPreferences | null>>;
@@ -70,6 +77,28 @@ describe('UserProfilePage', () => {
   };
 
   beforeEach(async () => {
+    mockAuthService = {
+      listSessions: vi.fn(() =>
+        of([
+          {
+            id: 's1',
+            ipAddress: '127.0.0.1',
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0)',
+            deviceInfo: 'Chrome / Windows',
+            lastActiveAt: '2026-08-25T18:00:00Z',
+            createdAt: '2026-08-25T18:00:00Z',
+            isCurrent: true,
+          },
+        ]),
+      ),
+      revokeSession: vi.fn(() =>
+        of({ success: true, message: 'Session revoked' }),
+      ),
+      revokeOtherSessions: vi.fn(() =>
+        of({ success: true, revokedCount: 1, message: 'Revoked' }),
+      ),
+    };
+
     mockStore = {
       profile: signal<UserProfile | null>(mockProfile),
       preferences: signal<UserPreferences | null>(mockPreferences),
@@ -99,6 +128,7 @@ describe('UserProfilePage', () => {
       imports: [UserProfilePage],
       providers: [
         { provide: UserProfileStore, useValue: mockStore },
+        { provide: AuthService, useValue: mockAuthService },
       ],
     }).compileComponents();
 
@@ -186,6 +216,15 @@ describe('UserProfilePage', () => {
     spy.mockRestore();
   });
 
+  it('includes America/Hermosillo and canonical options in timezonesList', () => {
+    const hermosillo = component.timezonesList.find(
+      (tz) => tz.id === 'America/Hermosillo',
+    );
+    expect(hermosillo).toBeDefined();
+    expect(hermosillo?.label).toContain('(GMT-7)');
+    expect(hermosillo?.label).toContain('Sonora');
+  });
+
   it('submits localization preferences to store', () => {
     component.localizationForm.patchValue({
       timeZone: 'America/Santiago',
@@ -230,5 +269,32 @@ describe('UserProfilePage', () => {
       },
       expect.any(Function),
     );
+  });
+
+  it('loads sessions on initialization', () => {
+    expect(mockAuthService.listSessions).toHaveBeenCalled();
+    expect(component.sessions()).toHaveLength(1);
+    expect(component.sessions()[0].isCurrent).toBe(true);
+  });
+
+  it('revokes an individual session and reloads sessions list', () => {
+    component.revokeSession('s-target');
+
+    expect(mockAuthService.revokeSession).toHaveBeenCalledWith('s-target');
+    expect(mockAuthService.listSessions).toHaveBeenCalledTimes(2);
+  });
+
+  it('revokes other sessions and reloads sessions list', () => {
+    component.revokeOtherSessions();
+
+    expect(mockAuthService.revokeOtherSessions).toHaveBeenCalled();
+    expect(mockAuthService.listSessions).toHaveBeenCalledTimes(2);
+  });
+
+  it('computes correct device icon based on userAgent or deviceInfo', () => {
+    expect(component.getDeviceIcon('Chrome / Android', 'Mozilla/5.0')).toBe('phone_iphone');
+    expect(component.getDeviceIcon('Safari / iPad', 'Mozilla/5.0')).toBe('tablet_mac');
+    expect(component.getDeviceIcon('Safari / macOS', 'Mozilla/5.0')).toBe('laptop_mac');
+    expect(component.getDeviceIcon('Chrome / Windows', 'Mozilla/5.0')).toBe('desktop_windows');
   });
 });

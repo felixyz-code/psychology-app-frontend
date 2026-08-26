@@ -68,15 +68,17 @@
 
 .session-note-workspace__summary-item,
 .session-note-workspace__record-item {
-  padding: 0.95rem;
-  border: 1px solid var(--app-color-card-border);
+  padding: 1rem;
+  border: 1px solid var(--app-color-card-border, #e2e8f0);
   border-radius: 16px;
-  background: color-mix(in srgb, var(--app-color-card-bg) 92%, transparent);
+  background: var(--app-color-card-soft-bg, #f8fafc);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .session-note-workspace__summary-item strong,
 .session-note-workspace__record-item p {
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .session-note-workspace__narrative {

@@ -27,11 +27,15 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
+import { AuthService } from '../../../core/auth/auth.service';
+import { UserSessionItem } from '../../../core/auth/auth.models';
 import { UserProfileStore } from '../../../core/user-profile/user-profile.store';
 import {
   COMMON_TIMEZONES,
   REMINDER_OPTIONS,
   SUPPORTED_LOCALES,
+  TIMEZONE_OPTIONS,
+  TimezoneOption,
   UserDateFormat,
   UserTimeFormat,
 } from '../../../core/user-profile/user-profile.models';
@@ -62,6 +66,7 @@ import { DigitalSignaturePadComponent } from '../components/digital-signature-pa
 })
 export class UserProfilePage implements OnInit {
   readonly store = inject(UserProfileStore);
+  private readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
 
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
@@ -70,7 +75,11 @@ export class UserProfilePage implements OnInit {
   readonly avatarError = signal<string | null>(null);
   readonly detectedTimeZone = signal<string | null>(null);
 
-  timezonesList = [...COMMON_TIMEZONES];
+  readonly sessions = signal<UserSessionItem[]>([]);
+  readonly isLoadingSessions = signal(false);
+  readonly isRevokingSessions = signal(false);
+
+  timezonesList: TimezoneOption[] = [...TIMEZONE_OPTIONS];
   readonly localesList = SUPPORTED_LOCALES;
   readonly reminderOptions = REMINDER_OPTIONS;
 
@@ -125,8 +134,11 @@ export class UserProfilePage implements OnInit {
     effect(() => {
       const prefs = this.store.preferences();
       if (prefs) {
-        if (prefs.timeZone && !this.timezonesList.includes(prefs.timeZone)) {
-          this.timezonesList = [prefs.timeZone, ...this.timezonesList];
+        if (prefs.timeZone && !this.timezonesList.some((tz) => tz.id === prefs.timeZone)) {
+          this.timezonesList = [
+            { id: prefs.timeZone, label: `${prefs.timeZone} (Personalizada)` },
+            ...this.timezonesList,
+          ];
         }
         this.localizationForm.patchValue({
           timeZone: prefs.timeZone || 'America/Mexico_City',
@@ -149,14 +161,73 @@ export class UserProfilePage implements OnInit {
 
   ngOnInit(): void {
     this.store.loadProfile();
+    this.loadSessions();
+  }
+
+  loadSessions(): void {
+    this.isLoadingSessions.set(true);
+    this.authService.listSessions().subscribe({
+      next: (data) => {
+        this.sessions.set(data);
+        this.isLoadingSessions.set(false);
+      },
+      error: () => {
+        this.isLoadingSessions.set(false);
+      },
+    });
+  }
+
+  revokeSession(sessionId: string): void {
+    this.isRevokingSessions.set(true);
+    this.authService.revokeSession(sessionId).subscribe({
+      next: () => {
+        this.isRevokingSessions.set(false);
+        this.showSuccess('Sesión remota revocada exitosamente.');
+        this.loadSessions();
+      },
+      error: () => {
+        this.isRevokingSessions.set(false);
+      },
+    });
+  }
+
+  revokeOtherSessions(): void {
+    this.isRevokingSessions.set(true);
+    this.authService.revokeOtherSessions().subscribe({
+      next: (res) => {
+        this.isRevokingSessions.set(false);
+        this.showSuccess(`Se han cerrado ${res.revokedCount} sesiones remotas.`);
+        this.loadSessions();
+      },
+      error: () => {
+        this.isRevokingSessions.set(false);
+      },
+    });
+  }
+
+  getDeviceIcon(deviceInfo?: string | null, userAgent?: string | null): string {
+    const target = `${deviceInfo || ''} ${userAgent || ''}`.toLowerCase();
+    if (target.includes('android') || target.includes('iphone') || target.includes('mobile')) {
+      return 'phone_iphone';
+    }
+    if (target.includes('ipad') || target.includes('tablet')) {
+      return 'tablet_mac';
+    }
+    if (target.includes('mac') || target.includes('laptop')) {
+      return 'laptop_mac';
+    }
+    return 'desktop_windows';
   }
 
   detectBrowserTimeZone(): void {
     try {
       const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
       if (detected) {
-        if (!this.timezonesList.includes(detected)) {
-          this.timezonesList = [detected, ...this.timezonesList];
+        if (!this.timezonesList.some((tz) => tz.id === detected)) {
+          this.timezonesList = [
+            { id: detected, label: `${detected} (Detectada)` },
+            ...this.timezonesList,
+          ];
         }
         this.localizationForm.patchValue({ timeZone: detected });
         this.detectedTimeZone.set(detected);

@@ -1,6 +1,7 @@
 import { authGuard } from './core/guards/auth.guard';
 import { anonymousOnlyGuard } from './core/guards/anonymous-only.guard';
 import { capabilityGuard } from './core/guards/capability.guard';
+import { superadminGuard } from './core/guards/superadmin.guard';
 import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
 import { routes } from './app.routes';
 
@@ -38,6 +39,19 @@ describe('app routes', () => {
     expect(sandboxRoute?.loadComponent).toBeDefined();
     expect(demoRoute?.canActivate).toBeUndefined();
     expect(demoRoute?.loadComponent).toBeDefined();
+  });
+
+  it('exposes public legal pages (privacy, terms, compliance) without auth guard', () => {
+    const privacyRoute = routes.find((route) => route.path === 'privacy');
+    const termsRoute = routes.find((route) => route.path === 'terms');
+    const complianceRoute = routes.find((route) => route.path === 'compliance');
+
+    expect(privacyRoute?.canActivate).toBeUndefined();
+    expect(privacyRoute?.loadComponent).toBeDefined();
+    expect(termsRoute?.canActivate).toBeUndefined();
+    expect(termsRoute?.loadComponent).toBeDefined();
+    expect(complianceRoute?.canActivate).toBeUndefined();
+    expect(complianceRoute?.loadComponent).toBeDefined();
   });
 
   it('exposes signup to anonymous users through the narrowly scoped anonymous-only policy', () => {
@@ -149,5 +163,24 @@ describe('app routes', () => {
       canActivate: [activeTenantGuard, capabilityGuard],
       data: { requiredCapability: 'notification_template.read' },
     });
+    expect(childRoutes.find((route) => route.path === 'admin/tenants')).toBeUndefined();
+  });
+
+  it('exposes isolated /admin platform route tree with superadminGuard and SuperAdminLayout', () => {
+    const adminRoute = routes.find((route) => route.path === 'admin');
+
+    expect(adminRoute).toBeDefined();
+    expect(adminRoute?.canActivate).toEqual([authGuard, superadminGuard]);
+    expect(adminRoute?.loadComponent).toBeDefined();
+
+    const adminChildren = adminRoute?.children ?? [];
+    expect(adminChildren.find((r) => r.path === '')).toMatchObject({
+      path: '',
+      pathMatch: 'full',
+      redirectTo: 'tenants',
+    });
+    expect(adminChildren.some((r) => r.path === 'tenants' && r.loadChildren)).toBe(true);
+    expect(adminChildren.some((r) => r.path === 'audit' && r.loadChildren)).toBe(true);
+    expect(adminChildren.some((r) => r.path === 'metrics')).toBe(true);
   });
 });

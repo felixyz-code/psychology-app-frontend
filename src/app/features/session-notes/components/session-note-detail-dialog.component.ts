@@ -18,7 +18,8 @@ interface SessionNoteDetailDialogData {
 type SessionNoteDetailDialogResult =
   | { action: 'close' }
   | { action: 'edit'; sessionNote: SessionNote }
-  | { action: 'delete'; sessionNote: SessionNote };
+  | { action: 'delete'; sessionNote: SessionNote }
+  | { action: 'schedule_next'; sessionNote: SessionNote };
 
 @Component({
   selector: 'app-session-note-detail-dialog',
@@ -89,6 +90,13 @@ export class SessionNoteDetailDialogComponent {
   delete(): void {
     this.dialogRef.close({
       action: 'delete',
+      sessionNote: this.sessionNote,
+    });
+  }
+
+  scheduleNext(): void {
+    this.dialogRef.close({
+      action: 'schedule_next',
       sessionNote: this.sessionNote,
     });
   }

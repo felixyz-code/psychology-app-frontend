@@ -105,6 +105,7 @@ export interface TeleconsultationRoom {
 
 export interface PublicTeleconsultationRoom {
   id: string;
+  appointmentId?: string;
   roomCode: string;
   provider: string;
   status: TeleconsultationRoomStatus;

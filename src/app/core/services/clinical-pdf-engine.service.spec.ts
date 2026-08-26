@@ -88,6 +88,9 @@ describe('ClinicalPdfEngineService', () => {
       expect(html).toContain('Centro PsiqueOS');
       expect(html).toContain('data:image/png;base64');
       expect(html).toContain('El paciente reporta mejoría notable');
+      expect(html).toContain('FOLIO:');
+      expect(html).toContain('EXP-CF-12345');
+      expect(html).toContain('Página 1 de 1');
     });
 
     it('generates Therapeutic Prescription HTML with indications and next appointment', () => {

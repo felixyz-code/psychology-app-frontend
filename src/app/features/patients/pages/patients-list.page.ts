@@ -29,6 +29,10 @@ import { PatientDetailDialogComponent } from '../components/patient-detail-dialo
 import { PatientFormDialogComponent } from '../components/patient-form-dialog.component';
 import { Patient } from '../models/patient.models';
 import { PatientsService } from '../services/patients.service';
+import { CaseFilesService } from '../../case-files/services/case-files.service';
+import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/components/clinical-document-preview-dialog.component';
+
+export type PatientClinicalFilterStatus = 'ALL' | 'ACTIVE' | 'PAUSED' | 'DISCHARGED';
 
 @Component({
   selector: 'app-patients-list-page',
@@ -59,6 +63,7 @@ export class PatientsListPage {
 
   private readonly dialog = inject(MatDialog);
   private readonly patientsService = inject(PatientsService);
+  private readonly caseFilesService = inject(CaseFilesService);
 
   readonly displayedColumns = ['name', 'phoneNumber', 'email', 'birthDate', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
@@ -67,6 +72,8 @@ export class PatientsListPage {
   readonly patients = signal<Patient[]>([]);
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
+  readonly clinicalStatusFilter = signal<PatientClinicalFilterStatus>('ALL');
+  readonly therapistFilter = signal<string>('ALL');
   readonly tableState = signal<DataTableState>({
     searchTerm: '',
     pageIndex: 0,
@@ -77,9 +84,17 @@ export class PatientsListPage {
   readonly patientsTableResult = computed<DataTableResult<Patient>>(() => {
     const state = this.tableState();
     const items = this.patients();
-    const filteredItems = items.filter((patient) =>
-      matchesSearchTerm(patient, state.searchTerm, (item) => this.getPatientSearchValues(item)),
-    );
+    const therapist = this.therapistFilter();
+    const filteredItems = items.filter((patient) => {
+      const matchesSearch = matchesSearchTerm(patient, state.searchTerm, (item) =>
+        this.getPatientSearchValues(item),
+      );
+      if (!matchesSearch) return false;
+      if (therapist !== 'ALL' && patient.psychologistId !== therapist) {
+        return false;
+      }
+      return true;
+    });
     const sortedItems = sortItems(filteredItems, {
       sortBy: state.sortBy,
       sortDirection: state.sortDirection,
@@ -95,14 +110,24 @@ export class PatientsListPage {
       }),
       totalItems: items.length,
       totalFilteredItems: filteredItems.length,
-      hasActiveFilters: Boolean(state.searchTerm.trim()),
+      hasActiveFilters: Boolean(
+        state.searchTerm.trim() || this.clinicalStatusFilter() !== 'ALL' || this.therapistFilter() !== 'ALL',
+      ),
     };
   });
   readonly safePageIndex = computed(() => {
     const state = this.tableState();
-    const totalFilteredItems = this.patients().filter((patient) =>
-      matchesSearchTerm(patient, state.searchTerm, (item) => this.getPatientSearchValues(item)),
-    ).length;
+    const therapist = this.therapistFilter();
+    const totalFilteredItems = this.patients().filter((patient) => {
+      const matchesSearch = matchesSearchTerm(patient, state.searchTerm, (item) =>
+        this.getPatientSearchValues(item),
+      );
+      if (!matchesSearch) return false;
+      if (therapist !== 'ALL' && patient.psychologistId !== therapist) {
+        return false;
+      }
+      return true;
+    }).length;
 
     return getSafePageIndex(totalFilteredItems, state.pageIndex, state.pageSize);
   });
@@ -245,12 +270,64 @@ export class PatientsListPage {
     }));
   }
 
+  setClinicalStatusFilter(status: PatientClinicalFilterStatus): void {
+    this.clinicalStatusFilter.set(status);
+    this.tableState.update((state) => ({
+      ...state,
+      pageIndex: 0,
+    }));
+  }
+
+  setTherapistFilter(therapistId: string): void {
+    this.therapistFilter.set(therapistId);
+    this.tableState.update((state) => ({
+      ...state,
+      pageIndex: 0,
+    }));
+  }
+
   clearPatientFilters(): void {
+    this.clinicalStatusFilter.set('ALL');
+    this.therapistFilter.set('ALL');
     this.tableState.update((state) => ({
       ...state,
       searchTerm: '',
       pageIndex: 0,
     }));
+  }
+
+  exportPatientSummary(patient: Patient, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    this.caseFilesService.getCaseFileByPatientId(patient.id).subscribe({
+      next: (caseFile) => {
+        this.caseFilesService.getClinicalPdfData(caseFile.id).subscribe({
+          next: (payload) => {
+            this.dialog.open(ClinicalDocumentPreviewDialogComponent, {
+              data: {
+                payload,
+                initialDocumentType: 'CASE_FILE_SUMMARY',
+                caseFileId: caseFile.id,
+              },
+              width: '90vw',
+              maxWidth: '960px',
+              maxHeight: '94vh',
+              panelClass: 'app-clinical-preview-dialog-panel',
+              autoFocus: false,
+              restoreFocus: true,
+            });
+          },
+          error: () => {
+            this.openPatientDetailDialog(patient);
+          },
+        });
+      },
+      error: () => {
+        this.openPatientDetailDialog(patient);
+      },
+    });
   }
 
   handlePatientsPageChange(event: PageEvent): void {

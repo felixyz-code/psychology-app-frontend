@@ -195,7 +195,11 @@ describe('AuthService', () => {
       .flush(bootstrapResponse);
     await Promise.resolve();
 
-    expect(setSession).toHaveBeenCalledWith(bootstrapResponse.accessToken, bootstrapResponse.user);
+    expect(setSession).toHaveBeenCalledWith(
+      bootstrapResponse.accessToken,
+      bootstrapResponse.user,
+      bootstrapResponse.refreshToken,
+    );
     expect(tenantContextStore.startForIdentity).toHaveBeenCalledWith(bootstrapResponse.user.id);
     expect(setSession.mock.invocationCallOrder[0]).toBeLessThan(
       tenantContextStore.startForIdentity.mock.invocationCallOrder[0],
@@ -318,15 +322,89 @@ describe('AuthService', () => {
     expect(store.user()).toEqual(user);
   });
 
-  it('delegates logout to the store', () => {
+  it('delegates logout to the store and posts to /auth/logout', () => {
     store.setSession('active-token', user);
     const clearSession = vi.spyOn(store, 'clearSession');
 
     service.logout();
 
+    const req = httpTesting.expectOne(`${environment.apiUrl}/auth/logout`);
+    expect(req.request.method).toBe('POST');
+    req.flush({ success: true, message: 'Logged out' });
+
     expect(clearSession).toHaveBeenCalledOnce();
     expect(tenantContextStore.resetTenantState).toHaveBeenCalledWith('logout');
     expect(store.isAuthenticated()).toBe(false);
+  });
+
+  it('rotates refresh token and updates store tokens', () => {
+    store.setSession('active-token', user, 'session-123.secret');
+    const updateTokens = vi.spyOn(store, 'updateTokens');
+    const received = vi.fn();
+
+    service.refreshToken().subscribe(received);
+
+    const req = httpTesting.expectOne(`${environment.apiUrl}/auth/refresh`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ refreshToken: 'session-123.secret' });
+    expect(req.request.context.get(TENANT_HTTP_MODE)).toBe('PUBLIC');
+
+    const refreshResponse: LoginResponse = {
+      accessToken: 'new-access-token',
+      refreshToken: 'session-123.new-secret',
+      user,
+    };
+    req.flush(refreshResponse);
+
+    expect(received).toHaveBeenCalledWith(refreshResponse);
+    expect(updateTokens).toHaveBeenCalledWith('new-access-token', 'session-123.new-secret');
+  });
+
+  it('fetches active sessions from /auth/sessions', () => {
+    const sessions = [
+      {
+        id: 's1',
+        ipAddress: '127.0.0.1',
+        userAgent: 'Chrome',
+        deviceInfo: 'Chrome / Windows',
+        lastActiveAt: '2026-08-25T18:00:00.000Z',
+        createdAt: '2026-08-25T18:00:00.000Z',
+        isCurrent: true,
+      },
+    ];
+    const received = vi.fn();
+
+    service.listSessions().subscribe(received);
+
+    const req = httpTesting.expectOne(`${environment.apiUrl}/auth/sessions`);
+    expect(req.request.method).toBe('GET');
+    req.flush(sessions);
+
+    expect(received).toHaveBeenCalledWith(sessions);
+  });
+
+  it('revokes an individual session by id', () => {
+    const received = vi.fn();
+
+    service.revokeSession('target-session-id').subscribe(received);
+
+    const req = httpTesting.expectOne(`${environment.apiUrl}/auth/sessions/target-session-id`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush({ success: true, message: 'Session revoked' });
+
+    expect(received).toHaveBeenCalledWith({ success: true, message: 'Session revoked' });
+  });
+
+  it('revokes all other sessions', () => {
+    const received = vi.fn();
+
+    service.revokeOtherSessions().subscribe(received);
+
+    const req = httpTesting.expectOne(`${environment.apiUrl}/auth/sessions/revoke-others`);
+    expect(req.request.method).toBe('POST');
+    req.flush({ success: true, revokedCount: 3, message: '3 sessions revoked' });
+
+    expect(received).toHaveBeenCalledWith({ success: true, revokedCount: 3, message: '3 sessions revoked' });
   });
 
   it('posts email to /auth/forgot-password with public tenant context', () => {

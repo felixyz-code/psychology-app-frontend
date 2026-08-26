@@ -63,7 +63,27 @@
 .auth-brand-panel__identity {
   display: inline-flex;
   align-items: center;
+}
+
+.auth-brand-panel__brand-link {
+  display: inline-flex;
+  align-items: center;
   gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    opacity: 0.92;
+    transform: scale(1.02);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-org-brand-accent, #2dd4bf);
+    outline-offset: 4px;
+    border-radius: 8px;
+  }
 }
 
 .auth-brand-panel__logo-container {

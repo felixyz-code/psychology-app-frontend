@@ -1,6 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,6 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 
+import { AuthStore } from '../../../core/auth/auth.store';
 import { AuditLogsService } from '../services/audit-logs.service';
 import { BranchesService } from '../../../core/services/branches.service';
 import {
@@ -60,10 +63,13 @@ import {
             <mat-icon>verified_user</mat-icon>
           </div>
           <div>
-            <h1>Bitácora de Auditoría Forense</h1>
+            <h1>{{ isGlobalMode() ? 'Bitácora de Auditoría Global de Plataforma' : 'Bitácora de Auditoría Forense' }}</h1>
             <p class="subtitle">
-              Registro inmutable (Append-Only) y trazabilidad legal de accesos y mutaciones clínicas
-              (Cumplimiento NOM-004 / HIPAA).
+              {{
+                isGlobalMode()
+                  ? 'Registro inmutable de gobernanza, mutaciones transversales de organizaciones y seguridad de plataforma.'
+                  : 'Registro inmutable (Append-Only) y trazabilidad legal de accesos y mutaciones clínicas (Cumplimiento NOM-004 / HIPAA).'
+              }}
             </p>
           </div>
         </div>
@@ -100,8 +106,8 @@ import {
       <!-- Filters Card -->
       <mat-card class="filter-card">
         <div class="filters-grid">
-          <!-- Branch Selector -->
-          <mat-form-field appearance="outline" class="filter-item">
+          <!-- Branch Selector (Omitted in Global SuperAdmin Mode) -->
+          <mat-form-field appearance="outline" class="filter-item" *ngIf="!isGlobalMode()">
             <mat-label>Sede / Sucursal</mat-label>
             <mat-select [(ngModel)]="selectedBranchId" (selectionChange)="onFilterChange()">
               <mat-option [value]="''">Todas las Sedes</mat-option>
@@ -647,6 +653,12 @@ export class AuditTrailViewerPage implements OnInit {
   private readonly auditService = inject(AuditLogsService);
   private readonly branchesService = inject(BranchesService);
   private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
+  private readonly authStore = inject(AuthStore);
+
+  readonly isGlobalMode = computed(
+    () => this.authStore.isSuperAdmin() && this.router.url.startsWith('/admin'),
+  );
 
   readonly logsSignal = signal<AuditLogEntry[]>([]);
   readonly branchesSignal = signal<Branch[]>([]);
@@ -673,14 +685,22 @@ export class AuditTrailViewerPage implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.loadBranches();
+    if (!this.isGlobalMode()) {
+      this.loadBranches();
+    }
     this.loadLogs();
   }
 
   loadBranches(): void {
+    if (this.isGlobalMode()) {
+      this.branchesSignal.set([]);
+      return;
+    }
     this.branchesService.findAll().subscribe({
       next: (branches) => this.branchesSignal.set(branches),
-      error: () => {},
+      error: () => {
+        this.branchesSignal.set([]);
+      },
     });
   }
 
@@ -700,16 +720,20 @@ export class AuditTrailViewerPage implements OnInit {
   loadLogs(): void {
     this.loadingSignal.set(true);
 
-    this.auditService.findAll(this.getFilterParams()).subscribe({
-      next: (res) => {
-        this.logsSignal.set(res.items);
-        this.totalSignal.set(res.total);
-        this.loadingSignal.set(false);
+    const query$ = this.isGlobalMode()
+      ? this.auditService.findGlobal(this.getFilterParams())
+      : this.auditService.findAll(this.getFilterParams());
+
+    query$.pipe(finalize(() => this.loadingSignal.set(false))).subscribe({
+      next: (res: any) => {
+        const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const total = res?.total ?? (Array.isArray(res) ? res.length : items.length);
+        this.logsSignal.set(items);
+        this.totalSignal.set(total);
       },
       error: () => {
         this.logsSignal.set([]);
         this.totalSignal.set(0);
-        this.loadingSignal.set(false);
       },
     });
   }

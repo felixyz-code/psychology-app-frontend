@@ -28,7 +28,14 @@
 }
 
 .appointment-dialog__section {
+  display: flex;
+  flex-direction: column;
   gap: 0.95rem;
+  padding: 1.1rem;
+  border-radius: 16px;
+  background: var(--app-color-card-soft-bg, #f8fafc);
+  border: 1px solid var(--app-color-card-border, #e2e8f0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .appointment-dialog__grid {
@@ -90,3 +97,70 @@
     padding-right: 0;
   }
 }
+
+.appointment-dialog__tz-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  background: var(--app-color-surface-variant, #f1f5f9);
+  color: var(--app-color-text-secondary, #475569);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--app-color-border-subtle, #e2e8f0);
+}
+
+.appointment-dialog__conflict-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #b91c1c;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+
+  strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+
+  p {
+    margin: 0 0 0.5rem 0;
+    color: var(--app-color-text-secondary, #475569);
+  }
+}
+
+.appointment-dialog__slot-suggestions {
+  margin-top: 0.4rem;
+}
+
+.appointment-dialog__slot-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--app-color-text-primary, #1e293b);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.appointment-dialog__slots-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.appointment-dialog__slot-btn {
+  font-size: 0.75rem !important;
+  padding: 0 0.6rem !important;
+  height: 28px !important;
+  line-height: 28px !important;
+  border-color: #3b82f6 !important;
+  color: #2563eb !important;
+  background: rgba(59, 130, 246, 0.06) !important;
+  border-radius: 4px !important;
+}
+

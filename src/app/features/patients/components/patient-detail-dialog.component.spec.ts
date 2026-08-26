@@ -11,12 +11,17 @@ import { SessionNoteFormDialogComponent } from '../../session-notes/components/s
 import { Patient } from '../models/patient.models';
 import { PatientDetailDialogComponent } from './patient-detail-dialog.component';
 
+import { AppointmentFormDialogComponent } from '../../appointments/components/appointment-form-dialog.component';
+import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/components/clinical-document-preview-dialog.component';
+
 describe('PatientDetailDialogComponent', () => {
   let caseFilesService: {
     getWorkspace: ReturnType<
       typeof vi.fn<(caseFileId: string) => Observable<CaseFileWorkspaceResponse>>
     >;
     getCaseFileByPatientId: ReturnType<typeof vi.fn<(patientId: string) => Observable<never>>>;
+    getClinicalPdfData: ReturnType<typeof vi.fn>;
+    getConsentPdfData: ReturnType<typeof vi.fn>;
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
 
@@ -24,6 +29,8 @@ describe('PatientDetailDialogComponent', () => {
     caseFilesService = {
       getWorkspace: vi.fn<(caseFileId: string) => Observable<CaseFileWorkspaceResponse>>(),
       getCaseFileByPatientId: vi.fn<(patientId: string) => Observable<never>>(),
+      getClinicalPdfData: vi.fn(() => of({ caseFile: { id: 'case-file-1' } })),
+      getConsentPdfData: vi.fn(() => of({ caseFile: { id: 'case-file-1' } })),
     };
     dialog = { open: vi.fn() };
   });
@@ -148,6 +155,44 @@ describe('PatientDetailDialogComponent', () => {
 
     expect(dialog.open).toHaveBeenCalledTimes(3);
     expect(caseFilesService.getWorkspace).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles schedule_next action from session note detail and opens appointment form dialog', () => {
+    caseFilesService.getWorkspace.mockReturnValue(of(createWorkspace()));
+    const sessionNote = createWorkspace().sessionNotes[0];
+    dialog.open
+      .mockReturnValueOnce({
+        afterClosed: () => of({ action: 'schedule_next', sessionNote }),
+      })
+      .mockReturnValueOnce({
+        afterClosed: () => of(true),
+      });
+
+    const component = createComponent({ caseFileId: 'case-file-1' });
+    component.openSessionNoteDetailDialog(sessionNote);
+
+    expect(dialog.open).toHaveBeenNthCalledWith(
+      2,
+      AppointmentFormDialogComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ mode: 'create', patientId: 'patient-1' }),
+      }),
+    );
+  });
+
+  it('opens clinical summary PDF preview on openSummaryPdfDialog', () => {
+    caseFilesService.getWorkspace.mockReturnValue(of(createWorkspace()));
+    const component = createComponent({ caseFileId: 'case-file-1' });
+
+    component.openSummaryPdfDialog();
+
+    expect(caseFilesService.getClinicalPdfData).toHaveBeenCalledWith('case-file-1', undefined);
+    expect(dialog.open).toHaveBeenCalledWith(
+      ClinicalDocumentPreviewDialogComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ initialDocumentType: 'CASE_FILE_SUMMARY' }),
+      }),
+    );
   });
 
   function expectSessionNoteActionRefresh(
