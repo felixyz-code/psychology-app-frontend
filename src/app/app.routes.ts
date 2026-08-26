@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { anonymousOnlyGuard } from './core/guards/anonymous-only.guard';
 import { capabilityGuard } from './core/guards/capability.guard';
+import { superadminGuard } from './core/guards/superadmin.guard';
 import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
 
 export const routes: Routes = [
@@ -251,6 +252,38 @@ export const routes: Routes = [
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',
+      },
+    ],
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard, superadminGuard],
+    loadComponent: () =>
+      import('./core/layout/superadmin-layout/superadmin-layout.component').then(
+        (m) => m.SuperAdminLayoutComponent,
+      ),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'tenants',
+      },
+      {
+        path: 'tenants',
+        title: 'Organizaciones & Suscripciones | Platform Governance',
+        loadChildren: () =>
+          import('./features/superadmin/superadmin.routes').then((m) => m.superadminRoutes),
+      },
+      {
+        path: 'audit',
+        title: 'Auditoría Global | Platform Governance',
+        loadChildren: () =>
+          import('./features/audit-logs/audit-logs.routes').then((m) => m.auditLogsRoutes),
+      },
+      {
+        path: 'metrics',
+        title: 'Métricas & Salud | Platform Governance',
+        redirectTo: 'tenants',
       },
     ],
   },

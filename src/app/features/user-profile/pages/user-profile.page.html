@@ -291,8 +291,8 @@
                 <mat-form-field appearance="outline" class="profile-form__tz-field">
                   <mat-label>Zona Horaria Canónica (IANA)</mat-label>
                   <mat-select formControlName="timeZone">
-                    @for (tz of timezonesList; track tz) {
-                      <mat-option [value]="tz">{{ tz }}</mat-option>
+                    @for (tz of timezonesList; track tz.id) {
+                      <mat-option [value]="tz.id">{{ tz.label }}</mat-option>
                     }
                   </mat-select>
                   <mat-hint>Zona horaria aplicada para tus agendas, citas y marcas temporales.</mat-hint>

@@ -27,6 +27,11 @@ export class AuthStore {
   readonly isAuthenticated = computed(() => !!this.accessTokenSignal());
   readonly sessionVersion = computed(() => this.sessionVersionSignal());
   readonly userRole = computed(() => this.currentUserSignal()?.role ?? null);
+  readonly isSuperAdmin = computed(
+    () =>
+      this.userRole() === 'SUPERADMIN' ||
+      this.currentUserSignal()?.isSuperAdmin === true,
+  );
   readonly isAdmin = computed(() => this.userRole() === 'ADMIN');
   readonly isPsychologist = computed(() => this.userRole() === 'PSYCHOLOGIST');
   readonly sessionChanges = this.sessionChangeSubject.asObservable();
