@@ -7,7 +7,7 @@ import { superadminGuard } from './superadmin.guard';
 describe('superadminGuard', () => {
   let mockAuthStore: {
     isAuthenticated: ReturnType<typeof vi.fn>;
-    isAdmin: ReturnType<typeof vi.fn>;
+    isSuperAdmin: ReturnType<typeof vi.fn>;
   };
   let mockRouter: {
     createUrlTree: ReturnType<typeof vi.fn>;
@@ -16,7 +16,7 @@ describe('superadminGuard', () => {
   beforeEach(() => {
     mockAuthStore = {
       isAuthenticated: vi.fn(),
-      isAdmin: vi.fn(),
+      isSuperAdmin: vi.fn(),
     };
     mockRouter = {
       createUrlTree: vi.fn((commands: any[]) => ({ path: commands[0] }) as unknown as UrlTree),
@@ -30,9 +30,9 @@ describe('superadminGuard', () => {
     });
   });
 
-  it('allows activation when user is authenticated and has ADMIN role', () => {
+  it('allows activation when user is authenticated and has SUPERADMIN status', () => {
     mockAuthStore.isAuthenticated.mockReturnValue(true);
-    mockAuthStore.isAdmin.mockReturnValue(true);
+    mockAuthStore.isSuperAdmin.mockReturnValue(true);
 
     const result = TestBed.runInInjectionContext(() =>
       superadminGuard({} as any, {} as any),
@@ -43,7 +43,7 @@ describe('superadminGuard', () => {
 
   it('redirects to /login when user is not authenticated', () => {
     mockAuthStore.isAuthenticated.mockReturnValue(false);
-    mockAuthStore.isAdmin.mockReturnValue(false);
+    mockAuthStore.isSuperAdmin.mockReturnValue(false);
 
     const result = TestBed.runInInjectionContext(() =>
       superadminGuard({} as any, {} as any),
@@ -53,9 +53,9 @@ describe('superadminGuard', () => {
     expect(result).toEqual({ path: '/login' });
   });
 
-  it('redirects to /dashboard when user is authenticated but not an ADMIN', () => {
+  it('redirects to /dashboard when user is authenticated but not a SUPERADMIN (e.g. clinic ADMIN)', () => {
     mockAuthStore.isAuthenticated.mockReturnValue(true);
-    mockAuthStore.isAdmin.mockReturnValue(false);
+    mockAuthStore.isSuperAdmin.mockReturnValue(false);
 
     const result = TestBed.runInInjectionContext(() =>
       superadminGuard({} as any, {} as any),

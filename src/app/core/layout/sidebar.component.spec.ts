@@ -98,13 +98,7 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
     expect(fixture.nativeElement.textContent).toContain('Plantillas');
   });
 
-  it('renders SuperAdmin Backoffice link only when user has ADMIN role', async () => {
+  it('strictly isolates tenant navigation and never renders superadmin backoffice in clinical sidebar', async () => {
     expect(fixture.nativeElement.textContent).not.toContain('SuperAdmin Backoffice');
-
-    isAdminSignal.set(true);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    expect(fixture.nativeElement.textContent).toContain('SuperAdmin Backoffice');
   });
 });

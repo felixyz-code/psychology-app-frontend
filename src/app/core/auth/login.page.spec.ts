@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
 import { AuthService } from './auth.service';
+import { AuthStore } from './auth.store';
 import { LoginPage } from './login.page';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 
@@ -16,6 +17,7 @@ describe('LoginPage', () => {
 
   let page: LoginPage;
   let authService: { login: ReturnType<typeof vi.fn> };
+  let authStore: { isSuperAdmin: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
   let tenantContextStore: {
     isActiveTenantReady: ReturnType<typeof vi.fn>;
@@ -24,6 +26,7 @@ describe('LoginPage', () => {
 
   beforeEach(() => {
     authService = { login: vi.fn() };
+    authStore = { isSuperAdmin: vi.fn(() => false) };
     router = { navigate: vi.fn(() => Promise.resolve(true)) };
     tenantContextStore = {
       isActiveTenantReady: vi.fn(() => true),
@@ -35,6 +38,7 @@ describe('LoginPage', () => {
       providers: [
         FormBuilder,
         { provide: AuthService, useValue: authService },
+        { provide: AuthStore, useValue: authStore },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: {} },
         { provide: TenantContextStore, useValue: tenantContextStore },
@@ -48,7 +52,7 @@ describe('LoginPage', () => {
     TestBed.resetTestingModule();
   });
 
-  it('submits valid credentials and navigates to the dashboard after login succeeds', () => {
+  it('submits valid credentials and navigates to the dashboard after login succeeds for standard user', () => {
     authService.login.mockReturnValue(of({ accessToken: 'token', user: {} }));
     page.loginForm.setValue(credentials);
 
@@ -57,6 +61,16 @@ describe('LoginPage', () => {
     expect(authService.login).toHaveBeenCalledWith(credentials);
     expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
     expect(page.isLoading()).toBe(false);
+  });
+
+  it('navigates directly to /admin/tenants when logged in user is a SUPERADMIN', () => {
+    authStore.isSuperAdmin.mockReturnValue(true);
+    authService.login.mockReturnValue(of({ accessToken: 'token', user: { role: 'SUPERADMIN' } }));
+    page.loginForm.setValue(credentials);
+
+    page.submit();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/admin/tenants']);
   });
 
   it('keeps the login error observable and does not navigate when login fails', () => {

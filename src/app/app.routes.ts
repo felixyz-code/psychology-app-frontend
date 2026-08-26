@@ -241,13 +241,6 @@ export const routes: Routes = [
           import('./features/audit-logs/audit-logs.routes').then((m) => m.auditLogsRoutes),
       },
       {
-        path: 'admin/tenants',
-        title: 'SuperAdmin Backoffice | PsiqueOS',
-        canActivate: [superadminGuard],
-        loadChildren: () =>
-          import('./features/superadmin/superadmin.routes').then((m) => m.superadminRoutes),
-      },
-      {
         path: 'profile',
         title: 'Mi Perfil | PsiqueOS',
         loadComponent: () =>
@@ -259,6 +252,38 @@ export const routes: Routes = [
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',
+      },
+    ],
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard, superadminGuard],
+    loadComponent: () =>
+      import('./core/layout/superadmin-layout/superadmin-layout.component').then(
+        (m) => m.SuperAdminLayoutComponent,
+      ),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'tenants',
+      },
+      {
+        path: 'tenants',
+        title: 'Organizaciones & Suscripciones | Platform Governance',
+        loadChildren: () =>
+          import('./features/superadmin/superadmin.routes').then((m) => m.superadminRoutes),
+      },
+      {
+        path: 'audit',
+        title: 'Auditoría Global | Platform Governance',
+        loadChildren: () =>
+          import('./features/audit-logs/audit-logs.routes').then((m) => m.auditLogsRoutes),
+      },
+      {
+        path: 'metrics',
+        title: 'Métricas & Salud | Platform Governance',
+        redirectTo: 'tenants',
       },
     ],
   },

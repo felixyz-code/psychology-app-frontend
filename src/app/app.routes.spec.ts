@@ -163,8 +163,24 @@ describe('app routes', () => {
       canActivate: [activeTenantGuard, capabilityGuard],
       data: { requiredCapability: 'notification_template.read' },
     });
-    expect(childRoutes.find((route) => route.path === 'admin/tenants')).toMatchObject({
-      canActivate: [superadminGuard],
+    expect(childRoutes.find((route) => route.path === 'admin/tenants')).toBeUndefined();
+  });
+
+  it('exposes isolated /admin platform route tree with superadminGuard and SuperAdminLayout', () => {
+    const adminRoute = routes.find((route) => route.path === 'admin');
+
+    expect(adminRoute).toBeDefined();
+    expect(adminRoute?.canActivate).toEqual([authGuard, superadminGuard]);
+    expect(adminRoute?.loadComponent).toBeDefined();
+
+    const adminChildren = adminRoute?.children ?? [];
+    expect(adminChildren.find((r) => r.path === '')).toMatchObject({
+      path: '',
+      pathMatch: 'full',
+      redirectTo: 'tenants',
     });
+    expect(adminChildren.some((r) => r.path === 'tenants' && r.loadChildren)).toBe(true);
+    expect(adminChildren.some((r) => r.path === 'audit' && r.loadChildren)).toBe(true);
+    expect(adminChildren.some((r) => r.path === 'metrics')).toBe(true);
   });
 });

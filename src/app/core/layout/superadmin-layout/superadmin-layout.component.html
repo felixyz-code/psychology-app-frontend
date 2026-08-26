@@ -1,0 +1,113 @@
+<div class="superadmin-shell">
+  <!-- Top Governance Header -->
+  <header class="superadmin-header">
+    <div class="header-left">
+      <button mat-icon-button (click)="toggleSidebar()" aria-label="Colapsar menú">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <div class="platform-brand">
+        <span class="platform-logo-icon">
+          <mat-icon>hub</mat-icon>
+        </span>
+        <div class="brand-text">
+          <span class="brand-title">Platform Suite Governance</span>
+          <span class="brand-subtitle">PsiqueOS / HealthTech Hub</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="infra-pill" matTooltip="Todos los nodos y servicios operativos">
+        <span class="status-dot status-dot--online"></span>
+        <span class="infra-label">Infraestructura Operativa</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="superadmin-badge">
+        <mat-icon>security</mat-icon>
+        <span>SUPERADMIN</span>
+      </div>
+
+      <div class="user-menu-wrapper">
+        <button
+          mat-button
+          [matMenuTriggerFor]="userMenu"
+          class="user-btn"
+          aria-label="Perfil SuperAdmin"
+        >
+          <div class="user-avatar">
+            <mat-icon>admin_panel_settings</mat-icon>
+          </div>
+          <span class="user-name">{{ user()?.name || 'SuperAdmin' }}</span>
+          <mat-icon>expand_more</mat-icon>
+        </button>
+
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="menu-user-header">
+            <strong>{{ user()?.name }}</strong>
+            <span class="menu-user-email">{{ user()?.email }}</span>
+            <span class="menu-role-tag">Global Platform Authority</span>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon color="warn">logout</mat-icon>
+            <span>Cerrar Sesión</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Area -->
+  <div class="superadmin-body">
+    <!-- Platform Sidebar -->
+    <aside class="superadmin-sidebar" [class.collapsed]="sidebarCollapsed()">
+      <div class="sidebar-section-label" *ngIf="!sidebarCollapsed()">
+        GOBERNANZA GLOBAL
+      </div>
+
+      <nav class="platform-nav">
+        <a
+          routerLink="/admin/tenants"
+          routerLinkActive="active"
+          class="nav-link"
+          [matTooltip]="sidebarCollapsed() ? 'Organizaciones & Suscripciones' : ''"
+        >
+          <mat-icon>domain</mat-icon>
+          <span class="link-label" *ngIf="!sidebarCollapsed()">Organizaciones</span>
+        </a>
+
+        <a
+          routerLink="/admin/audit"
+          routerLinkActive="active"
+          class="nav-link"
+          [matTooltip]="sidebarCollapsed() ? 'Auditoría Forense Global' : ''"
+        >
+          <mat-icon>verified_user</mat-icon>
+          <span class="link-label" *ngIf="!sidebarCollapsed()">Auditoría Global</span>
+        </a>
+
+        <a
+          routerLink="/admin/metrics"
+          routerLinkActive="active"
+          class="nav-link"
+          [matTooltip]="sidebarCollapsed() ? 'Estado de Plataforma' : ''"
+        >
+          <mat-icon>monitoring</mat-icon>
+          <span class="link-label" *ngIf="!sidebarCollapsed()">Métricas & Salud</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer" *ngIf="!sidebarCollapsed()">
+        <span class="version-text">PsiqueOS Governance v15.2</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Outlet -->
+    <main class="superadmin-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

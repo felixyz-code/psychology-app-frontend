@@ -1,10 +1,11 @@
-export type UserRole = 'ADMIN' | 'PSYCHOLOGIST';
+export type UserRole = 'SUPERADMIN' | 'ADMIN' | 'PSYCHOLOGIST';
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  isSuperAdmin?: boolean;
 }
 
 export interface LoginRequest {
