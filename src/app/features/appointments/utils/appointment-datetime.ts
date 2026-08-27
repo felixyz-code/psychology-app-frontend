@@ -63,6 +63,23 @@ export function getLocalDayDifference(value: string | Date, reference: Date = ne
   return Math.round((targetDay - currentDay) / millisecondsPerDay);
 }
 
+export function calculateSmartDefaultTime(
+  referenceDate: Date = new Date(),
+  targetDate?: Date | string | null,
+): Date {
+  const target = targetDate ? parseAppointmentDate(targetDate) : new Date(referenceDate);
+  const currentHours = referenceDate.getHours();
+  const currentMinutes = referenceDate.getMinutes();
+  const currentSeconds = referenceDate.getSeconds();
+
+  const hasMinutes = currentMinutes > 0 || currentSeconds > 0;
+  const nextHour = hasMinutes ? currentHours + 1 : currentHours;
+
+  const result = new Date(target);
+  result.setHours(nextHour, 0, 0, 0);
+  return result;
+}
+
 export function toDateTimeLocalValue(value: string | Date): string {
   const date = parseAppointmentDate(value);
   const year = date.getFullYear();

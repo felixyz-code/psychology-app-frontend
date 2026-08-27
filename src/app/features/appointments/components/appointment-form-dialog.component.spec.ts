@@ -216,6 +216,78 @@ describe('AppointmentFormDialogComponent', () => {
     expect(component.hasConflict()).toBe(false);
   });
 
+  it('filters patients reactively by name, phone or email and handles selection/clearing', () => {
+    const p1: Patient = {
+      id: 'patient-1',
+      psychologistId: 'psychologist-1',
+      firstName: 'Carlos',
+      lastName: 'Santana',
+      phoneNumber: '555-1234',
+      email: 'carlos@test.com',
+      createdAt: '',
+      updatedAt: '',
+    };
+    const p2: Patient = {
+      id: 'patient-2',
+      psychologistId: 'psychologist-1',
+      firstName: 'Beatriz',
+      lastName: 'Mendez',
+      phoneNumber: '555-9876',
+      email: 'beatriz@test.com',
+      createdAt: '',
+      updatedAt: '',
+    };
+
+    const { component } = createComponent({
+      mode: 'create',
+      patients: [p1, p2],
+    });
+
+    expect(component.filteredPatients().length).toBe(2);
+
+    // Filter by name
+    component.patientSearchControl.setValue('Beatriz');
+    expect(component.filteredPatients().length).toBe(1);
+    expect(component.filteredPatients()[0].id).toBe('patient-2');
+
+    // Filter by phone
+    component.patientSearchControl.setValue('1234');
+    expect(component.filteredPatients().length).toBe(1);
+    expect(component.filteredPatients()[0].id).toBe('patient-1');
+
+    // Select patient
+    component.onPatientSelected(p2);
+    expect(component.selectedPatient()?.id).toBe('patient-2');
+    expect(component.appointmentForm.controls.patientId.value).toBe('patient-2');
+    expect(component.getInitials(p2)).toBe('BM');
+    expect(component.displayPatientFn(p2)).toBe('Beatriz Mendez');
+
+    // Clear patient
+    component.clearPatientSelection();
+    expect(component.selectedPatient()).toBeNull();
+    expect(component.appointmentForm.controls.patientId.value).toBe('');
+    expect(component.patientSearchControl.value).toBe('');
+  });
+
+  it('updates live availability status dynamically based on conflict state', () => {
+    const { component } = createComponent({
+      mode: 'create',
+      patients: [createPatient()],
+    });
+
+    component.appointmentForm.patchValue({
+      scheduledAt: '2026-07-15T10:00',
+    });
+
+    expect(component.availabilityStatus()).toBe('available');
+
+    component.hasConflict.set(true);
+    expect(component.availabilityStatus()).toBe('conflict');
+
+    component.isCheckingAvailability.set(true);
+    expect(component.availabilityStatus()).toBe('loading');
+  });
+
   function createComponent(
     data: {
       mode: 'create' | 'edit';

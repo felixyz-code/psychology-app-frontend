@@ -36,6 +36,8 @@ describe('ToastService', () => {
       'OK',
       expect.objectContaining({
         duration: 3500,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
         panelClass: ['app-toast', 'app-toast--success'],
       }),
     );

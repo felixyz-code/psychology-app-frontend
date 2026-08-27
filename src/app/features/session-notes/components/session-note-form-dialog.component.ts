@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, debounceTime, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -159,6 +159,14 @@ export class SessionNoteFormDialogComponent implements OnInit, OnDestroy {
     this.autosaveSubscription?.unsubscribe();
   }
 
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardShortcut(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault();
+      this.saveDraftLocal();
+    }
+  }
+
   insertSnippet(snippet: ClinicalSnippet): void {
     const currentContent = this.sessionNoteForm.controls.content.value.trim();
     if (!currentContent) {
@@ -250,7 +258,7 @@ export class SessionNoteFormDialogComponent implements OnInit, OnDestroy {
     return this.mode === 'edit' ? 'Guardar cambios' : 'Guardar nota';
   }
 
-  private saveDraftLocal(): void {
+  saveDraftLocal(): void {
     if (typeof window === 'undefined' || !window.localStorage) {
       return;
     }

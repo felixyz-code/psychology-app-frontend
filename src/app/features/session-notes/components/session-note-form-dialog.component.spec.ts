@@ -189,6 +189,45 @@ describe('SessionNoteFormDialogComponent', () => {
     (component as any).clearDraftLocal();
   });
 
+  it('triggers immediate draft save on Ctrl+S and Cmd+S keyboard events', () => {
+    const { component } = createComponent({ mode: 'create', caseFileId: 'case-file-shortcut' });
+    component.sessionNoteForm.patchValue({
+      title: 'Nota de urgencia',
+      content: 'Contenido salvado con atajo Ctrl+S',
+    });
+
+    const preventDefaultSpy = vi.fn();
+    const ctrlSEvent = new KeyboardEvent('keydown', {
+      key: 's',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(ctrlSEvent, 'preventDefault', { value: preventDefaultSpy });
+
+    component.handleKeyboardShortcut(ctrlSEvent);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(component.autosaveStatus()).toBe('saved');
+
+    // Cmd+S (metaKey)
+    const cmdPreventDefaultSpy = vi.fn();
+    const cmdSEvent = new KeyboardEvent('keydown', {
+      key: 'S',
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(cmdSEvent, 'preventDefault', { value: cmdPreventDefaultSpy });
+
+    component.handleKeyboardShortcut(cmdSEvent);
+
+    expect(cmdPreventDefaultSpy).toHaveBeenCalled();
+    expect(component.autosaveStatus()).toBe('saved');
+
+    (component as any).clearDraftLocal();
+  });
+
   function createComponent(data: {
     mode: 'create' | 'edit';
     caseFileId: string;

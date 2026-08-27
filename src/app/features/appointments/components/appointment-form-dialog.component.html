@@ -22,11 +22,63 @@
             class="appointment-dialog__full app-form-field--full"
           >
             <mat-label>Paciente</mat-label>
-            <mat-select formControlName="patientId" [disabled]="isLoadingPatients()">
-              @for (patient of availablePatients(); track patient.id) {
-                <mat-option [value]="patient.id">{{ getPatientLabel(patient) }}</mat-option>
+            <input
+              type="text"
+              matInput
+              [formControl]="patientSearchControl"
+              [matAutocomplete]="autoPatient"
+              placeholder="Escribe el nombre o apellido del paciente..."
+              [disabled]="isLoadingPatients()"
+              (blur)="onPatientInputBlur()"
+            />
+            <mat-icon matPrefix class="patient-search-prefix-icon">search</mat-icon>
+            @if (patientSearchControl.value && !isLoadingPatients()) {
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                aria-label="Limpiar paciente seleccionado"
+                (click)="clearPatientSelection()"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+            <mat-autocomplete
+              #autoPatient="matAutocomplete"
+              [displayWith]="displayPatientFn"
+              (optionSelected)="onPatientSelected($event.option.value)"
+            >
+              @for (patient of filteredPatients(); track patient.id) {
+                <mat-option [value]="patient" class="patient-autocomplete-option">
+                  <div class="patient-option">
+                    <div class="patient-option__avatar">
+                      {{ getInitials(patient) }}
+                    </div>
+                    <div class="patient-option__details">
+                      <span class="patient-option__name">{{ getPatientLabel(patient) }}</span>
+                      @if (patient.phoneNumber || patient.email) {
+                        <span class="patient-option__meta">
+                          @if (patient.phoneNumber) {
+                            <span>{{ patient.phoneNumber }}</span>
+                          }
+                          @if (patient.phoneNumber && patient.email) {
+                            <span> • </span>
+                          }
+                          @if (patient.email) {
+                            <span>{{ patient.email }}</span>
+                          }
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </mat-option>
               }
-            </mat-select>
+              @if (!filteredPatients().length && !isLoadingPatients()) {
+                <mat-option disabled class="patient-autocomplete-empty">
+                  No se encontraron pacientes coincidentes
+                </mat-option>
+              }
+            </mat-autocomplete>
             <mat-hint>{{ getPatientSectionMessage() }}</mat-hint>
             @if (hasRequiredError('patientId')) {
               <mat-error>El paciente es obligatorio.</mat-error>
@@ -54,10 +106,29 @@
                 Define cuándo se realizará la cita y cuánto tiempo quedará reservado para la sesión.
               </p>
             </div>
-            <span class="appointment-dialog__tz-badge">
-              <mat-icon style="font-size: 16px; width: 16px; height: 16px;">schedule</mat-icon>
-              <span>Zona horaria: {{ localTimeZone }}</span>
-            </span>
+            <div class="appointment-dialog__header-badges">
+              @if (availabilityStatus() === 'loading') {
+                <span class="appointment-dialog__badge appointment-dialog__badge--loading" aria-live="polite">
+                  <mat-spinner diameter="14" />
+                  <span>Verificando...</span>
+                </span>
+              } @else if (availabilityStatus() === 'available') {
+                <span class="appointment-dialog__badge appointment-dialog__badge--available" aria-live="polite">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Horario disponible</span>
+                </span>
+              } @else if (availabilityStatus() === 'conflict') {
+                <span class="appointment-dialog__badge appointment-dialog__badge--conflict" aria-live="polite">
+                  <mat-icon>warning</mat-icon>
+                  <span>Conflicto de horario</span>
+                </span>
+              }
+
+              <span class="appointment-dialog__tz-badge">
+                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">schedule</mat-icon>
+                <span>Zona horaria: {{ localTimeZone }}</span>
+              </span>
+            </div>
           </div>
         </div>
 

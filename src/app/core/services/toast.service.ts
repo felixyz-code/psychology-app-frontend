@@ -84,7 +84,7 @@ export class ToastService {
   ): MatSnackBarRef<TextOnlySnackBar> {
     const config: MatSnackBarConfig = {
       duration: options?.duration ?? this.DEFAULT_DURATIONS[type],
-      horizontalPosition: options?.horizontalPosition ?? 'end',
+      horizontalPosition: options?.horizontalPosition ?? 'center',
       verticalPosition: options?.verticalPosition ?? 'top',
       panelClass: [
         'app-toast',

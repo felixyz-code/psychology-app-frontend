@@ -1,6 +1,7 @@
 import { SlicePipe } from '@angular/common';
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,7 +15,11 @@ import { AuthStore } from '../../../core/auth/auth.store';
 import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
-import { localDateTimeValueToIso, toDateTimeLocalValue } from '../utils/appointment-datetime';
+import {
+  calculateSmartDefaultTime,
+  localDateTimeValueToIso,
+  toDateTimeLocalValue,
+} from '../utils/appointment-datetime';
 import {
   Appointment,
   AppointmentStatus,
@@ -38,6 +43,7 @@ interface AppointmentFormDialogData {
   imports: [
     SlicePipe,
     ReactiveFormsModule,
+    MatAutocompleteModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -68,11 +74,46 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
   readonly mode = this.data.mode;
   readonly statuses: AppointmentStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
   readonly availablePatients = signal<Patient[]>(this.data.patients ?? []);
+  readonly selectedPatient = signal<Patient | null>(null);
+  readonly patientSearchTerm = signal('');
   readonly localTimeZone = typeof Intl !== 'undefined' && Intl.DateTimeFormat
     ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local'
     : 'Local';
 
+  readonly patientSearchControl = new FormControl<string | Patient>('');
+
   private valueChangeSubscription?: Subscription;
+  private patientSearchSubscription?: Subscription;
+
+  readonly filteredPatients = computed(() => {
+    const term = this.patientSearchTerm().trim().toLowerCase();
+    const patients = this.availablePatients();
+
+    if (!term) {
+      return patients;
+    }
+
+    return patients.filter((patient) => {
+      const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+      const phone = (patient.phoneNumber || '').toLowerCase();
+      const email = (patient.email || '').toLowerCase();
+
+      return fullName.includes(term) || phone.includes(term) || email.includes(term);
+    });
+  });
+
+  readonly availabilityStatus = computed<'loading' | 'available' | 'conflict' | 'idle'>(() => {
+    if (this.isCheckingAvailability()) {
+      return 'loading';
+    }
+    if (this.hasConflict()) {
+      return 'conflict';
+    }
+    if (this.appointmentForm?.controls?.scheduledAt?.value) {
+      return 'available';
+    }
+    return 'idle';
+  });
 
   readonly appointmentForm = this.formBuilder.nonNullable.group({
     patientId: [this.data.patientId ?? '', [Validators.required]],
@@ -83,6 +124,19 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
+    this.patientSearchSubscription = this.patientSearchControl.valueChanges.subscribe((value) => {
+      if (typeof value === 'string') {
+        this.patientSearchTerm.set(value);
+        const current = this.selectedPatient();
+        if (current && this.getPatientLabel(current) !== value) {
+          this.selectedPatient.set(null);
+          this.appointmentForm.controls.patientId.setValue('');
+        }
+      } else if (!value) {
+        this.patientSearchTerm.set('');
+      }
+    });
+
     if (this.mode === 'edit' && this.data.appointment) {
       this.appointmentForm.patchValue({
         patientId: this.data.patientId ?? this.data.appointment.patientId,
@@ -95,6 +149,8 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
 
     if (!this.availablePatients().length) {
       this.loadPatients();
+    } else {
+      this.syncInitialSelectedPatient();
     }
   }
 
@@ -109,6 +165,7 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.valueChangeSubscription?.unsubscribe();
+    this.patientSearchSubscription?.unsubscribe();
   }
 
   checkAvailability(): void {
@@ -299,6 +356,68 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
     return `${patient.firstName} ${patient.lastName}`;
   }
 
+  getInitials(patient: Patient): string {
+    const first = patient.firstName?.trim()?.charAt(0) || '';
+    const last = patient.lastName?.trim()?.charAt(0) || '';
+    return `${first}${last}`.toUpperCase() || 'P';
+  }
+
+  displayPatientFn = (patient: Patient | string | null): string => {
+    if (!patient) {
+      return '';
+    }
+    if (typeof patient === 'string') {
+      return patient;
+    }
+    return this.getPatientLabel(patient);
+  };
+
+  onPatientSelected(patient: Patient): void {
+    if (!patient) {
+      return;
+    }
+    this.selectedPatient.set(patient);
+    this.patientSearchControl.setValue(patient, { emitEvent: false });
+    this.appointmentForm.controls.patientId.setValue(patient.id);
+    this.appointmentForm.controls.patientId.markAsTouched();
+    this.appointmentForm.controls.patientId.markAsDirty();
+  }
+
+  clearPatientSelection(): void {
+    this.selectedPatient.set(null);
+    this.patientSearchControl.setValue('');
+    this.patientSearchTerm.set('');
+    this.appointmentForm.controls.patientId.setValue('');
+    this.appointmentForm.controls.patientId.markAsTouched();
+  }
+
+  onPatientInputBlur(): void {
+    const rawSearchValue = this.patientSearchControl.value;
+    if (typeof rawSearchValue === 'string') {
+      const normalized = rawSearchValue.trim().toLowerCase();
+      const match = this.availablePatients().find(
+        (p) => this.getPatientLabel(p).toLowerCase() === normalized,
+      );
+      if (match) {
+        this.onPatientSelected(match);
+      } else if (!this.selectedPatient()) {
+        this.appointmentForm.controls.patientId.setValue('');
+      }
+    }
+    this.appointmentForm.controls.patientId.markAsTouched();
+  }
+
+  private syncInitialSelectedPatient(): void {
+    const currentPatientId = this.appointmentForm.controls.patientId.value;
+    if (currentPatientId) {
+      const match = this.availablePatients().find((p) => p.id === currentPatientId);
+      if (match) {
+        this.selectedPatient.set(match);
+        this.patientSearchControl.setValue(match, { emitEvent: false });
+      }
+    }
+  }
+
   private normalizeOptional(value: string): string | null {
     const normalized = value.trim();
     return normalized ? normalized : null;
@@ -317,6 +436,7 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
           );
 
           this.availablePatients.set(sortedPatients);
+          this.syncInitialSelectedPatient();
         },
         error: () => {
           this.errorMessage.set('No fue posible cargar los pacientes para la cita.');
@@ -324,21 +444,13 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
       });
   }
 
-  private getCurrentDateTimeLocal(): string {
-    return toDateTimeLocalValue(new Date());
-  }
-
   private getInitialScheduledAtValue(): string {
-    if (this.data.scheduledAt) {
-      return toDateTimeLocalValue(this.data.scheduledAt);
-    }
-
-    return this.getCurrentDateTimeLocal();
+    return toDateTimeLocalValue(calculateSmartDefaultTime(new Date(), this.data.scheduledAt));
   }
 
   private initialDurationMinutes(): number {
     return this.data.mode === 'edit'
       ? (this.data.appointment?.durationMinutes ?? 60)
-      : this.organizationConfigurationStore.effectiveAppointmentDuration();
+      : (this.organizationConfigurationStore.effectiveAppointmentDuration?.() || 60);
   }
 }

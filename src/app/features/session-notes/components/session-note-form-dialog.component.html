@@ -2,12 +2,18 @@
   <div class="session-note-dialog__header app-dialog__header">
     <div class="session-note-dialog__title-row">
       <h2>{{ getTitle() }}</h2>
-      <!-- Visual Autosave Indicator -->
-      <app-saving-indicator
-        [status]="autosaveStatus()"
-        savingText="Guardando borrador..."
-        savedText="Borrador guardado"
-      />
+      <!-- Visual Autosave Indicator and Shortcut Hint -->
+      <div class="session-note-dialog__header-meta">
+        <span class="session-note-dialog__shortcut-badge" title="Presiona Ctrl+S para guardar el borrador">
+          <mat-icon>keyboard</mat-icon>
+          <span>Ctrl+S para guardar</span>
+        </span>
+        <app-saving-indicator
+          [status]="autosaveStatus()"
+          savingText="Guardando borrador..."
+          savedText="Borrador guardado"
+        />
+      </div>
     </div>
     <p>Registra el seguimiento clínico y evolución médica bajo los criterios de la NOM-004-SSA3-2012.</p>
   </div>
