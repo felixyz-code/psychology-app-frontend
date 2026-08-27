@@ -1,4 +1,4 @@
-import { SlicePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -16,9 +16,12 @@ import { OrganizationConfigurationStore } from '../../../core/organization-confi
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import {
+  BusinessGridSlot,
   calculateSmartDefaultTime,
   filterBusinessHourSlots,
+  generateBusinessHoursGrid,
   localDateTimeValueToIso,
+  parseFlexibleDateTime,
   toDateTimeLocalValue,
 } from '../utils/appointment-datetime';
 import {
@@ -42,7 +45,7 @@ interface AppointmentFormDialogData {
   selector: 'app-appointment-form-dialog',
   standalone: true,
   imports: [
-    SlicePipe,
+    CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
     MatButtonModule,
@@ -70,7 +73,7 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
   readonly isCheckingAvailability = signal(false);
   readonly hasConflict = signal(false);
   readonly conflictWarning = signal('');
-  readonly availableSlots = signal<AvailabilitySlot[]>([]);
+  readonly availableSlots = signal<BusinessGridSlot[]>([]);
   readonly errorMessage = signal('');
   readonly mode = this.data.mode;
   readonly statuses: AppointmentStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
@@ -180,10 +183,21 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const selectedDate = scheduledAtValue.split('T')[0];
+    const parsedDate = parseFlexibleDateTime(scheduledAtValue);
+    if (isNaN(parsedDate.getTime())) {
+      this.hasConflict.set(false);
+      this.conflictWarning.set('');
+      this.availableSlots.set([]);
+      return;
+    }
+
+    const year = parsedDate.getFullYear();
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const selectedDate = `${year}-${month}-${day}`;
+
     const durationMinutes = this.appointmentForm.controls.durationMinutes.value || 60;
-    const selectedIso = localDateTimeValueToIso(scheduledAtValue);
-    const selectedStart = new Date(selectedIso).getTime();
+    const selectedStart = parsedDate.getTime();
     const selectedEnd = selectedStart + durationMinutes * 60_000;
 
     this.isCheckingAvailability.set(true);
@@ -196,41 +210,48 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.isCheckingAvailability.set(false)))
       .subscribe({
         next: (response) => {
-          const slots = response.slots || [];
-          this.availableSlots.set(filterBusinessHourSlots(slots));
-
-          const hasOverlap = slots
+          const rawSlots = response.slots || [];
+          const occupied = rawSlots
             .filter((s) => !s.available)
-            .some((s) => {
+            .filter((s) => {
               // If in edit mode and the conflict is the current appointment, skip it
               if (this.mode === 'edit' && this.data.appointment) {
-                const isSameSlot =
-                  new Date(s.startTime).getTime() ===
-                  new Date(this.data.appointment.scheduledAt).getTime();
-                if (isSameSlot) {
+                const currentApptStart = parseFlexibleDateTime(
+                  this.data.appointment.scheduledAt,
+                ).getTime();
+                const slotStart = parseFlexibleDateTime(s.startTime).getTime();
+                if (slotStart === currentApptStart) {
                   return false;
                 }
               }
-              const slotStart = new Date(s.startTime).getTime();
-              const slotEnd = new Date(s.endTime).getTime();
-              return selectedStart < slotEnd && selectedEnd > slotStart;
+              return true;
             });
+
+          const grid = generateBusinessHoursGrid(parsedDate, occupied, 9, 19);
+          this.availableSlots.set(grid);
+
+          const hasOverlap = occupied.some((s) => {
+            const slotStart = parseFlexibleDateTime(s.startTime).getTime();
+            const slotEnd = parseFlexibleDateTime(s.endTime).getTime();
+            return selectedStart < slotEnd && selectedEnd > slotStart;
+          });
 
           this.hasConflict.set(hasOverlap);
           this.conflictWarning.set(
             hasOverlap
-              ? 'Existe un conflicto de horario con otra cita o bloqueo programado en este intervalo.'
+              ? 'Conflicto de horario: Ya existe una cita asignada en este rango.'
               : '',
           );
         },
         error: () => {
           this.hasConflict.set(false);
           this.conflictWarning.set('');
+          this.availableSlots.set(generateBusinessHoursGrid(parsedDate, [], 9, 19));
         },
       });
   }
 
-  selectSlot(slot: AvailabilitySlot): void {
+  selectSlot(slot: BusinessGridSlot): void {
     if (!slot.available) {
       return;
     }
@@ -248,7 +269,7 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
 
     if (this.hasConflict()) {
       this.errorMessage.set(
-        'Existe un conflicto de horario con otra cita o bloqueo en la agenda. Selecciona otro horario.',
+        'Conflicto de horario: Ya existe una cita asignada en este rango. Selecciona otro horario.',
       );
       return;
     }

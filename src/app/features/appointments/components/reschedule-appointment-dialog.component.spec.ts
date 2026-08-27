@@ -68,23 +68,19 @@ describe('RescheduleAppointmentDialogComponent', () => {
     expect(component.rescheduleForm.controls.durationMinutes.value).toBe(60);
   });
 
-  it('checks availability slots and sets state', () => {
+  it('checks availability slots and sets state with full 09:00 to 19:00 grid', () => {
     component.checkAvailability();
     expect(appointmentsService.getAvailability).toHaveBeenCalledWith({
       therapistId: 'therapist-789',
       date: expect.any(String),
       durationMinutes: 60,
     });
-    expect(component.availableSlots().length).toBe(1);
+    expect(component.availableSlots().length).toBe(11);
     expect(component.localTimeZone).toBeTruthy();
   });
 
   it('selects available slot and updates scheduledAt control', () => {
-    const slot = {
-      startTime: '2026-08-25T08:00:00.000Z',
-      endTime: '2026-08-25T09:00:00.000Z',
-      available: true,
-    };
+    const slot = component.availableSlots().find((s) => s.available)!;
     component.selectSlot(slot);
     expect(component.rescheduleForm.controls.scheduledAt.value).toBeDefined();
   });

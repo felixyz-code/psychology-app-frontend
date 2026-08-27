@@ -168,16 +168,19 @@
               <p>El horario seleccionado se solapa con una cita o bloqueo existente en la agenda.</p>
               @if (availableSlots().length) {
                 <div class="appointment-dialog__slot-suggestions">
-                  <span class="appointment-dialog__slot-label">Horarios disponibles hoy:</span>
+                  <span class="appointment-dialog__slot-label">Horarios laborales del día (09:00 - 19:00):</span>
                   <div class="appointment-dialog__slots-row">
                     @for (slot of availableSlots(); track slot.startTime) {
                       <button
                         mat-stroked-button
                         type="button"
                         class="appointment-dialog__slot-btn"
+                        [class.appointment-dialog__slot-btn--free]="slot.available"
+                        [class.appointment-dialog__slot-btn--busy]="!slot.available"
+                        [disabled]="!slot.available"
                         (click)="selectSlot(slot)"
                       >
-                        {{ slot.startTime | slice: 11 : 16 }}
+                        {{ slot.timeLabel }} ({{ slot.available ? 'Libre' : 'Ocupado' }})
                       </button>
                     }
                   </div>

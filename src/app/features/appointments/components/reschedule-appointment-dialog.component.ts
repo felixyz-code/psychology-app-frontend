@@ -11,11 +11,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, finalize, Subscription } from 'rxjs';
 
 import {
-  filterBusinessHourSlots,
+  BusinessGridSlot,
+  generateBusinessHoursGrid,
   localDateTimeValueToIso,
+  parseFlexibleDateTime,
   toDateTimeLocalValue,
 } from '../utils/appointment-datetime';
-import { Appointment, AvailabilitySlot } from '../models/appointment.models';
+import { Appointment } from '../models/appointment.models';
 import { AppointmentsService } from '../services/appointments.service';
 
 export interface RescheduleAppointmentDialogData {
@@ -52,7 +54,7 @@ export class RescheduleAppointmentDialogComponent implements OnInit, OnDestroy {
   readonly hasConflict = signal(false);
   readonly conflictWarning = signal('');
   readonly errorMessage = signal('');
-  readonly availableSlots = signal<AvailabilitySlot[]>([]);
+  readonly availableSlots = signal<BusinessGridSlot[]>([]);
   readonly localTimeZone = typeof Intl !== 'undefined' && Intl.DateTimeFormat
     ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local'
     : 'Local';
@@ -87,10 +89,21 @@ export class RescheduleAppointmentDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const selectedDate = scheduledAtValue.split('T')[0];
+    const parsedDate = parseFlexibleDateTime(scheduledAtValue);
+    if (isNaN(parsedDate.getTime())) {
+      this.hasConflict.set(false);
+      this.conflictWarning.set('');
+      this.availableSlots.set([]);
+      return;
+    }
+
+    const year = parsedDate.getFullYear();
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const selectedDate = `${year}-${month}-${day}`;
+
     const durationMinutes = this.rescheduleForm.controls.durationMinutes.value || 60;
-    const selectedIso = localDateTimeValueToIso(scheduledAtValue);
-    const selectedStart = new Date(selectedIso).getTime();
+    const selectedStart = parsedDate.getTime();
     const selectedEnd = selectedStart + durationMinutes * 60_000;
 
     this.isLoadingSlots.set(true);
@@ -105,40 +118,47 @@ export class RescheduleAppointmentDialogComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.isLoadingSlots.set(false)))
       .subscribe({
         next: (response) => {
-          const slots = response.slots || [];
-          this.availableSlots.set(filterBusinessHourSlots(slots));
-
-          const hasOverlap = slots
+          const rawSlots = response.slots || [];
+          const occupied = rawSlots
             .filter((s) => !s.available)
-            .some((s) => {
-              const isSameAsCurrent =
-                new Date(s.startTime).getTime() === new Date(this.appointment.scheduledAt).getTime();
-              if (isSameAsCurrent) {
-                return false;
-              }
-              const slotStart = new Date(s.startTime).getTime();
-              const slotEnd = new Date(s.endTime).getTime();
-              return selectedStart < slotEnd && selectedEnd > slotStart;
+            .filter((s) => {
+              const currentApptStart = parseFlexibleDateTime(this.appointment.scheduledAt).getTime();
+              const slotStart = parseFlexibleDateTime(s.startTime).getTime();
+              return slotStart !== currentApptStart;
             });
+
+          const grid = generateBusinessHoursGrid(parsedDate, occupied, 9, 19);
+          this.availableSlots.set(grid);
+
+          const hasOverlap = occupied.some((s) => {
+            const slotStart = parseFlexibleDateTime(s.startTime).getTime();
+            const slotEnd = parseFlexibleDateTime(s.endTime).getTime();
+            return selectedStart < slotEnd && selectedEnd > slotStart;
+          });
 
           this.hasConflict.set(hasOverlap);
           this.conflictWarning.set(
-            hasOverlap ? 'Existe un conflicto con otra cita o bloqueo programado para este horario.' : '',
+            hasOverlap
+              ? 'Conflicto de horario: Ya existe una cita asignada en este rango.'
+              : '',
           );
         },
         error: () => {
           this.hasConflict.set(false);
           this.conflictWarning.set('');
+          this.availableSlots.set(generateBusinessHoursGrid(parsedDate, [], 9, 19));
         },
       });
   }
 
-  selectSlot(slot: AvailabilitySlot): void {
+  selectSlot(slot: BusinessGridSlot): void {
     if (!slot.available) {
       return;
     }
     const localString = toDateTimeLocalValue(slot.startTime);
     this.rescheduleForm.patchValue({ scheduledAt: localString });
+    this.hasConflict.set(false);
+    this.conflictWarning.set('');
   }
 
   submit(): void {

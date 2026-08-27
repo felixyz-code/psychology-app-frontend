@@ -209,11 +209,50 @@ describe('AppointmentFormDialogComponent', () => {
     component.checkAvailability();
 
     expect(component.hasConflict()).toBe(true);
-    expect(component.conflictWarning()).toContain('conflicto');
-    expect(component.availableSlots().length).toBe(1);
+    expect(component.conflictWarning()).toContain('Conflicto');
+    expect(component.availableSlots().length).toBe(11);
 
-    component.selectSlot(component.availableSlots()[0]);
+    const freeSlot = component.availableSlots().find((s) => s.available)!;
+    component.selectSlot(freeSlot);
     expect(component.hasConflict()).toBe(false);
+  });
+
+  it('detects collision with afternoon appointment at 13:00 and Latin 12h formatting', () => {
+    appointmentsService.getAvailability.mockReturnValue(
+      of({
+        therapistId: 'psychologist-1',
+        date: '2026-08-27',
+        slotDurationMinutes: 60,
+        slots: [
+          {
+            startTime: new Date(2026, 7, 27, 13, 0, 0).toISOString(),
+            endTime: new Date(2026, 7, 27, 14, 0, 0).toISOString(),
+            available: false,
+            conflictType: 'APPOINTMENT',
+          },
+        ],
+      }),
+    );
+
+    const { component } = createComponent({
+      mode: 'create',
+      patients: [createPatient()],
+    });
+
+    component.appointmentForm.patchValue({
+      scheduledAt: '27/08/2026 01:00 p. m.',
+      durationMinutes: 60,
+    });
+    component.checkAvailability();
+
+    expect(component.hasConflict()).toBe(true);
+    expect(component.conflictWarning()).toContain('Conflicto de horario');
+
+    const slot13 = component.availableSlots().find((s) => s.timeLabel === '13:00');
+    expect(slot13?.available).toBe(false);
+
+    const slot14 = component.availableSlots().find((s) => s.timeLabel === '14:00');
+    expect(slot14?.available).toBe(true);
   });
 
   it('filters patients reactively by name, phone or email and handles selection/clearing', () => {
@@ -304,7 +343,7 @@ describe('AppointmentFormDialogComponent', () => {
     component.submit();
 
     expect(appointmentsService.createAppointment).not.toHaveBeenCalled();
-    expect(component.errorMessage()).toContain('conflicto');
+    expect(component.errorMessage()).toContain('Conflicto');
     expect(dialogRef.close).not.toHaveBeenCalled();
   });
 

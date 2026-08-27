@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   calculateSmartDefaultTime,
+  checkIntervalOverlap,
   endOfLocalDay,
   endOfLocalMonth,
   filterBusinessHourSlots,
+  generateBusinessHoursGrid,
   getLocalDayDifference,
   isAfterTodayLocal,
   isSameLocalDay,
@@ -12,6 +14,7 @@ import {
   isWithinLocalDateRange,
   localDateTimeValueToIso,
   parseAppointmentDate,
+  parseFlexibleDateTime,
   sortAppointmentsByScheduledAt,
   startOfLocalDay,
   startOfLocalMonth,
@@ -19,6 +22,103 @@ import {
 } from './appointment-datetime';
 
 describe('appointment-datetime utils', () => {
+  it('parseFlexibleDateTime correctly parses Latin 12h format with p. m. (01:00 p. m. -> 13:00)', () => {
+    const parsed = parseFlexibleDateTime('27/08/2026 01:00 p. m.');
+    expect(parsed.getFullYear()).toBe(2026);
+    expect(parsed.getMonth()).toBe(7); // August = index 7
+    expect(parsed.getDate()).toBe(27);
+    expect(parsed.getHours()).toBe(13);
+    expect(parsed.getMinutes()).toBe(0);
+  });
+
+  it('parseFlexibleDateTime correctly parses Latin 12h format with a. m. (09:30 a. m. -> 09:30)', () => {
+    const parsed = parseFlexibleDateTime('27/08/2026 09:30 a. m.');
+    expect(parsed.getFullYear()).toBe(2026);
+    expect(parsed.getMonth()).toBe(7);
+    expect(parsed.getDate()).toBe(27);
+    expect(parsed.getHours()).toBe(9);
+    expect(parsed.getMinutes()).toBe(30);
+  });
+
+  it('parseFlexibleDateTime correctly parses Latin 24h format (27/08/2026 15:45)', () => {
+    const parsed = parseFlexibleDateTime('27/08/2026 15:45');
+    expect(parsed.getFullYear()).toBe(2026);
+    expect(parsed.getMonth()).toBe(7);
+    expect(parsed.getDate()).toBe(27);
+    expect(parsed.getHours()).toBe(15);
+    expect(parsed.getMinutes()).toBe(45);
+  });
+
+  it('parseFlexibleDateTime correctly parses datetime-local string (2026-08-27T13:00)', () => {
+    const parsed = parseFlexibleDateTime('2026-08-27T13:00');
+    expect(parsed.getFullYear()).toBe(2026);
+    expect(parsed.getMonth()).toBe(7);
+    expect(parsed.getDate()).toBe(27);
+    expect(parsed.getHours()).toBe(13);
+    expect(parsed.getMinutes()).toBe(0);
+  });
+
+  it('generateBusinessHoursGrid generates all 11 slots from 09:00 to 19:00 and marks occupied slots', () => {
+    const targetDate = new Date(2026, 7, 27);
+    const occupied = [
+      {
+        startTime: new Date(2026, 7, 27, 13, 0, 0).toISOString(),
+        durationMinutes: 60,
+        type: 'APPOINTMENT' as const,
+      },
+    ];
+
+    const grid = generateBusinessHoursGrid(targetDate, occupied, 9, 19);
+    expect(grid).toHaveLength(11); // 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+
+    const labels = grid.map((g) => g.timeLabel);
+    expect(labels).toEqual([
+      '09:00',
+      '10:00',
+      '11:00',
+      '12:00',
+      '13:00',
+      '14:00',
+      '15:00',
+      '16:00',
+      '17:00',
+      '18:00',
+      '19:00',
+    ]);
+
+    const slot13 = grid.find((g) => g.timeLabel === '13:00');
+    expect(slot13?.available).toBe(false);
+    expect(slot13?.conflictType).toBe('APPOINTMENT');
+
+    const slot10 = grid.find((g) => g.timeLabel === '10:00');
+    expect(slot10?.available).toBe(true);
+
+    const slot19 = grid.find((g) => g.timeLabel === '19:00');
+    expect(slot19?.available).toBe(true);
+  });
+
+  it('checkIntervalOverlap detects overlapping intervals and non-overlapping intervals', () => {
+    // 13:00 to 14:00 vs 13:30 to 14:30 -> overlap
+    expect(
+      checkIntervalOverlap(
+        new Date(2026, 7, 27, 13, 0),
+        60,
+        new Date(2026, 7, 27, 13, 30),
+        60,
+      ),
+    ).toBe(true);
+
+    // 13:00 to 14:00 vs 14:00 to 15:00 -> no overlap (consecutive)
+    expect(
+      checkIntervalOverlap(
+        new Date(2026, 7, 27, 13, 0),
+        60,
+        new Date(2026, 7, 27, 14, 0),
+        60,
+      ),
+    ).toBe(false);
+  });
+
   it('calculateSmartDefaultTime computes next hour for 4:15 PM to 5:00 PM', () => {
     const reference = new Date(2026, 6, 15, 16, 15, 0); // 4:15 PM
     const calculated = calculateSmartDefaultTime(reference);
@@ -85,11 +185,12 @@ describe('appointment-datetime utils', () => {
     ];
 
     const filtered = filterBusinessHourSlots(rawSlots);
-    expect(filtered).toHaveLength(3);
+    expect(filtered).toHaveLength(4);
     expect(filtered.map((s: { startTime: string }) => s.startTime)).toEqual([
       new Date(2026, 6, 15, 9, 0, 0).toISOString(),
       new Date(2026, 6, 15, 14, 0, 0).toISOString(),
       new Date(2026, 6, 15, 18, 30, 0).toISOString(),
+      new Date(2026, 6, 15, 19, 0, 0).toISOString(),
     ]);
   });
 });
