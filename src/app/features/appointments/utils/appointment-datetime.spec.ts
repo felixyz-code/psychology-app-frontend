@@ -1,12 +1,14 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   calculateSmartDefaultTime,
   endOfLocalDay,
   endOfLocalMonth,
+  filterBusinessHourSlots,
   getLocalDayDifference,
   isAfterTodayLocal,
   isSameLocalDay,
   isTomorrowLocal,
+  isWithinBusinessHours,
   isWithinLocalDateRange,
   localDateTimeValueToIso,
   parseAppointmentDate,
@@ -71,13 +73,23 @@ describe('appointment-datetime utils', () => {
     expect(isWithinLocalDateRange(today, today, tomorrow)).toBe(true);
   });
 
-  it('sorts appointments by scheduledAt ascending', () => {
-    const list = [
-      { id: '2', scheduledAt: '2026-07-15T18:00:00.000Z' },
-      { id: '1', scheduledAt: '2026-07-15T10:00:00.000Z' },
+  it('filters slots to business hours between 09:00 and 19:00', () => {
+    const rawSlots = [
+      { startTime: new Date(2026, 6, 15, 1, 0, 0).toISOString(), available: true },
+      { startTime: new Date(2026, 6, 15, 8, 30, 0).toISOString(), available: true },
+      { startTime: new Date(2026, 6, 15, 9, 0, 0).toISOString(), available: true },
+      { startTime: new Date(2026, 6, 15, 14, 0, 0).toISOString(), available: true },
+      { startTime: new Date(2026, 6, 15, 18, 30, 0).toISOString(), available: true },
+      { startTime: new Date(2026, 6, 15, 19, 0, 0).toISOString(), available: true },
+      { startTime: new Date(2026, 6, 15, 22, 0, 0).toISOString(), available: true },
     ];
-    const sorted = sortAppointmentsByScheduledAt(list);
-    expect(sorted[0].id).toBe('1');
-    expect(sorted[1].id).toBe('2');
+
+    const filtered = filterBusinessHourSlots(rawSlots);
+    expect(filtered).toHaveLength(3);
+    expect(filtered.map((s: { startTime: string }) => s.startTime)).toEqual([
+      new Date(2026, 6, 15, 9, 0, 0).toISOString(),
+      new Date(2026, 6, 15, 14, 0, 0).toISOString(),
+      new Date(2026, 6, 15, 18, 30, 0).toISOString(),
+    ]);
   });
 });

@@ -17,6 +17,7 @@ import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import {
   calculateSmartDefaultTime,
+  filterBusinessHourSlots,
   localDateTimeValueToIso,
   toDateTimeLocalValue,
 } from '../utils/appointment-datetime';
@@ -196,12 +197,20 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           const slots = response.slots || [];
-          this.availableSlots.set(slots.filter((s) => s.available));
+          this.availableSlots.set(filterBusinessHourSlots(slots));
 
           const hasOverlap = slots
             .filter((s) => !s.available)
             .some((s) => {
               // If in edit mode and the conflict is the current appointment, skip it
+              if (this.mode === 'edit' && this.data.appointment) {
+                const isSameSlot =
+                  new Date(s.startTime).getTime() ===
+                  new Date(this.data.appointment.scheduledAt).getTime();
+                if (isSameSlot) {
+                  return false;
+                }
+              }
               const slotStart = new Date(s.startTime).getTime();
               const slotEnd = new Date(s.endTime).getTime();
               return selectedStart < slotEnd && selectedEnd > slotStart;
@@ -209,7 +218,9 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
 
           this.hasConflict.set(hasOverlap);
           this.conflictWarning.set(
-            hasOverlap ? 'Existe un conflicto de horario con otra cita o bloqueo programado.' : '',
+            hasOverlap
+              ? 'Existe un conflicto de horario con otra cita o bloqueo programado en este intervalo.'
+              : '',
           );
         },
         error: () => {
@@ -232,6 +243,13 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
 
   submit(): void {
     if (this.isSaving()) {
+      return;
+    }
+
+    if (this.hasConflict()) {
+      this.errorMessage.set(
+        'Existe un conflicto de horario con otra cita o bloqueo en la agenda. Selecciona otro horario.',
+      );
       return;
     }
 

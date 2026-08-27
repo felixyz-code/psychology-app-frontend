@@ -10,7 +10,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, finalize, Subscription } from 'rxjs';
 
-import { localDateTimeValueToIso, toDateTimeLocalValue } from '../utils/appointment-datetime';
+import {
+  filterBusinessHourSlots,
+  localDateTimeValueToIso,
+  toDateTimeLocalValue,
+} from '../utils/appointment-datetime';
 import { Appointment, AvailabilitySlot } from '../models/appointment.models';
 import { AppointmentsService } from '../services/appointments.service';
 
@@ -102,11 +106,16 @@ export class RescheduleAppointmentDialogComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           const slots = response.slots || [];
-          this.availableSlots.set(slots.filter((s) => s.available));
+          this.availableSlots.set(filterBusinessHourSlots(slots));
 
           const hasOverlap = slots
             .filter((s) => !s.available)
             .some((s) => {
+              const isSameAsCurrent =
+                new Date(s.startTime).getTime() === new Date(this.appointment.scheduledAt).getTime();
+              if (isSameAsCurrent) {
+                return false;
+              }
               const slotStart = new Date(s.startTime).getTime();
               const slotEnd = new Date(s.endTime).getTime();
               return selectedStart < slotEnd && selectedEnd > slotStart;
@@ -133,6 +142,11 @@ export class RescheduleAppointmentDialogComponent implements OnInit, OnDestroy {
   }
 
   submit(): void {
+    if (this.hasConflict()) {
+      this.errorMessage.set('Existe un conflicto de horario con otra cita o bloqueo.');
+      return;
+    }
+
     if (this.rescheduleForm.invalid || this.isSubmitting()) {
       this.rescheduleForm.markAllAsTouched();
       return;

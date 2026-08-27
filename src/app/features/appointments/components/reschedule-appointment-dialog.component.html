@@ -115,7 +115,7 @@
       color="primary"
       type="button"
       (click)="submit()"
-      [disabled]="rescheduleForm.invalid || isSubmitting()"
+      [disabled]="rescheduleForm.invalid || isSubmitting() || hasConflict()"
     >
       <mat-spinner *ngIf="isSubmitting()" diameter="18" class="button-spinner"></mat-spinner>
       <span *ngIf="!isSubmitting()">Confirmar Reprogramación</span>

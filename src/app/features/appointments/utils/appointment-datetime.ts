@@ -63,6 +63,32 @@ export function getLocalDayDifference(value: string | Date, reference: Date = ne
   return Math.round((targetDay - currentDay) / millisecondsPerDay);
 }
 
+export const DEFAULT_BUSINESS_HOURS = {
+  startHour: 9, // 09:00 AM
+  endHour: 19, // 07:00 PM (19:00)
+};
+
+export function isWithinBusinessHours(
+  dateValue: string | Date,
+  startHour: number = DEFAULT_BUSINESS_HOURS.startHour,
+  endHour: number = DEFAULT_BUSINESS_HOURS.endHour,
+): boolean {
+  const date = parseAppointmentDate(dateValue);
+  const hour = date.getHours();
+  return hour >= startHour && hour < endHour;
+}
+
+export function filterBusinessHourSlots<T extends { startTime: string; available?: boolean }>(
+  slots: T[],
+  startHour: number = DEFAULT_BUSINESS_HOURS.startHour,
+  endHour: number = DEFAULT_BUSINESS_HOURS.endHour,
+): T[] {
+  return slots.filter((slot) => {
+    const isAvailable = slot.available !== false;
+    return isAvailable && isWithinBusinessHours(slot.startTime, startHour, endHour);
+  });
+}
+
 export function calculateSmartDefaultTime(
   referenceDate: Date = new Date(),
   targetDate?: Date | string | null,
@@ -73,7 +99,14 @@ export function calculateSmartDefaultTime(
   const currentSeconds = referenceDate.getSeconds();
 
   const hasMinutes = currentMinutes > 0 || currentSeconds > 0;
-  const nextHour = hasMinutes ? currentHours + 1 : currentHours;
+  let nextHour = hasMinutes ? currentHours + 1 : currentHours;
+
+  // If outside of business hours (e.g. late night / early morning), default to 9:00 AM
+  if (nextHour < DEFAULT_BUSINESS_HOURS.startHour || nextHour >= DEFAULT_BUSINESS_HOURS.endHour) {
+    if (nextHour < DEFAULT_BUSINESS_HOURS.startHour) {
+      nextHour = DEFAULT_BUSINESS_HOURS.startHour;
+    }
+  }
 
   const result = new Date(target);
   result.setHours(nextHour, 0, 0, 0);

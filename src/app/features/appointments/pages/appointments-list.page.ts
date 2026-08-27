@@ -338,6 +338,7 @@ export class AppointmentsListPage {
 
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
+        this.toastService.success('Cita actualizada exitosamente.');
         this.loadAppointments();
       }
     });

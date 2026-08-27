@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { catchError, finalize, of } from 'rxjs';
@@ -14,6 +13,7 @@ import {
   AssessmentAdministration,
 } from '../../../../core/models/assessment.models';
 import { AssessmentsHttpService } from '../../../../core/services/assessments-http.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import {
   StatusBadgeComponent,
   StatusBadgeVariant,
@@ -32,7 +32,6 @@ import { AssessmentResultDialogComponent } from '../assessment-result-dialog/ass
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     MatTableModule,
     MatTooltipModule,
     SectionCardComponent,
@@ -51,7 +50,7 @@ export class AssessmentListComponent implements OnInit {
 
   private readonly assessmentsService = inject(AssessmentsHttpService);
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly toastService = inject(ToastService);
 
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
@@ -104,9 +103,7 @@ export class AssessmentListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((created) => {
       if (created) {
-        this.snackBar.open('Evaluación psicométrica asignada correctamente.', 'Cerrar', {
-          duration: 4000,
-        });
+        this.toastService.success('Evaluación psicométrica asignada correctamente.');
         this.loadAssessments();
         this.assessmentChanged.emit();
       }
@@ -122,17 +119,13 @@ export class AssessmentListComponent implements OnInit {
 
   copyRunnerLink(administration: AssessmentAdministration): void {
     if (!administration.accessToken) {
-      this.snackBar.open('Esta evaluación no tiene enlace remoto generado.', 'Cerrar', {
-        duration: 3000,
-      });
+      this.toastService.warning('Esta evaluación no tiene enlace remoto generado.');
       return;
     }
 
     const runnerUrl = `${window.location.origin}/assessment-runner/${administration.accessToken}`;
     navigator.clipboard.writeText(runnerUrl).then(() => {
-      this.snackBar.open('Enlace de evaluación copiado al portapapeles.', 'Cerrar', {
-        duration: 3500,
-      });
+      this.toastService.success('Enlace de evaluación copiado al portapapeles.');
     });
   }
 

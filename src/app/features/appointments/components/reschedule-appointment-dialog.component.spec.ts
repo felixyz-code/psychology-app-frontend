@@ -37,8 +37,8 @@ describe('RescheduleAppointmentDialogComponent', () => {
           date: '2026-08-25',
           slotDurationMinutes: 60,
           slots: [
-            { startTime: '2026-08-25T08:00:00.000Z', endTime: '2026-08-25T09:00:00.000Z', available: true },
-            { startTime: '2026-08-25T09:00:00.000Z', endTime: '2026-08-25T10:00:00.000Z', available: false },
+            { startTime: '2026-08-25T10:00:00.000', endTime: '2026-08-25T11:00:00.000', available: true },
+            { startTime: '2026-08-25T11:00:00.000', endTime: '2026-08-25T12:00:00.000', available: false },
           ],
         }),
       ),

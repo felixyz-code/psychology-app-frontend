@@ -253,7 +253,7 @@
     >
       <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>
       <div class="app-dialog__actions-group app-form-actions__group">
-        <button mat-flat-button type="submit" [disabled]="isSaving()">
+        <button mat-flat-button type="submit" [disabled]="isSaving() || hasConflict()">
           {{ getSubmitLabel() }}
         </button>
       </div>

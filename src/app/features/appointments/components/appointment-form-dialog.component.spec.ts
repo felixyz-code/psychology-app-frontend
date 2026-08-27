@@ -181,14 +181,14 @@ describe('AppointmentFormDialogComponent', () => {
         slotDurationMinutes: 60,
         slots: [
           {
-            startTime: new Date('2026-07-15T09:00').toISOString(),
-            endTime: new Date('2026-07-15T10:00').toISOString(),
+            startTime: new Date(2026, 6, 15, 9, 0, 0).toISOString(),
+            endTime: new Date(2026, 6, 15, 10, 0, 0).toISOString(),
             available: false,
             conflictType: 'APPOINTMENT',
           },
           {
-            startTime: new Date('2026-07-15T11:00').toISOString(),
-            endTime: new Date('2026-07-15T12:00').toISOString(),
+            startTime: new Date(2026, 6, 15, 11, 0, 0).toISOString(),
+            endTime: new Date(2026, 6, 15, 12, 0, 0).toISOString(),
             available: true,
           },
         ],
@@ -286,6 +286,26 @@ describe('AppointmentFormDialogComponent', () => {
 
     component.isCheckingAvailability.set(true);
     expect(component.availabilityStatus()).toBe('loading');
+  });
+
+  it('prevents submission when a schedule conflict is detected', () => {
+    const { component, dialogRef } = createComponent({
+      mode: 'create',
+      patients: [createPatient()],
+    });
+
+    component.appointmentForm.patchValue({
+      patientId: 'patient-1',
+      scheduledAt: '2026-07-15T10:00',
+      durationMinutes: 60,
+    });
+
+    component.hasConflict.set(true);
+    component.submit();
+
+    expect(appointmentsService.createAppointment).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toContain('conflicto');
+    expect(dialogRef.close).not.toHaveBeenCalled();
   });
 
   function createComponent(
