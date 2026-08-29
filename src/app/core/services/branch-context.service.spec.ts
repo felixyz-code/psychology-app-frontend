@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
@@ -41,6 +42,7 @@ describe('BranchContextService', () => {
     isActiveTenantReady: ReturnType<typeof vi.fn>;
     hasCapability: ReturnType<typeof vi.fn>;
     invalidations: { subscribe: ReturnType<typeof vi.fn> };
+    snapshot: ReturnType<typeof signal>;
   };
   let authStoreMock: {
     sessionChanges: { subscribe: ReturnType<typeof vi.fn> };
@@ -71,6 +73,7 @@ describe('BranchContextService', () => {
       isActiveTenantReady: vi.fn().mockReturnValue(true),
       hasCapability: vi.fn().mockReturnValue(true),
       invalidations: { subscribe: vi.fn() },
+      snapshot: signal({ membership: { role: 'ADMIN' } }),
     };
 
     authStoreMock = {
@@ -170,5 +173,66 @@ describe('BranchContextService', () => {
     expect(result).toEqual([]);
     expect(service.error()).toBe('Network error');
     expect(service.isLoading()).toBe(false);
+  });
+
+  it('computes badges and display names for primary, branch and all branches', async () => {
+    await service.loadBranches();
+
+    // Default primary branch
+    expect(service.currentBranchId()).toBe('branch-1');
+    expect(service.activeBranchBadge()).toBe('Matriz');
+    expect(service.activeBranchDisplayName()).toBe('Sede Central');
+    expect(service.isAllBranchesSelected()).toBe(false);
+
+    // Switch to branch-2
+    service.setActiveBranch('branch-2');
+    expect(service.activeBranchBadge()).toBe('Sucursal');
+    expect(service.activeBranchDisplayName()).toBe('Sede Sur');
+    expect(service.isAllBranchesSelected()).toBe(false);
+
+    // Switch to ALL
+    service.setActiveBranch('ALL');
+    expect(service.currentBranchId()).toBeNull();
+    expect(service.isAllBranchesSelected()).toBe(true);
+    expect(service.activeBranchBadge()).toBe('Todas');
+    expect(service.activeBranchDisplayName()).toBe('Todas las sedes');
+    expect(localStorage.getItem(ACTIVE_BRANCH_STORAGE_KEY)).toBe('ALL');
+  });
+
+  it('restores ALL from localStorage when user can select all branches', async () => {
+    localStorage.setItem(ACTIVE_BRANCH_STORAGE_KEY, 'ALL');
+
+    await service.loadBranches();
+
+    expect(service.currentBranchId()).toBeNull();
+    expect(service.isAllBranchesSelected()).toBe(true);
+    expect(service.activeBranchDisplayName()).toBe('Todas las sedes');
+  });
+
+  it('restricts non-admin users to assigned branches and prevents selecting ALL', async () => {
+    tenantContextStoreMock.snapshot.set({ membership: { role: 'RECEPTIONIST' } });
+    branchesServiceMock.getMyBranches.mockReturnValue(
+      of([
+        {
+          id: 'access-1',
+          organizationId: 'org-1',
+          userId: 'user-2',
+          branchId: 'branch-2',
+          isPrimary: true,
+          branch: mockBranch2,
+        } as UserBranchAccess,
+      ]),
+    );
+
+    const branches = await service.loadBranches();
+
+    expect(branches.length).toBe(1);
+    expect(branches[0].id).toBe('branch-2');
+    expect(service.canSelectAllBranches()).toBe(false);
+    expect(service.currentBranchId()).toBe('branch-2');
+
+    // Attempting to select ALL should be ignored for non-admin
+    service.setActiveBranch('ALL');
+    expect(service.currentBranchId()).toBe('branch-2');
   });
 });

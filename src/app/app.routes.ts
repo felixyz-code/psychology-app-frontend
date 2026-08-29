@@ -185,6 +185,14 @@ export const routes: Routes = [
           import('./features/branches/branches.routes').then((m) => m.branchesRoutes),
       },
       {
+        path: 'organization/branches',
+        redirectTo: 'branches',
+      },
+      {
+        path: 'organization-administration/branches',
+        redirectTo: 'branches',
+      },
+      {
         path: 'corporate',
         title: 'Gestión Corporativa PAEF | PsiqueOS',
         canActivate: [activeTenantGuard, capabilityGuard],

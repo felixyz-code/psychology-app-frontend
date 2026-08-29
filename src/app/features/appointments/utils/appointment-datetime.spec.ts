@@ -15,6 +15,7 @@ import {
   localDateTimeValueToIso,
   parseAppointmentDate,
   parseFlexibleDateTime,
+  resolveBusinessHours,
   sortAppointmentsByScheduledAt,
   startOfLocalDay,
   startOfLocalMonth,
@@ -58,7 +59,7 @@ describe('appointment-datetime utils', () => {
     expect(parsed.getMinutes()).toBe(0);
   });
 
-  it('generateBusinessHoursGrid generates all 11 slots from 09:00 to 19:00 and marks occupied slots', () => {
+  it('generateBusinessHoursGrid generates all 10 slots from default 09:00 to 18:00 and marks occupied slots', () => {
     const targetDate = new Date(2026, 7, 27);
     const occupied = [
       {
@@ -68,8 +69,8 @@ describe('appointment-datetime utils', () => {
       },
     ];
 
-    const grid = generateBusinessHoursGrid(targetDate, occupied, 9, 19);
-    expect(grid).toHaveLength(11); // 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+    const grid = generateBusinessHoursGrid(targetDate, occupied);
+    expect(grid).toHaveLength(10); // 09, 10, 11, 12, 13, 14, 15, 16, 17, 18
 
     const labels = grid.map((g) => g.timeLabel);
     expect(labels).toEqual([
@@ -83,7 +84,6 @@ describe('appointment-datetime utils', () => {
       '16:00',
       '17:00',
       '18:00',
-      '19:00',
     ]);
 
     const slot13 = grid.find((g) => g.timeLabel === '13:00');
@@ -93,8 +93,68 @@ describe('appointment-datetime utils', () => {
     const slot10 = grid.find((g) => g.timeLabel === '10:00');
     expect(slot10?.available).toBe(true);
 
-    const slot19 = grid.find((g) => g.timeLabel === '19:00');
-    expect(slot19?.available).toBe(true);
+    const slot18 = grid.find((g) => g.timeLabel === '18:00');
+    expect(slot18?.available).toBe(true);
+  });
+
+  it('generateBusinessHoursGrid supports custom startHour and endHour (e.g. 08:00 to 17:00)', () => {
+    const targetDate = new Date(2026, 7, 27);
+    const grid = generateBusinessHoursGrid(targetDate, [], 8, 17);
+    expect(grid).toHaveLength(10);
+    expect(grid[0].timeLabel).toBe('08:00');
+    expect(grid[grid.length - 1].timeLabel).toBe('17:00');
+  });
+
+  it('resolveBusinessHours falls back to 09:00 to 18:00 when no configuration is provided', () => {
+    const result = resolveBusinessHours(null, undefined);
+    expect(result).toEqual({ startHour: 9, endHour: 18 });
+  });
+
+  it('resolveBusinessHours reads workdayStartHour and workdayEndHour from branch', () => {
+    const branch = {
+      workdayStartHour: 8,
+      workdayEndHour: 16,
+    };
+    const result = resolveBusinessHours(branch);
+    expect(result).toEqual({ startHour: 8, endHour: 16 });
+  });
+
+  it('resolveBusinessHours reads businessHours object when workday fields not directly present', () => {
+    const settings = {
+      businessHours: {
+        startHour: 10,
+        endHour: 20,
+      },
+    };
+    const result = resolveBusinessHours(settings);
+    expect(result).toEqual({ startHour: 10, endHour: 20 });
+  });
+
+  it('checkIntervalOverlap accurately detects exact collision between 27/08/2026 13:00 and 27/08/2026 01:00 p. m.', () => {
+    const existingAppointment = {
+      scheduledAt: new Date(2026, 7, 27, 13, 0, 0).toISOString(),
+      durationMinutes: 60,
+    };
+
+    const selectedDateTimeString = '27/08/2026 01:00 p. m.';
+    const startNew = parseFlexibleDateTime(selectedDateTimeString);
+    const durationMinutes = 60;
+
+    const startA = startNew.getTime();
+    const endA = startA + durationMinutes * 60000;
+    const startB = new Date(existingAppointment.scheduledAt).getTime();
+    const endB = startB + (existingAppointment.durationMinutes || 60) * 60000;
+    const hasConflict = startA < endB && endA > startB;
+
+    expect(hasConflict).toBe(true);
+
+    const overlapDirect = checkIntervalOverlap(
+      startNew,
+      durationMinutes,
+      existingAppointment.scheduledAt,
+      existingAppointment.durationMinutes,
+    );
+    expect(overlapDirect).toBe(true);
   });
 
   it('checkIntervalOverlap detects overlapping intervals and non-overlapping intervals', () => {
@@ -173,24 +233,23 @@ describe('appointment-datetime utils', () => {
     expect(isWithinLocalDateRange(today, today, tomorrow)).toBe(true);
   });
 
-  it('filters slots to business hours between 09:00 and 19:00', () => {
+  it('filters slots to business hours between 09:00 and 18:00 by default', () => {
     const rawSlots = [
       { startTime: new Date(2026, 6, 15, 1, 0, 0).toISOString(), available: true },
       { startTime: new Date(2026, 6, 15, 8, 30, 0).toISOString(), available: true },
       { startTime: new Date(2026, 6, 15, 9, 0, 0).toISOString(), available: true },
       { startTime: new Date(2026, 6, 15, 14, 0, 0).toISOString(), available: true },
-      { startTime: new Date(2026, 6, 15, 18, 30, 0).toISOString(), available: true },
+      { startTime: new Date(2026, 6, 15, 18, 0, 0).toISOString(), available: true },
       { startTime: new Date(2026, 6, 15, 19, 0, 0).toISOString(), available: true },
       { startTime: new Date(2026, 6, 15, 22, 0, 0).toISOString(), available: true },
     ];
 
     const filtered = filterBusinessHourSlots(rawSlots);
-    expect(filtered).toHaveLength(4);
+    expect(filtered).toHaveLength(3);
     expect(filtered.map((s: { startTime: string }) => s.startTime)).toEqual([
       new Date(2026, 6, 15, 9, 0, 0).toISOString(),
       new Date(2026, 6, 15, 14, 0, 0).toISOString(),
-      new Date(2026, 6, 15, 18, 30, 0).toISOString(),
-      new Date(2026, 6, 15, 19, 0, 0).toISOString(),
+      new Date(2026, 6, 15, 18, 0, 0).toISOString(),
     ]);
   });
 });

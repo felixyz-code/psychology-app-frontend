@@ -131,6 +131,11 @@ describe('BranchesListPage', () => {
     expect(dialogMock.open).toHaveBeenCalled();
   });
 
+  it('opens schedule dialog on action click', () => {
+    component.openScheduleDialog(mockBranches[0]);
+    expect(dialogMock.open).toHaveBeenCalled();
+  });
+
   it('opens delete dialog on action click', () => {
     component.openDeleteDialog(mockBranches[0]);
     expect(dialogMock.open).toHaveBeenCalled();
@@ -154,7 +159,7 @@ describe('BranchesListPage', () => {
     expect(actionRows.length).toBe(2);
 
     const firstRowButtons = actionRows[0].querySelectorAll('button');
-    expect(firstRowButtons.length).toBe(3); // Assign, Edit, Delete
+    expect(firstRowButtons.length).toBe(4); // Schedule, Assign, Edit, Delete
   });
 
   it('handles error state when API fails', async () => {

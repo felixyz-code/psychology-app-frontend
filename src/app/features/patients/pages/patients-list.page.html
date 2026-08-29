@@ -207,6 +207,16 @@
                   <button
                     mat-icon-button
                     type="button"
+                    matTooltip="Transferir de sede"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); openTransferPatientDialog(patient)"
+                    [attr.aria-label]="'Transferir de sede a ' + getFullName(patient)"
+                  >
+                    <mat-icon>swap_horiz</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
                     matTooltip="Editar paciente"
                     [matTooltipShowDelay]="150"
                     (click)="stopRowClick($event); openEditPatientDialog(patient)"

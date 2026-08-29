@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,7 +7,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Subscription } from 'rxjs';
 
+import { BranchContextService } from '../../../core/services/branch-context.service';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
 import {
@@ -27,6 +29,7 @@ import {
 import { PatientDeleteDialogComponent } from '../components/patient-delete-dialog.component';
 import { PatientDetailDialogComponent } from '../components/patient-detail-dialog.component';
 import { PatientFormDialogComponent } from '../components/patient-form-dialog.component';
+import { PatientTransferDialogComponent } from '../components/patient-transfer-dialog/patient-transfer-dialog.component';
 import { Patient } from '../models/patient.models';
 import { PatientsService } from '../services/patients.service';
 import { CaseFilesService } from '../../case-files/services/case-files.service';
@@ -58,7 +61,7 @@ export type PatientClinicalFilterStatus = 'ALL' | 'ACTIVE' | 'PAUSED' | 'DISCHAR
   templateUrl: './patients-list.page.html',
   styleUrl: './patients-list.page.scss',
 })
-export class PatientsListPage {
+export class PatientsListPage implements OnDestroy {
   private static readonly SUMMARY_DATE_FORMATTER = new Intl.DateTimeFormat('es-MX', {
     day: '2-digit',
     month: '2-digit',
@@ -69,6 +72,8 @@ export class PatientsListPage {
   private readonly patientsService = inject(PatientsService);
   private readonly caseFilesService = inject(CaseFilesService);
   private readonly toastService = inject(ToastService);
+  private readonly branchContextService = inject(BranchContextService, { optional: true });
+  private branchSubscription?: Subscription;
 
   readonly displayedColumns = ['name', 'phoneNumber', 'email', 'birthDate', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
@@ -216,6 +221,11 @@ export class PatientsListPage {
 
   constructor() {
     this.loadPatients();
+    if (this.branchContextService) {
+      this.branchSubscription = this.branchContextService.branchChanges.subscribe(() => {
+        this.loadPatients();
+      });
+    }
   }
 
   loadPatients(): void {
@@ -417,6 +427,26 @@ export class PatientsListPage {
     });
   }
 
+  openTransferPatientDialog(patient: Patient): void {
+    const dialogRef = this.dialog.open(PatientTransferDialogComponent, {
+      width: '540px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      autoFocus: false,
+      disableClose: this.isLoading(),
+      data: {
+        patient,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((transferred) => {
+      if (transferred) {
+        this.toastService.success('Paciente transferido de sede exitosamente.');
+        this.loadPatients();
+      }
+    });
+  }
+
   openDeletePatientDialog(patient: Patient): void {
     const dialogRef = this.dialog.open(PatientDeleteDialogComponent, {
       width: '520px',
@@ -482,5 +512,9 @@ export class PatientsListPage {
     const date = new Date(value);
 
     return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  ngOnDestroy(): void {
+    this.branchSubscription?.unsubscribe();
   }
 }

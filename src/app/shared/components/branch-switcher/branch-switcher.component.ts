@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -12,22 +12,36 @@ import { TenantContextStore } from '../../../core/tenant-context/tenant-context.
 @Component({
   selector: 'app-branch-switcher',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, MatMenuModule, MatProgressSpinnerModule],
+  imports: [
+    MatButtonModule,
+    MatDividerModule,
+    MatIconModule,
+    MatMenuModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './branch-switcher.component.html',
   styleUrl: './branch-switcher.component.scss',
 })
 export class BranchSwitcherComponent implements OnInit {
   readonly branchContextService = inject(BranchContextService);
   readonly tenantContextStore = inject(TenantContextStore);
-  private readonly router = inject(Router, { optional: true });
 
   readonly availableBranches = this.branchContextService.availableBranches;
   readonly currentBranch = this.branchContextService.currentBranch;
+  readonly currentBranchId = this.branchContextService.currentBranchId;
   readonly isLoading = this.branchContextService.isLoading;
   readonly hasMultipleBranches = this.branchContextService.hasMultipleBranches;
+  readonly canSelectAllBranches = this.branchContextService.canSelectAllBranches;
+  readonly isAllBranchesSelected = this.branchContextService.isAllBranchesSelected;
+  readonly activeBranchBadge = this.branchContextService.activeBranchBadge;
+  readonly activeBranchDisplayName = this.branchContextService.activeBranchDisplayName;
 
   readonly isVisible = computed(() => {
     return this.tenantContextStore.isActiveTenantReady() && this.availableBranches().length > 0;
+  });
+
+  readonly isMenuEnabled = computed(() => {
+    return this.hasMultipleBranches() || this.canSelectAllBranches();
   });
 
   ngOnInit(): void {
@@ -36,36 +50,43 @@ export class BranchSwitcherComponent implements OnInit {
     }
   }
 
-  selectBranch(branchOrId: Branch | string): void {
-    const branchId = typeof branchOrId === 'string' ? branchOrId : branchOrId.id;
-    if (!branchId || branchId === this.currentBranch()?.id) {
+  selectBranch(branchOrIdOrNull: Branch | string | null): void {
+    let targetId: string | null = null;
+    if (branchOrIdOrNull === null || branchOrIdOrNull === 'ALL') {
+      targetId = 'ALL';
+    } else if (typeof branchOrIdOrNull === 'string') {
+      targetId = branchOrIdOrNull;
+    } else {
+      targetId = branchOrIdOrNull.id;
+    }
+
+    const currentId = this.currentBranchId();
+    if (targetId === 'ALL' && this.isAllBranchesSelected()) {
+      return;
+    }
+    if (targetId !== 'ALL' && targetId === currentId) {
       return;
     }
 
-    this.branchContextService.setActiveBranch(branchId);
+    this.branchContextService.setActiveBranch(targetId === 'ALL' ? null : targetId);
 
-    // Emit global event for components listening to window custom events
+    // Emit global event for any legacy components listening to window custom events
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('app:branch-changed', {
           detail: {
-            branchId,
-            branch: this.availableBranches().find((b) => b.id === branchId),
+            branchId: targetId === 'ALL' ? null : targetId,
+            branch:
+              targetId === 'ALL'
+                ? null
+                : this.availableBranches().find((b) => b.id === targetId),
           },
         }),
       );
     }
-
-    // Refresh active route so components / queries re-execute with new branch context
-    if (this.router) {
-      const currentUrl = this.router.url;
-      void this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-        void this.router?.navigateByUrl(currentUrl);
-      });
-    }
   }
 
-  switchBranch(branchId: string): void {
+  switchBranch(branchId: string | null): void {
     this.selectBranch(branchId);
   }
 }

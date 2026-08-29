@@ -4,10 +4,13 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
+  AssignProfessionalBranchDto,
   AssignUserBranchDto,
   Branch,
+  BranchProfessionalScheduleItem,
   CreateBranchDto,
   UpdateBranchDto,
+  UpdateProfessionalScheduleDto,
   UserBranchAccess,
 } from '../models/branch.models';
 
@@ -65,6 +68,42 @@ export class BranchesService {
   getBranchUsers(branchId: string): Observable<UserBranchAccess[]> {
     return this.http.get<UserBranchAccess[]>(
       `${this.basePath}/${encodeURIComponent(branchId)}/users`,
+    );
+  }
+
+  getBranchProfessionals(branchId: string): Observable<BranchProfessionalScheduleItem[]> {
+    return this.http.get<BranchProfessionalScheduleItem[]>(
+      `${this.basePath}/${encodeURIComponent(branchId)}/professionals`,
+    );
+  }
+
+  assignProfessional(
+    branchId: string,
+    dto: AssignProfessionalBranchDto,
+  ): Observable<BranchProfessionalScheduleItem> {
+    return this.http.post<BranchProfessionalScheduleItem>(
+      `${this.basePath}/${encodeURIComponent(branchId)}/professionals`,
+      dto,
+    );
+  }
+
+  updateProfessionalSchedule(
+    branchId: string,
+    userId: string,
+    dto: UpdateProfessionalScheduleDto,
+  ): Observable<{ success: boolean; count: number }> {
+    return this.http.put<{ success: boolean; count: number }>(
+      `${this.basePath}/${encodeURIComponent(branchId)}/professionals/${encodeURIComponent(userId)}/schedule`,
+      dto,
+    );
+  }
+
+  removeProfessional(
+    branchId: string,
+    userId: string,
+  ): Observable<{ success: boolean; message?: string }> {
+    return this.http.delete<{ success: boolean; message?: string }>(
+      `${this.basePath}/${encodeURIComponent(branchId)}/professionals/${encodeURIComponent(userId)}`,
     );
   }
 }

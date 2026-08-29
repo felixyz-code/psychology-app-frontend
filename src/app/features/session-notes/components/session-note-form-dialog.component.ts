@@ -121,11 +121,18 @@ export class SessionNoteFormDialogComponent implements OnInit, OnDestroy {
   readonly errorMessage = signal('');
   readonly autosaveStatus = signal<'idle' | 'saving' | 'saved'>('idle');
   readonly lastAutosavedAt = signal<string | null>(null);
+  /** True when a previously unsaved draft was found — user must confirm or discard */
+  readonly hasPendingDraft = signal(false);
+  /** Human-readable time when the pending draft was last auto-saved */
+  readonly pendingDraftSavedAt = signal<string | null>(null);
   readonly snippets = CLINICAL_SNIPPET_PRESETS;
   readonly mode = this.data.mode;
 
   private autosaveSubscription?: Subscription;
+  /** Temporarily holds the raw draft data until the user confirms or discards */
+  private pendingDraftData: { title: string; content: string; sessionDate: string } | null = null;
   private readonly draftStorageKey = `psiqueos_session_note_draft_${this.data.caseFileId}_${this.mode}${this.data.sessionNote ? `_${this.data.sessionNote.id}` : ''}`;
+
 
   readonly sessionNoteForm = this.formBuilder.nonNullable.group({
     title: [''],
@@ -298,21 +305,47 @@ export class SessionNoteFormDialogComponent implements OnInit, OnDestroy {
 
       const draft = JSON.parse(saved);
       if (draft && draft.content && this.mode === 'create') {
-        this.sessionNoteForm.patchValue({
+        // Show confirmation banner instead of silently patching the form
+        this.pendingDraftData = {
           title: draft.title || '',
           content: draft.content || '',
           sessionDate: draft.sessionDate || this.getCurrentDateTimeLocal(),
-        });
+        };
+        this.hasPendingDraft.set(true);
+
         if (draft.savedAt) {
           const date = new Date(draft.savedAt);
-          this.lastAutosavedAt.set(date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          this.autosaveStatus.set('saved');
+          this.pendingDraftSavedAt.set(
+            date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+          );
         }
       }
     } catch {
       // Ignore local storage parse errors safely
     }
   }
+
+  /** Restores the pending draft into the form and hides the banner. */
+  confirmRestoreDraft(): void {
+    if (!this.pendingDraftData) return;
+    this.sessionNoteForm.patchValue({
+      title: this.pendingDraftData.title,
+      content: this.pendingDraftData.content,
+      sessionDate: this.pendingDraftData.sessionDate,
+    });
+    this.autosaveStatus.set('saved');
+    this.pendingDraftData = null;
+    this.hasPendingDraft.set(false);
+  }
+
+  /** Discards the pending draft and removes it from localStorage. */
+  discardDraft(): void {
+    this.pendingDraftData = null;
+    this.hasPendingDraft.set(false);
+    this.pendingDraftSavedAt.set(null);
+    this.clearDraftLocal();
+  }
+
 
   private clearDraftLocal(): void {
     if (typeof window === 'undefined' || !window.localStorage) {

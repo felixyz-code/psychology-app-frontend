@@ -5,6 +5,7 @@ import { Branch, UserBranchAccess } from '../models/branch.models';
 import { BranchesService } from './branches.service';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 import { AuthStore } from '../auth/auth.store';
+import { resolveBusinessHours } from '../../features/appointments/utils/appointment-datetime';
 
 export const ACTIVE_BRANCH_STORAGE_KEY = 'app_active_branch_id';
 
@@ -14,8 +15,20 @@ export class BranchContextService {
   private readonly tenantContextStore = inject(TenantContextStore);
   private readonly authStore = inject(AuthStore);
 
+  private getInitialBranchId(): string | null {
+    try {
+      const persisted = localStorage.getItem(ACTIVE_BRANCH_STORAGE_KEY);
+      if (persisted && persisted !== 'ALL') {
+        return persisted;
+      }
+    } catch {
+      // Ignore
+    }
+    return null;
+  }
+
   private readonly availableBranchesSignal = signal<Branch[]>([]);
-  private readonly currentBranchIdSignal = signal<string | null>(null);
+  private readonly currentBranchIdSignal = signal<string | null>(this.getInitialBranchId());
   private readonly isLoadingSignal = signal<boolean>(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly branchChangesSubject = new Subject<string | null>();
@@ -24,13 +37,44 @@ export class BranchContextService {
   readonly currentBranchId = computed(() => this.currentBranchIdSignal());
   readonly currentBranch = computed(() => {
     const id = this.currentBranchIdSignal();
-    if (!id) return null;
+    if (!id || id === 'ALL') return null;
     return this.availableBranchesSignal().find((b) => b.id === id) ?? null;
   });
   readonly isLoading = computed(() => this.isLoadingSignal());
   readonly error = computed(() => this.errorSignal());
   readonly hasMultipleBranches = computed(() => this.availableBranchesSignal().length > 1);
   readonly branchChanges = this.branchChangesSubject.asObservable();
+  readonly effectiveBusinessHours = computed(() => {
+    return resolveBusinessHours(this.currentBranch());
+  });
+
+  readonly canSelectAllBranches = computed(() => {
+    const role = this.tenantContextStore.snapshot()?.membership?.role;
+    return role === 'OWNER' || role === 'ADMIN';
+  });
+
+  readonly isAllBranchesSelected = computed(() => {
+    return this.currentBranchIdSignal() === null && this.canSelectAllBranches();
+  });
+
+  readonly activeBranchBadge = computed<'Matriz' | 'Sucursal' | 'Todas' | null>(() => {
+    if (this.isAllBranchesSelected()) {
+      return 'Todas';
+    }
+    const branch = this.currentBranch();
+    if (!branch) {
+      return null;
+    }
+    return branch.isPrimary ? 'Matriz' : 'Sucursal';
+  });
+
+  readonly activeBranchDisplayName = computed<string>(() => {
+    if (this.isAllBranchesSelected()) {
+      return 'Todas las sedes';
+    }
+    const branch = this.currentBranch();
+    return branch ? branch.name : 'Seleccionar sede';
+  });
 
   private tenantSubscription?: Subscription;
 
@@ -65,9 +109,9 @@ export class BranchContextService {
 
     try {
       let branches: Branch[] = [];
-      const canManageOrg = this.tenantContextStore.hasCapability('organization.read');
+      const isGlobalAdmin = this.canSelectAllBranches();
 
-      if (canManageOrg) {
+      if (isGlobalAdmin) {
         // Admins can see all active organization branches
         const allBranches = await firstValueFrom(
           this.branchesService.findAll({ includeInactive: false }),
@@ -85,7 +129,7 @@ export class BranchContextService {
           isPrimary: b.id === primaryBranchId,
         }));
       } else {
-        // Regular users get their assigned branches
+        // Regular users get strictly their assigned branches
         const accesses = await firstValueFrom(this.branchesService.getMyBranches());
         branches = accesses
           .filter((a) => a.branch && a.branch.isActive)
@@ -107,7 +151,20 @@ export class BranchContextService {
     }
   }
 
-  setActiveBranch(branchId: string): void {
+  setActiveBranch(branchId: string | null): void {
+    if (branchId === null || branchId === 'ALL') {
+      if (this.canSelectAllBranches()) {
+        this.currentBranchIdSignal.set(null);
+        try {
+          localStorage.setItem(ACTIVE_BRANCH_STORAGE_KEY, 'ALL');
+        } catch {
+          // Ignore
+        }
+        this.branchChangesSubject.next(null);
+      }
+      return;
+    }
+
     const branch = this.availableBranchesSignal().find((b) => b.id === branchId);
     if (!branch) {
       return;
@@ -138,6 +195,11 @@ export class BranchContextService {
       return;
     }
 
+    if (branches.length === 1 && !this.canSelectAllBranches()) {
+      this.setActiveBranch(branches[0].id);
+      return;
+    }
+
     let persistedBranchId: string | null = null;
     try {
       persistedBranchId = localStorage.getItem(ACTIVE_BRANCH_STORAGE_KEY);
@@ -145,11 +207,17 @@ export class BranchContextService {
       // Ignore
     }
 
+    if (persistedBranchId === 'ALL' && this.canSelectAllBranches()) {
+      this.currentBranchIdSignal.set(null);
+      return;
+    }
+
     if (
       persistedBranchId &&
+      persistedBranchId !== 'ALL' &&
       branches.some((b) => b.id === persistedBranchId && b.isActive !== false)
     ) {
-      this.currentBranchIdSignal.set(persistedBranchId);
+      this.setActiveBranch(persistedBranchId);
       return;
     }
 

@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of, Subject, throwError } from 'rxjs';
 
 import { AuthStore } from '../../../core/auth/auth.store';
+import { BranchContextService } from '../../../core/services/branch-context.service';
 import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
@@ -14,6 +15,8 @@ describe('AppointmentFormDialogComponent', () => {
   let appointmentsService: {
     createAppointment: ReturnType<typeof vi.fn>;
     updateAppointment: ReturnType<typeof vi.fn>;
+    getAppointments: ReturnType<typeof vi.fn>;
+    getScheduleBlocks: ReturnType<typeof vi.fn>;
     getAvailability: ReturnType<typeof vi.fn>;
   };
 
@@ -21,6 +24,8 @@ describe('AppointmentFormDialogComponent', () => {
     appointmentsService = {
       createAppointment: vi.fn(),
       updateAppointment: vi.fn(),
+      getAppointments: vi.fn(() => of([])),
+      getScheduleBlocks: vi.fn(() => of([])),
       getAvailability: vi.fn(() =>
         of({ therapistId: 'psychologist-1', date: '2026-07-15', slotDurationMinutes: 60, slots: [] }),
       ),
@@ -210,7 +215,7 @@ describe('AppointmentFormDialogComponent', () => {
 
     expect(component.hasConflict()).toBe(true);
     expect(component.conflictWarning()).toContain('Conflicto');
-    expect(component.availableSlots().length).toBe(11);
+    expect(component.availableSlots().length).toBe(10);
 
     const freeSlot = component.availableSlots().find((s) => s.available)!;
     component.selectSlot(freeSlot);
@@ -253,6 +258,49 @@ describe('AppointmentFormDialogComponent', () => {
 
     const slot14 = component.availableSlots().find((s) => s.timeLabel === '14:00');
     expect(slot14?.available).toBe(true);
+  });
+
+  it('detects exact conflict when creating a new appointment at 27/08/2026 13:00 with existing appointment at 13:00 (60 min)', () => {
+    const existingAppt: Appointment = {
+      id: 'existing-fernanda',
+      patientId: 'patient-fernanda',
+      psychologistId: 'psychologist-1',
+      scheduledAt: new Date(2026, 7, 27, 13, 0, 0).toISOString(),
+      durationMinutes: 60,
+      status: 'SCHEDULED',
+      notes: 'Sesión Fernanda López Vega',
+      createdAt: '',
+      updatedAt: '',
+    };
+
+    appointmentsService.getAppointments.mockReturnValue(of([existingAppt]));
+
+    const { component, dialogRef } = createComponent({
+      mode: 'create',
+      patients: [createPatient({ id: 'patient-fernanda', firstName: 'Fernanda', lastName: 'López Vega' })],
+      existingAppointments: [existingAppt],
+    });
+
+    // Selecting 27/08/2026 01:00 p. m. (or 2026-08-27T13:00)
+    component.appointmentForm.patchValue({
+      patientId: 'patient-fernanda',
+      scheduledAt: '27/08/2026 01:00 p. m.',
+      durationMinutes: 60,
+    });
+
+    component.checkAvailability();
+
+    expect(component.hasConflict()).toBe(true);
+    expect(component.conflictWarning()).toBe(
+      'Conflicto de horario: Ya existe una cita asignada en este rango.',
+    );
+    expect(component.availabilityStatus()).toBe('conflict');
+
+    // Attempting submit must be blocked
+    component.submit();
+    expect(appointmentsService.createAppointment).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toContain('Conflicto de horario');
+    expect(dialogRef.close).not.toHaveBeenCalled();
   });
 
   it('filters patients reactively by name, phone or email and handles selection/clearing', () => {
@@ -353,6 +401,7 @@ describe('AppointmentFormDialogComponent', () => {
       patients?: Patient[];
       patientId?: string;
       appointment?: Appointment;
+      existingAppointments?: Appointment[];
     },
     getEffectiveDuration: () => number = () => 60,
   ): {
@@ -369,8 +418,15 @@ describe('AppointmentFormDialogComponent', () => {
         { provide: PatientsService, useValue: { getPatients: vi.fn(() => of([])) } },
         { provide: AuthStore, useValue: { user: () => ({ id: 'psychologist-1' }) } },
         {
+          provide: BranchContextService,
+          useValue: { currentBranch: () => null, effectiveBusinessHours: () => ({ startHour: 9, endHour: 18 }) },
+        },
+        {
           provide: OrganizationConfigurationStore,
-          useValue: { effectiveAppointmentDuration: getEffectiveDuration },
+          useValue: {
+            effectiveAppointmentDuration: getEffectiveDuration,
+            settings: () => null,
+          },
         },
       ],
     });
@@ -379,7 +435,7 @@ describe('AppointmentFormDialogComponent', () => {
   }
 });
 
-function createPatient(): Patient {
+function createPatient(overrides: Partial<Patient> = {}): Patient {
   return {
     id: 'patient-1',
     psychologistId: 'psychologist-1',
@@ -387,6 +443,7 @@ function createPatient(): Patient {
     lastName: 'Lopez',
     createdAt: '',
     updatedAt: '',
+    ...overrides,
   };
 }
 

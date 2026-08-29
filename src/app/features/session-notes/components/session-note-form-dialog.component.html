@@ -16,7 +16,40 @@
       </div>
     </div>
     <p>Registra el seguimiento clínico y evolución médica bajo los criterios de la NOM-004-SSA3-2012.</p>
+
+    <!-- Draft Restoration Banner: shown when an unsaved session draft is detected -->
+    @if (hasPendingDraft()) {
+      <div class="session-note-dialog__draft-banner" role="alert" aria-live="polite">
+        <div class="session-note-dialog__draft-banner-content">
+          <mat-icon class="session-note-dialog__draft-icon">history</mat-icon>
+          <div>
+            <strong>Borrador no guardado encontrado</strong>
+            @if (pendingDraftSavedAt()) {
+              <span class="session-note-dialog__draft-time">Guardado a las {{ pendingDraftSavedAt() }}</span>
+            }
+          </div>
+        </div>
+        <div class="session-note-dialog__draft-actions">
+          <button
+            type="button"
+            class="session-note-dialog__draft-btn session-note-dialog__draft-btn--restore"
+            (click)="confirmRestoreDraft()"
+          >
+            <mat-icon>restore</mat-icon>
+            <span>Restaurar</span>
+          </button>
+          <button
+            type="button"
+            class="session-note-dialog__draft-btn session-note-dialog__draft-btn--discard"
+            (click)="discardDraft()"
+          >
+            Descartar
+          </button>
+        </div>
+      </div>
+    }
   </div>
+
 
   <form
     class="session-note-dialog__form app-dialog__form app-form"

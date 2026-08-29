@@ -36,8 +36,13 @@ describe('BranchSwitcherComponent', () => {
 
   let availableBranchesSignal: ReturnType<typeof signal<Branch[]>>;
   let currentBranchSignal: ReturnType<typeof signal<Branch | null>>;
+  let currentBranchIdSignal: ReturnType<typeof signal<string | null>>;
   let isLoadingSignal: ReturnType<typeof signal<boolean>>;
   let hasMultipleBranchesSignal: ReturnType<typeof signal<boolean>>;
+  let canSelectAllBranchesSignal: ReturnType<typeof signal<boolean>>;
+  let isAllBranchesSelectedSignal: ReturnType<typeof signal<boolean>>;
+  let activeBranchBadgeSignal: ReturnType<typeof signal<'Matriz' | 'Sucursal' | 'Todas' | null>>;
+  let activeBranchDisplayNameSignal: ReturnType<typeof signal<string>>;
   let isActiveTenantReadyMock: ReturnType<typeof vi.fn>;
   let loadBranchesMock: ReturnType<typeof vi.fn>;
   let setActiveBranchMock: ReturnType<typeof vi.fn>;
@@ -45,8 +50,13 @@ describe('BranchSwitcherComponent', () => {
   beforeEach(async () => {
     availableBranchesSignal = signal<Branch[]>([mockBranch1, mockBranch2]);
     currentBranchSignal = signal<Branch | null>(mockBranch1);
+    currentBranchIdSignal = signal<string | null>('branch-1');
     isLoadingSignal = signal<boolean>(false);
     hasMultipleBranchesSignal = signal<boolean>(true);
+    canSelectAllBranchesSignal = signal<boolean>(true);
+    isAllBranchesSelectedSignal = signal<boolean>(false);
+    activeBranchBadgeSignal = signal<'Matriz' | 'Sucursal' | 'Todas' | null>('Matriz');
+    activeBranchDisplayNameSignal = signal<string>('Sede Central');
     isActiveTenantReadyMock = vi.fn().mockReturnValue(true);
     loadBranchesMock = vi.fn().mockResolvedValue([mockBranch1, mockBranch2]);
     setActiveBranchMock = vi.fn();
@@ -54,8 +64,13 @@ describe('BranchSwitcherComponent', () => {
     const branchContextServiceMock = {
       availableBranches: availableBranchesSignal,
       currentBranch: currentBranchSignal,
+      currentBranchId: currentBranchIdSignal,
       isLoading: isLoadingSignal,
       hasMultipleBranches: hasMultipleBranchesSignal,
+      canSelectAllBranches: canSelectAllBranchesSignal,
+      isAllBranchesSelected: isAllBranchesSelectedSignal,
+      activeBranchBadge: activeBranchBadgeSignal,
+      activeBranchDisplayName: activeBranchDisplayNameSignal,
       loadBranches: loadBranchesMock,
       setActiveBranch: setActiveBranchMock,
     };
@@ -103,8 +118,14 @@ describe('BranchSwitcherComponent', () => {
     dispatchSpy.mockRestore();
   });
 
-  it('renders single branch identity when hasMultipleBranches is false', () => {
+  it('switches to all branches when selecting ALL', () => {
+    component.selectBranch('ALL');
+    expect(setActiveBranchMock).toHaveBeenCalledWith(null);
+  });
+
+  it('renders single branch identity when hasMultipleBranches is false and cannot select all', () => {
     hasMultipleBranchesSignal.set(false);
+    canSelectAllBranchesSignal.set(false);
     availableBranchesSignal.set([mockBranch1]);
     fixture.detectChanges();
 

@@ -108,6 +108,93 @@
   }
 }
 
+// ── Draft Restoration Banner ──────────────────────────────────────────────────
+
+.session-note-dialog__draft-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #92400e;
+  font-size: 0.85rem;
+}
+
+.session-note-dialog__draft-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.session-note-dialog__draft-icon {
+  color: #d97706;
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.session-note-dialog__draft-time {
+  display: block;
+  font-size: 0.78rem;
+  color: #a16207;
+  margin-top: 0.1rem;
+}
+
+.session-note-dialog__draft-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.session-note-dialog__draft-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 34px;
+  padding: 0.3rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+
+  mat-icon {
+    font-size: 0.95rem;
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  &--restore {
+    background: #d97706;
+    color: #ffffff;
+    border-color: #b45309;
+
+    &:hover {
+      background: #b45309;
+    }
+  }
+
+  &--discard {
+    background: transparent;
+    color: #92400e;
+    border-color: rgba(245, 158, 11, 0.45);
+
+    &:hover {
+      background: rgba(245, 158, 11, 0.12);
+    }
+  }
+}
+
+
 .session-note-dialog__form {
   display: flex;
   flex: 1 1 auto;
@@ -178,6 +265,11 @@
     padding: 0.5rem;
   }
 
+  // Hide Ctrl+S badge on mobile — physical keyboard not available on touch devices
+  .session-note-dialog__shortcut-badge {
+    display: none;
+  }
+
   .clinical-snippets-bar {
     display: flex;
     flex-wrap: nowrap;
@@ -188,14 +280,30 @@
 
     .snippet-btn {
       flex: 0 0 auto;
-      min-height: 38px;
-      padding: 0.35rem 0.6rem;
+      min-height: 44px; // ← meets WCAG 2.5.5 touch target minimum
+      padding: 0.4rem 0.7rem;
       font-size: 0.75rem;
     }
   }
 
   .session-note-dialog__grid textarea.mat-mdc-input-element {
     min-height: 8.5rem;
+  }
+
+  // Draft banner stacks vertically on small screens
+  .session-note-dialog__draft-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .session-note-dialog__draft-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .session-note-dialog__draft-btn {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
   }
 
   .session-note-dialog__actions {

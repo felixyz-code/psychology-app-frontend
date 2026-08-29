@@ -9,26 +9,33 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, finalize, Subscription } from 'rxjs';
+import { catchError, debounceTime, finalize, forkJoin, of, Subscription } from 'rxjs';
 
 import { AuthStore } from '../../../core/auth/auth.store';
+import { BranchContextService } from '../../../core/services/branch-context.service';
 import { OrganizationConfigurationStore } from '../../../core/organization-configuration/organization-configuration.store';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import {
   BusinessGridSlot,
   calculateSmartDefaultTime,
+  checkIntervalOverlap,
   filterBusinessHourSlots,
   generateBusinessHoursGrid,
   localDateTimeValueToIso,
+  OccupiedInterval,
   parseFlexibleDateTime,
+  resolveBusinessHours,
   toDateTimeLocalValue,
 } from '../utils/appointment-datetime';
 import {
   Appointment,
   AppointmentStatus,
+  AvailabilityQuery,
+  AvailabilityResponse,
   AvailabilitySlot,
   CreateAppointmentRequest,
+  ScheduleBlock,
   UpdateAppointmentRequest,
 } from '../models/appointment.models';
 import { AppointmentsService } from '../services/appointments.service';
@@ -39,6 +46,7 @@ interface AppointmentFormDialogData {
   patients?: Patient[];
   appointment?: Appointment;
   scheduledAt?: Date;
+  existingAppointments?: Appointment[];
 }
 
 @Component({
@@ -64,7 +72,10 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly patientsService = inject(PatientsService);
   private readonly authStore = inject(AuthStore);
-  private readonly organizationConfigurationStore = inject(OrganizationConfigurationStore);
+  private readonly branchContextService = inject(BranchContextService, { optional: true });
+  private readonly organizationConfigurationStore = inject(OrganizationConfigurationStore, {
+    optional: true,
+  });
   private readonly formBuilder = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<AppointmentFormDialogComponent, boolean>);
 
@@ -74,20 +85,33 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
   readonly hasConflict = signal(false);
   readonly conflictWarning = signal('');
   readonly availableSlots = signal<BusinessGridSlot[]>([]);
+  readonly allAppointments = signal<Appointment[]>(
+    this.data.existingAppointments ?? (this.data.appointment ? [this.data.appointment] : []),
+  );
+  readonly scheduleBlocks = signal<ScheduleBlock[]>([]);
   readonly errorMessage = signal('');
   readonly mode = this.data.mode;
   readonly statuses: AppointmentStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
   readonly availablePatients = signal<Patient[]>(this.data.patients ?? []);
   readonly selectedPatient = signal<Patient | null>(null);
   readonly patientSearchTerm = signal('');
-  readonly localTimeZone = typeof Intl !== 'undefined' && Intl.DateTimeFormat
-    ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local'
-    : 'Local';
+  readonly localTimeZone =
+    typeof Intl !== 'undefined' && Intl.DateTimeFormat
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local'
+      : 'Local';
 
   readonly patientSearchControl = new FormControl<string | Patient>('');
 
   private valueChangeSubscription?: Subscription;
   private patientSearchSubscription?: Subscription;
+  private availabilitySubscription?: Subscription;
+
+  readonly businessHours = computed(() => {
+    return resolveBusinessHours(
+      this.branchContextService?.currentBranch(),
+      this.organizationConfigurationStore?.settings?.(),
+    );
+  });
 
   readonly filteredPatients = computed(() => {
     const term = this.patientSearchTerm().trim().toLowerCase();
@@ -161,7 +185,7 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.checkAvailability();
     this.valueChangeSubscription = this.appointmentForm.valueChanges
-      .pipe(debounceTime(400))
+      .pipe(debounceTime(300))
       .subscribe(() => {
         this.checkAvailability();
       });
@@ -170,83 +194,219 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.valueChangeSubscription?.unsubscribe();
     this.patientSearchSubscription?.unsubscribe();
+    this.availabilitySubscription?.unsubscribe();
+  }
+
+  formatTimeHour(hour: number): string {
+    return `${hour.toString().padStart(2, '0')}:00`;
   }
 
   checkAvailability(): void {
     const scheduledAtValue = this.appointmentForm.controls.scheduledAt.value;
+    const durationMinutes = Number(this.appointmentForm.controls.durationMinutes.value) || 60;
     const psychologistId = this.authStore.user()?.id;
 
-    if (!scheduledAtValue || !psychologistId) {
+    if (!scheduledAtValue) {
       this.hasConflict.set(false);
       this.conflictWarning.set('');
       this.availableSlots.set([]);
       return;
     }
 
-    const parsedDate = parseFlexibleDateTime(scheduledAtValue);
-    if (isNaN(parsedDate.getTime())) {
+    const startNew = parseFlexibleDateTime(scheduledAtValue);
+    if (isNaN(startNew.getTime())) {
       this.hasConflict.set(false);
       this.conflictWarning.set('');
       this.availableSlots.set([]);
       return;
     }
 
-    const year = parsedDate.getFullYear();
-    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
-    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const startA = startNew.getTime();
+    const endA = startA + durationMinutes * 60_000;
+    const { startHour, endHour } = this.businessHours();
+
+    // 1. Immediate local collision check against all known appointments
+    const knownAppts = this.allAppointments().filter((app) => {
+      if (this.mode === 'edit' && this.data.appointment && app.id === this.data.appointment.id) {
+        return false;
+      }
+      if (app.status === 'CANCELLED') {
+        return false;
+      }
+      if (psychologistId && app.psychologistId && app.psychologistId !== psychologistId) {
+        return false;
+      }
+      return true;
+    });
+
+    const hasImmediateApptOverlap = knownAppts.some((app) => {
+      const startB = new Date(app.scheduledAt).getTime();
+      const endB = startB + (app.durationMinutes || 60) * 60_000;
+      return startA < endB && endA > startB;
+    });
+
+    const hasImmediateBlockOverlap = this.scheduleBlocks().some((block) => {
+      const startB = new Date(block.startTime).getTime();
+      const endB = new Date(block.endTime).getTime();
+      return startA < endB && endA > startB;
+    });
+
+    if (hasImmediateApptOverlap || hasImmediateBlockOverlap) {
+      this.hasConflict.set(true);
+      this.conflictWarning.set('Conflicto de horario: Ya existe una cita asignada en este rango.');
+    }
+
+    const initialOccupied: OccupiedInterval[] = [
+      ...knownAppts.map((app) => ({
+        startTime: new Date(app.scheduledAt).getTime(),
+        durationMinutes: app.durationMinutes || 60,
+        type: 'APPOINTMENT' as const,
+      })),
+      ...this.scheduleBlocks().map((block) => ({
+        startTime: new Date(block.startTime).getTime(),
+        endTime: new Date(block.endTime).getTime(),
+        type: 'SCHEDULE_BLOCK' as const,
+        title: block.title,
+      })),
+    ];
+    this.availableSlots.set(
+      generateBusinessHoursGrid(startNew, initialOccupied, startHour, endHour),
+    );
+
+    // 2. Fetch full remote appointments, blocks, and availability from server
+    this.isCheckingAvailability.set(true);
+    this.availabilitySubscription?.unsubscribe();
+
+    const year = startNew.getFullYear();
+    const month = String(startNew.getMonth() + 1).padStart(2, '0');
+    const day = String(startNew.getDate()).padStart(2, '0');
     const selectedDate = `${year}-${month}-${day}`;
 
-    const durationMinutes = this.appointmentForm.controls.durationMinutes.value || 60;
-    const selectedStart = parsedDate.getTime();
-    const selectedEnd = selectedStart + durationMinutes * 60_000;
+    const availabilityQuery: AvailabilityQuery = {
+      therapistId: psychologistId || '',
+      date: selectedDate,
+      durationMinutes,
+      startHour,
+      endHour,
+    };
 
-    this.isCheckingAvailability.set(true);
-    this.appointmentsService
-      .getAvailability({
-        therapistId: psychologistId,
-        date: selectedDate,
-        durationMinutes,
-      })
+    this.availabilitySubscription = forkJoin({
+      appointments: this.appointmentsService
+        .getAppointments()
+        .pipe(catchError(() => of(this.allAppointments()))),
+      scheduleBlocks: psychologistId
+        ? this.appointmentsService
+            .getScheduleBlocks({ therapistId: psychologistId })
+            .pipe(catchError(() => of([] as ScheduleBlock[])))
+        : of([] as ScheduleBlock[]),
+      availability: psychologistId
+        ? this.appointmentsService
+            .getAvailability(availabilityQuery)
+            .pipe(catchError(() => of(null as AvailabilityResponse | null)))
+        : of(null as AvailabilityResponse | null),
+    })
       .pipe(finalize(() => this.isCheckingAvailability.set(false)))
       .subscribe({
-        next: (response) => {
-          const rawSlots = response.slots || [];
-          const occupied = rawSlots
-            .filter((s) => !s.available)
-            .filter((s) => {
-              // If in edit mode and the conflict is the current appointment, skip it
-              if (this.mode === 'edit' && this.data.appointment) {
-                const currentApptStart = parseFlexibleDateTime(
-                  this.data.appointment.scheduledAt,
-                ).getTime();
-                const slotStart = parseFlexibleDateTime(s.startTime).getTime();
-                if (slotStart === currentApptStart) {
-                  return false;
-                }
-              }
-              return true;
-            });
+        next: ({ appointments, scheduleBlocks, availability }) => {
+          this.allAppointments.set(appointments);
+          this.scheduleBlocks.set(scheduleBlocks);
 
-          const grid = generateBusinessHoursGrid(parsedDate, occupied, 9, 19);
-          this.availableSlots.set(grid);
-
-          const hasOverlap = occupied.some((s) => {
-            const slotStart = parseFlexibleDateTime(s.startTime).getTime();
-            const slotEnd = parseFlexibleDateTime(s.endTime).getTime();
-            return selectedStart < slotEnd && selectedEnd > slotStart;
+          const activeAppts = appointments.filter((app) => {
+            if (
+              this.mode === 'edit' &&
+              this.data.appointment &&
+              app.id === this.data.appointment.id
+            ) {
+              return false;
+            }
+            if (app.status === 'CANCELLED') {
+              return false;
+            }
+            if (psychologistId && app.psychologistId && app.psychologistId !== psychologistId) {
+              return false;
+            }
+            return true;
           });
 
-          this.hasConflict.set(hasOverlap);
+          const activeBlocks = scheduleBlocks.filter(
+            (b) => !psychologistId || !b.therapistId || b.therapistId === psychologistId,
+          );
+
+          const apptOverlap = activeAppts.some((app) => {
+            const startB = new Date(app.scheduledAt).getTime();
+            const endB = startB + (app.durationMinutes || 60) * 60_000;
+            return startA < endB && endA > startB;
+          });
+
+          const blockOverlap = activeBlocks.some((block) => {
+            const startB = new Date(block.startTime).getTime();
+            const endB = new Date(block.endTime).getTime();
+            return startA < endB && endA > startB;
+          });
+
+          // Also check server availability slots if present
+          let availabilitySlotOverlap = false;
+          if (availability?.slots) {
+            const occupiedSlots = availability.slots
+              .filter((s) => !s.available)
+              .filter((s) => {
+                if (this.mode === 'edit' && this.data.appointment) {
+                  const currentApptStart = new Date(this.data.appointment.scheduledAt).getTime();
+                  const slotStart = new Date(s.startTime).getTime();
+                  if (slotStart === currentApptStart) {
+                    return false;
+                  }
+                }
+                return true;
+              });
+
+            availabilitySlotOverlap = occupiedSlots.some((s) => {
+              const slotStart = new Date(s.startTime).getTime();
+              const slotEnd = new Date(s.endTime).getTime();
+              return startA < slotEnd && endA > slotStart;
+            });
+          }
+
+          const hasConflict = apptOverlap || blockOverlap || availabilitySlotOverlap;
+          this.hasConflict.set(hasConflict);
           this.conflictWarning.set(
-            hasOverlap
+            hasConflict
               ? 'Conflicto de horario: Ya existe una cita asignada en este rango.'
               : '',
           );
+
+          const occupiedIntervals: OccupiedInterval[] = [
+            ...activeAppts.map((app) => ({
+              startTime: new Date(app.scheduledAt).getTime(),
+              durationMinutes: app.durationMinutes || 60,
+              type: 'APPOINTMENT' as const,
+            })),
+            ...activeBlocks.map((b) => ({
+              startTime: new Date(b.startTime).getTime(),
+              endTime: new Date(b.endTime).getTime(),
+              type: 'SCHEDULE_BLOCK' as const,
+              title: b.title,
+            })),
+          ];
+
+          if (availability?.slots) {
+            for (const slot of availability.slots) {
+              if (!slot.available) {
+                occupiedIntervals.push({
+                  startTime: new Date(slot.startTime).getTime(),
+                  endTime: new Date(slot.endTime).getTime(),
+                  type: slot.conflictType || 'APPOINTMENT',
+                  title: slot.title,
+                });
+              }
+            }
+          }
+
+          const grid = generateBusinessHoursGrid(startNew, occupiedIntervals, startHour, endHour);
+          this.availableSlots.set(grid);
         },
         error: () => {
-          this.hasConflict.set(false);
-          this.conflictWarning.set('');
-          this.availableSlots.set(generateBusinessHoursGrid(parsedDate, [], 9, 19));
+          // Keep current local evaluation
         },
       });
   }
@@ -490,6 +650,6 @@ export class AppointmentFormDialogComponent implements OnInit, OnDestroy {
   private initialDurationMinutes(): number {
     return this.data.mode === 'edit'
       ? (this.data.appointment?.durationMinutes ?? 60)
-      : (this.organizationConfigurationStore.effectiveAppointmentDuration?.() || 60);
+      : (this.organizationConfigurationStore?.effectiveAppointmentDuration?.() || 60);
   }
 }

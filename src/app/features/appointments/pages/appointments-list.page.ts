@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -15,8 +15,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { catchError, finalize, forkJoin, of, Subscription } from 'rxjs';
 
+import { BranchContextService } from '../../../core/services/branch-context.service';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
 import {
@@ -98,7 +99,7 @@ interface AppointmentsTableState extends DataTableState {
   templateUrl: './appointments-list.page.html',
   styleUrl: './appointments-list.page.scss',
 })
-export class AppointmentsListPage {
+export class AppointmentsListPage implements OnDestroy {
   private static readonly SUMMARY_DATE_FORMATTER = new Intl.DateTimeFormat('es-MX', {
     day: '2-digit',
     month: '2-digit',
@@ -107,9 +108,11 @@ export class AppointmentsListPage {
 
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly patientsService = inject(PatientsService);
+  private readonly branchContextService = inject(BranchContextService, { optional: true });
   private readonly dialog = inject(MatDialog);
   private readonly toastService = inject(ToastService);
   private readonly defaultDateRange = this.createCurrentMonthDateRange();
+  private branchSubscription?: Subscription;
 
   readonly displayedColumns = ['patient', 'scheduledAt', 'durationMinutes', 'status', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
@@ -292,6 +295,11 @@ export class AppointmentsListPage {
 
   constructor() {
     this.loadAppointments();
+    if (this.branchContextService) {
+      this.branchSubscription = this.branchContextService.branchChanges.subscribe(() => {
+        this.loadAppointments();
+      });
+    }
   }
 
   loadAppointments(): void {
@@ -333,6 +341,7 @@ export class AppointmentsListPage {
         mode: 'edit',
         patientId: appointment.patientId,
         appointment,
+        existingAppointments: this.appointments(),
       },
     });
 
@@ -373,6 +382,7 @@ export class AppointmentsListPage {
         mode: 'create',
         patients: this.availablePatients(),
         scheduledAt: selectedDate,
+        existingAppointments: this.appointments(),
       },
     });
 
@@ -395,6 +405,7 @@ export class AppointmentsListPage {
       data: {
         appointment,
         patientName: this.getPatientName(appointment.patientId),
+        existingAppointments: this.appointments(),
       },
     });
 
@@ -731,5 +742,9 @@ export class AppointmentsListPage {
         new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + days),
       ),
     );
+  }
+
+  ngOnDestroy(): void {
+    this.branchSubscription?.unsubscribe();
   }
 }

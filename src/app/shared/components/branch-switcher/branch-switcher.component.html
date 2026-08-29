@@ -1,41 +1,72 @@
 @if (isVisible()) {
-  @if (hasMultipleBranches()) {
+  @if (isMenuEnabled()) {
     <button
       class="branch-control branch-menu-trigger"
       type="button"
       [matMenuTriggerFor]="branchMenu"
       [disabled]="isLoading()"
-      [attr.aria-label]="'Cambiar sede: ' + (currentBranch()?.name ?? 'Seleccionar sede')"
+      [attr.aria-label]="'Cambiar sede: ' + activeBranchDisplayName()"
     >
       @if (isLoading()) {
         <mat-spinner diameter="18" aria-label="Cargando sedes" />
+      } @else if (isAllBranchesSelected()) {
+        <mat-icon aria-hidden="true">domain</mat-icon>
       } @else {
         <mat-icon aria-hidden="true">apartment</mat-icon>
       }
-      <span class="branch-name">{{ currentBranch()?.name ?? 'Seleccionar sede' }}</span>
-      @if (currentBranch()?.isPrimary) {
-        <span class="branch-pill-badge" title="Sede principal / Matriz">Matriz</span>
+      <span class="branch-name">{{ activeBranchDisplayName() }}</span>
+      @if (activeBranchBadge(); as badge) {
+        <span
+          class="branch-pill-badge"
+          [class.branch-pill-badge--primary]="badge === 'Matriz'"
+          [class.branch-pill-badge--branch]="badge === 'Sucursal'"
+          [class.branch-pill-badge--all]="badge === 'Todas'"
+          [title]="badge === 'Matriz' ? 'Sede principal / Matriz' : (badge === 'Todas' ? 'Vista global consolidada' : 'Sucursal operativa')"
+        >
+          {{ badge }}
+        </span>
       }
       <mat-icon class="branch-control__chevron" aria-hidden="true">expand_more</mat-icon>
     </button>
 
     <mat-menu #branchMenu="matMenu" xPosition="before" class="branch-switch-menu">
       <div class="branch-switch-menu__heading">Sedes disponibles</div>
+
+      @if (canSelectAllBranches()) {
+        <button
+          mat-menu-item
+          type="button"
+          class="branch-switch-menu__item"
+          [disabled]="isLoading() || isAllBranchesSelected()"
+          [attr.aria-current]="isAllBranchesSelected() ? 'true' : null"
+          (click)="selectBranch('ALL')"
+        >
+          <mat-icon aria-hidden="true">
+            {{ isAllBranchesSelected() ? 'check' : 'domain' }}
+          </mat-icon>
+          <span class="branch-menu-label">Todas las sedes</span>
+          <span class="branch-menu-badge branch-menu-badge--all">Todas</span>
+        </button>
+        <mat-divider />
+      }
+
       @for (branch of availableBranches(); track branch.id) {
         <button
           mat-menu-item
           type="button"
           class="branch-switch-menu__item"
-          [disabled]="isLoading() || branch.id === currentBranch()?.id"
-          [attr.aria-current]="branch.id === currentBranch()?.id ? 'true' : null"
+          [disabled]="isLoading() || branch.id === currentBranchId()"
+          [attr.aria-current]="branch.id === currentBranchId() ? 'true' : null"
           (click)="selectBranch(branch)"
         >
           <mat-icon aria-hidden="true">
-            {{ branch.id === currentBranch()?.id ? 'check' : 'apartment' }}
+            {{ branch.id === currentBranchId() ? 'check' : 'apartment' }}
           </mat-icon>
           <span class="branch-menu-label">{{ branch.name }}</span>
           @if (branch.isPrimary) {
-            <span class="branch-menu-badge">Matriz</span>
+            <span class="branch-menu-badge branch-menu-badge--primary">Matriz</span>
+          } @else {
+            <span class="branch-menu-badge branch-menu-badge--branch">Sucursal</span>
           }
         </button>
       }
@@ -45,7 +76,9 @@
       <mat-icon aria-hidden="true">apartment</mat-icon>
       <span class="branch-name">{{ branch.name }}</span>
       @if (branch.isPrimary) {
-        <span class="branch-pill-badge" title="Sede principal / Matriz">Matriz</span>
+        <span class="branch-pill-badge branch-pill-badge--primary" title="Sede principal / Matriz">Matriz</span>
+      } @else {
+        <span class="branch-pill-badge branch-pill-badge--branch" title="Sucursal operativa">Sucursal</span>
       }
     </div>
   }

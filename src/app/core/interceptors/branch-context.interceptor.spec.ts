@@ -69,6 +69,16 @@ describe('branchContextInterceptor', () => {
     req.flush({});
   });
 
+  it('omits x-branch-id header when active branch is set to ALL', () => {
+    currentBranchIdSignal.set('ALL');
+
+    client.get('/api/patients').subscribe();
+
+    const req = httpTesting.expectOne('/api/patients');
+    expect(req.request.headers.has('x-branch-id')).toBe(false);
+    req.flush([]);
+  });
+
   it('preserves existing custom x-branch-id header if already present', () => {
     currentBranchIdSignal.set('branch-default');
 

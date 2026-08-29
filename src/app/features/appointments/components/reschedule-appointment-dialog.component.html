@@ -62,7 +62,7 @@
 
       <div *ngIf="availableSlots().length > 0" class="reschedule-dialog__slots-section">
         <div class="slots-header">
-          <span class="slots-title">Horarios laborales del día (09:00 - 19:00):</span>
+          <span class="slots-title">Horarios laborales del día ({{ formatTimeHour(businessHours().startHour) }} - {{ formatTimeHour(businessHours().endHour) }}):</span>
           <span class="slots-hint">Verde = Libre | Gris = Ocupado</span>
         </div>
         <div class="reschedule-dialog__slots-grid">

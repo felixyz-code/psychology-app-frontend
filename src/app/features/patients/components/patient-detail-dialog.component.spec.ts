@@ -115,6 +115,20 @@ describe('PatientDetailDialogComponent', () => {
     expect(caseFilesService.getWorkspace).toHaveBeenCalledTimes(3);
   });
 
+  it('refreshes the workspace after patient transfer completes', () => {
+    caseFilesService.getWorkspace.mockReturnValue(of(createWorkspace()));
+    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    const component = createComponent({ caseFileId: 'case-file-1' });
+
+    component.openTransferPatientDialog();
+
+    expect(dialog.open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ data: { patient: component.patient() } }),
+    );
+    expect(caseFilesService.getWorkspace).toHaveBeenCalledTimes(2);
+  });
+
   it('refreshes the workspace once after a session note is created', () => {
     expectSessionNoteActionRefresh(
       (component) => component.openCreateSessionNoteDialog(),

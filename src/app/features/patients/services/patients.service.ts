@@ -3,7 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { CreatePatientRequest, Patient, UpdatePatientRequest } from '../models/patient.models';
+import {
+  CreatePatientRequest,
+  Patient,
+  TransferPatientRequest,
+  UpdatePatientRequest,
+} from '../models/patient.models';
 
 @Injectable({ providedIn: 'root' })
 export class PatientsService {
@@ -24,6 +29,16 @@ export class PatientsService {
 
   updatePatient(id: string, payload: UpdatePatientRequest): Observable<Patient> {
     return this.http.patch<Patient>(`${this.apiUrl}/patients/${id}`, payload);
+  }
+
+  transferPatient(
+    id: string,
+    payload: TransferPatientRequest,
+  ): Observable<Patient> {
+    return this.http.post<Patient>(
+      `${this.apiUrl}/patients/${id}/transfer`,
+      payload,
+    );
   }
 
   deletePatient(id: string): Observable<void> {

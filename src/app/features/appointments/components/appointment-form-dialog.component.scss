@@ -52,6 +52,14 @@
   margin-top: -0.1rem;
 }
 
+.appointment-dialog__agenda-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .appointment-dialog__error,
 .appointment-dialog__saving {
   margin-top: 0.25rem;
@@ -83,20 +91,45 @@
   resize: vertical;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .appointment-dialog {
-    max-height: calc(100dvh - 1.25rem);
-    height: calc(100dvh - 1.25rem);
+    max-height: calc(100dvh - 1rem);
+    height: calc(100dvh - 1rem);
   }
 
   .appointment-dialog__form {
-    gap: 1.25rem;
+    gap: 1rem;
   }
 
   .appointment-dialog__body {
     padding-right: 0;
   }
+
+  // Single-column grid on mobile to avoid horizontal overflow
+  .appointment-dialog__grid.app-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment-dialog__section {
+    padding: 0.85rem;
+    border-radius: 12px;
+  }
+
+  // Slot suggestion buttons: enlarge to 44px for touch targets (were 28px)
+  .appointment-dialog__slot-btn {
+    height: 44px !important;
+    line-height: 44px !important;
+    min-width: 68px !important;
+    font-size: 0.8rem !important;
+    padding: 0 0.75rem !important;
+    border-radius: 8px !important;
+  }
+
+  .appointment-dialog__slots-row {
+    gap: 0.5rem;
+  }
 }
+
 
 .patient-search-prefix-icon {
   margin-right: 0.35rem;

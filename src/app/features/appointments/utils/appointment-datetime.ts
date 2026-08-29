@@ -135,8 +135,52 @@ export function getLocalDayDifference(value: string | Date, reference: Date = ne
 
 export const DEFAULT_BUSINESS_HOURS = {
   startHour: 9, // 09:00 AM
-  endHour: 19, // 07:00 PM (19:00)
+  endHour: 18, // 06:00 PM (18:00)
 };
+
+export interface BusinessHoursConfig {
+  workdayStartHour?: number | null;
+  workdayEndHour?: number | null;
+  businessHours?: {
+    startHour?: number | null;
+    endHour?: number | null;
+  } | null;
+}
+
+export function resolveBusinessHours(
+  ...configs: (BusinessHoursConfig | null | undefined)[]
+): { startHour: number; endHour: number } {
+  for (const config of configs) {
+    if (!config) continue;
+    const start = config.workdayStartHour ?? config.businessHours?.startHour;
+    const end = config.workdayEndHour ?? config.businessHours?.endHour;
+    if (typeof start === 'number' && typeof end === 'number' && !isNaN(start) && !isNaN(end)) {
+      return { startHour: start, endHour: end };
+    }
+    if (typeof start === 'number' && !isNaN(start)) {
+      return {
+        startHour: start,
+        endHour:
+          typeof config.businessHours?.endHour === 'number' && !isNaN(config.businessHours.endHour)
+            ? config.businessHours.endHour
+            : DEFAULT_BUSINESS_HOURS.endHour,
+      };
+    }
+    if (typeof end === 'number' && !isNaN(end)) {
+      return {
+        startHour:
+          typeof config.businessHours?.startHour === 'number' && !isNaN(config.businessHours.startHour)
+            ? config.businessHours.startHour
+            : DEFAULT_BUSINESS_HOURS.startHour,
+        endHour: end,
+      };
+    }
+  }
+  return {
+    startHour: DEFAULT_BUSINESS_HOURS.startHour,
+    endHour: DEFAULT_BUSINESS_HOURS.endHour,
+  };
+}
 
 export function isWithinBusinessHours(
   dateValue: string | Date,
@@ -168,8 +212,8 @@ export interface BusinessGridSlot {
 }
 
 export interface OccupiedInterval {
-  startTime: string | Date;
-  endTime?: string | Date;
+  startTime: string | Date | number;
+  endTime?: string | Date | number;
   durationMinutes?: number;
   type?: 'APPOINTMENT' | 'SCHEDULE_BLOCK';
   title?: string;
@@ -177,7 +221,7 @@ export interface OccupiedInterval {
 }
 
 /**
- * Generates all 1-hour slots from startHour (09:00) through endHour (19:00 inclusive)
+ * Generates all 1-hour slots from startHour (09:00) through endHour (18:00 inclusive)
  * for the selected date, evaluating availability against known occupied intervals.
  */
 export function generateBusinessHoursGrid(
@@ -203,8 +247,21 @@ export function generateBusinessHoursGrid(
       if (occ.available === true) {
         return false;
       }
-      const occStart = parseFlexibleDateTime(occ.startTime).getTime();
-      let occEnd = occ.endTime ? parseFlexibleDateTime(occ.endTime).getTime() : 0;
+      const occStart =
+        typeof occ.startTime === 'number'
+          ? occ.startTime
+          : occ.startTime instanceof Date
+            ? occ.startTime.getTime()
+            : parseFlexibleDateTime(occ.startTime).getTime();
+
+      let occEnd = occ.endTime
+        ? typeof occ.endTime === 'number'
+          ? occ.endTime
+          : occ.endTime instanceof Date
+            ? occ.endTime.getTime()
+            : parseFlexibleDateTime(occ.endTime).getTime()
+        : 0;
+
       if (!occEnd && occ.durationMinutes) {
         occEnd = occStart + occ.durationMinutes * 60_000;
       }
@@ -233,15 +290,26 @@ export function generateBusinessHoursGrid(
  * Evaluates whether two intervals overlap: [startA < endB && endA > startB]
  */
 export function checkIntervalOverlap(
-  startA: string | Date,
+  startA: string | Date | number,
   durationMinutesA: number,
-  startB: string | Date,
+  startB: string | Date | number,
   durationMinutesB: number,
 ): boolean {
-  const startMsA = parseFlexibleDateTime(startA).getTime();
+  const startMsA =
+    typeof startA === 'number'
+      ? startA
+      : startA instanceof Date
+        ? startA.getTime()
+        : parseFlexibleDateTime(startA).getTime();
   const endMsA = startMsA + durationMinutesA * 60_000;
-  const startMsB = parseFlexibleDateTime(startB).getTime();
-  const endMsB = startMsB + durationMinutesB * 60_000;
+
+  const startMsB =
+    typeof startB === 'number'
+      ? startB
+      : startB instanceof Date
+        ? startB.getTime()
+        : parseFlexibleDateTime(startB).getTime();
+  const endMsB = startMsB + (durationMinutesB || 60) * 60_000;
 
   return startMsA < endMsB && endMsA > startMsB;
 }

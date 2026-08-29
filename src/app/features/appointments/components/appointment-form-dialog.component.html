@@ -99,7 +99,7 @@
 
       <section class="appointment-dialog__section app-form-section">
         <div class="app-form-section__header">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+          <div class="appointment-dialog__agenda-header-row">
             <div>
               <h3>Agenda</h3>
               <p>
@@ -168,7 +168,7 @@
               <p>El horario seleccionado se solapa con una cita o bloqueo existente en la agenda.</p>
               @if (availableSlots().length) {
                 <div class="appointment-dialog__slot-suggestions">
-                  <span class="appointment-dialog__slot-label">Horarios laborales del día (09:00 - 19:00):</span>
+                  <span class="appointment-dialog__slot-label">Horarios laborales del día ({{ formatTimeHour(businessHours().startHour) }} - {{ formatTimeHour(businessHours().endHour) }}):</span>
                   <div class="appointment-dialog__slots-row">
                     @for (slot of availableSlots(); track slot.startTime) {
                       <button
