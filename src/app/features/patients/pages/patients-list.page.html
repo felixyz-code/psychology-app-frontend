@@ -51,40 +51,13 @@
 
   <app-section-card title="Listado de pacientes" subtitle="Gestion de pacientes registrados.">
     @if (isLoading()) {
-      <div class="patients-loading-state" aria-label="Cargando pacientes" aria-busy="true">
-        <div class="patients-loading-state__header">
-          <span
-            class="app-skeleton-line patients-skeleton-line patients-skeleton-line--search"
-            aria-hidden="true"
-          ></span>
-          <span
-            class="app-skeleton-line patients-skeleton-line patients-skeleton-line--meta"
-            aria-hidden="true"
-          ></span>
-        </div>
-
-        <div class="patients-loading-state__table" aria-hidden="true">
-          @for (row of tableSkeletonRows; track $index) {
-            <div class="patients-loading-row">
-              <span
-                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--name"
-              ></span>
-              <span
-                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--contact"
-              ></span>
-              <span
-                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--contact"
-              ></span>
-              <span
-                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--date"
-              ></span>
-              <span
-                class="app-skeleton-line patients-skeleton-line patients-skeleton-line--actions"
-              ></span>
-            </div>
-          }
-        </div>
-      </div>
+      <app-skeleton-table
+        [rows]="6"
+        [columns]="4"
+        [hasToolbar]="true"
+        [hasPagination]="true"
+        [hasActionsColumn]="true"
+      />
     } @else if (errorMessage()) {
       <div
         class="patients-state patients-state--error app-table-feedback-state app-table-feedback-state--error"
@@ -230,6 +203,16 @@
                     [attr.aria-label]="'Exportar Ficha Clínica de ' + getFullName(patient)"
                   >
                     <mat-icon>picture_as_pdf</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Transferir de sede"
+                    [matTooltipShowDelay]="150"
+                    (click)="stopRowClick($event); openTransferPatientDialog(patient)"
+                    [attr.aria-label]="'Transferir de sede a ' + getFullName(patient)"
+                  >
+                    <mat-icon>swap_horiz</mat-icon>
                   </button>
                   <button
                     mat-icon-button

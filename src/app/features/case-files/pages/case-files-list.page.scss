@@ -210,3 +210,28 @@
     padding: 1.25rem;
   }
 }
+
+@media (max-width: 768px) {
+  // Enable smooth momentum scrolling for the horizontal table on touch devices
+  .case-files-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  // Slightly narrower min-width so the table is easier to scroll on 390px phones
+  .case-files-table {
+    min-width: 680px;
+  }
+
+  // Action icon buttons must meet 44×44px touch target
+  .case-files-actions .mat-mdc-icon-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  // Paginator touch-friendly font
+  .case-files-paginator {
+    font-size: 0.875rem;
+  }
+}

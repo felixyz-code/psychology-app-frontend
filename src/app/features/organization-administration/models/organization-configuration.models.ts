@@ -5,6 +5,12 @@ export interface OrganizationSettingsResponse {
   updatedAt: string | null;
   defaultAppointmentDuration: number;
   persistedDefaultAppointmentDuration: number | null;
+  workdayStartHour?: number | null;
+  workdayEndHour?: number | null;
+  businessHours?: {
+    startHour: number;
+    endHour: number;
+  } | null;
 }
 
 export interface OrganizationBrandingResponse {

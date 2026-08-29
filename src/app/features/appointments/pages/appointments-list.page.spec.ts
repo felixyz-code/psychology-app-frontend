@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { of, Subject, throwError } from 'rxjs';
-
+import { BranchContextService } from '../../../core/services/branch-context.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { Appointment } from '../models/appointment.models';
@@ -12,16 +13,24 @@ describe('AppointmentsListPage cancellation', () => {
   let getAppointments: ReturnType<typeof vi.fn>;
   let getPatients: ReturnType<typeof vi.fn>;
   let updateAppointment: ReturnType<typeof vi.fn>;
+  let toastService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; warning: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     getAppointments = vi.fn(() => of([createAppointment()]));
     getPatients = vi.fn(() => of([createPatient()]));
     updateAppointment = vi.fn();
+    toastService = {
+      success: vi.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
+      info: vi.fn(),
+    };
     TestBed.configureTestingModule({
       providers: [
         { provide: AppointmentsService, useValue: { getAppointments, updateAppointment } },
         { provide: PatientsService, useValue: { getPatients } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: ToastService, useValue: toastService },
       ],
     });
   });
@@ -79,6 +88,33 @@ describe('AppointmentsListPage cancellation', () => {
     page.openScheduleBlocksManager();
 
     expect(dialog.open).toHaveBeenCalled();
+    expect(getAppointments).toHaveBeenCalledTimes(2);
+  });
+
+  it('reloads appointments when branchChanges emits from BranchContextService', () => {
+    const branchChangesSubject = new Subject<string | null>();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AppointmentsService, useValue: { getAppointments, updateAppointment } },
+        { provide: PatientsService, useValue: { getPatients } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: ToastService, useValue: toastService },
+        {
+          provide: BranchContextService,
+          useValue: { branchChanges: branchChangesSubject.asObservable() },
+        },
+      ],
+    });
+
+    const page = createPage();
+    expect(getAppointments).toHaveBeenCalledTimes(1);
+
+    branchChangesSubject.next('branch-2');
+    expect(getAppointments).toHaveBeenCalledTimes(2);
+
+    page.ngOnDestroy();
+    branchChangesSubject.next('branch-3');
     expect(getAppointments).toHaveBeenCalledTimes(2);
   });
 

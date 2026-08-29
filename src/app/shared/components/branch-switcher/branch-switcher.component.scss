@@ -86,6 +86,24 @@
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+
+  &--primary {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(147, 197, 253, 0.45);
+    color: #93c5fd;
+  }
+
+  &--branch {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(110, 231, 183, 0.35);
+    color: #6ee7b7;
+  }
+
+  &--all {
+    background: rgba(168, 85, 247, 0.25);
+    border-color: rgba(216, 180, 254, 0.4);
+    color: #d8b4fe;
+  }
 }
 
 .branch-switch-menu__heading {
@@ -115,11 +133,26 @@
 .branch-menu-badge {
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
-  background: var(--app-color-primary-soft);
-  color: var(--app-color-primary);
+  background: var(--app-color-primary-soft, rgba(59, 130, 246, 0.15));
+  color: var(--app-color-primary, #3b82f6);
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
+
+  &--primary {
+    background: rgba(59, 130, 246, 0.15);
+    color: #2563eb;
+  }
+
+  &--branch {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+  }
+
+  &--all {
+    background: rgba(168, 85, 247, 0.15);
+    color: #7c3aed;
+  }
 }
 
 @media (max-width: 992px) {

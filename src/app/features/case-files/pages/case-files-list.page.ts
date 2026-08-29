@@ -32,6 +32,7 @@ import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { CaseFileFormDialogComponent } from '../components/case-file-form-dialog.component';
 import { ClinicalDocumentPreviewDialogComponent } from '../components/clinical-document-preview-dialog.component';
+import { SkeletonTableComponent } from '../../../shared/components/skeleton';
 import { CaseFile } from '../models/case-file.models';
 import { CaseFilesService } from '../services/case-files.service';
 
@@ -52,6 +53,7 @@ import { CaseFilesService } from '../services/case-files.service';
     PageHeaderComponent,
     SectionCardComponent,
     StatusBadgeComponent,
+    SkeletonTableComponent,
   ],
   templateUrl: './case-files-list.page.html',
   styleUrl: './case-files-list.page.scss',

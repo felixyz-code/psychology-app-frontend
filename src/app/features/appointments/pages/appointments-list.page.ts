@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -15,8 +15,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { catchError, finalize, forkJoin, of, Subscription } from 'rxjs';
 
+import { BranchContextService } from '../../../core/services/branch-context.service';
 import { DataTableEmptyStateComponent } from '../../../shared/components/data-table-empty-state/data-table-empty-state.component';
 import { DataTableToolbarComponent } from '../../../shared/components/data-table-toolbar/data-table-toolbar.component';
 import {
@@ -37,6 +38,8 @@ import {
   paginateItems,
   sortItems,
 } from '../../../shared/utils/data-table';
+import { SkeletonTableComponent } from '../../../shared/components/skeleton';
+import { ToastService } from '../../../core/services/toast.service';
 import { Patient } from '../../patients/models/patient.models';
 import { PatientsService } from '../../patients/services/patients.service';
 import { AppointmentDeleteDialogComponent } from '../components/appointment-delete-dialog.component';
@@ -89,13 +92,14 @@ interface AppointmentsTableState extends DataTableState {
     PageHeaderComponent,
     SectionCardComponent,
     StatusBadgeComponent,
+    SkeletonTableComponent,
     AppointmentsCalendarComponent,
     AppointmentsDailyAgendaComponent,
   ],
   templateUrl: './appointments-list.page.html',
   styleUrl: './appointments-list.page.scss',
 })
-export class AppointmentsListPage {
+export class AppointmentsListPage implements OnDestroy {
   private static readonly SUMMARY_DATE_FORMATTER = new Intl.DateTimeFormat('es-MX', {
     day: '2-digit',
     month: '2-digit',
@@ -104,8 +108,11 @@ export class AppointmentsListPage {
 
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly patientsService = inject(PatientsService);
+  private readonly branchContextService = inject(BranchContextService, { optional: true });
   private readonly dialog = inject(MatDialog);
+  private readonly toastService = inject(ToastService);
   private readonly defaultDateRange = this.createCurrentMonthDateRange();
+  private branchSubscription?: Subscription;
 
   readonly displayedColumns = ['patient', 'scheduledAt', 'durationMinutes', 'status', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
@@ -288,6 +295,11 @@ export class AppointmentsListPage {
 
   constructor() {
     this.loadAppointments();
+    if (this.branchContextService) {
+      this.branchSubscription = this.branchContextService.branchChanges.subscribe(() => {
+        this.loadAppointments();
+      });
+    }
   }
 
   loadAppointments(): void {
@@ -329,11 +341,13 @@ export class AppointmentsListPage {
         mode: 'edit',
         patientId: appointment.patientId,
         appointment,
+        existingAppointments: this.appointments(),
       },
     });
 
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
+        this.toastService.success('Cita actualizada exitosamente.');
         this.loadAppointments();
       }
     });
@@ -368,11 +382,13 @@ export class AppointmentsListPage {
         mode: 'create',
         patients: this.availablePatients(),
         scheduledAt: selectedDate,
+        existingAppointments: this.appointments(),
       },
     });
 
     dialogRef.afterClosed().subscribe((created) => {
       if (created) {
+        this.toastService.success('Cita programada exitosamente.');
         this.loadAppointments();
       }
     });
@@ -389,11 +405,13 @@ export class AppointmentsListPage {
       data: {
         appointment,
         patientName: this.getPatientName(appointment.patientId),
+        existingAppointments: this.appointments(),
       },
     });
 
     dialogRef.afterClosed().subscribe((rescheduled) => {
       if (rescheduled) {
+        this.toastService.success('La cita fue reprogramada correctamente.');
         this.successMessage.set('La cita fue reprogramada correctamente.');
         this.loadAppointments();
       }
@@ -429,11 +447,14 @@ export class AppointmentsListPage {
       .pipe(finalize(() => this.cancellingAppointmentId.set(null)))
       .subscribe({
         next: () => {
+          this.toastService.success('La cita fue cancelada correctamente.');
           this.successMessage.set('La cita fue cancelada correctamente.');
           this.loadAppointments();
         },
         error: (error: HttpErrorResponse) => {
-          this.errorMessage.set(this.getAppointmentActionErrorMessage(error, 'cancelar'));
+          const msg = this.getAppointmentActionErrorMessage(error, 'cancelar');
+          this.toastService.error(msg);
+          this.errorMessage.set(msg);
         },
       });
   }
@@ -452,6 +473,7 @@ export class AppointmentsListPage {
 
     dialogRef.afterClosed().subscribe((deleted) => {
       if (deleted) {
+        this.toastService.success('La cita fue eliminada exitosamente.');
         this.loadAppointments();
       }
     });
@@ -720,5 +742,9 @@ export class AppointmentsListPage {
         new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + days),
       ),
     );
+  }
+
+  ngOnDestroy(): void {
+    this.branchSubscription?.unsubscribe();
   }
 }

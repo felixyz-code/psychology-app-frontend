@@ -62,8 +62,8 @@
 
       <div *ngIf="availableSlots().length > 0" class="reschedule-dialog__slots-section">
         <div class="slots-header">
-          <span class="slots-title">Horarios del día:</span>
-          <span class="slots-hint">Haga clic en un horario libre para seleccionarlo</span>
+          <span class="slots-title">Horarios laborales del día ({{ formatTimeHour(businessHours().startHour) }} - {{ formatTimeHour(businessHours().endHour) }}):</span>
+          <span class="slots-hint">Verde = Libre | Gris = Ocupado</span>
         </div>
         <div class="reschedule-dialog__slots-grid">
           <button
@@ -74,9 +74,9 @@
             [class.slot-occupied]="!slot.available"
             [disabled]="!slot.available"
             (click)="selectSlot(slot)"
-            [attr.aria-label]="slot.startTime | date: 'HH:mm'"
+            [attr.aria-label]="slot.timeLabel + (slot.available ? ' - Libre' : ' - Ocupado')"
           >
-            <span class="slot-time">{{ slot.startTime | date: 'HH:mm' }}</span>
+            <span class="slot-time">{{ slot.timeLabel }}</span>
             <span
               class="slot-badge"
               [class.badge-free]="slot.available"
@@ -115,7 +115,7 @@
       color="primary"
       type="button"
       (click)="submit()"
-      [disabled]="rescheduleForm.invalid || isSubmitting()"
+      [disabled]="rescheduleForm.invalid || isSubmitting() || hasConflict()"
     >
       <mat-spinner *ngIf="isSubmitting()" diameter="18" class="button-spinner"></mat-spinner>
       <span *ngIf="!isSubmitting()">Confirmar Reprogramación</span>

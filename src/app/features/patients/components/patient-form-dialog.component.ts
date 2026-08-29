@@ -13,6 +13,8 @@ import { logError } from '../../../core/logging/app-logger';
 import { CreatePatientRequest, Patient, UpdatePatientRequest } from '../models/patient.models';
 import { PatientsService } from '../services/patients.service';
 
+import { ButtonSpinnerDirective } from '../../../shared/directives/button-spinner.directive';
+
 interface PatientDialogData {
   mode: 'create' | 'edit';
   patient?: Patient;
@@ -29,6 +31,7 @@ interface PatientDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './patient-form-dialog.component.html',
   styleUrl: './patient-form-dialog.component.scss',

@@ -22,6 +22,7 @@ import { DataTableEmptyStateComponent } from '../../../shared/components/data-ta
 import { BranchFormDialogComponent } from '../components/branch-form-dialog/branch-form-dialog.component';
 import { BranchAssignDialogComponent } from '../components/branch-assign-dialog/branch-assign-dialog.component';
 import { BranchDeleteDialogComponent } from '../components/branch-delete-dialog/branch-delete-dialog.component';
+import { BranchScheduleDialogComponent } from '../components/branch-schedule-dialog/branch-schedule-dialog.component';
 
 type ViewState = 'loading' | 'loaded' | 'empty' | 'error' | 'forbidden';
 
@@ -172,6 +173,19 @@ export class BranchesListPage implements OnInit {
       maxWidth: '44rem',
       maxHeight: '85vh',
       width: '100%',
+    });
+
+    ref.afterClosed().subscribe(() => {
+      void this.branchContextService.loadBranches();
+    });
+  }
+
+  openScheduleDialog(branch: Branch): void {
+    const ref = this.dialog.open(BranchScheduleDialogComponent, {
+      data: { branch },
+      width: '850px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
     });
 
     ref.afterClosed().subscribe(() => {

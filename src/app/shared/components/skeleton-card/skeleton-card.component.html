@@ -1,0 +1,35 @@
+<div
+  class="app-skeleton-card app-skeleton-card--{{ variant() }} {{ customClass() }}"
+  role="status"
+  aria-busy="true"
+  aria-label="Cargando contenido..."
+>
+  @if (hasHeader()) {
+    <div class="app-skeleton-card__header">
+      @if (hasAvatar()) {
+        <div class="app-skeleton-avatar"></div>
+      }
+      <div class="app-skeleton-card__header-text">
+        <div class="app-skeleton-line app-skeleton-line--title"></div>
+        <div class="app-skeleton-line app-skeleton-line--subtitle"></div>
+      </div>
+    </div>
+  }
+
+  <div class="app-skeleton-card__body">
+    @for (index of getLinesArray(); track index) {
+      <div
+        class="app-skeleton-line app-skeleton-line--body"
+        [style.width]="getLineWidth(index)"
+      ></div>
+    }
+  </div>
+
+  @if (hasActions()) {
+    <div class="app-skeleton-card__actions">
+      @for (action of getActionsArray(); track action) {
+        <div class="app-skeleton-button"></div>
+      }
+    </div>
+  }
+</div>

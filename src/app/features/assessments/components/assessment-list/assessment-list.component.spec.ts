@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import {
   AdministrationStatus,
   AssessmentAdministration,
 } from '../../../../core/models/assessment.models';
 import { AssessmentsHttpService } from '../../../../core/services/assessments-http.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { AssessmentListComponent } from './assessment-list.component';
 
 describe('AssessmentListComponent', () => {
@@ -80,8 +80,11 @@ describe('AssessmentListComponent', () => {
     }),
   };
 
-  const mockSnackBar = {
-    open: vi.fn(),
+  const mockToastService = {
+    success: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -90,7 +93,7 @@ describe('AssessmentListComponent', () => {
       providers: [
         { provide: AssessmentsHttpService, useValue: mockAssessmentsService },
         { provide: MatDialog, useValue: mockDialog },
-        { provide: MatSnackBar, useValue: mockSnackBar },
+        { provide: ToastService, useValue: mockToastService },
       ],
     }).compileComponents();
 

@@ -132,7 +132,12 @@
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>NOMBRE</th>
             <td mat-cell *matCellDef="let branch">
-              <strong class="branch-name-text">{{ branch.name }}</strong>
+              <div class="branch-name-cell">
+                <strong class="branch-name-text">{{ branch.name }}</strong>
+                @if (branch.isPrimary) {
+                  <span class="branch-pill-badge branch-pill-badge--primary" title="Sede principal / Matriz">Matriz</span>
+                }
+              </div>
             </td>
           </ng-container>
 
@@ -177,6 +182,16 @@
             <td mat-cell *matCellDef="let branch">
               @if (canManage()) {
                 <div class="branches-actions app-table-actions" aria-label="Acciones de sede">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Horarios y terapeutas"
+                    [matTooltipShowDelay]="150"
+                    (click)="openScheduleDialog(branch)"
+                    [attr.aria-label]="'Gestionar horarios y terapeutas de sede ' + branch.name"
+                  >
+                    <mat-icon>calendar_month</mat-icon>
+                  </button>
                   <button
                     mat-icon-button
                     type="button"

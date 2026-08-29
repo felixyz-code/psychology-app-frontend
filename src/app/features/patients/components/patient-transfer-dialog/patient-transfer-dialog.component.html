@@ -1,0 +1,123 @@
+<h2 mat-dialog-title class="dialog-title">
+  <div class="dialog-title__icon">
+    <mat-icon>swap_horiz</mat-icon>
+  </div>
+  <div class="dialog-title__text">
+    <span class="dialog-title__main">Transferir Paciente de Sede</span>
+    <span class="dialog-title__sub">
+      Reubicar expediente de <strong>{{ getPatientFullName() }}</strong> a otra sucursal y reasignar terapeuta titular.
+    </span>
+  </div>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  @if (errorMessage()) {
+    <div class="dialog-alert dialog-alert--error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (isLoadingBranches()) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Cargando sedes disponibles...</span>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="transfer-form" (ngSubmit)="onSubmit()">
+      <!-- Sede Destino -->
+      <mat-form-field appearance="outline" class="form-field-full">
+        <mat-label>Sede Destino</mat-label>
+        <mat-select
+          formControlName="targetBranchId"
+          (selectionChange)="onBranchChange($event.value)"
+          placeholder="Seleccione la sede de destino"
+        >
+          @for (branch of branches(); track branch.id) {
+            <mat-option [value]="branch.id">
+              {{ branch.name }} ({{ branch.code }})
+            </mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>apartment</mat-icon>
+        @if (form.get('targetBranchId')?.hasError('required') && form.get('targetBranchId')?.touched) {
+          <mat-error>La sede destino es obligatoria.</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Nuevo Psicólogo Titular (Opcional) -->
+      <mat-form-field appearance="outline" class="form-field-full">
+        <mat-label>Nuevo Psicólogo Titular (Opcional)</mat-label>
+        <mat-select
+          formControlName="targetPsychologistId"
+          placeholder="Mantener actual o reasignar a profesional de la sede"
+          [disabled]="isLoadingProfessionals() || !form.get('targetBranchId')?.value"
+        >
+          <mat-option value="">-- Mantener profesional actual (si tiene acceso a la sede) --</mat-option>
+          @for (prof of professionals(); track prof.userId) {
+            <mat-option [value]="prof.userId">
+              {{ prof.user?.displayName || prof.user?.name || prof.user?.email || prof.userId }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>psychology</mat-icon>
+        @if (isLoadingProfessionals()) {
+          <mat-hint>Cargando profesionales de la sede...</mat-hint>
+        } @else if (form.get('targetBranchId')?.value && professionals().length === 0) {
+          <mat-hint>No hay profesionales asignados específicamente a esta sede.</mat-hint>
+        }
+      </mat-form-field>
+
+      <!-- Motivo de Transferencia -->
+      <mat-form-field appearance="outline" class="form-field-full">
+        <mat-label>Motivo de la Transferencia</mat-label>
+        <textarea
+          matInput
+          rows="3"
+          formControlName="reason"
+          placeholder="Indique la justificación clínica o administrativa de la transferencia..."
+          maxlength="500"
+        ></textarea>
+        <mat-icon matPrefix>edit_note</mat-icon>
+        <mat-hint align="end">
+          {{ form.get('reason')?.value?.length || 0 }} / 500
+        </mat-hint>
+        @if (form.get('reason')?.hasError('required') && form.get('reason')?.touched) {
+          <mat-error>El motivo de la transferencia es obligatorio.</mat-error>
+        } @else if (form.get('reason')?.hasError('minlength')) {
+          <mat-error>Debe especificar al menos 3 caracteres.</mat-error>
+        }
+      </mat-form-field>
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button
+    mat-button
+    type="button"
+    (click)="onCancel()"
+    [disabled]="isSubmitting()"
+  >
+    Cancelar
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="onSubmit()"
+    [disabled]="form.invalid || isSubmitting() || isLoadingBranches()"
+  >
+    @if (isSubmitting()) {
+      <span class="btn-content">
+        <mat-spinner diameter="18" class="button-spinner"></mat-spinner>
+        <span>Transfiriendo...</span>
+      </span>
+    } @else {
+      <span class="btn-content">
+        <mat-icon>swap_horiz</mat-icon>
+        <span>Confirmar Transferencia</span>
+      </span>
+    }
+  </button>
+</mat-dialog-actions>

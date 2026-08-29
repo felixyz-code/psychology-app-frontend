@@ -1,7 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 
-import { BranchContextService } from '../services/branch-context.service';
+import { ACTIVE_BRANCH_STORAGE_KEY, BranchContextService } from '../services/branch-context.service';
 import { TENANT_HTTP_MODE } from '../tenant-context/tenant-http-context';
 
 export const branchContextInterceptor: HttpInterceptorFn = (req, next) => {
@@ -12,13 +12,22 @@ export const branchContextInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const branchContextService = inject(BranchContextService);
-  const activeBranchId = branchContextService.currentBranchId();
+  let activeBranchId = branchContextService.currentBranchId();
 
-  if (activeBranchId && !req.headers.has('x-branch-id')) {
+  if (!activeBranchId) {
+    try {
+      const persisted = localStorage.getItem(ACTIVE_BRANCH_STORAGE_KEY);
+      if (persisted && persisted !== 'ALL') {
+        activeBranchId = persisted;
+      }
+    } catch {
+      // Ignore
+    }
+  }
+
+  if (activeBranchId && activeBranchId !== 'ALL' && !req.headers.has('x-branch-id')) {
     const cloned = req.clone({
-      setHeaders: {
-        'x-branch-id': activeBranchId,
-      },
+      headers: req.headers.set('x-branch-id', activeBranchId),
     });
     return next(cloned);
   }

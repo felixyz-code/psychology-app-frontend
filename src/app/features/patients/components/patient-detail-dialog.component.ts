@@ -58,6 +58,7 @@ import { SessionNoteFormDialogComponent } from '../../session-notes/components/s
 import { SessionNote } from '../../session-notes/models/session-note.models';
 import { Patient } from '../models/patient.models';
 import { PatientFormDialogComponent } from './patient-form-dialog.component';
+import { PatientTransferDialogComponent } from './patient-transfer-dialog/patient-transfer-dialog.component';
 import { CaseFileAttachmentsComponent } from '../../case-files/components/case-file-attachments/case-file-attachments.component';
 import { AssessmentListComponent } from '../../assessments/components/assessment-list/assessment-list.component';
 import { ClinicalDocumentPreviewDialogComponent } from '../../case-files/components/clinical-document-preview-dialog.component';
@@ -511,6 +512,24 @@ export class PatientDetailDialogComponent {
         if (this.caseFileId()) {
           this.loadWorkspace();
         }
+      }
+    });
+  }
+
+  openTransferPatientDialog(): void {
+    const dialogRef = this.dialog.open(PatientTransferDialogComponent, {
+      width: '540px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      autoFocus: false,
+      data: {
+        patient: this.patient(),
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((transferred) => {
+      if (transferred) {
+        this.loadWorkspace();
       }
     });
   }

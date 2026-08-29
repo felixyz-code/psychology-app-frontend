@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ButtonSpinnerDirective } from '../../../shared/directives/button-spinner.directive';
 import { AdminTenantItem } from '../models/superadmin.models';
 import { SuperadminTenantsService } from '../services/superadmin-tenants.service';
 
@@ -27,6 +28,7 @@ export interface FreezeTenantDialogData {
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   template: `
     <div class="dialog-container">
@@ -92,13 +94,10 @@ export interface FreezeTenantDialogData {
           [color]="data.isCurrentlyFrozen ? 'primary' : 'warn'"
           type="button"
           (click)="submit()"
+          [appButtonSpinner]="isLoading()"
           [disabled]="isLoading()"
         >
-          @if (isLoading()) {
-            <mat-spinner diameter="18"></mat-spinner>
-          } @else {
-            <span>{{ data.isCurrentlyFrozen ? 'Confirmar Descongelamiento' : 'Confirmar Congelamiento' }}</span>
-          }
+          <span>{{ data.isCurrentlyFrozen ? 'Confirmar Descongelamiento' : 'Confirmar Congelamiento' }}</span>
         </button>
       </mat-dialog-actions>
     </div>

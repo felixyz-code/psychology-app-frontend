@@ -165,27 +165,117 @@ describe('SessionNoteFormDialogComponent', () => {
     expect(component.sessionNoteForm.controls.content.value).toContain('EXAMEN DEL ESTADO MENTAL:');
   });
 
-  it('saves draft to localStorage and restores it when available', () => {
+  it('detects a pending draft and shows the banner without auto-patching the form', () => {
     const { component } = createComponent({ mode: 'create', caseFileId: 'case-file-test' });
-    component.sessionNoteForm.patchValue({
+
+    // Pre-seed a draft in localStorage for the component's key
+    const draftKey = `psiqueos_session_note_draft_case-file-test_create`;
+    const draft = {
       title: 'Borrador test',
       content: 'Contenido guardado localmente',
-    });
+      sessionDate: '2026-07-02T09:00',
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draft));
 
-    // Save draft to localStorage
-    (component as any).saveDraftLocal();
-    expect(component.autosaveStatus()).toBe('saved');
-    expect(component.lastAutosavedAt()).toBeTruthy();
-
-    // Reset form value and restore draft
-    component.sessionNoteForm.patchValue({
-      title: '',
-      content: '',
-    });
+    // Trigger draft detection (runs in ngOnInit via restoreDraftIfAvailable)
     (component as any).restoreDraftIfAvailable();
-    expect(component.sessionNoteForm.controls.content.value).toBe('Contenido guardado localmente');
+
+    // Banner must be visible — form should NOT be auto-patched
+    expect(component.hasPendingDraft()).toBe(true);
+    expect(component.pendingDraftSavedAt()).toBeTruthy();
+    expect(component.sessionNoteForm.controls.content.value).toBe(''); // not patched yet
 
     // Clean up
+    localStorage.removeItem(draftKey);
+  });
+
+  it('restores draft content into the form when user confirms', () => {
+    const { component } = createComponent({ mode: 'create', caseFileId: 'case-file-confirm' });
+
+    const draftKey = `psiqueos_session_note_draft_case-file-confirm_create`;
+    const draft = {
+      title: 'Borrador confirmado',
+      content: 'Contenido a restaurar',
+      sessionDate: '2026-07-05T10:00',
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draft));
+
+    (component as any).restoreDraftIfAvailable();
+    expect(component.hasPendingDraft()).toBe(true);
+
+    // User clicks "Restaurar"
+    component.confirmRestoreDraft();
+
+    expect(component.hasPendingDraft()).toBe(false);
+    expect(component.sessionNoteForm.controls.content.value).toBe('Contenido a restaurar');
+    expect(component.sessionNoteForm.controls.title.value).toBe('Borrador confirmado');
+    expect(component.autosaveStatus()).toBe('saved');
+
+    localStorage.removeItem(draftKey);
+  });
+
+  it('discards the pending draft and removes it from localStorage when user dismisses', () => {
+    const { component } = createComponent({ mode: 'create', caseFileId: 'case-file-discard' });
+
+    const draftKey = `psiqueos_session_note_draft_case-file-discard_create`;
+    const draft = {
+      title: 'Borrador descartable',
+      content: 'No debería restaurarse',
+      sessionDate: '2026-07-06T11:00',
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draft));
+
+    (component as any).restoreDraftIfAvailable();
+    expect(component.hasPendingDraft()).toBe(true);
+
+    // User clicks "Descartar"
+    component.discardDraft();
+
+    expect(component.hasPendingDraft()).toBe(false);
+    expect(component.pendingDraftSavedAt()).toBeNull();
+    expect(component.sessionNoteForm.controls.content.value).toBe(''); // form untouched
+    expect(localStorage.getItem(draftKey)).toBeNull(); // draft removed from storage
+  });
+
+  it('triggers immediate draft save on Ctrl+S and Cmd+S keyboard events', () => {
+    const { component } = createComponent({ mode: 'create', caseFileId: 'case-file-shortcut' });
+    component.sessionNoteForm.patchValue({
+      title: 'Nota de urgencia',
+      content: 'Contenido salvado con atajo Ctrl+S',
+    });
+
+    const preventDefaultSpy = vi.fn();
+    const ctrlSEvent = new KeyboardEvent('keydown', {
+      key: 's',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(ctrlSEvent, 'preventDefault', { value: preventDefaultSpy });
+
+    component.handleKeyboardShortcut(ctrlSEvent);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(component.autosaveStatus()).toBe('saved');
+
+    // Cmd+S (metaKey)
+    const cmdPreventDefaultSpy = vi.fn();
+    const cmdSEvent = new KeyboardEvent('keydown', {
+      key: 'S',
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(cmdSEvent, 'preventDefault', { value: cmdPreventDefaultSpy });
+
+    component.handleKeyboardShortcut(cmdSEvent);
+
+    expect(cmdPreventDefaultSpy).toHaveBeenCalled();
+    expect(component.autosaveStatus()).toBe('saved');
+
     (component as any).clearDraftLocal();
   });
 

@@ -154,4 +154,88 @@ describe('BranchesService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([mockUserAccess]);
   });
+
+  it('gets assigned professionals and schedules via GET :id/professionals', () => {
+    const mockProfSchedule = [
+      {
+        id: 'access-1',
+        organizationId: 'org-1',
+        branchId: 'branch-1',
+        userId: 'user-1',
+        isPrimary: true,
+        schedules: [
+          {
+            id: 'slot-1',
+            dayOfWeek: 1,
+            startTime: '09:00',
+            endTime: '14:00',
+            durationSlotMinutes: 60,
+            isActive: true,
+          },
+        ],
+      },
+    ];
+
+    service.getBranchProfessionals('branch-1').subscribe((profs) => {
+      expect(profs).toEqual(mockProfSchedule);
+    });
+
+    const req = httpTesting.expectOne(`${baseUrl}/branch-1/professionals`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockProfSchedule);
+  });
+
+  it('assigns professional with schedules via POST :id/professionals', () => {
+    const dto = {
+      userId: 'user-1',
+      isPrimary: true,
+      schedules: [{ dayOfWeek: 1, startTime: '09:00', endTime: '13:00' }],
+    };
+
+    const mockResponse = {
+      id: 'access-1',
+      organizationId: 'org-1',
+      branchId: 'branch-1',
+      userId: 'user-1',
+      isPrimary: true,
+      schedules: [{ dayOfWeek: 1, startTime: '09:00', endTime: '13:00' }],
+    };
+
+    service.assignProfessional('branch-1', dto).subscribe((res) => {
+      expect(res).toEqual(mockResponse);
+    });
+
+    const req = httpTesting.expectOne(`${baseUrl}/branch-1/professionals`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(dto);
+    req.flush(mockResponse);
+  });
+
+  it('updates professional schedule via PUT :id/professionals/:userId/schedule', () => {
+    const dto = {
+      schedules: [
+        { dayOfWeek: 2, startTime: '10:00', endTime: '18:00', durationSlotMinutes: 60 },
+      ],
+    };
+
+    service.updateProfessionalSchedule('branch-1', 'user-1', dto).subscribe((res) => {
+      expect(res.success).toBe(true);
+      expect(res.count).toBe(1);
+    });
+
+    const req = httpTesting.expectOne(`${baseUrl}/branch-1/professionals/user-1/schedule`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(dto);
+    req.flush({ success: true, count: 1 });
+  });
+
+  it('removes professional from branch via DELETE :id/professionals/:userId', () => {
+    service.removeProfessional('branch-1', 'user-1').subscribe((res) => {
+      expect(res.success).toBe(true);
+    });
+
+    const req = httpTesting.expectOne(`${baseUrl}/branch-1/professionals/user-1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush({ success: true, message: 'Professional removed' });
+  });
 });

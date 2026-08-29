@@ -1,0 +1,22 @@
+{
+  "name": "PsiqueOS | Sistema Operativo Clínico",
+  "short_name": "PsiqueOS",
+  "description": "Sistema Operativo Clínico para Profesionales de la Salud Mental. Expediente clínico electrónico bajo NOM-004-SSA3.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0f1e36",
+  "background_color": "#f8fafc",
+  "lang": "es-MX",
+  "categories": ["health", "medical", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48 32x32 16x16",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ],
+  "prefer_related_applications": false
+}

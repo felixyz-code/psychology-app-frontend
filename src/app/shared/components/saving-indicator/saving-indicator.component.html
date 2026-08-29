@@ -1,0 +1,15 @@
+@if (isVisible()) {
+  <div
+    class="app-saving-indicator app-saving-indicator--{{ status() }} {{ customClass() }}"
+    role="status"
+    aria-live="polite"
+  >
+    <mat-icon
+      class="app-saving-indicator__icon"
+      [class.app-saving-indicator__icon--spinning]="status() === 'saving'"
+    >
+      {{ currentIcon() }}
+    </mat-icon>
+    <span class="app-saving-indicator__text">{{ currentText() }}</span>
+  </div>
+}

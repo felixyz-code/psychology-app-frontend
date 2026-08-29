@@ -14,6 +14,7 @@ import {
   canonicalOrganizationBrandColor,
   PLATFORM_ORGANIZATION_BRAND_ACCENT,
 } from './organization-brand-color';
+import { resolveBusinessHours } from '../../features/appointments/utils/appointment-datetime';
 
 export type ConfigurationLoadState = 'NOT_LOADED' | 'LOADING' | 'LOADED' | 'ERROR';
 
@@ -56,6 +57,10 @@ export class OrganizationConfigurationStore {
 
   effectiveAppointmentDuration(): number {
     return this.settings()?.defaultAppointmentDuration ?? 60;
+  }
+
+  effectiveBusinessHours(): { startHour: number; endHour: number } {
+    return resolveBusinessHours(this.settings());
   }
 
   loadCurrent(): void {

@@ -60,6 +60,21 @@ describe('PatientsService', () => {
     request.flush({ ...createPatient(), ...payload });
   });
 
+  it('posts a transfer request with the supplied payload', () => {
+    const payload = {
+      targetBranchId: 'branch-2',
+      targetPsychologistId: 'psychologist-2',
+      reason: 'Paciente reubicado por cambio de sede.',
+    };
+
+    service.transferPatient('patient-1', payload).subscribe();
+
+    const request = httpTesting.expectOne('/api/patients/patient-1/transfer');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(payload);
+    request.flush({ ...createPatient(), branchId: 'branch-2', psychologistId: 'psychologist-2' });
+  });
+
   it('propagates HTTP errors without transforming them', () => {
     let receivedError: unknown;
 

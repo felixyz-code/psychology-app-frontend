@@ -1,0 +1,157 @@
+<h2 mat-dialog-title class="dialog-title">
+  <div class="dialog-title__text">
+    <span class="dialog-title__main">Horarios y Terapeutas — {{ data.branch.name }}</span>
+    <span class="dialog-title__sub">Gestiona las franjas presenciales de atención en esta sede ({{ data.branch.code }}).</span>
+  </div>
+  <span class="dialog-title__badge">{{ assignedStaff().length }} Terapeuta(s)</span>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <!-- Barra de control en UNA SOLA FILA compacta -->
+  <div class="control-bar">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="control-bar__select">
+      <mat-label>Terapeuta a configurar</mat-label>
+      <mat-select [value]="selectedUserId()" (selectionChange)="onSelectStaff($event.value)" [disabled]="isSaving() || assignedStaff().length === 0">
+        @for (staff of assignedStaff(); track staff.userId) {
+          <mat-option [value]="staff.userId">
+            {{ staff.name }} ({{ staff.slots.length }} franja{{ staff.slots.length === 1 ? '' : 's' }})
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (selectedUserId()) {
+      <button mat-stroked-button color="warn" type="button" class="control-bar__action-btn" [disabled]="isSaving()" (click)="onUnassignStaff(selectedUserId()!)">
+        <mat-icon>person_remove</mat-icon> Desvincular
+      </button>
+    }
+
+    <!-- Asignar nuevo terapeuta en la misma fila -->
+    @if (unassignedStaff().length > 0) {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="control-bar__assign-select">
+        <mat-label>Asignar otro terapeuta</mat-label>
+        <mat-select [(value)]="selectedNewStaffId" [disabled]="isSaving()">
+          @for (staff of unassignedStaff(); track staff.userId) {
+            <mat-option [value]="staff.userId">{{ staff.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" class="control-bar__action-btn" [disabled]="!selectedNewStaffId || isSaving()" (click)="onAssignStaff()">
+        Asignar
+      </button>
+    }
+  </div>
+
+  <mat-divider></mat-divider>
+
+  @if (errorMessage()) {
+    <div class="branch-schedule-alert branch-schedule-alert--error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="branch-schedule-alert branch-schedule-alert--success" role="status">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  <!-- Editor de Franjas -->
+  <div class="slots-section">
+    <div class="slots-header">
+      <h3>Franjas de atención: {{ selectedStaff()?.name || 'Selecciona un terapeuta' }}</h3>
+      @if (selectedUserId()) {
+        <button mat-stroked-button color="primary" type="button" (click)="addSlot()">
+          <mat-icon>add</mat-icon> Agregar franja
+        </button>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="branch-schedule-loading" aria-live="polite">
+        <mat-spinner diameter="36"></mat-spinner>
+        <span>Cargando terapeutas y franjas presenciales...</span>
+      </div>
+    } @else if (!selectedUserId()) {
+      <div class="empty-state">
+        <mat-icon>person_search</mat-icon>
+        <p>Selecciona o asigna un terapeuta arriba para configurar sus horarios.</p>
+      </div>
+    } @else if (slotsFormArray.controls.length === 0) {
+      <div class="empty-state">
+        <mat-icon>schedule</mat-icon>
+        <p>No hay franjas configuradas para este profesional. Haz clic en "Agregar franja".</p>
+      </div>
+    } @else {
+      <div class="slots-list" [formGroup]="scheduleForm">
+        <div formArrayName="slots" class="slots-grid">
+          @for (slot of slotsFormArray.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="slot-card" [class.slot-card--invalid]="slot.errors?.['invalidTimeRange']">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Día</mat-label>
+                <mat-select formControlName="dayOfWeek">
+                  <mat-option [value]="1">Lunes</mat-option>
+                  <mat-option [value]="2">Martes</mat-option>
+                  <mat-option [value]="3">Miércoles</mat-option>
+                  <mat-option [value]="4">Jueves</mat-option>
+                  <mat-option [value]="5">Viernes</mat-option>
+                  <mat-option [value]="6">Sábado</mat-option>
+                  <mat-option [value]="0">Domingo</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Inicio</mat-label>
+                <input matInput type="time" formControlName="startTime" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Fin</mat-label>
+                <input matInput type="time" formControlName="endTime" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Duración (m)</mat-label>
+                <input matInput type="number" formControlName="durationSlotMinutes" min="15" max="240" step="15" />
+              </mat-form-field>
+
+              <div class="slot-card__toggle">
+                <mat-slide-toggle formControlName="isActive" color="primary">Activo</mat-slide-toggle>
+              </div>
+
+              <button mat-icon-button color="warn" type="button" aria-label="Eliminar franja" (click)="removeSlot(i)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+
+              @if (slot.errors?.['invalidTimeRange']) {
+                <div class="slot-card__error" role="alert">
+                  <mat-icon>error_outline</mat-icon>
+                  <span>La hora de inicio debe ser anterior a la hora de fin.</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button type="button" [disabled]="isSaving()" (click)="close()">Cerrar / Cancelar</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!selectedUserId() || scheduleForm.invalid || isSaving()" (click)="onSaveSchedule()">
+    @if (isSaving()) {
+      <span class="branch-schedule-btn-content">
+        <mat-spinner diameter="18"></mat-spinner>
+        <span>Guardando...</span>
+      </span>
+    } @else {
+      <span class="branch-schedule-btn-content">
+        <mat-icon>save</mat-icon>
+        <span>Guardar horarios</span>
+      </span>
+    }
+  </button>
+</mat-dialog-actions>

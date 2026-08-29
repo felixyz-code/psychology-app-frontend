@@ -10,6 +10,12 @@ export interface Branch {
   createdAt: string;
   updatedAt: string;
   isPrimary?: boolean;
+  workdayStartHour?: number | null;
+  workdayEndHour?: number | null;
+  businessHours?: {
+    startHour: number;
+    endHour: number;
+  } | null;
 }
 
 export interface CreateBranchDto {
@@ -46,6 +52,7 @@ export interface UserBranchAccess {
   updatedAt: string;
   user?: {
     id: string;
+    name?: string | null;
     displayName?: string | null;
     email: string;
     role?: string;
@@ -61,4 +68,41 @@ export interface BranchStaffAssignmentItem {
   isAssigned: boolean;
   isPrimary: boolean;
   accessId?: string;
+}
+
+export interface ScheduleSlot {
+  id?: string;
+  dayOfWeek: number; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime: string; // HH:mm format
+  endTime: string; // HH:mm format
+  durationSlotMinutes?: number;
+  isActive?: boolean;
+}
+
+export interface AssignProfessionalBranchDto {
+  userId: string;
+  isPrimary?: boolean;
+  schedules?: ScheduleSlot[];
+}
+
+export interface UpdateProfessionalScheduleDto {
+  schedules: ScheduleSlot[];
+}
+
+export interface BranchProfessionalScheduleItem {
+  id: string;
+  organizationId: string;
+  branchId: string;
+  userId: string;
+  isPrimary: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  user?: {
+    id: string;
+    name?: string | null;
+    displayName?: string | null;
+    email: string;
+    role?: string;
+  };
+  schedules: ScheduleSlot[];
 }

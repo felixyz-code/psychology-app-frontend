@@ -1,6 +1,12 @@
 export interface Patient {
   id: string;
   psychologistId: string;
+  branchId?: string | null;
+  branch?: {
+    id: string;
+    name: string;
+    code: string;
+  } | null;
   firstName: string;
   lastName: string;
   phoneNumber?: string | null;
@@ -12,6 +18,7 @@ export interface Patient {
 
 export interface CreatePatientRequest {
   psychologistId?: string;
+  branchId?: string | null;
   firstName: string;
   lastName: string;
   phoneNumber?: string | null;
@@ -21,9 +28,16 @@ export interface CreatePatientRequest {
 
 export interface UpdatePatientRequest {
   psychologistId?: string;
+  branchId?: string | null;
   firstName?: string;
   lastName?: string;
   phoneNumber?: string | null;
   email?: string | null;
   birthDate?: string | null;
+}
+
+export interface TransferPatientRequest {
+  targetBranchId: string;
+  targetPsychologistId?: string;
+  reason: string;
 }
