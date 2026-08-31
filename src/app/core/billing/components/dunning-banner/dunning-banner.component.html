@@ -1,0 +1,79 @@
+@if (bannerState() === 'WARNING_GRACE') {
+  <aside
+    class="dunning-banner dunning-banner--warning"
+    role="status"
+    aria-label="Aviso de pago pendiente de suscripción"
+  >
+    <div class="dunning-banner__content">
+      <mat-icon class="dunning-banner__icon" aria-hidden="true">warning_amber</mat-icon>
+      <div class="dunning-banner__text">
+        <span class="dunning-banner__title">Pago de suscripción pendiente.</span>
+        <span class="dunning-banner__message">
+          Tu método de pago registrado presentó un inconveniente. Cuentas con período de gracia
+          @if (daysRemaining() !== null) {
+            (<strong>{{ daysRemaining() }} {{ daysRemaining() === 1 ? 'día restante' : 'días restantes' }}</strong>@if (formattedGraceDate()) {<span> &bull; vence el {{ formattedGraceDate() }}</span>})
+          }
+          para actualizarlo antes de que se restrinjan las operaciones de escritura.
+        </span>
+      </div>
+    </div>
+
+    <div class="dunning-banner__actions">
+      <button
+        mat-flat-button
+        color="warn"
+        class="dunning-banner__btn dunning-banner__btn--primary"
+        type="button"
+        [disabled]="isRedirecting()"
+        (click)="handleAction()"
+      >
+        <span class="dunning-banner__btn-content">
+          @if (isRedirecting()) {
+            <mat-spinner diameter="16" aria-label="Redirigiendo" />
+          } @else {
+            <mat-icon aria-hidden="true">credit_card</mat-icon>
+            <span>Actualizar método de pago</span>
+          }
+        </span>
+      </button>
+
+      <button
+        mat-icon-button
+        class="dunning-banner__close"
+        type="button"
+        aria-label="Descartar aviso temporalmente"
+        (click)="dismiss()"
+      >
+        <mat-icon aria-hidden="true">close</mat-icon>
+      </button>
+    </div>
+  </aside>
+} @else if (bannerState() === 'CRITICAL_BLOCKED') {
+  <aside
+    class="dunning-banner dunning-banner--danger"
+    role="alert"
+    aria-label="Aviso de cuenta en modo de solo lectura"
+  >
+    <div class="dunning-banner__content">
+      <mat-icon class="dunning-banner__icon" aria-hidden="true">lock</mat-icon>
+      <div class="dunning-banner__text">
+        <span class="dunning-banner__title">Modo de Solo Lectura Activo.</span>
+        <span class="dunning-banner__message">
+          Tu suscripción se encuentra inactiva o con pagos vencidos. Las funciones de creación y modificación están suspendidas. Tus expedientes clínicos y datos permanecen seguros para consulta.
+        </span>
+      </div>
+    </div>
+
+    <div class="dunning-banner__actions">
+      <button
+        mat-flat-button
+        class="dunning-banner__btn dunning-banner__btn--danger"
+        type="button"
+        (click)="handleAction()"
+      >
+        <mat-icon aria-hidden="true">restore</mat-icon>
+        <span>Reactivar Suscripción</span>
+      </button>
+    </div>
+  </aside>
+}

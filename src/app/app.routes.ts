@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { anonymousOnlyGuard } from './core/guards/anonymous-only.guard';
+import { billingGuard } from './core/guards/billing.guard';
 import { capabilityGuard } from './core/guards/capability.guard';
 import { superadminGuard } from './core/guards/superadmin.guard';
 import { activeTenantGuard, tenantContextGuard } from './core/guards/tenant-context.guard';
@@ -247,6 +248,15 @@ export const routes: Routes = [
         data: { requiredCapability: 'audit.read' },
         loadChildren: () =>
           import('./features/audit-logs/audit-logs.routes').then((m) => m.auditLogsRoutes),
+      },
+      {
+        path: 'billing',
+        title: 'Suscripción & Facturación | PsiqueOS',
+        canActivate: [activeTenantGuard, billingGuard],
+        loadComponent: () =>
+          import('./features/billing/pages/billing.page').then(
+            (m) => m.BillingPageComponent,
+          ),
       },
       {
         path: 'profile',

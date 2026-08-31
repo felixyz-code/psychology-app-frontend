@@ -3,10 +3,13 @@ import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { AuthStore } from '../auth/auth.store';
+import { QuotaExceededDetails } from '../billing/billing.models';
+import { QuotaPaywallDialogService } from '../billing/quota-paywall-dialog.service';
 
 export type HttpErrorKind =
   | 'network'
   | 'unauthorized'
+  | 'payment-required'
   | 'forbidden'
   | 'not-found'
   | 'rate-limited'
@@ -20,6 +23,10 @@ export function getHttpErrorKind(status: number): HttpErrorKind {
 
   if (status === 401) {
     return 'unauthorized';
+  }
+
+  if (status === 402) {
+    return 'payment-required';
   }
 
   if (status === 403) {
@@ -45,6 +52,7 @@ export function getHttpErrorKind(status: number): HttpErrorKind {
 export class HttpErrorPolicyService {
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
+  private readonly quotaPaywallService = inject(QuotaPaywallDialogService);
 
   private isRedirectingToLogin = false;
 
@@ -53,9 +61,32 @@ export class HttpErrorPolicyService {
 
     if (kind === 'unauthorized') {
       this.handleUnauthorizedRequest(requestUrl);
+    } else if (
+      kind === 'payment-required' ||
+      error.error?.code === 'QUOTA_EXCEEDED' ||
+      error.error?.error === 'QUOTA_EXCEEDED'
+    ) {
+      this.handleQuotaExceeded(error);
     }
 
     return kind;
+  }
+
+  private handleQuotaExceeded(error: HttpErrorResponse): void {
+    const errorBody = error.error || {};
+    const details: QuotaExceededDetails = {
+      statusCode: error.status || 402,
+      error: errorBody.error || 'QUOTA_EXCEEDED',
+      code: errorBody.code || 'QUOTA_EXCEEDED',
+      resource: errorBody.resource || 'OPERATIONAL_QUOTA',
+      currentUsage: errorBody.currentUsage ?? 0,
+      maxAllowed: errorBody.maxAllowed ?? 0,
+      currentTier: errorBody.currentTier || '',
+      suggestedTier: errorBody.suggestedTier || 'PRO',
+      message: errorBody.message,
+    };
+
+    this.quotaPaywallService.openQuotaExceededDialog(details);
   }
 
   private handleUnauthorizedRequest(requestUrl: string): void {
