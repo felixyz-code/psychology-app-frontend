@@ -169,6 +169,21 @@
         </a>
       }
 
+      @if (canAccessBilling()) {
+        <a
+          routerLink="/billing"
+          routerLinkActive="sidebar__link--active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="sidebar__link"
+          (click)="navSelected.emit()"
+        >
+          <mat-icon>credit_card</mat-icon>
+          <span class="sidebar__content">
+            <span class="sidebar__title">Facturaci&oacute;n & Planes</span>
+          </span>
+        </a>
+      }
+
       @if (
         tenantContextStore.isActiveTenantReady() &&
         !tenantContextStore.isCanonicalContextSynchronizationPending() &&

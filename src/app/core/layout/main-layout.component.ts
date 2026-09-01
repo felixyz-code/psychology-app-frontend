@@ -3,12 +3,13 @@ import { RouterOutlet } from '@angular/router';
 
 import { NavbarComponent } from './navbar.component';
 import { SidebarComponent } from './sidebar.component';
+import { DunningBannerComponent } from '../billing/components/dunning-banner/dunning-banner.component';
 import { TenantContextStore } from '../tenant-context/tenant-context.store';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, SidebarComponent],
+  imports: [RouterOutlet, NavbarComponent, SidebarComponent, DunningBannerComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
 })

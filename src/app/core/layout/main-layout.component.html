@@ -23,6 +23,8 @@
     />
 
     <main class="main-layout__content">
+      <app-dunning-banner />
+
       @if (
         tenantContextStore.isActiveTenantReady() || tenantContextStore.isAdminSuspendedContext()
       ) {

@@ -39,6 +39,7 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
           useValue: {
             isActiveTenantReady: activeTenantReady,
             isCanonicalContextSynchronizationPending: synchronizationPending,
+            snapshot: signal({ tenantContext: { organizationRole: 'OWNER' } }),
             hasCapability: (capability: string) => capabilities().includes(capability),
           },
         },
@@ -98,7 +99,11 @@ describe('SidebarComponent tenant lifecycle navigation', () => {
     expect(fixture.nativeElement.textContent).toContain('Plantillas');
   });
 
-  it('strictly isolates tenant navigation and never renders superadmin backoffice in clinical sidebar', async () => {
+  it('renders Facturación & Planes link when user is OWNER or BILLING', () => {
+    expect(fixture.nativeElement.textContent).toContain('Facturación & Planes');
+  });
+
+  it('strictly isolates tenant navigation and never renders superadmin backoffice in clinical sidebar', () => {
     expect(fixture.nativeElement.textContent).not.toContain('SuperAdmin Backoffice');
   });
 });

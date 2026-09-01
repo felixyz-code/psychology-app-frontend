@@ -1,0 +1,380 @@
+<div class="billing-container">
+  <!-- Page Header -->
+  <header class="billing-header">
+    <div class="billing-header__title-group">
+      <div class="billing-header__icon-wrapper">
+        <mat-icon>credit_card</mat-icon>
+      </div>
+      <div>
+        <h1 class="billing-header__title">Suscripci&oacute;n & Facturaci&oacute;n SaaS</h1>
+        <p class="billing-header__subtitle">
+          Administra el plan de tu organizaci&oacute;n, consulta el consumo de cuotas y gestiona m&eacute;todos de pago.
+        </p>
+      </div>
+    </div>
+
+    <div class="billing-header__actions">
+      <button
+        mat-stroked-button
+        color="primary"
+        class="billing-header__portal-btn"
+        (click)="openCustomerPortal()"
+        [disabled]="isRedirecting() !== null || isLoading()"
+      >
+        <span class="btn-content-wrap">
+          @if (isRedirecting() === 'portal') {
+            <mat-spinner diameter="18"></mat-spinner>
+            <span>Redirigiendo...</span>
+          } @else {
+            <mat-icon>manage_accounts</mat-icon>
+            <span>Portal de Facturaci&oacute;n Stripe</span>
+          }
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Query Param Notifications Banner -->
+  @if (bannerMessage()) {
+    <div
+      class="billing-banner"
+      [class.billing-banner--success]="bannerMessage()?.type === 'success'"
+      [class.billing-banner--warning]="bannerMessage()?.type === 'warning'"
+    >
+      <mat-icon class="billing-banner__icon">
+        {{ bannerMessage()?.type === 'success' ? 'check_circle' : 'warning' }}
+      </mat-icon>
+      <div class="billing-banner__content">
+        <p class="billing-banner__text">{{ bannerMessage()?.text }}</p>
+      </div>
+      <button mat-icon-button (click)="dismissBanner()" aria-label="Cerrar aviso">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Error Banner -->
+  @if (errorMessage()) {
+    <div class="billing-banner billing-banner--error">
+      <mat-icon class="billing-banner__icon">error_outline</mat-icon>
+      <div class="billing-banner__content">
+        <p class="billing-banner__text">{{ errorMessage() }}</p>
+      </div>
+      <button mat-button color="warn" (click)="loadSubscriptionOverview()">
+        Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Loading Skeleton State -->
+  @if (isLoading()) {
+    <div class="billing-skeleton-section">
+      <div class="skeleton-card skeleton-overview"></div>
+      <div class="skeleton-grid">
+        <div class="skeleton-card skeleton-gauge"></div>
+        <div class="skeleton-card skeleton-gauge"></div>
+        <div class="skeleton-card skeleton-gauge"></div>
+      </div>
+      <div class="skeleton-plans-grid">
+        <div class="skeleton-card skeleton-plan"></div>
+        <div class="skeleton-card skeleton-plan"></div>
+        <div class="skeleton-card skeleton-plan"></div>
+        <div class="skeleton-card skeleton-plan"></div>
+      </div>
+    </div>
+  } @else if (subscription()) {
+    <!-- Subscription Overview Summary Bar -->
+    <section class="overview-panel">
+      <div class="overview-panel__main">
+        <div class="overview-panel__plan-info">
+          <span class="overview-panel__eyebrow">Plan Activo</span>
+          <div class="overview-panel__name-row">
+            <h2 class="overview-panel__plan-name">{{ subscription()?.plan?.name }}</h2>
+            <span
+              class="status-badge"
+              [ngClass]="getStatusBadgeClass(subscription()?.status)"
+            >
+              {{ getStatusLabel(subscription()?.status) }}
+            </span>
+          </div>
+          <p class="overview-panel__price-text">
+            <strong>${{ subscription()?.plan?.basePrice }} {{ subscription()?.plan?.currency }}</strong> / mes
+          </p>
+        </div>
+
+        <div class="overview-panel__dates-info">
+          <div class="overview-panel__date-item">
+            <span class="overview-panel__date-label">Per&iacute;odo de Facturaci&oacute;n</span>
+            <span class="overview-panel__date-val">
+              {{ subscription()?.currentPeriodStart | date: 'dd MMM yyyy' }} &mdash;
+              {{ subscription()?.currentPeriodEnd | date: 'dd MMM yyyy' }}
+            </span>
+          </div>
+
+          @if (subscription()?.cancelAtPeriodEnd) {
+            <div class="overview-panel__cancel-notice">
+              <mat-icon>info</mat-icon>
+              <span>Esta suscripci&oacute;n no se renovar&aacute; al t&eacute;rmino del ciclo actual.</span>
+            </div>
+          }
+
+          @if (subscription()?.status === 'PAST_DUE' && subscription()?.gracePeriodEndsAt) {
+            <div class="overview-panel__grace-notice">
+              <mat-icon>warning_amber</mat-icon>
+              <span>Per&iacute;odo de gracia activo hasta el {{ subscription()?.gracePeriodEndsAt | date: 'dd MMM yyyy' }}. Actualiza tu m&eacute;todo de pago.</span>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Usage Gauges Section -->
+    <section class="usage-section">
+      <div class="usage-section__header">
+        <h2 class="usage-section__title">
+          <mat-icon>speed</mat-icon>
+          <span>M&eacute;tricas de Consumo & Cuotas en Tiempo Real</span>
+        </h2>
+        <p class="usage-section__subtitle">
+          Supervisi&oacute;n de los recursos activos frente a los l&iacute;mites contratados.
+        </p>
+      </div>
+
+      <div class="gauges-grid">
+        <!-- Gauge 1: Terapeutas -->
+        <div
+          class="gauge-card"
+          [ngClass]="getUsageStatusClass(subscription()!.usage.therapistsCount, subscription()!.quotas.maxTherapists)"
+        >
+          <div class="gauge-card__header">
+            <div class="gauge-card__icon-box">
+              <mat-icon>groups</mat-icon>
+            </div>
+            <div class="gauge-card__meta">
+              <span class="gauge-card__label">Terapeutas Profesionales</span>
+              <span class="gauge-card__percentage">
+                {{ getUsagePercent(subscription()!.usage.therapistsCount, subscription()!.quotas.maxTherapists) }}%
+              </span>
+            </div>
+          </div>
+
+          <div class="gauge-card__values">
+            <span class="gauge-card__current">{{ subscription()!.usage.therapistsCount }}</span>
+            <span class="gauge-card__divider">/</span>
+            <span class="gauge-card__max">{{ subscription()!.quotas.maxTherapists }} activos</span>
+          </div>
+
+          <div class="gauge-card__bar-wrapper">
+            <div class="gauge-card__track">
+              <div
+                class="gauge-card__fill"
+                [style.width.%]="getUsagePercent(subscription()!.usage.therapistsCount, subscription()!.quotas.maxTherapists)"
+              ></div>
+            </div>
+          </div>
+
+          <p class="gauge-card__hint">
+            @if (subscription()!.usage.therapistsCount >= subscription()!.quotas.maxTherapists) {
+              <span class="text-danger font-semibold">L&iacute;mite m&aacute;ximo alcanzado. Se requiere upgrade.</span>
+            } @else {
+              <span>Quedan {{ subscription()!.quotas.maxTherapists - subscription()!.usage.therapistsCount }} plazas disponibles</span>
+            }
+          </p>
+        </div>
+
+        <!-- Gauge 2: Sedes / Sucursales -->
+        <div
+          class="gauge-card"
+          [ngClass]="getUsageStatusClass(subscription()!.usage.branchesCount, subscription()!.quotas.maxBranches)"
+        >
+          <div class="gauge-card__header">
+            <div class="gauge-card__icon-box">
+              <mat-icon>apartment</mat-icon>
+            </div>
+            <div class="gauge-card__meta">
+              <span class="gauge-card__label">Sedes / Sucursales Cl&iacute;nicas</span>
+              <span class="gauge-card__percentage">
+                {{ getUsagePercent(subscription()!.usage.branchesCount, subscription()!.quotas.maxBranches) }}%
+              </span>
+            </div>
+          </div>
+
+          <div class="gauge-card__values">
+            <span class="gauge-card__current">{{ subscription()!.usage.branchesCount }}</span>
+            <span class="gauge-card__divider">/</span>
+            <span class="gauge-card__max">{{ subscription()!.quotas.maxBranches }} habilitadas</span>
+          </div>
+
+          <div class="gauge-card__bar-wrapper">
+            <div class="gauge-card__track">
+              <div
+                class="gauge-card__fill"
+                [style.width.%]="getUsagePercent(subscription()!.usage.branchesCount, subscription()!.quotas.maxBranches)"
+              ></div>
+            </div>
+          </div>
+
+          <p class="gauge-card__hint">
+            @if (subscription()!.usage.branchesCount >= subscription()!.quotas.maxBranches) {
+              <span class="text-danger font-semibold">L&iacute;mite de sedes alcanzado.</span>
+            } @else {
+              <span>Quedan {{ subscription()!.quotas.maxBranches - subscription()!.usage.branchesCount }} sedes disponibles</span>
+            }
+          </p>
+        </div>
+
+        <!-- Gauge 3: Notificaciones Mensuales -->
+        <div
+          class="gauge-card"
+          [ngClass]="getUsageStatusClass(subscription()!.usage.notificationsCount, subscription()!.quotas.maxNotificationsPerMonth)"
+        >
+          <div class="gauge-card__header">
+            <div class="gauge-card__icon-box">
+              <mat-icon>notifications_active</mat-icon>
+            </div>
+            <div class="gauge-card__meta">
+              <span class="gauge-card__label">Notificaciones / Mes</span>
+              <span class="gauge-card__percentage">
+                {{ getUsagePercent(subscription()!.usage.notificationsCount, subscription()!.quotas.maxNotificationsPerMonth) }}%
+              </span>
+            </div>
+          </div>
+
+          <div class="gauge-card__values">
+            <span class="gauge-card__current">{{ subscription()!.usage.notificationsCount }}</span>
+            <span class="gauge-card__divider">/</span>
+            <span class="gauge-card__max">{{ subscription()!.quotas.maxNotificationsPerMonth }} enviadas</span>
+          </div>
+
+          <div class="gauge-card__bar-wrapper">
+            <div class="gauge-card__track">
+              <div
+                class="gauge-card__fill"
+                [style.width.%]="getUsagePercent(subscription()!.usage.notificationsCount, subscription()!.quotas.maxNotificationsPerMonth)"
+              ></div>
+            </div>
+          </div>
+
+          <p class="gauge-card__hint">
+            <span>Se reinicia el {{ subscription()!.currentPeriodEnd | date: 'dd/MM/yyyy' }}</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SaaS Commercial Plans Catalog -->
+    <section class="plans-section">
+      <div class="plans-section__header">
+        <h2 class="plans-section__title">
+          <mat-icon>workspace_premium</mat-icon>
+          <span>Cat&aacute;logo de Planes SaaS</span>
+        </h2>
+        <p class="plans-section__subtitle">
+          Escala la infraestructura de tu cl&iacute;nica seg&uacute;n tus necesidades terap&eacute;uticas.
+        </p>
+      </div>
+
+      <div class="pricing-cards-grid">
+        @for (plan of commercialPlans; track plan.tier) {
+          <div
+            class="pricing-card"
+            [class.pricing-card--current]="isCurrentPlan(plan)"
+            [class.pricing-card--popular]="plan.isPopular"
+          >
+            @if (plan.isPopular) {
+              <div class="pricing-card__popular-badge">
+                <mat-icon>star</mat-icon>
+                <span>M&aacute;s Popular</span>
+              </div>
+            }
+
+            @if (isCurrentPlan(plan)) {
+              <div class="pricing-card__current-badge">
+                <mat-icon>check_circle</mat-icon>
+                <span>Plan Actual</span>
+              </div>
+            }
+
+            <div class="pricing-card__head">
+              <h3 class="pricing-card__name">{{ plan.name }}</h3>
+              <p class="pricing-card__tagline">{{ plan.tagline }}</p>
+              <div class="pricing-card__price-box">
+                <span class="pricing-card__price-main">{{ plan.formattedPrice }}</span>
+                <span class="pricing-card__price-sub">{{ plan.billingIntervalText }}</span>
+              </div>
+            </div>
+
+            <div class="pricing-card__features-list">
+              <p class="pricing-card__features-title">Capacidades & L&iacute;mites:</p>
+              <ul class="pricing-card__items">
+                @for (feature of plan.features; track feature) {
+                  <li class="pricing-card__feature-item">
+                    <mat-icon class="pricing-card__feature-icon">check</mat-icon>
+                    <span>{{ feature }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+
+            <div class="pricing-card__footer">
+              @if (isCurrentPlan(plan)) {
+                <button
+                  mat-stroked-button
+                  disabled
+                  class="pricing-card__action-btn"
+                >
+                  <mat-icon>check</mat-icon>
+                  <span>Plan Actual</span>
+                </button>
+              } @else if (plan.tier === 'ENTERPRISE') {
+                <button
+                  mat-flat-button
+                  color="accent"
+                  class="pricing-card__action-btn"
+                  (click)="selectPlan(plan)"
+                >
+                  <mat-icon>support_agent</mat-icon>
+                  <span>Contactar a Ventas</span>
+                </button>
+              } @else {
+                <button
+                  mat-flat-button
+                  [color]="plan.isPopular ? 'primary' : 'basic'"
+                  class="pricing-card__action-btn"
+                  (click)="selectPlan(plan)"
+                  [disabled]="isRedirecting() !== null"
+                >
+                  <span class="btn-content-wrap">
+                    @if (isRedirecting() === plan.stripePriceId) {
+                      <mat-spinner diameter="18"></mat-spinner>
+                      <span>Conectando con Stripe...</span>
+                    } @else {
+                      <mat-icon>{{ isUpgrade(plan) ? 'upgrade' : 'change_circle' }}</mat-icon>
+                      <span>{{ isUpgrade(plan) ? 'Mejorar a este Plan' : 'Cambiar a este Plan' }}</span>
+                    }
+                  </span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Security, Compliance & Invoicing Disclaimer -->
+    <footer class="billing-compliance-footer">
+      <div class="compliance-item">
+        <mat-icon>lock</mat-icon>
+        <span>Pagos procesados de forma segura con cifrado SSL de 256 bits mediante Stripe.</span>
+      </div>
+      <div class="compliance-item">
+        <mat-icon>verified</mat-icon>
+        <span>Plataforma certificada en cumplimiento con NOM-004-SSA3-2012 para expedientes clínicos.</span>
+      </div>
+      <div class="compliance-item">
+        <mat-icon>receipt_long</mat-icon>
+        <span>Facturación electrónica CFDI 4.0 disponible en el portal de autoservicio.</span>
+      </div>
+    </footer>
+  }
+</div>

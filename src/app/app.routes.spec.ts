@@ -163,6 +163,10 @@ describe('app routes', () => {
       canActivate: [activeTenantGuard, capabilityGuard],
       data: { requiredCapability: 'notification_template.read' },
     });
+    expect(childRoutes.find((route) => route.path === 'billing')).toMatchObject({
+      path: 'billing',
+      title: 'Suscripción & Facturación | PsiqueOS',
+    });
     expect(childRoutes.find((route) => route.path === 'admin/tenants')).toBeUndefined();
   });
 
